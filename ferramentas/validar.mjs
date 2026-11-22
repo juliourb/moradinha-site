@@ -11,7 +11,12 @@ import { DuckDBInstance } from "@duckdb/node-api";
 import { isValidCell, getResolution } from "h3-js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CONTRATO_DIR = join(__dirname, "..", "contrato", "v1");
+const RAIZ_CONTRATOS = join(__dirname, "..", "contrato");
+
+/** Pasta do contrato pelo campo manifesto.contrato ("1.0" → v1; "1.1" → v1.1). */
+function pastaContrato(versaoContrato) {
+  return join(RAIZ_CONTRATOS, versaoContrato === "1.1" ? "v1.1" : "v1");
+}
 
 const MARCAS_VALIDAS = new Set([
   "total_fragil",
@@ -91,6 +96,18 @@ function ajvInstancia() {
 async function validarEsquemasJSON(pasta, rel) {
   const ajv = ajvInstancia();
   const dados = {};
+
+  // Espia manifesto.contrato antes de validar, para escolher a pasta do
+  // contrato certa (contrato/v1 ou contrato/v1.1); se a leitura falhar aqui,
+  // o loop abaixo relata o erro normalmente (V1) com a pasta v1 por padrão.
+  let versaoContrato = "1.0";
+  try {
+    versaoContrato = lerJSON(join(pasta, "manifesto.json")).contrato ?? "1.0";
+  } catch {
+    // relatado como falha de V1 no loop abaixo.
+  }
+  const dirContrato = pastaContrato(versaoContrato);
+
   for (const [arquivo, esquema] of Object.entries(JSON_SCHEMAS)) {
     const caminho = join(pasta, arquivo);
     if (!existsSync(caminho)) {
@@ -105,7 +122,7 @@ async function validarEsquemasJSON(pasta, rel) {
       continue;
     }
     dados[arquivo] = conteudo;
-    const schema = lerJSON(join(CONTRATO_DIR, esquema));
+    const schema = lerJSON(join(dirContrato, esquema));
     const validate = ajv.compile(schema);
     if (!validate(conteudo)) {
       rel.falha(
@@ -140,6 +157,7 @@ async function validarEsquemasJSON(pasta, rel) {
       rel.falha("V1", nome, "feição sem propriedades cod/nome", semProps.slice(0, 5));
     }
   }
+  dados._dirContrato = dirContrato;
   return dados;
 }
 
@@ -172,8 +190,8 @@ function tipoCompativel(esperado, real) {
   return esperado === real;
 }
 
-async function validarEsquemaParquet(conn, pasta, rel) {
-  const esquemaParquet = lerJSON(join(CONTRATO_DIR, "parquet.schema.json"));
+async function validarEsquemaParquet(conn, pasta, rel, dirContrato) {
+  const esquemaParquet = lerJSON(join(dirContrato, "parquet.schema.json"));
   const colunasPorArquivo = {};
   for (const [arquivo, def] of Object.entries(esquemaParquet.arquivos)) {
     const caminho = join(pasta, arquivo);
@@ -282,9 +300,9 @@ function linhasNoMapa(totais, componente, periodoId) {
 
 async function validarV5(conn, pasta, manifesto, totais, rel) {
   // Exatamente uma linha com no_mapa=true por componente × período.
-  const combinacoes = new Set(totais.totais.map((t) => `${t.componente} ${t.periodo}`));
+  const combinacoes = new Set(totais.totais.map((t) => `${t.componente} ${t.periodo}`));
   for (const chave of combinacoes) {
-    const [componente, periodo] = chave.split(" ");
+    const [componente, periodo] = chave.split(" ");
     const linhas = linhasNoMapa(totais, componente, periodo);
     if (linhas.length !== 1) {
       rel.falha(
@@ -497,7 +515,7 @@ export async function validarPacote(pasta) {
 
   const conn = await conectarDuckDB();
   try {
-    await passo("V1", () => validarEsquemaParquet(conn, pasta, rel));
+    await passo("V1", () => validarEsquemaParquet(conn, pasta, rel, dados._dirContrato));
     await passo("V2", () => validarV2(pasta, manifesto, rel));
     await passo("V3", () => validarV3(conn, pasta, manifesto, rel));
     await passo("V4", () => validarV4(conn, pasta, manifesto, rel));

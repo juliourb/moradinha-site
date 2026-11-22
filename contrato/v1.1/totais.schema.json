@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/totais.schema.json",
+  "title": "totais.json",
+  "type": "object",
+  "required": ["totais", "domicilios", "mudancas"],
+  "additionalProperties": false,
+  "properties": {
+    "totais": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["componente", "periodo", "regime", "total", "marcas", "no_mapa"],
+        "additionalProperties": false,
+        "properties": {
+          "componente": { "enum": ["coabitacao", "onus", "precariedade"] },
+          "periodo": { "type": "string" },
+          "regime": { "enum": ["c", "d", "misto", "amostra", "provisoria"] },
+          "total": { "type": "number" },
+          "ep": { "type": ["number", "null"] },
+          "cv": { "type": ["number", "null"] },
+          "ic_inf": { "type": ["number", "null"] },
+          "ic_sup": { "type": ["number", "null"] },
+          "marcas": { "type": "array", "items": { "type": "string" } },
+          "no_mapa": { "type": "boolean" }
+        }
+      }
+    },
+    "domicilios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["periodo", "total"],
+        "additionalProperties": false,
+        "properties": {
+          "periodo": { "type": "string" },
+          "total": { "type": "number" }
+        }
+      }
+    },
+    "mudancas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["componente", "de", "para", "delta", "z", "marcas"],
+        "additionalProperties": false,
+        "properties": {
+          "componente": { "enum": ["coabitacao", "onus", "precariedade"] },
+          "de": { "type": "string" },
+          "para": { "type": "string" },
+          "delta": { "type": "number" },
+          "z": { "type": ["number", "null"] },
+          "marcas": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

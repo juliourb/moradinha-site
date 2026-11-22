@@ -30,7 +30,7 @@ Blocos, títulos e textos (usar estes textos; ajustes só de forma):
 | **Por quê?** | curvas de forma por variável e importância | O modelo (EBM, Explainable Boosting Machine) soma uma contribuição por característica do domicílio ou do território. A curva mostra quanto cada categoria aumenta ou diminui a chance de déficit; a importância, quanto cada variável pesa no total. |
 | **Quanto confiar nesses números?** (bloco recolhido, "para avaliadores") | métricas por dobra; intervalos por reamostragem das APs; Moran dos resíduos; cobertura (d) | Com poucas áreas (53 no piloto), cada métrica oscila; os intervalos mostram quanto. O Moran dos resíduos diz se os erros se agrupam no mapa (se sim, falta ao modelo alguma informação espacial). A cobertura diz em quantas áreas o modelo cai dentro do intervalo de 95% da amostra — um teste exigente, porque pede ao modelo a precisão da própria amostra. |
 
-Curva com `desvio` nulo (o caso do piloto: o modelo gravado não guarda o desvio por faixa) é desenhada sem faixa, com a nota "sem faixa de incerteza da curva nesta edição".
+Curva com `desvio` nulo (contrato v1.1 — `CHANGELOG_SPECS.md`; o caso do piloto: o modelo gravado não guarda o desvio por faixa para toda variável) é desenhada sem faixa, com a nota "faixa de oscilação não calculada nesta edição".
 
 Componente com `usado = false` (precariedade no piloto) mostra só: "Nesta área, o modelo não superou a repartição pela taxa média; o mapa usa a repartição simples." e os números do teste.
 

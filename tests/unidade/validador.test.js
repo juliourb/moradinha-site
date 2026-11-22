@@ -1,6 +1,7 @@
 // F0-3: "o validador morde" — corrompe uma cópia do pacote pequeno e confirma
 // que o validador falha na regra certa, uma vez por regra V1–V12.
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -26,6 +27,14 @@ function lerJSON(nome) {
 
 function escreverJSON(nome, dados) {
   writeFileSync(join(pasta, nome), JSON.stringify(dados, null, 2));
+}
+
+/** Reescreve nome e atualiza manifesto.arquivos para não disparar V2 (sha256). */
+function escreverJSONComHash(nome, dados) {
+  escreverJSON(nome, dados);
+  const manifesto = lerJSON("manifesto.json");
+  manifesto.arquivos[nome] = createHash("sha256").update(readFileSync(join(pasta, nome))).digest("hex");
+  escreverJSON("manifesto.json", manifesto);
 }
 
 async function reescreverParquet(nomeArquivo, sqlSelect) {
@@ -165,5 +174,26 @@ describe("validador morde (F0-3)", () => {
        FROM range(300000) AS t(i)`
     );
     expect(await falhas("V12")).not.toHaveLength(0);
+  });
+});
+
+describe("contrato v1 x v1.1 (curvas[].desvio nulável só no v1.1)", () => {
+  it("manifesto.contrato = '1.1' aceita curvas[].desvio nulo", async () => {
+    const manifesto = lerJSON("manifesto.json");
+    manifesto.contrato = "1.1";
+    escreverJSON("manifesto.json", manifesto);
+    const modelo = lerJSON("modelo.json");
+    modelo.coabitacao.curvas[0].desvio = null;
+    escreverJSONComHash("modelo.json", modelo);
+
+    expect(await falhas("V1")).toHaveLength(0);
+  });
+
+  it("manifesto.contrato = '1.0' (padrão) rejeita curvas[].desvio nulo", async () => {
+    const modelo = lerJSON("modelo.json");
+    modelo.coabitacao.curvas[0].desvio = null;
+    escreverJSONComHash("modelo.json", modelo);
+
+    expect(await falhas("V1")).not.toHaveLength(0);
   });
 });

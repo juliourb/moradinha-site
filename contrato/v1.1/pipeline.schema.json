@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/pipeline.schema.json",
+  "title": "pipeline.json",
+  "type": "object",
+  "required": ["etapas", "ligacoes"],
+  "additionalProperties": false,
+  "properties": {
+    "etapas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "nome", "descricao", "commit", "data", "saidas"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "nome": { "type": "string" },
+          "descricao": { "type": "string" },
+          "commit": { "type": "string" },
+          "data": { "type": "string", "format": "date" },
+          "saidas": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "ligacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["de", "para"],
+        "additionalProperties": false,
+        "properties": {
+          "de": { "type": "string" },
+          "para": { "type": "string" }
+        }
+      }
+    }
+  }
+}

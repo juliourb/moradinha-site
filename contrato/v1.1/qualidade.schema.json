@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/qualidade.schema.json",
+  "title": "qualidade.json",
+  "type": "object",
+  "required": ["fontes", "sigilo", "aps", "ponte", "cnefe", "lacunas"],
+  "additionalProperties": false,
+  "properties": {
+    "fontes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["variavel", "fonte", "anos_disponiveis", "uso_por_periodo", "marcas"],
+        "properties": {
+          "variavel": { "type": "string" },
+          "fonte": { "type": "string" },
+          "anos_disponiveis": { "type": "array", "items": { "type": "integer" } },
+          "uso_por_periodo": { "type": "object", "additionalProperties": { "type": "string" } },
+          "marcas": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "sigilo": {
+      "type": "object",
+      "required": ["hex_sem_dado", "hex_parcial"],
+      "properties": {
+        "hex_sem_dado": { "type": "integer" },
+        "hex_parcial": { "type": "integer" }
+      }
+    },
+    "aps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["componente", "n_aps", "n_ressalva", "n_sem_direta"],
+        "properties": {
+          "componente": { "enum": ["coabitacao", "onus", "precariedade"] },
+          "n_aps": { "type": "integer" },
+          "n_ressalva": { "type": "integer" },
+          "n_sem_direta": { "type": "integer" }
+        }
+      }
+    },
+    "ponte": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["indicador", "pnadc", "pnadc_ep", "censo", "censo_ep", "razao", "leitura"],
+        "properties": {
+          "indicador": { "type": "string" },
+          "pnadc": { "type": ["number", "null"] },
+          "pnadc_ep": { "type": ["number", "null"] },
+          "censo": { "type": ["number", "null"] },
+          "censo_ep": { "type": ["number", "null"] },
+          "razao": { "type": ["number", "null"] },
+          "leitura": { "type": "string" }
+        }
+      }
+    },
+    "cnefe": {
+      "type": "object",
+      "required": ["enderecos", "hex_sem_endereco", "domicilios_nesses_hex", "correlacao_hex"],
+      "properties": {
+        "enderecos": { "type": "number" },
+        "hex_sem_endereco": { "type": "integer" },
+        "domicilios_nesses_hex": { "type": "number" },
+        "correlacao_hex": { "type": ["number", "null"] }
+      }
+    },
+    "lacunas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "efeito"],
+        "properties": {
+          "item": { "type": "string" },
+          "efeito": { "type": "string" }
+        }
+      }
+    }
+  }
+}
