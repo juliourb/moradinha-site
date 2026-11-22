@@ -10,7 +10,7 @@ arquivo e até 5 exemplos.
 | V2 | sha256 de cada arquivo = `manifesto.arquivos` |
 | V3 | todo `h3` é válido, da resolução `h3_resolucao`, sem repetição em `hex_atributos` |
 | V4 | `hex.parquet` tem exatamente n_hex × n_periodos × n_componentes linhas; `hex_base` e `hex_qualidade`, n_hex × n_periodos; frações entre 0 e 1; `g_estoque` = 1 em 2022 |
-| V5 | Σ `absoluto` por (período, componente) = `totais` regime c, com erro relativo ≤ 1e−6 |
+| V5 | `totais` tem exatamente uma linha com `no_mapa = true` por componente × período; Σ `absoluto` por (período, componente) = `total` dessa linha, com erro relativo ≤ 1e−6 |
 | V6 | Σ `domicilios` por período = `totais.domicilios`, erro relativo ≤ 1e−6 |
 | V7 | `minimo` ≤ `absoluto` ≤ `maximo` onde os três existem; `minimo`/`maximo` nulos onde `absoluto` é nulo |
 | V8 | `relativo` = 100 × `absoluto` ÷ `domicilios` (tolerância 1e−9) onde `domicilios` > 0; nulo onde `domicilios` é nulo |

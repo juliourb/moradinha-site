@@ -1,6 +1,6 @@
 # SPEC 00 — Fundamentos do site do moradinha
 
-*Versão 1.2, 22/11/2026 (definições de qualidade fechadas com a investigação G1 do moradinha; recortes especiais genéricos; AP dominante; referência da FJP com subcomponentes). Mudanças em `CHANGELOG_SPECS.md`.*
+*Versão 1.2, 22/11/2026 (definições de qualidade fechadas com a investigação G1 do moradinha; recortes especiais genéricos; AP dominante; referência da FJP com subcomponentes; regime "provisoria" e `no_mapa` em `totais.json`). Mudanças em `CHANGELOG_SPECS.md`.*
 
 *Versão 1.1, 22/11/2026 (tema de qualidade no explorador; mapa de base sem chave).*
 
@@ -81,7 +81,7 @@ Um pacote = uma pasta `pacotes/<conjunto_id>/<edicao>/`. `edicao` = hash curto d
 | `contexto.parquet` (opcional) | hexágono × variável × período | `h3`, `variavel`, `periodo`, `valor` double?, `unidade` |
 | `contornos/ap.geojson`, `contornos/municipios.geojson`, `contornos/fcu.geojson` | feição | propriedades `cod`, `nome`; geometria simplificada (tolerância em `manifesto.contornos_tolerancia_m`) |
 | `ap.parquet` | AP × componente | `ap_cod`, `ap_nome`, `municipio_cod`, `tipo` ("capital" \| "resto"), `componente`, `direta` double?, `direta_cv` double? (%), `direta_ic_inf`, `direta_ic_sup`, `motor_2022` double?, `ressalva` bool, `sem_direta` bool |
-| `totais.json` | — | `totais`: [{`componente`, `periodo`, `regime` ("c" \| "d" \| "misto" \| "amostra"), `total`, `ep`?, `cv`?, `ic_inf`?, `ic_sup`?, `marcas`[]}]; `domicilios`: [{`periodo`, `total`}]; `mudancas`: [{`componente`, `de`, `para`, `delta`, `z`, `marcas`[]}] |
+| `totais.json` | — | `totais`: [{`componente`, `periodo`, `regime` ("c" \| "d" \| "misto" \| "amostra" \| "provisoria"), `total`, `ep`?, `cv`?, `ic_inf`?, `ic_sup`?, `marcas`[], `no_mapa` (bool; exatamente uma linha `true` por componente × período — o total que o mapa usa: coabitação e ônus no regime c; precariedade "amostra" em 2022 e "provisoria" nos anos t e médias)}]; `domicilios`: [{`periodo`, `total`}]; `mudancas`: [{`componente`, `de`, `para`, `delta`, `z`, `marcas`[]}] |
 | `modelo.json` | — | por componente: SPEC_F3, seção 3 |
 | `consistencia.json` | — | `spearman`: {componente: {`periodos`[], `matriz`[[]]}}; `razoes`: [{`componente`, `periodo`, `razao_total`, `mediana`, `p5`, `p95`, `n_hexagonos`}] |
 | `qualidade.json` | — | SPEC_F3, seção 2 |
@@ -120,7 +120,7 @@ Sai com código diferente de zero se qualquer regra falhar e imprime a regra, o 
 | V2 | sha256 de cada arquivo = `manifesto.arquivos` |
 | V3 | todo `h3` é válido, da resolução `h3_resolucao`, sem repetição em `hex_atributos` |
 | V4 | `hex.parquet` tem exatamente n_hex × n_periodos × n_componentes linhas; `hex_base` e `hex_qualidade`, n_hex × n_periodos; frações entre 0 e 1; `g_estoque` = 1 em 2022 |
-| V5 | Σ `absoluto` por (período, componente) = `totais` regime c, com erro relativo ≤ 1e−6 |
+| V5 | `totais` tem exatamente uma linha com `no_mapa = true` por componente × período; Σ `absoluto` por (período, componente) = `total` dessa linha, com erro relativo ≤ 1e−6 |
 | V6 | Σ `domicilios` por período = `totais.domicilios`, erro relativo ≤ 1e−6 |
 | V7 | `minimo` ≤ `absoluto` ≤ `maximo` onde os três existem; `minimo`/`maximo` nulos onde `absoluto` é nulo |
 | V8 | `relativo` = 100 × `absoluto` ÷ `domicilios` (tolerância 1e−9) onde `domicilios` > 0; nulo onde `domicilios` é nulo |

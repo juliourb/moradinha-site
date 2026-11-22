@@ -9,6 +9,7 @@
 - `pipeline.json`: sem `mor_restrito` e sem caminhos de microdado.
 - Marca `fonte_estoque_diferente`: rótulo esclarecido (só 2023).
 - V9 ampliada (recortes, `n_aps`, `n_municipios`).
+- `totais.json`: regime aceita `provisoria`; cada linha tem `no_mapa` (bool; exatamente uma `true` por componente × período — o total que o mapa usa: coabitação e ônus no regime c; precariedade "amostra" em 2022 e "provisoria" nos anos t e médias). V5 passa a conferir contra a linha `no_mapa`.
 - F1: medida de qualidade constante fica desabilitada; aviso de hexágono que cruza APs.
 - F2: subcomponentes da FJP e "dentro/fora da faixa da reconstrução".
 - F3: curva de forma sem faixa quando `desvio` é nulo (caso do piloto).

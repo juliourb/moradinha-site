@@ -11,7 +11,8 @@
       "ic_sup": 575.79,
       "marcas": [
         "total_fragil"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -26,7 +27,8 @@
         "total_fragil",
         "mudanca_no_ruido",
         "fonte_estoque_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -40,7 +42,8 @@
       "marcas": [
         "total_fragil",
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -54,7 +57,8 @@
       "marcas": [
         "total_fragil",
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -67,7 +71,8 @@
       "ic_sup": 447.19,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -80,7 +85,8 @@
       "ic_sup": 439.26,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -91,7 +97,8 @@
       "cv": 11.73,
       "ic_inf": 1069.21,
       "ic_sup": 1707.82,
-      "marcas": []
+      "marcas": [],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -105,7 +112,8 @@
       "marcas": [
         "mudanca_no_ruido",
         "fonte_estoque_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -118,7 +126,8 @@
       "ic_sup": 1836.85,
       "marcas": [
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -131,7 +140,8 @@
       "ic_sup": 2069.03,
       "marcas": [
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -144,7 +154,8 @@
       "ic_sup": 1720.97,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -157,7 +168,8 @@
       "ic_sup": 1857.81,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
@@ -168,12 +180,13 @@
       "cv": 5.18,
       "ic_inf": 228.28,
       "ic_sup": 279.89,
-      "marcas": []
+      "marcas": [],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "2023",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 272.7135,
       "ep": null,
       "cv": null,
@@ -182,12 +195,13 @@
       "marcas": [
         "precariedade_provisoria_sem_faixa",
         "fonte_estoque_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "2024",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 266.146,
       "ep": null,
       "cv": null,
@@ -195,12 +209,13 @@
       "ic_sup": null,
       "marcas": [
         "precariedade_provisoria_sem_faixa"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "2025",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 278.698,
       "ep": null,
       "cv": null,
@@ -208,12 +223,13 @@
       "ic_sup": null,
       "marcas": [
         "precariedade_provisoria_sem_faixa"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "m2024",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 264.31550000000004,
       "ep": null,
       "cv": null,
@@ -222,12 +238,13 @@
       "marcas": [
         "precariedade_provisoria_sem_faixa",
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "m2025",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 272.519,
       "ep": null,
       "cv": null,
@@ -236,7 +253,8 @@
       "marcas": [
         "precariedade_provisoria_sem_faixa",
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     }
   ],
   "domicilios": [

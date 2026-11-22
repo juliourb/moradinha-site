@@ -276,13 +276,25 @@ async function validarV4(conn, pasta, manifesto, rel) {
   }
 }
 
-async function totalRegimeC(manifesto, totais, componente, periodoId) {
-  return totais.totais.find(
-    (t) => t.componente === componente && t.periodo === periodoId && t.regime === "c"
-  );
+function linhasNoMapa(totais, componente, periodoId) {
+  return totais.totais.filter((t) => t.componente === componente && t.periodo === periodoId && t.no_mapa === true);
 }
 
 async function validarV5(conn, pasta, manifesto, totais, rel) {
+  // Exatamente uma linha com no_mapa=true por componente × período.
+  const combinacoes = new Set(totais.totais.map((t) => `${t.componente} ${t.periodo}`));
+  for (const chave of combinacoes) {
+    const [componente, periodo] = chave.split(" ");
+    const linhas = linhasNoMapa(totais, componente, periodo);
+    if (linhas.length !== 1) {
+      rel.falha(
+        "V5",
+        "totais.json",
+        `componente ${componente}, período ${periodo}: esperada 1 linha com no_mapa=true, encontradas ${linhas.length}`
+      );
+    }
+  }
+
   const pHex = join(pasta, "hex.parquet").replace(/\\/g, "/");
   if (!existsSync(join(pasta, "hex.parquet"))) return;
   const somas = await consultar(
@@ -290,11 +302,11 @@ async function validarV5(conn, pasta, manifesto, totais, rel) {
     `SELECT periodo, componente, SUM(absoluto) AS soma FROM read_parquet('${pHex}') GROUP BY periodo, componente`
   );
   for (const { periodo, componente, soma } of somas) {
-    const t = await totalRegimeC(manifesto, totais, componente, periodo);
+    const [t] = linhasNoMapa(totais, componente, periodo);
     if (!t) continue;
     const erro = Math.abs(Number(soma) - t.total) / Math.max(Math.abs(t.total), 1e-9);
     if (erro > 1e-6) {
-      rel.falha("V5", "hex.parquet / totais.json", `componente ${componente}, período ${periodo}: soma ${soma} vs totais ${t.total}`);
+      rel.falha("V5", "hex.parquet / totais.json", `componente ${componente}, período ${periodo}: soma ${soma} vs totais (no_mapa) ${t.total}`);
     }
   }
 }

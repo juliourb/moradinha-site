@@ -11,7 +11,8 @@
       "ic_sup": 11515.77,
       "marcas": [
         "total_fragil"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -26,7 +27,8 @@
         "total_fragil",
         "mudanca_no_ruido",
         "fonte_estoque_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -40,7 +42,8 @@
       "marcas": [
         "total_fragil",
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -54,7 +57,8 @@
       "marcas": [
         "total_fragil",
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -67,7 +71,8 @@
       "ic_sup": 8943.72,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "coabitacao",
@@ -80,7 +85,8 @@
       "ic_sup": 8785.12,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -91,7 +97,8 @@
       "cv": 11.73,
       "ic_inf": 21384.17,
       "ic_sup": 34156.31,
-      "marcas": []
+      "marcas": [],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -105,7 +112,8 @@
       "marcas": [
         "mudanca_no_ruido",
         "fonte_estoque_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -118,7 +126,8 @@
       "ic_sup": 36736.98,
       "marcas": [
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -131,7 +140,8 @@
       "ic_sup": 41380.5,
       "marcas": [
         "mudanca_no_ruido"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -144,7 +154,8 @@
       "ic_sup": 34419.4,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "onus",
@@ -157,7 +168,8 @@
       "ic_sup": 37156.29,
       "marcas": [
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
@@ -168,12 +180,13 @@
       "cv": 5.18,
       "ic_inf": 4565.66,
       "ic_sup": 5597.8,
-      "marcas": []
+      "marcas": [],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "2023",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 5454.27,
       "ep": null,
       "cv": null,
@@ -182,12 +195,13 @@
       "marcas": [
         "precariedade_provisoria_sem_faixa",
         "fonte_estoque_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "2024",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 5322.92,
       "ep": null,
       "cv": null,
@@ -195,12 +209,13 @@
       "ic_sup": null,
       "marcas": [
         "precariedade_provisoria_sem_faixa"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "2025",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 5573.96,
       "ep": null,
       "cv": null,
@@ -208,12 +223,13 @@
       "ic_sup": null,
       "marcas": [
         "precariedade_provisoria_sem_faixa"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "m2024",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 5286.31,
       "ep": null,
       "cv": null,
@@ -222,12 +238,13 @@
       "marcas": [
         "precariedade_provisoria_sem_faixa",
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     },
     {
       "componente": "precariedade",
       "periodo": "m2025",
-      "regime": "c",
+      "regime": "provisoria",
       "total": 5450.38,
       "ep": null,
       "cv": null,
@@ -236,7 +253,8 @@
       "marcas": [
         "precariedade_provisoria_sem_faixa",
         "media_inclui_fonte_diferente"
-      ]
+      ],
+      "no_mapa": true
     }
   ],
   "domicilios": [

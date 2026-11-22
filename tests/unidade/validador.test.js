@@ -89,6 +89,13 @@ describe("validador morde (F0-3)", () => {
     expect(await falhas("V5")).not.toHaveLength(0);
   });
 
+  it("V5: no_mapa não tem exatamente uma linha true por componente×período", async () => {
+    const totais = lerJSON("totais.json");
+    totais.totais.find((t) => t.componente === "coabitacao" && t.periodo === "2022").no_mapa = false;
+    escreverJSON("totais.json", totais);
+    expect(await falhas("V5")).not.toHaveLength(0);
+  });
+
   it("V6: soma de domicílios não bate com totais.domicilios", async () => {
     await reescreverParquet(
       "hex_base.parquet",

@@ -353,13 +353,20 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
                 marcas.append("fonte_estoque_diferente")
             if pid in ("m2024", "m2025"):
                 marcas.append("media_inclui_fonte_diferente")
+            if comp == "precariedade":
+                regime = "amostra" if pid == "2022" else "provisoria"
+            else:
+                regime = "c"
             totais_json["totais"].append({
-                "componente": comp, "periodo": pid, "regime": "c" if not (comp == "precariedade" and pid == "2022") else "amostra",
+                "componente": comp, "periodo": pid, "regime": regime,
                 "total": total_v,
                 "ep": ep_v, "cv": r(100 * ep_v / total_v, 2) if ep_v else None,
                 "ic_inf": r(total_v - 1.96 * ep_v, 2) if ep_v else None,
                 "ic_sup": r(total_v + 1.96 * ep_v, 2) if ep_v else None,
                 "marcas": marcas,
+                # Único regime calculado por componente×período neste piloto fictício:
+                # é sempre a linha que o mapa usa (SPEC_00 §5.1).
+                "no_mapa": True,
             })
     for i, pid in enumerate(PIDS):
         totais_json["domicilios"].append({"periodo": pid, "total": dom_reais[i]})

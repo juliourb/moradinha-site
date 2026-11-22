@@ -10,18 +10,19 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["componente", "periodo", "regime", "total", "marcas"],
+        "required": ["componente", "periodo", "regime", "total", "marcas", "no_mapa"],
         "additionalProperties": false,
         "properties": {
           "componente": { "enum": ["coabitacao", "onus", "precariedade"] },
           "periodo": { "type": "string" },
-          "regime": { "enum": ["c", "d", "misto", "amostra"] },
+          "regime": { "enum": ["c", "d", "misto", "amostra", "provisoria"] },
           "total": { "type": "number" },
           "ep": { "type": ["number", "null"] },
           "cv": { "type": ["number", "null"] },
           "ic_inf": { "type": ["number", "null"] },
           "ic_sup": { "type": ["number", "null"] },
-          "marcas": { "type": "array", "items": { "type": "string" } }
+          "marcas": { "type": "array", "items": { "type": "string" } },
+          "no_mapa": { "type": "boolean" }
         }
       }
     },
