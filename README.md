@@ -26,6 +26,17 @@ Ver `specs/` para as especificações completas e `CLAUDE.md` para as regras do 
 | @duckdb/node-api (só `ferramentas/validar.mjs`, lê Parquet em Node) | 2.0.1-r.1 |
 | Python (só para `ferramentas/gerar_ficticio.py`) | 3.13.9, h3==4.2.2, pyarrow==26.0.1, duckdb==2.0.1, em venv isolado `.venv-ficticio/` |
 
+GitHub Actions (`.github/workflows/site.yml`), versões exatas, runtime Node 24:
+
+| action | versão |
+|---|---|
+| actions/checkout | v7.0.1 |
+| actions/setup-node | v7.1.0 |
+| actions/upload-artifact | v7.0.2 |
+| actions/upload-pages-artifact | v5.0.0 |
+| actions/deploy-pages | v5.0.1 |
+| quarto-dev/quarto-actions/setup | v2.2.0 |
+
 ## Como rodar
 
 ```sh

@@ -1,0 +1,5 @@
+# Pacotes são gerados por ferramenta e verificados por sha256 (manifesto.arquivos,
+# V2): bytes exatamente como gerados, nunca normalizados pelo checkout do git
+# (era a causa da falha do V2 no CI Linux: CRLF local x LF no runner).
+* text=auto eol=lf
+pacotes/** binary
