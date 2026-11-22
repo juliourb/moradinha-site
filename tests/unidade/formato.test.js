@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatar, formatarPercentual } from "../../src/js/util/formato.js";
+import { formatar, formatarPercentual, rotuloCurto } from "../../src/js/util/formato.js";
 
 describe("formato.js", () => {
   it("formata milhar com ponto e decimal com vírgula", () => {
@@ -21,5 +21,11 @@ describe("formato.js", () => {
 
   it("percentual nulo vira travessão", () => {
     expect(formatarPercentual(null)).toBe("—");
+  });
+
+  it("rotuloCurto abrevia médias para caber em eixos estreitos", () => {
+    expect(rotuloCurto("Média 2022–24")).toBe("M22–24");
+    expect(rotuloCurto("Média 2023–25")).toBe("M23–25");
+    expect(rotuloCurto("2025")).toBe("2025");
   });
 });

@@ -11,7 +11,9 @@ Ver `specs/` para as especificações completas e `CLAUDE.md` para as regras do 
 | item | versão |
 |---|---|
 | deck.gl | 9.1.14 |
+| @deck.gl/core (pino direto para alinhar a resolução de dependências com @deck.gl/mapbox) | 9.1.14 |
 | @deck.gl/mapbox | 9.1.14 |
+| @luma.gl/webgl (adaptador WebGL exigido pelo deck.gl v9/luma.gl v9) | 9.1.10 |
 | h3-js | 4.2.1 |
 | d3 | 7.9.0 |
 | maplibre-gl | 6.17.0 (última estável com mais de 2 semanas em 22/11/2026) |

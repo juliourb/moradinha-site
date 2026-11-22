@@ -2,6 +2,7 @@
 // importam e chamam estes módulos; nenhuma lógica de mapa ou gráfico fica
 // presa numa célula (SPEC_00 §2).
 import { carregarJSON } from "./dados/pacote.js";
+import { iniciarExplorador } from "./explorador.js";
 
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -26,3 +27,7 @@ async function preencherCabecalho() {
 }
 
 preencherCabecalho();
+iniciarExplorador().catch((erro) => {
+  // eslint-disable-next-line no-console
+  console.error("Falha ao iniciar o explorador:", erro);
+});

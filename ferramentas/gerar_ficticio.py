@@ -203,7 +203,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
     ap_rows = []
     ap_ressalva_coab = {}
     random.seed(202)
-    for ap_cod, idx in sorted(aps_idx.items()):
+    for k, (ap_cod, idx) in enumerate(sorted(aps_idx.items())):
         motor = sum(valores["coabitacao"]["2022"][j] for j in idx)
         dom_ap = sum(dom_por_periodo["2022"][j] for j in idx)
         if motor > 0:
@@ -214,7 +214,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
             direta = 0.0
         ressalva = bool(cv is not None and cv > 0.30) or (direta == 0)
         ap_ressalva_coab[ap_cod] = ressalva
-        ap_nome = f"AP {ap_cod[-4:]}"
+        ap_nome = f"AP {k + 1:02d}"
         ap_rows.append(dict(ap_cod=ap_cod, ap_nome=ap_nome, municipio_cod="270030", tipo="capital",
                              componente="coabitacao", direta=r(direta, 1) if direta else 0.0,
                              direta_cv=r(cv * 100, 1) if cv else None,
@@ -327,13 +327,25 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
 
     # hex_atributos
     # município e AP dominantes por domicílios 2022: no recorte fictício, cada
-    # hexágono só tem um pai H3 res-7 (AP) e um município (Maceió), então
-    # n_aps=n_municipios=1 sempre — ainda assim exigido ≥ 1 pela V9.
+    # hexágono só tem um pai H3 res-7 (AP) e um município (Maceió). Para poder
+    # testar o aviso "cruza N áreas de ponderação" (F1-17), um punhado de
+    # hexágonos (candidatos: realmente adjacentes a uma AP vizinha) é marcado
+    # com n_aps=2 fictício, mantendo ap_cod como a AP dominante. A maioria dos
+    # hexágonos toca uma AP vizinha (as APs fictícias têm só 7 células cada),
+    # então a marca é amostrada, não aplicada a todo candidato.
+    hexagonos_do_pacote = {y["h"] for y in H}
+    candidatas_borda = [
+        j for j, x in enumerate(H)
+        if any(h3.cell_to_parent(v, 7) != x["ap"] for v in h3.grid_disk(x["h"], 1) if v in hexagonos_do_pacote)
+    ]
+    random.seed(303)
+    n_bordas = max(1, len(candidatas_borda) // 20) if candidatas_borda else 0
+    bordas_ap = set(random.sample(candidatas_borda, min(n_bordas, len(candidatas_borda))))
     hex_atributos_rows = [
         dict(h3=x["h"], municipio_cod="270030", municipio_nome="Maceió", n_municipios=1,
-             ap_cod=x["ap"], n_aps=1,
+             ap_cod=x["ap"], n_aps=2 if j in bordas_ap else 1,
              fcu_fracao=1.0 if x["fcu"] else 0.0, recortes="braskem" if x["braskem"] else "")
-        for x in H
+        for j, x in enumerate(H)
     ]
 
     # totais.json
@@ -600,9 +612,9 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
         return [[lng, lat] for lat, lng in h3.cell_to_boundary(cell)] + [[h3.cell_to_boundary(cell)[0][1], h3.cell_to_boundary(cell)[0][0]]]
 
     ap_features = [
-        {"type": "Feature", "properties": {"cod": ap_cod, "nome": f"AP {ap_cod[-4:]}"},
+        {"type": "Feature", "properties": {"cod": ap_cod, "nome": f"AP {k + 1:02d}"},
          "geometry": {"type": "Polygon", "coordinates": [boundary_geojson(ap_cod)]}}
-        for ap_cod in sorted(aps_idx.keys())
+        for k, ap_cod in enumerate(sorted(aps_idx.keys()))
     ]
     (pasta / "contornos" / "ap.geojson").write_text(
         json.dumps({"type": "FeatureCollection", "features": ap_features}, ensure_ascii=False), encoding="utf-8")

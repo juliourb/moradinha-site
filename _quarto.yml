@@ -9,6 +9,8 @@ project:
   resources:
     - catalogo.json
     - pacotes/
+    - assets/js/duckdb/
+    - assets/js/maplibre-gl-worker.mjs
 
 website:
   title: "moradinha"
@@ -34,7 +36,9 @@ format:
     theme:
       light: [cosmo, assets/css/tema-claro.scss]
       dark: [cosmo, assets/css/tema-escuro.scss]
-    css: assets/css/tokens.css
+    css:
+      - assets/css/maplibre-gl.css
+      - assets/css/tokens.css
     toc: false
     page-layout: full
     include-in-header:

@@ -16,6 +16,11 @@ export function formatar(valor, decimais = 0) {
   });
 }
 
+/** Abrevia rótulos de média para caber em eixos estreitos: "Média 2022–24" → "M22–24". */
+export function rotuloCurto(rotulo) {
+  return rotulo.replace(/^Média (\d{2})(\d{2})–/, "M$2–");
+}
+
 /**
  * @param {number|null|undefined} valor
  * @param {number} decimais

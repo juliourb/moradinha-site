@@ -4,14 +4,69 @@ title: ""
 
 {{< include textos/_cabecalho.qmd >}}
 
-::: panel
-## Resultados
+```{=html}
+<div id="pane-resultados">
+<div class="ask">
+  <div class="q" id="f1-question"></div>
+  <div class="ctl"><span class="lab" id="f1-lab-tema">Tema</span><div class="seg" role="group" aria-labelledby="f1-lab-tema" id="f1-seg-tema">
+    <button type="button" data-v="deficit" aria-pressed="true">Déficit</button><button type="button" data-v="qualidade" aria-pressed="false">Qualidade</button></div></div>
+  <div class="ctl" id="f1-ctl-medida-qualidade" hidden><label for="f1-sel-medida-qualidade">Medida de qualidade</label><select id="f1-sel-medida-qualidade"></select>
+    <div class="sub" id="f1-medida-qualidade-explicacao"></div></div>
+  <div class="ctl" id="f1-ctl-medida"><span class="lab" id="f1-lab-med">Medida</span><div class="seg" role="group" aria-labelledby="f1-lab-med" id="f1-seg-med">
+    <button type="button" data-v="absoluto" aria-pressed="true">Absoluto</button><button type="button" data-v="relativo" aria-pressed="false">Relativo</button></div></div>
+  <div class="ctl"><span class="lab" id="f1-lab-comp">Componente</span><div class="seg" role="group" aria-labelledby="f1-lab-comp" id="f1-seg-comp">
+    <button type="button" data-v="total" aria-pressed="true">Total</button><button type="button" data-v="coabitacao" aria-pressed="false">Coabitação</button><button type="button" data-v="onus" aria-pressed="false">Ônus</button><button type="button" data-v="precariedade" aria-pressed="false">Precariedade</button></div></div>
+  <div class="ctl"><label for="f1-sel-per">Período</label><select id="f1-sel-per"></select></div>
+  <div class="ctl"><label for="f1-sel-cmp">Comparar com (cortina)</label><select id="f1-sel-cmp"></select></div>
+</div>
 
-::: sub
-Em construção (SPEC_F1). Vai trazer o explorador ligado: mapa (deck.gl
-`H3HexagonLayer` sobre MapLibre GL), cortina de comparação entre períodos,
-camadas de contexto (áreas de ponderação, FCU — favelas e comunidades urbanas,
-recortes), painel do hexágono selecionado e gráficos em carrossel (histograma,
-ranking, série no tempo, distribuição por período).
-:::
-:::
+<div class="grid-main">
+  <div class="mapbox" id="f1-mapbox">
+    <div class="deck" id="f1-deckA"></div>
+    <div class="deck" id="f1-deckB"></div>
+    <div class="divider" id="f1-divider" tabindex="0" role="slider" aria-label="Arrastar a cortina" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50"><button type="button" aria-label="Arrastar a cortina">↔</button></div>
+    <div class="maplab" id="f1-labA"></div><div class="maplab" id="f1-labB"></div>
+    <div class="legend" id="f1-legend"></div>
+    <div class="attrib">Mapa: © OpenStreetMap contributors · OpenFreeMap</div>
+    <div class="basefail" id="f1-basefail">Mapa de fundo indisponível nesta sessão; o mapa segue sem base.</div>
+    <div class="layers" role="group" aria-label="Camadas de contexto" id="f1-layers">
+      <span class="t">Camadas</span>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel answer" aria-live="polite">
+      <div class="sub" id="f1-ans-lab"></div>
+      <div class="big num" id="f1-ans-big"></div>
+      <div class="range num" id="f1-ans-range"></div>
+      <div class="pills" id="f1-ans-pills"></div>
+      <div class="cards" id="f1-cards"></div>
+    </div>
+    <div class="panel detail" id="f1-detail"></div>
+  </div>
+</div>
+
+<section class="dock" id="f1-dock" aria-label="Gráficos ligados ao mapa">
+  <div class="dock-head">
+    <div class="carrossel" role="group" aria-label="Conjunto de gráficos">
+      <button type="button" class="iconbtn" id="f1-carrossel-prev" aria-label="Conjunto anterior de gráficos">‹</button>
+      <h2 id="f1-dock-titulo">Gráficos ligados ao mapa — Déficit</h2>
+      <button type="button" class="iconbtn" id="f1-carrossel-next" aria-label="Próximo conjunto de gráficos">›</button>
+      <span class="pontos" id="f1-carrossel-pontos" role="group" aria-label="Conjuntos"></span>
+    </div>
+    <button type="button" class="iconbtn" id="f1-dock-toggle" aria-expanded="true">Minimizar todos</button>
+  </div>
+  <div class="dock-body" id="f1-dock-body-deficit">
+    <article class="dcard" data-k="hist"><header><h3 title="Clique numa barra para destacar esses hexágonos no mapa">Distribuição nos hexágonos</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição">–</button></header><div class="body" id="f1-hist"></div></article>
+    <article class="dcard" data-k="rank"><header><h3>Os 5 hexágonos com mais déficit</h3><button type="button" class="iconbtn" aria-label="Minimizar ranking">–</button></header><div class="body"><table class="rank num" id="f1-rank"></table></div></article>
+    <article class="dcard" data-k="series"><header><h3 title="Ponto = total; barra = faixa de 95%; losango = média de 3 anos. Clique num período para levá-lo ao mapa.">Total do domínio no tempo</h3><button type="button" class="iconbtn" aria-label="Minimizar série">–</button></header><div class="body" id="f1-series"></div></article>
+    <article class="dcard" data-k="boxes"><header><h3 title="Caixa = p25–p75; traço = mediana; haste = p10–p90; só hexágonos acima de zero.">Distribuição por período</h3><button type="button" class="iconbtn" aria-label="Minimizar caixas">–</button></header><div class="body" id="f1-boxes"></div></article>
+  </div>
+  <div class="dock-body" id="f1-dock-body-qualidade" hidden>
+    <article class="dcard" data-k="qhist"><header><h3 title="Clique numa barra para destacar esses hexágonos no mapa">Distribuição da medida de qualidade</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição da qualidade">–</button></header><div class="body" id="f1-qhist"></div></article>
+    <article class="dcard" data-k="disp"><header><h3 title="Um ponto por hexágono. Quadrante sombreado: muito déficit e muita incerteza.">Déficit × incerteza</h3><button type="button" class="iconbtn" aria-label="Minimizar dispersão">–</button></header><div class="body" id="f1-disp"></div></article>
+    <article class="dcard" data-k="comp"><header><h3>Composição da qualidade por período</h3><button type="button" class="iconbtn" aria-label="Minimizar composição">–</button></header><div class="body" id="f1-comp"></div></article>
+    <article class="dcard" data-k="estoque"><header><h3 title="Estoque do período ÷ estoque de 2022, por hexágono.">Estoque ÷ 2022 por período</h3><button type="button" class="iconbtn" aria-label="Minimizar estoque">–</button></header><div class="body" id="f1-estoque"></div></article>
+  </div>
+</section>
+</div>
+```

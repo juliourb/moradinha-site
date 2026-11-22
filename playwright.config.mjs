@@ -7,6 +7,10 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: "http://localhost:4173",
+    // WebGL por software (deck.gl/MapLibre) em Chromium headless.
+    launchOptions: {
+      args: ["--use-gl=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"],
+    },
   },
   webServer: {
     command: "node ferramentas/servir.mjs 4173",

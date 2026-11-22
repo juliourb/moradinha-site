@@ -11,6 +11,9 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SAIDA_JS = join(RAIZ, "assets", "js", "moradinha.js");
 const SAIDA_DUCKDB = join(RAIZ, "assets", "js", "duckdb");
 const DUCKDB_DIST = join(RAIZ, "node_modules", "@duckdb", "duckdb-wasm", "dist");
+const MAPLIBRE_DIST = join(RAIZ, "node_modules", "maplibre-gl", "dist");
+const MAPLIBRE_CSS = join(MAPLIBRE_DIST, "maplibre-gl.css");
+const SAIDA_MAPLIBRE_CSS = join(RAIZ, "assets", "css", "maplibre-gl.css");
 
 async function empacotarJS() {
   await build({
@@ -39,4 +42,8 @@ function copiarDuckDBWasm() {
 
 await empacotarJS();
 copiarDuckDBWasm();
-console.log("Bundle JS e assets do DuckDB-WASM gerados em assets/js/.");
+copyFileSync(MAPLIBRE_CSS, SAIDA_MAPLIBRE_CSS);
+// maplibre-gl calcula a URL do worker como um arquivo irmão do próprio módulo
+// (import.meta.url) — aqui, irmão de assets/js/moradinha.js.
+copyFileSync(join(MAPLIBRE_DIST, "maplibre-gl-worker.mjs"), join(RAIZ, "assets", "js", "maplibre-gl-worker.mjs"));
+console.log("Bundle JS, CSS do MapLibre e assets do DuckDB-WASM/MapLibre gerados em assets/.");
