@@ -5,17 +5,19 @@ para `main` que torna o site público de fato.
 
 ## Pacote
 
-- [x] Pacote real validado: `npm run validar -- pacotes/al_rm_maceio/69277fd` → `OK: todas as regras
+- [x] Pacote real validado: `npm run validar -- pacotes/al_rm_maceio/bd10cbd` → `OK: todas as regras
   passaram.`
 - [x] `manifesto.ficticio` é `false` no pacote real.
 - [x] `manifesto.publico` é `true` no pacote real.
 - [x] `manifesto.d17_conferido` é `true`.
 - [x] Chip "dados fictícios" ausente quando a edição padrão (sem parâmetros na URL) é aberta —
   `tests/e2e/f5-publicacao.spec.js`.
-- [x] Edição citada (`manifesto.edicao`) igual ao commit do moradinha que gerou o pacote: `69277fd`
-  é o prefixo de `manifesto.commit_completo` (`69277fdb576e584df7747d86f92c478f62d959c4`).
-- [x] `catalogo.json`: a edição real (`69277fd`) é a `padrao` de `al_rm_maceio`; a fictícia e o
-  domínio `teste_pequeno` ficam marcados `teste_apenas` (nunca aparecem no seletor público, só por
+- [x] Edição citada (`manifesto.edicao`) igual ao commit do moradinha que gerou o pacote: `bd10cbd`
+  é o prefixo de `manifesto.commit_completo` (`bd10cbde76cbd2174abc6fbea0e8ff180265b673`).
+- [x] `catalogo.json`: a edição real (`bd10cbd`) é a `padrao` de `al_rm_maceio` (F6.0: a edição
+  anterior, `69277fd`, saiu do catálogo por ter o erro da ponte A1 corrigido em `bd10cbd`; a pasta
+  `pacotes/al_rm_maceio/69277fd/` fica, apagar é decisão de Julio). A fictícia e o domínio
+  `teste_pequeno` ficam marcados `teste_apenas` (nunca aparecem no seletor público, só por
   `?dominio=&edicao=` explícito — é assim que a suíte de testes abre os pacotes fictícios).
 - [x] `npm run validar:catalogo-publico` → toda entrada do catálogo fora de `teste_apenas` é
   `publico=true`/`ficticio=false`.

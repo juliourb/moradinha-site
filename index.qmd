@@ -12,6 +12,28 @@ title: ""
 </div>
 
 <div class="cartoes-bi" id="f2-cartoes"></div>
+<div style="margin:6px 0 10px"><button type="button" class="iconbtn" id="f2-detalhes-btn" aria-haspopup="dialog" aria-controls="f2-detalhes-dialog">Detalhes</button></div>
+<p class="nota-fixa" id="f2-ressalva-relativo"></p>
+
+<div class="dlg-backdrop" id="f2-detalhes-backdrop" hidden>
+  <div class="dlg" id="f2-detalhes-dialog" role="dialog" aria-modal="true" aria-labelledby="f2-detalhes-titulo">
+    <div class="dlg-head">
+      <h2 id="f2-detalhes-titulo">Detalhes</h2>
+      <button type="button" class="iconbtn" id="f2-detalhes-fechar" aria-label="Fechar">✕</button>
+    </div>
+    <div class="como-ler">Cada painel mostra o total do domínio por ano, com a faixa de 95% quando houver; a linha tracejada é a média de 3 anos.</div>
+    <div class="grid-detalhes">
+      <div class="dpanel"><h3>Total</h3><div id="f2-det-total"></div></div>
+      <div class="dpanel"><h3>Coabitação</h3><div id="f2-det-coabitacao"></div></div>
+      <div class="dpanel"><h3>Ônus</h3><div id="f2-det-onus"></div></div>
+      <div class="dpanel"><h3>Precariedade</h3><div id="f2-det-precariedade"></div></div>
+    </div>
+    <p class="sub" id="f2-det-frase-ruido"></p>
+    <h3>Curva de concentração</h3>
+    <div class="como-ler">% dos hexágonos com domicílio (do maior para o menor déficit) no eixo x; % do déficit acumulado no eixo y.</div>
+    <div id="f2-det-concentracao"></div>
+  </div>
+</div>
 
 <div class="grid-visaogeral">
   <div class="panel">
@@ -19,6 +41,7 @@ title: ""
     <div class="sub" id="f2-minimapa-sub"></div>
     <div class="minimapa" id="f2-minimapa">
       <div class="attrib"><a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://openmaptiles.org">OpenMapTiles</a> · Dados © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a></div>
+      <div class="hex-tooltip" id="f2-minimapa-tooltip" role="tooltip" hidden></div>
     </div>
     <a href="resultados.html" class="iconbtn" id="f2-link-explorar" style="display:inline-block;margin-top:8px">Explorar no mapa completo →</a>
   </div>

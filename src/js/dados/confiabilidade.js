@@ -2,9 +2,89 @@
 // cálculo além do que já vem pronto em qualidade.json/modelo.json/
 // consistencia.json/achados.json.
 import { ascending, quantileSorted } from "d3";
+import { fjpTresValores } from "./visaoGeral.js";
 
 export const COMPONENTES_MODELO = ["coabitacao", "onus", "precariedade"];
 export const CLAB = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
+
+/** Indicador do referencia_fjp.json correspondente a cada componente (SPEC_F6 pergunta 1). */
+const INDICADOR_FJP_POR_COMPONENTE = { coabitacao: "coabitacao", onus: "onus", precariedade: "habitacao_precaria" };
+
+/** Pergunta 1 ("Os números de partida batem?") — SPEC_F6 painel de vereditos. */
+export function veredictoPergunta1(qualidade, referenciaFjp, componente) {
+  const pontePonto = (qualidade.ponte ?? []).find((p) => p.indicador === componente);
+  const numero = pontePonto?.razao ?? null;
+  const indicadorFjp = INDICADOR_FJP_POR_COMPONENTE[componente];
+  const item = fjpTresValores(referenciaFjp ?? []).find((i) => i.indicador === indicadorFjp);
+  const veredicto = item?.dentro == null ? null : item.dentro ? "bate" : "não bate";
+  return { veredicto, numero };
+}
+
+/**
+ * Pergunta 2 ("O modelo põe o déficit no lugar certo?") — protocolo a–e,
+ * SPEC_F6 painel de vereditos. Roda sempre que os campos existirem, mesmo
+ * com usado=false (o motivo é exibido separadamente na seção do modelo).
+ */
+export function veredictoPergunta2(modeloComponente) {
+  if (!modeloComponente) return { veredicto: null, numero: null, motivo: null, usado: null };
+  const numero = modeloComponente.ganho?.razao != null ? 100 * modeloComponente.ganho.razao : null;
+  const a = modeloComponente.ganho?.razao != null && modeloComponente.ganho.razao <= 0.9;
+  const ordem = modeloComponente.ordem;
+  const b = ordem != null && ordem.spearman_modelo > ordem.spearman_base && ordem.spearman_modelo > 0.6;
+  const c = ordem != null && ordem.top20_modelo > ordem.top20_base;
+  const cobertura = modeloComponente.confianca?.cobertura_d;
+  const d = cobertura != null && cobertura.modelo > cobertura.base;
+  const viesAp = (modeloComponente.vies ?? []).filter((v) => v.grupo_tipo === "tipo de AP");
+  const e = viesAp.length > 0 && viesAp.every((v) => v.razao_somas >= 0.9 && v.razao_somas <= 1.1);
+  let veredicto;
+  if (!a) veredicto = "não";
+  else veredicto = a && b && c && d && e ? "sim" : "em parte";
+  return { veredicto, numero, motivo: modeloComponente.motivo ?? null, usado: modeloComponente.usado };
+}
+
+const MARCAS_COMPARABILIDADE = new Set([
+  "fonte_estoque_diferente", "media_inclui_fonte_diferente", "mudanca_no_ruido", "precariedade_provisoria_sem_faixa",
+]);
+
+/** Pergunta 3 ("A série é comparável entre anos?") — SPEC_F6 painel de vereditos. */
+export function veredictoPergunta3(manifesto, totais, componente) {
+  const linhasPorPeriodo = new Map(totais.totais.filter((t) => t.componente === componente && t.no_mapa === true).map((t) => [t.periodo, t]));
+  const mudancasComponente = (totais.mudancas ?? []).filter((m) => m.componente === componente);
+  let marcados = 0;
+  for (const p of manifesto.periodos) {
+    const marcasPeriodo = p.marcas ?? [];
+    const marcasLinha = linhasPorPeriodo.get(p.id)?.marcas ?? [];
+    const mudancaAqui = mudancasComponente.some((m) => m.para === p.id && (m.marcas ?? []).includes("mudanca_no_ruido"));
+    const temMarca = [...marcasPeriodo, ...marcasLinha].some((m) => MARCAS_COMPARABILIDADE.has(m)) || mudancaAqui;
+    if (temMarca) marcados++;
+  }
+  const total = manifesto.periodos.length;
+  return { veredicto: marcados === 0 ? "sim" : "em parte", numero: total > 0 ? marcados / total : null, marcados, total };
+}
+
+/** Pergunta 4 ("O que ainda não sabemos") — sem veredito, só o número de achados públicos. */
+export function veredictoPergunta4(achados) {
+  return { veredicto: null, numero: achadosPublicos(achados).reduce((s, g) => s + g.itens.length, 0) };
+}
+
+/** Rótulo em linguagem simples para um valor de `uso_por_periodo` (N12). */
+export function rotuloUso(uso) {
+  if (uso == null) return "sem dado";
+  if (uso === "do ano") return "do próprio ano";
+  return uso;
+}
+
+/**
+ * Matriz "o que falta" (N12): variável × período, SPEC_F6 seção 4.
+ * Lê `qualidade.fontes[].uso_por_periodo`.
+ */
+export function matrizOqueFalta(qualidade, manifesto) {
+  const fontes = qualidade.fontes ?? [];
+  return fontes.map((f) => ({
+    variavel: f.variavel,
+    celulas: manifesto.periodos.map((p) => ({ periodo: p.id, uso: rotuloUso(f.uso_por_periodo?.[p.id]) })),
+  }));
+}
 
 export const BLOCOS_MODELO = [
   {
@@ -38,9 +118,10 @@ export const BLOCOS_MODELO = [
   {
     chave: "curvas",
     titulo: "Por quê?",
+    recolhido: true,
     significado:
-      "O modelo (EBM, Explainable Boosting Machine) soma uma contribuição por característica do domicílio ou do território. " +
-      "A curva mostra quanto cada categoria aumenta ou diminui a chance de déficit; a importância, quanto cada variável pesa no total.",
+      "O modelo (EBM, Explainable Boosting Machine) soma uma contribuição por característica do domicílio ou do território; " +
+      "a importância diz quanto cada variável pesa no total. As curvas ficam recolhidas nesta edição.",
   },
   {
     chave: "confianca",

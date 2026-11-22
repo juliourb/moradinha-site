@@ -41,6 +41,9 @@ export function classeMarca(codigo) {
 
 /** Rótulos conhecidos para `hex_qualidade.fonte_estoque`/`manifesto.periodos[].fonte_estoque` (CHANGELOG_SPECS v1.5). */
 const ROTULOS_FONTE_ESTOQUE = Object.freeze({
+  censo: "Censo 2022",
+  open_buildings: "Open Buildings",
+  mapbiomas: "MapBiomas",
   mista: "Média de anos com fontes de estoque diferentes",
 });
 

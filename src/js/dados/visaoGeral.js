@@ -1,7 +1,39 @@
 // Cálculos da Visão geral (SPEC_F2) — só o que a regra inviolável 1 permite:
 // soma de componentes, relativo e os totais já no pacote.
-import { totalDoMapa, domiciliosTotal, COMPONENTES_BASE } from "./calculo.js";
+import { totalDoMapa, domiciliosTotal, brutoHex, mudanca, COMPONENTES_BASE } from "./calculo.js";
 import { PRIORIDADE_MARCAS } from "../util/marcas.js";
+import { taxaDominio } from "./escalaCor.js";
+
+/** Parte do CadÚnico de um indicador do referencia_fjp.json (SPEC_F6 N8/N9). */
+export function parteCadUnico(item, todosItens) {
+  const origem = item.indicador === "total" ? todosItens.find((i) => i.indicador === "habitacao_precaria") : item;
+  const sub = origem?.fjp_subcomponentes?.find((s) => s.nome === "improvisados");
+  return sub?.valor ?? 0;
+}
+
+/** Faixa de 95% da reconstrução, com a ponta de baixo cortada em 0 só na exibição (N7). */
+export function faixaReconstrucao(reconstrucaoPnadc, reconstrucaoEp) {
+  if (reconstrucaoPnadc == null || reconstrucaoEp == null) return null;
+  return {
+    inf: Math.max(0, reconstrucaoPnadc - 1.96 * reconstrucaoEp),
+    sup: reconstrucaoPnadc + 1.96 * reconstrucaoEp,
+  };
+}
+
+/**
+ * Os três valores da comparação com a FJP (N8/N9): publicado, parte do CadÚnico e
+ * sem CadÚnico. "Dentro/fora da faixa" compara o valor sem CadÚnico com a faixa de
+ * 95% da reconstrução.
+ */
+export function fjpTresValores(referenciaFjp) {
+  return referenciaFjp.map((item) => {
+    const cadUnico = parteCadUnico(item, referenciaFjp);
+    const semCadUnico = item.fjp_publicado == null ? null : item.fjp_publicado - cadUnico;
+    const faixa = faixaReconstrucao(item.reconstrucao_pnadc, item.reconstrucao_ep);
+    const dentro = semCadUnico != null && faixa != null ? semCadUnico >= faixa.inf && semCadUnico <= faixa.sup : null;
+    return { ...item, cadUnico, semCadUnico, faixa, dentro };
+  });
+}
 
 export const NOME_COMPONENTE = { total: "total", coabitacao: "coabitação", onus: "ônus", precariedade: "precariedade" };
 export const CLAB = { total: "Total", coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
@@ -102,4 +134,85 @@ export function linhasParaCitar(manifesto, totais) {
     }
   }
   return linhas;
+}
+
+/**
+ * Curva de concentração (SPEC_F6 B6): hexágonos com 1+ domicílio, do maior
+ * para o menor déficit absoluto; % dos hexágonos (eixo x) vs. % do déficit
+ * acumulado (eixo y). Também marca onde a curva chega à metade do déficit.
+ */
+export function curvaConcentracao(linhasArr, componente, periodo) {
+  const valores = [];
+  for (const l of linhasArr) {
+    const dom = l.dom[periodo];
+    if (dom == null || dom < 1) continue;
+    const v = brutoHex(l, componente, periodo);
+    if (v == null) continue;
+    valores.push(v);
+  }
+  valores.sort((a, b) => b - a);
+  const n = valores.length;
+  const totalDeficit = valores.reduce((s, v) => s + v, 0);
+  const pontos = [];
+  let acumulado = 0;
+  for (let i = 0; i < n; i++) {
+    acumulado += valores[i];
+    pontos.push({ pctHex: (100 * (i + 1)) / n, pctDeficitAcumulado: totalDeficit > 0 ? (100 * acumulado) / totalDeficit : 0 });
+  }
+  const idxMeio = pontos.findIndex((p) => p.pctDeficitAcumulado >= 50);
+  const nHexMeio = idxMeio === -1 ? n : idxMeio + 1;
+  const pctHexMeio = idxMeio === -1 ? 100 : pontos[idxMeio].pctHex;
+  return { pontos, n, nHexMeio, pctHexMeio };
+}
+
+/** Maior valor relativo (%) entre hexágonos com 1+ domicílio, no componente/período. */
+export function maiorRelativo(linhasArr, componente, periodo) {
+  let melhor = null;
+  for (const l of linhasArr) {
+    const dom = l.dom[periodo];
+    if (dom == null || dom < 1) continue;
+    const v = brutoHex(l, componente, periodo);
+    if (v == null) continue;
+    const relativo = (100 * v) / dom;
+    if (melhor == null || relativo > melhor) melhor = relativo;
+  }
+  return melhor;
+}
+
+/** Frase da ressalva do relativo (SPEC_F6, Visão geral), gerada do pacote. */
+export function fraseRessalvaRelativo(linhasArr, totais, componente, periodo) {
+  const conc = curvaConcentracao(linhasArr, componente, periodo);
+  const maiorRel = maiorRelativo(linhasArr, componente, periodo);
+  const taxa = taxaDominio(totais, componente, periodo);
+  const vezes = taxa && maiorRel != null ? maiorRel / taxa : null;
+  const frase1 = `${Math.round(conc.nHexMeio).toLocaleString("pt-BR")} hexágonos (${conc.pctHexMeio.toFixed(0)}% dos que têm domicílio) somam metade do déficit absoluto.`;
+  if (vezes == null) return frase1;
+  const frase2 =
+    vezes >= 2
+      ? `No relativo, o maior hexágono tem ${vezes.toFixed(1)} vezes a taxa do domínio.`
+      : `No relativo, o maior hexágono tem ${vezes.toFixed(1)} vezes a taxa do domínio: a concentração do mapa absoluto acompanha, em boa parte, onde estão os domicílios.`;
+  return `${frase1} ${frase2}`;
+}
+
+/** Pares de anos consecutivos (manifesto.periodos, tipo "ano") cuja mudança passa de 1,96 EP. */
+export function mudancasAnuaisForaDoRuido(manifesto, totais) {
+  const anos = manifesto.periodos.filter((p) => p.tipo === "ano");
+  const resultado = [];
+  for (let i = 0; i < anos.length - 1; i++) {
+    for (const componente of ["total", ...COMPONENTES_BASE]) {
+      const m = mudanca(totais, componente, anos[i].id, anos[i + 1].id);
+      if (m?.z != null && m.z > 1.96) {
+        resultado.push({ componente, de: anos[i], para: anos[i + 1], z: m.z });
+      }
+    }
+  }
+  return resultado;
+}
+
+/** Frase do pop-up "Detalhes" (B3) sobre mudanças anuais fora do ruído da amostra. */
+export function fraseRuidoAnual(manifesto, totais) {
+  const passam = mudancasAnuaisForaDoRuido(manifesto, totais);
+  if (!passam.length) return "Nenhuma mudança de um ano para o outro passa do ruído da amostra.";
+  const nomes = passam.map((p) => `${NOME_COMPONENTE[p.componente]} de ${p.de.rotulo} para ${p.para.rotulo}`);
+  return `Passa(m) do ruído da amostra: ${nomes.join("; ")}.`;
 }

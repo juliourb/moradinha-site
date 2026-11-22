@@ -87,7 +87,7 @@ describe("dados/metodologia.js", () => {
       ],
     };
     const { periodos, limiares } = parametrosDominio(manifesto);
-    expect(periodos[0]).toEqual({ id: "2022", rotulo: "2022", tipo: "ano", fonteEstoque: "censo" });
+    expect(periodos[0]).toEqual({ id: "2022", rotulo: "2022", tipo: "ano", fonteEstoque: "Censo 2022" });
     expect(periodos[1].fonteEstoque).toBe("Média de anos com fontes de estoque diferentes");
     expect(limiares.cv_ap_ressalva.valor).toBe(30);
   });

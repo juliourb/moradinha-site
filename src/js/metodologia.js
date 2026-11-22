@@ -1,8 +1,18 @@
-// Composição da aba Metodologia (SPEC_F4).
-import { carregarJSON, carregarBinario, escolherDominioEEdicao } from "./dados/pacote.js";
-import { camadasPipeline, parametrosDominio, linhasRastreio, CLAB, COMPONENTES_MODELO } from "./dados/metodologia.js";
+// Composição da aba Metodologia (SPEC_F4, grafo em grupos pela SPEC_F6 B4/N18).
+import { carregarJSON, carregarBinario, carregarTexto, escolherDominioEEdicao } from "./dados/pacote.js";
+import {
+  camadasPipeline, parametrosDominio, linhasRastreio, agruparPipeline, arestasEntreGrupos, pipelineDoGrupo,
+  ID_NO_EXPORTACAO, CLAB, COMPONENTES_MODELO,
+} from "./dados/metodologia.js";
+import { analisarYamlSimples } from "./util/yamlSimples.js";
 import { sha256Hex } from "./util/hash.js";
 import { formatar } from "./util/formato.js";
+
+/** Grupo (nome do método) → id da seção de texto, anexo A (SPEC_F6). */
+const GRUPO_PARA_TEXTO_ID = {
+  Coleta: "coleta", Grade: "grade", Classificação: "classificacao", Treino: "treino",
+  "Montagem 2022": "montagem2022", "Anos t": "anost", Exportação: "exportacao",
+};
 
 function $(id) {
   return document.getElementById(id);
@@ -16,54 +26,129 @@ const ALTURA_NO = 46;
 const ESPACO_X = 60;
 const ESPACO_Y = 14;
 
-function renderizarPipeline(el, pipeline) {
-  const { nos, arestas, nCamadas, maiorCamada } = camadasPipeline(pipeline);
-  const W = nCamadas * (LARGURA_NO + ESPACO_X) - ESPACO_X;
-  const H = maiorCamada * (ALTURA_NO + ESPACO_Y) - ESPACO_Y;
+/** Desenha um mini-grafo em camadas (coleção de nós + arestas já com camada/posicao) — reusado para o grupo expandido. */
+function montarSvgCaixas(nos, arestas, { larguraNo = LARGURA_NO, alturaNo = ALTURA_NO } = {}) {
+  const nCamadas = Math.max(...nos.map((n) => n.camada)) + 1;
+  const maiorCamada = Math.max(1, ...[...d3GrupoContagem(nos)].map(([, v]) => v));
+  const W = nCamadas * (larguraNo + ESPACO_X) - ESPACO_X;
+  const H = maiorCamada * (alturaNo + ESPACO_Y) - ESPACO_Y;
   const porId = new Map(nos.map((n) => [n.id, n]));
-  const xy = (n) => ({
-    x: n.camada * (LARGURA_NO + ESPACO_X),
-    y: n.posicao * (ALTURA_NO + ESPACO_Y),
-  });
+  const xy = (n) => ({ x: n.camada * (larguraNo + ESPACO_X), y: n.posicao * (alturaNo + ESPACO_Y) });
 
   const linhas = arestas
     .map((a) => {
-      const de = xy(porId.get(a.de));
-      const para = xy(porId.get(a.para));
-      const x1 = de.x + LARGURA_NO;
-      const y1 = de.y + ALTURA_NO / 2;
-      const x2 = para.x;
-      const y2 = para.y + ALTURA_NO / 2;
+      const de = porId.get(a.de);
+      const para = porId.get(a.para);
+      if (!de || !para) return "";
+      const p1 = xy(de);
+      const p2 = xy(para);
+      const x1 = p1.x + larguraNo;
+      const y1 = p1.y + alturaNo / 2;
+      const x2 = p2.x;
+      const y2 = p2.y + alturaNo / 2;
       return `<path d="M${x1},${y1} C${x1 + ESPACO_X / 2},${y1} ${x2 - ESPACO_X / 2},${y2} ${x2},${y2}" fill="none" stroke="${css("--line")}" stroke-width="2"/>`;
     })
     .join("");
+  return { W, H, linhas, xy };
+}
 
-  const caixas = nos
+function d3GrupoContagem(nos) {
+  const m = new Map();
+  for (const n of nos) m.set(n.camada, (m.get(n.camada) ?? 0) + 1);
+  return m;
+}
+
+let grupoAtualIdx = -1;
+
+function renderizarPipeline(el, pipeline, manifesto, config) {
+  const { grupos, grupoPorEtapaId } = agruparPipeline(pipeline, manifesto, config);
+  const arestasGrupos = arestasEntreGrupos(pipeline, grupoPorEtapaId);
+  const nomesPresentes = grupos.map((g) => g.nome);
+
+  const LARG_GRUPO = 170;
+  const ALT_GRUPO = 56;
+  const nosGrupo = grupos.map((g, i) => ({ id: g.nome, camada: i, posicao: 0, grupo: g }));
+  const { W, H, linhas } = montarSvgCaixas(nosGrupo, arestasGrupos, { larguraNo: LARG_GRUPO, alturaNo: ALT_GRUPO });
+
+  const caixas = nosGrupo
     .map((n) => {
-      const { x, y } = xy(n);
-      const dataCommit = `${n.commit.slice(0, 7)} · ${n.data}`;
-      return `<g class="no-pipeline" tabindex="0" role="button" data-etapa="${n.id}" transform="translate(${x},${y})" aria-label="${n.nome} ${dataCommit} — ir para o texto desta etapa">
-        <rect width="${LARGURA_NO}" height="${ALTURA_NO}" rx="8" fill="${css("--surface")}" stroke="${css("--accent")}" stroke-width="1.5"/>
-        <text x="10" y="18" font-size="13" font-weight="650" fill="${css("--ink")}">${n.nome}</text>
-        <text x="10" y="34" font-size="10" fill="${css("--muted")}">${dataCommit}</text>
+      const x = n.camada * (LARG_GRUPO + ESPACO_X);
+      const g = n.grupo;
+      const nEtapas = g.etapas.filter((e) => e.id !== ID_NO_EXPORTACAO).length;
+      const sub = g.nome === "Exportação" ? "pacote de publicação" : `${nEtapas} tabela${nEtapas === 1 ? "" : "s"}`;
+      return `<g class="no-pipeline" tabindex="0" role="button" aria-expanded="false" data-grupo="${g.nome}" transform="translate(${x},0)" aria-label="${g.nome}: ${sub} — expandir e ir para o texto">
+        <rect width="${LARG_GRUPO}" height="${ALT_GRUPO}" rx="8" fill="${css("--surface")}" stroke="${css("--accent")}" stroke-width="1.5"/>
+        <text x="10" y="22" font-size="13" font-weight="650" fill="${css("--ink")}">${g.nome}</text>
+        <text x="10" y="40" font-size="10" fill="${css("--muted")}">${sub}</text>
       </g>`;
     })
     .join("");
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="group" aria-label="Pipeline do moradinha, da coleta à exportação">${linhas}${caixas}</svg>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="group" aria-label="Pipeline do moradinha por etapa do método, da coleta à exportação">${linhas}${caixas}</svg>
+    <div id="met-pipeline-expandido"></div>`;
+
+  function expandirGrupo(nomeGrupo) {
+    const idx = nomesPresentes.indexOf(nomeGrupo);
+    if (idx === -1) return;
+    grupoAtualIdx = idx;
+    el.querySelectorAll(".no-pipeline").forEach((n) => n.setAttribute("aria-expanded", String(n.dataset.grupo === nomeGrupo)));
+
+    const grupo = grupos[idx];
+    const expandidoEl = $("met-pipeline-expandido");
+    if (grupo.nome === "Exportação" && grupo.etapas.length === 1 && grupo.etapas[0].id === ID_NO_EXPORTACAO) {
+      const n = grupo.etapas[0];
+      expandidoEl.innerHTML = `<div class="pergunta-bloco"><h4>${n.nome}</h4><div class="significado">${n.descricao}</div></div>`;
+    } else {
+      const sub = pipelineDoGrupo(pipeline, grupo);
+      const { nos, arestas } = camadasPipeline(sub);
+      const { W: We, H: He, linhas: linhasE } = montarSvgCaixas(nos, arestas);
+      const caixasE = nos
+        .map((n) => {
+          const x = n.camada * (LARGURA_NO + ESPACO_X);
+          const y = n.posicao * (ALTURA_NO + ESPACO_Y);
+          const dataCommit = `${n.commit.slice(0, 7)} · ${n.data}`;
+          return `<g transform="translate(${x},${y})"><rect width="${LARGURA_NO}" height="${ALTURA_NO}" rx="8" fill="${css("--surface")}" stroke="${css("--line")}" stroke-width="1.2"/>
+            <title>${n.nome} — ${n.commit} · ${n.data}</title>
+            <text x="8" y="18" font-size="11" fill="${css("--ink")}">${n.nome.length > 28 ? n.nome.slice(0, 27) + "…" : n.nome}</text>
+            <text x="8" y="34" font-size="9" fill="${css("--muted")}">${dataCommit}</text>
+          </g>`;
+        })
+        .join("");
+      expandidoEl.innerHTML = `<div class="como-ler">Tabelas do grupo ${grupo.nome}, com as ligações entre elas.</div>
+        <svg viewBox="0 0 ${We} ${He}" width="100%" height="${He}" role="group" aria-label="Tabelas do grupo ${grupo.nome}">${linhasE}${caixasE}</svg>`;
+    }
+
+    const textoId = GRUPO_PARA_TEXTO_ID[nomeGrupo];
+    const destino = $(`met-texto-${textoId}`);
+    const subEl = $(`met-sub-${textoId}`);
+    if (subEl) {
+      const descricoes = grupo.etapas
+        .filter((e) => e.id !== ID_NO_EXPORTACAO && e.descricao)
+        .map((e) => `<div>${e.nome}: ${e.descricao}</div>`)
+        .join("");
+      subEl.innerHTML = descricoes;
+    }
+    destino?.scrollIntoView({ behavior: "smooth", block: "start" });
+    destino?.focus();
+  }
 
   el.querySelectorAll(".no-pipeline").forEach((no) => {
-    const irParaTexto = () => {
-      const destino = $(`met-texto-${no.dataset.etapa}`);
-      destino?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-    no.addEventListener("click", irParaTexto);
+    const abrir = () => expandirGrupo(no.dataset.grupo);
+    no.addEventListener("click", abrir);
     no.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" || ev.key === " ") {
         ev.preventDefault();
-        irParaTexto();
+        abrir();
       }
     });
+  });
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+    if (grupoAtualIdx === -1) return;
+    const delta = ev.key === "ArrowRight" ? 1 : -1;
+    const proximo = Math.max(0, Math.min(nomesPresentes.length - 1, grupoAtualIdx + delta));
+    expandirGrupo(nomesPresentes[proximo]);
   });
 }
 
@@ -145,13 +230,15 @@ export async function iniciarMetodologia() {
 
   const catalogo = await carregarJSON(".", "catalogo.json");
   const { edicao } = escolherDominioEEdicao(catalogo);
-  const [manifesto, pipeline, modelo] = await Promise.all([
+  const [manifesto, pipeline, modelo, configTexto] = await Promise.all([
     carregarJSON(edicao.origem, "manifesto.json"),
     carregarJSON(edicao.origem, "pipeline.json"),
     carregarJSON(edicao.origem, "modelo.json"),
+    carregarTexto("textos/metodologia/grupos_pipeline.yml"),
   ]);
+  const config = analisarYamlSimples(configTexto);
 
-  renderizarPipeline(painel, pipeline);
+  renderizarPipeline(painel, pipeline, manifesto, config);
   renderizarParametros($("met-parametros"), manifesto);
   await renderizarRastreio($("met-rastreio"), manifesto, edicao.origem, __VERSAO_SITE__);
   renderizarInterna($("met-interna"), modelo);

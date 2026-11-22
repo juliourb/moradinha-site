@@ -96,3 +96,28 @@ test.describe("F3-6: página inteira, claro/escuro, axe", () => {
     });
   }
 });
+
+test.describe("F6.1-11: painel de vereditos (pacote real bd10cbd)", () => {
+  test("vereditos esperados; clicar numa célula abre a seção; as setas passam para a seguinte", async ({ page }) => {
+    await page.goto("/confiabilidade.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.waitForLoadState("networkidle");
+
+    const linhas = page.locator("#f3-grade-vereditos .grade-vereditos tbody tr");
+    const linha2 = linhas.nth(1); // pergunta 2
+    const celulas2 = linha2.locator(".vereditocel");
+    await expect(celulas2.nth(0).locator(".palavra")).toHaveText("sim");
+    await expect(celulas2.nth(1).locator(".palavra")).toHaveText("sim");
+    await expect(celulas2.nth(2).locator(".palavra")).toHaveText("não");
+
+    const linha3 = linhas.nth(2); // pergunta 3
+    for (const i of [0, 1, 2]) {
+      await expect(linha3.locator(".vereditocel").nth(i).locator(".palavra")).toHaveText("em parte");
+    }
+
+    await celulas2.nth(0).click();
+    await expect(page.locator("#f3-secao-modelo")).toBeFocused({ timeout: 3000 });
+
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#f3-secao-consistencia")).toBeFocused({ timeout: 3000 });
+  });
+});

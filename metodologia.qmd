@@ -12,38 +12,50 @@ Como o número nasce: o pipeline que gerou este pacote, os parâmetros do domín
 commit exato do moradinha e deste site.
 :::
 
+O moradinha usa a definição de déficit habitacional da Fundação João Pinheiro (habitação precária,
+coabitação e ônus excessivo com aluguel) e não a substitui. O que ele muda é a escala. O total que
+a PNADc permite afirmar para a região inteira é repartido em hexágonos de cerca de 0,7 km², com a
+incerteza declarada. Quanto déficit há só se diz para o domínio; o mapa diz onde ele está.
+
 ### O pipeline
 
-<div class="como-ler">Cada caixa é uma etapa, com o commit e a data da execução. Clique numa caixa
-(ou use Tab e Enter) para ir direto ao texto dela.</div>
+<div class="como-ler">Cada grupo é uma etapa do método, recolhida. Clique num grupo (ou use Tab e Enter) para
+expandir as tabelas dele e ir para o texto; as setas ← → passam para o grupo seguinte.</div>
 <div id="met-pipeline"></div>
 
-<section id="met-texto-coleta">
+<section id="met-texto-coleta" tabindex="-1">
 {{< include textos/metodologia/coleta.qmd >}}
+<div class="sub como-ler" id="met-sub-coleta"></div>
 </section>
 
-<section id="met-texto-grade">
+<section id="met-texto-grade" tabindex="-1">
 {{< include textos/metodologia/grade.qmd >}}
+<div class="sub como-ler" id="met-sub-grade"></div>
 </section>
 
-<section id="met-texto-classificacao">
+<section id="met-texto-classificacao" tabindex="-1">
 {{< include textos/metodologia/classificacao.qmd >}}
+<div class="sub como-ler" id="met-sub-classificacao"></div>
 </section>
 
-<section id="met-texto-treino">
+<section id="met-texto-treino" tabindex="-1">
 {{< include textos/metodologia/treino.qmd >}}
+<div class="sub como-ler" id="met-sub-treino"></div>
 </section>
 
-<section id="met-texto-montagem2022">
+<section id="met-texto-montagem2022" tabindex="-1">
 {{< include textos/metodologia/montagem2022.qmd >}}
+<div class="sub como-ler" id="met-sub-montagem2022"></div>
 </section>
 
-<section id="met-texto-anost">
+<section id="met-texto-anost" tabindex="-1">
 {{< include textos/metodologia/anost.qmd >}}
+<div class="sub como-ler" id="met-sub-anost"></div>
 </section>
 
-<section id="met-texto-exportacao">
+<section id="met-texto-exportacao" tabindex="-1">
 {{< include textos/metodologia/exportacao.qmd >}}
+<div class="sub como-ler" id="met-sub-exportacao"></div>
 </section>
 
 ### Parâmetros do domínio

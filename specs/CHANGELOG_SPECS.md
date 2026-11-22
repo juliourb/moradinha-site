@@ -1,5 +1,11 @@
 # Mudanças nas especificações
 
+## v1.6 (22/11/2026) — SPEC_F6: ajustes depois da revisão do pacote real
+- `specs/SPEC_F6_ajustes.md` (novo): ajustes pedidos por Julio depois de revisar `relatorios/F5.md`
+  e `PUBLICAR.md` com o pacote real `al_rm_maceio/69277fd` — e, já dentro da F6, com a edição
+  corrigida `al_rm_maceio/bd10cbd` (erro da ponte A1 corrigido). Contrato v1.1 sem mudança.
+- Não altera `contrato/v1/` nem `contrato/v1.1/`.
+
 ## v1.5 (22/11/2026) — complemento ao contrato v1.1: `fonte_estoque` pode ser "mista"
 - `fonte_estoque` (em `manifesto.periodos[]` e `hex_qualidade.fonte_estoque`) pode vir `"mista"` nos
   períodos do tipo `media` (já era o caso nos pacotes fictícios: `m2024`, `m2025`). Decisão de Julio:

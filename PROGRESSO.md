@@ -12,6 +12,7 @@ antes da F5).
 | F3 | concluída (6/6 validações verdes; contrato v1.1 e complemento `fonte_estoque` por decisão de Julio) | 2026-11-22 | ver `git log` |
 | F4 | concluída (6/6 validações verdes) | 2026-11-22 | ver `git log` |
 | F5 | implementada na branch `f5-publicacao`, não publicada; revisão de Julio pediu ajustes (F6, spec a chegar) | 2026-11-22 | ver `git log f5-publicacao` (não mesclada) |
+| F6.1 | concluída (pacote `bd10cbd`; conteúdo e leitura — números, escala de cores, explorador, Visão geral, Confiabilidade, Metodologia, dicas); suíte completa verde | 2026-11-22 | ver `git log f5-publicacao` (não mesclada) |
 
 ## Notas
 

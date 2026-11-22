@@ -2,7 +2,8 @@
 import * as d3 from "d3";
 import { formatar } from "../util/formato.js";
 import { rotuloMarca, rotuloFonteEstoque } from "../util/marcas.js";
-import { valorHex, brutoHex, faixaHex, incertezaHex, COMPONENTES_BASE } from "../dados/calculo.js";
+import { valorHex, brutoHex, faixaHex, incertezaHex, totalDoMapa, COMPONENTES_BASE } from "../dados/calculo.js";
+import { formatarPercentual } from "../util/formato.js";
 import { nivelIncerteza, nivelCvAp, nivelFracaoImputada } from "../util/limiares.js";
 
 const CLAB = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
@@ -81,7 +82,7 @@ function blocoQualidade(linha, estado) {
  * @param {Map} apMap
  * @param {object} manifesto
  */
-export function renderizarHexagono(el, estado, linhas, apMap, manifesto) {
+export function renderizarHexagono(el, estado, linhas, apMap, manifesto, totais) {
   const linha = estado.selecionado ? linhas.get(estado.selecionado) : null;
   if (!linha) {
     el.innerHTML = `<h2>Hexágono</h2><p class="empty">Clique num hexágono do mapa ou do ranking para ver a estimativa, a faixa, as marcas e a comparação com a amostra na AP.</p>`;
@@ -101,11 +102,22 @@ export function renderizarHexagono(el, estado, linhas, apMap, manifesto) {
   const ap = apMap.get(linha.apCod);
   const coab = ap?.componentes?.coabitacao;
 
+  // C6: peso do hexágono = absoluto do hexágono ÷ Σ absoluto do componente no período.
+  let pesoHtml = "";
+  if (totais) {
+    const brutoAtual = brutoHex(linha, estado.componente, estado.periodo);
+    const totalComponente = totalDoMapa(totais, estado.componente, estado.periodo);
+    if (brutoAtual != null && totalComponente?.total) {
+      const peso = (100 * brutoAtual) / totalComponente.total;
+      pesoHtml = `<dt>Peso no total do domínio</dt><dd>${formatarPercentual(peso, 2)}</dd>`;
+    }
+  }
+
   el.innerHTML = `<h2>Hexágono <span class="num" style="font-family:var(--body);font-size:12px;color:var(--muted)">${linha.h3}</span></h2>
    <div class="pills">${pills.join("")}</div>
    <dl class="num"><dt>Área de ponderação</dt><dd>${ap?.ap_nome ?? linha.apCod}</dd><dt>Município</dt><dd>${linha.municipioNome}</dd><dt>Domicílios em ${periodoRotulo}</dt><dd>${
     dom == null ? "sigilo" : formatar(dom, 1)
-  }</dd></dl>
+  }</dd>${pesoHtml}</dl>
    <div class="sub">Estimativa e faixa de 95% em ${periodoRotulo} (domicílios)</div>${COMPONENTES_BASE.map((c) => linhaComponente(linha, c, estado.periodo)).join("")}
    <div class="sub" style="margin-top:10px">${estado.componente === "total" ? "Total" : CLAB[estado.componente] ?? "Total"} ${estado.medida === "relativo" ? "relativo" : "absoluto"} no tempo</div>${sparkline(
     linha,

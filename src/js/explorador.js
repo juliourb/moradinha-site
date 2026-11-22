@@ -58,13 +58,15 @@ export async function iniciarExplorador() {
   const elementosMapa = {
     deckA: $("f1-deckA"), deckB: $("f1-deckB"), divider: $("f1-divider"),
     labA: $("f1-labA"), labB: $("f1-labB"), legend: $("f1-legend"),
-    basefail: $("f1-basefail"), layers: $("f1-layers"), mapboxEl: $("f1-mapbox"),
+    basefail: $("f1-basefail"), layers: $("f1-layers"), mapboxEl: $("f1-mapbox"), tooltip: $("f1-tooltip"),
     aoSelecionar: (h3) => loja.definir({ selecionado: h3 }),
+    aoMudarRelativoModo: (relativo_modo) => loja.definir({ relativo_modo }),
   };
   const mapa = criarMapa({
-    elementos: elementosMapa, manifesto, linhas, ap,
+    elementos: elementosMapa, manifesto, linhas, ap, totais,
     contornosAp: dados.contornosAp, contornosMunicipios: dados.contornosMunicipios, contornosFcu: dados.contornosFcu,
   });
+  window.__moradinhaMapas = mapa.instanciasMapLibre;
 
   const elementosResposta = { lab: $("f1-ans-lab"), big: $("f1-ans-big"), range: $("f1-ans-range"), pills: $("f1-ans-pills"), cards: $("f1-cards") };
   const elDetail = $("f1-detail");
@@ -104,7 +106,7 @@ export async function iniciarExplorador() {
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
     mapa.renderizarCamadasUI(estado, (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }));
     renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: null }));
-    renderizarHexagono(elDetail, estado, linhas, ap, manifesto);
+    renderizarHexagono(elDetail, estado, linhas, ap, manifesto, totais);
     renderizarGraficos(estado);
     salvarLocalStorage(estado);
   }

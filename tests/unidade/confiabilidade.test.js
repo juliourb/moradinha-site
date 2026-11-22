@@ -3,7 +3,7 @@
 // system via getComputedStyle(document.documentElement) (assets/css/tokens.css).
 import { describe, expect, it } from "vitest";
 import { blocoModelo, achadosPublicos, limiteEixoP99, BLOCOS_MODELO } from "../../src/js/dados/confiabilidade.js";
-import { montarModeloHtml, renderizarCurvas } from "../../src/js/confiabilidade.js";
+import { montarModeloHtml, renderizarCurvas, formatarImportancia } from "../../src/js/confiabilidade.js";
 
 const MODELO_BASE = {
   configuracao: "e3", usado: true, motivo: "",
@@ -93,5 +93,24 @@ describe("F3-5 (curvas): desvio nulo mostra a nota, sem inventar faixa", () => {
     const html = renderizarCurvas([{ variavel: "x", rotulo: "X", nivel: "n", escore: 0.5, desvio: 0.1 }], []);
     expect(html).not.toContain("faixa de oscilação não calculada nesta edição");
     expect(html).toContain("<svg");
+  });
+});
+
+describe("N14: importância em % da soma, sem arredondar para 0,00", () => {
+  it("valores pequenos não somem em 0,00 e abaixo de 0,1% mostram '< 0,1%'", () => {
+    expect(formatarImportancia(0.0001, 1)).toBe("< 0,1%");
+    expect(formatarImportancia(0.5, 1)).toBe("50,0%");
+  });
+
+  it("renderizarCurvas mostra a importância como percentual, não o valor cru", () => {
+    const html = renderizarCurvas(
+      [{ variavel: "x", rotulo: "X", nivel: "n", escore: 0.5, desvio: 0.1 }],
+      [
+        { variavel: "a", rotulo: "A", valor: 0.03464566672669605 },
+        { variavel: "b", rotulo: "B", valor: 0.00001 },
+      ]
+    );
+    expect(html).not.toContain("(0,00)");
+    expect(html).toContain("< 0,1%");
   });
 });

@@ -4,7 +4,7 @@
       "conjunto_id": "al_rm_maceio",
       "nome": "RM de Maceió",
       "edicoes": [
-        { "edicao": "69277fd", "origem": "pacotes/al_rm_maceio/69277fd", "padrao": true },
+        { "edicao": "bd10cbd", "origem": "pacotes/al_rm_maceio/bd10cbd", "padrao": true },
         { "edicao": "ficticio", "origem": "pacotes/al_rm_maceio/ficticio", "padrao": false, "teste_apenas": true }
       ]
     },

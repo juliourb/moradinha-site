@@ -32,6 +32,7 @@ title: ""
     <div class="divider" id="f1-divider" tabindex="0" role="slider" aria-label="Arrastar a cortina" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50"><button type="button" aria-label="Arrastar a cortina">↔</button></div>
     <div class="maplab" id="f1-labA"></div><div class="maplab" id="f1-labB"></div>
     <div class="legend" id="f1-legend"></div>
+    <div class="hex-tooltip" id="f1-tooltip" role="tooltip" hidden></div>
     <div class="attrib"><a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://openmaptiles.org">OpenMapTiles</a> · Dados © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a></div>
     <div class="basefail" id="f1-basefail">Mapa de fundo indisponível nesta sessão; o mapa segue sem base.</div>
     <div class="layers" role="group" aria-label="Camadas de contexto" id="f1-layers">
@@ -61,16 +62,16 @@ title: ""
     <button type="button" class="iconbtn" id="f1-dock-toggle" aria-expanded="true">Minimizar todos</button>
   </div>
   <div class="dock-body" id="f1-dock-body-deficit">
-    <article class="dcard" data-k="hist"><header><h3 title="Clique numa barra para destacar esses hexágonos no mapa">Distribuição nos hexágonos</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição">–</button></header><div class="body" id="f1-hist"></div></article>
-    <article class="dcard" data-k="rank"><header><h3>Os 5 hexágonos com mais déficit</h3><button type="button" class="iconbtn" aria-label="Minimizar ranking">–</button></header><div class="body"><table class="rank num" id="f1-rank"></table></div></article>
-    <article class="dcard" data-k="series"><header><h3 title="Ponto = total; barra = faixa de 95%; losango = média de 3 anos. Clique num período para levá-lo ao mapa.">Total do domínio no tempo</h3><button type="button" class="iconbtn" aria-label="Minimizar série">–</button></header><div class="body" id="f1-series"></div></article>
-    <article class="dcard" data-k="boxes"><header><h3 title="Caixa = p25–p75; traço = mediana; haste = p10–p90; só hexágonos acima de zero.">Distribuição por período</h3><button type="button" class="iconbtn" aria-label="Minimizar caixas">–</button></header><div class="body" id="f1-boxes"></div></article>
+    <article class="dcard" data-k="hist"><header><h3>Distribuição nos hexágonos</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição">–</button></header><div class="grafico-dica">Quantos hexágonos caem em cada faixa de valor. Clique numa barra para destacar esses hexágonos no mapa.</div><div class="body" id="f1-hist"></div></article>
+    <article class="dcard" data-k="rank"><header><h3>Os 5 hexágonos com mais déficit</h3><button type="button" class="iconbtn" aria-label="Minimizar ranking">–</button></header><div class="grafico-dica">Os cinco hexágonos com o maior valor na medida atual. Clique numa linha para ir até aquele hexágono no mapa.</div><div class="body"><table class="rank num" id="f1-rank"></table></div></article>
+    <article class="dcard" data-k="series"><header><h3>Total do domínio no tempo</h3><button type="button" class="iconbtn" aria-label="Minimizar série">–</button></header><div class="grafico-dica">Ponto = total; barra = faixa de 95%; losango = média de 3 anos. Clique num período para levá-lo ao mapa.</div><div class="body" id="f1-series"></div></article>
+    <article class="dcard" data-k="boxes"><header><h3>Distribuição por período</h3><button type="button" class="iconbtn" aria-label="Minimizar caixas">–</button></header><div class="grafico-dica">Caixa = p25–p75; traço = mediana; haste = p10–p90; só hexágonos acima de zero.</div><div class="body" id="f1-boxes"></div></article>
   </div>
   <div class="dock-body" id="f1-dock-body-qualidade" hidden>
-    <article class="dcard" data-k="qhist"><header><h3 title="Clique numa barra para destacar esses hexágonos no mapa">Distribuição da medida de qualidade</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição da qualidade">–</button></header><div class="body" id="f1-qhist"></div></article>
-    <article class="dcard" data-k="disp"><header><h3 title="Um ponto por hexágono. Quadrante sombreado: muito déficit e muita incerteza.">Déficit × incerteza</h3><button type="button" class="iconbtn" aria-label="Minimizar dispersão">–</button></header><div class="body" id="f1-disp"></div></article>
-    <article class="dcard" data-k="comp"><header><h3>Composição da qualidade por período</h3><button type="button" class="iconbtn" aria-label="Minimizar composição">–</button></header><div class="body" id="f1-comp"></div></article>
-    <article class="dcard" data-k="estoque"><header><h3 title="Estoque do período ÷ estoque de 2022, por hexágono.">Estoque ÷ 2022 por período</h3><button type="button" class="iconbtn" aria-label="Minimizar estoque">–</button></header><div class="body" id="f1-estoque"></div></article>
+    <article class="dcard" data-k="qhist"><header><h3>Distribuição da medida de qualidade</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição da qualidade">–</button></header><div class="grafico-dica">Quantos hexágonos caem em cada faixa da medida de qualidade escolhida. Clique numa barra para destacar esses hexágonos no mapa.</div><div class="body" id="f1-qhist"></div></article>
+    <article class="dcard" data-k="disp"><header><h3>Déficit × incerteza</h3><button type="button" class="iconbtn" aria-label="Minimizar dispersão">–</button></header><div class="grafico-dica">Um ponto por hexágono. Quadrante sombreado: muito déficit e muita incerteza.</div><div class="body" id="f1-disp"></div></article>
+    <article class="dcard" data-k="comp"><header><h3>Composição da qualidade por período</h3><button type="button" class="iconbtn" aria-label="Minimizar composição">–</button></header><div class="grafico-dica">Parte dos hexágonos em cada categoria de qualidade, por período.</div><div class="body" id="f1-comp"></div></article>
+    <article class="dcard" data-k="estoque"><header><h3>Estoque ÷ 2022 por período</h3><button type="button" class="iconbtn" aria-label="Minimizar estoque">–</button></header><div class="grafico-dica">Estoque do período ÷ estoque de 2022, por hexágono.</div><div class="body" id="f1-estoque"></div></article>
   </div>
 </section>
 </div>

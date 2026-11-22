@@ -1,0 +1,34 @@
+# Agrupa as etapas do pipeline.json nas 7 etapas do método (SPEC_F6 B4/N18).
+# Vale para todos os domínios (não é por pacote). O grupo padrão de cada
+# etapa vem do esquema da tabela que ela produz (antes do ponto em
+# `etapas[].saidas[]`); "excecoes" sobrepõe o padrão por nome de tabela
+# quando precisar. Tabela sem grupo aqui cai em "Outras" e é listada no
+# relatório da fase.
+
+ordem:
+  - Coleta
+  - Grade
+  - Classificação
+  - Treino
+  - Montagem 2022
+  - Anos t
+  - Exportação
+
+esquemas:
+  mor_coleta: Coleta
+  mor_ref: Grade
+  mor_classif: Classificação
+  mor_modelo: Treino
+  mor_alocacao: "Montagem 2022"
+  mor_diag: "Anos t"
+
+# Pacotes fictícios (testes automatizados): uma etapa só por grupo, saída
+# nomeada diretamente pelo grupo (sem esquema mor_*). Exceções por tabela.
+excecoes:
+  coleta.parquet: Coleta
+  grade.parquet: Grade
+  classificacao.parquet: "Classificação"
+  treino.parquet: Treino
+  montagem2022.parquet: "Montagem 2022"
+  anost.parquet: "Anos t"
+  exportacao.parquet: "Exportação"

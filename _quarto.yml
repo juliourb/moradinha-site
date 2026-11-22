@@ -11,6 +11,7 @@ project:
     - pacotes/
     - assets/js/duckdb/
     - assets/js/maplibre-gl-worker.mjs
+    - textos/metodologia/grupos_pipeline.yml
 
 bibliography: referencias.bib
 

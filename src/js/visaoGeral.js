@@ -5,12 +5,15 @@ import * as d3 from "d3";
 import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
 import {
   periodoRecenteAno, periodoRecenteMedia, componenteMaior, marcaMaisImportante,
-  dadosCartoesBI, marcasDoDominio, linhasParaCitar, NOME_COMPONENTE, CLAB,
+  dadosCartoesBI, marcasDoDominio, linhasParaCitar, fjpTresValores,
+  fraseRessalvaRelativo, fraseRuidoAnual, NOME_COMPONENTE, CLAB,
 } from "./dados/visaoGeral.js";
 import { rotuloMarca, classeMarca } from "./util/marcas.js";
+import { rotulo } from "./util/rotulos.js";
 import { formatar, formatarPercentual } from "./util/formato.js";
 import { prepararNavegacaoResultados } from "./estado/pergunta.js";
 import { criarMiniMapa } from "./mapa/index.js";
+import { renderizarPainelDetalhe, renderizarCurvaConcentracao } from "./graficos/deficit.js";
 
 const NOME_INDICADOR = {
   total: "Total", habitacao_precaria: "Habitação precária", coabitacao: "Coabitação",
@@ -78,28 +81,21 @@ function renderizarCartoes(el, manifesto, totais) {
   });
 }
 
-function dentroDaFaixa(publicado, reconstrucao, ep) {
-  if (publicado == null || reconstrucao == null || ep == null) return null;
-  const lo = reconstrucao - 1.96 * ep;
-  const hi = reconstrucao + 1.96 * ep;
-  return publicado >= lo && publicado <= hi;
-}
-
 function renderizarFjp(el, referenciaFjp) {
-  el.innerHTML = referenciaFjp
+  const itens = fjpTresValores(referenciaFjp);
+  const anoRef = itens[0]?.ano_ref;
+  el.innerHTML = `<h3>Comparação com a FJP${anoRef != null ? `, ${anoRef}` : ""}</h3>` + itens
     .map((item) => {
-      const dentro = dentroDaFaixa(item.fjp_publicado, item.reconstrucao_pnadc, item.reconstrucao_ep);
-      const faixaTxt =
-        item.reconstrucao_ep != null
-          ? `faixa de 95%: ${formatar(item.reconstrucao_pnadc - 1.96 * item.reconstrucao_ep, 1)} a ${formatar(item.reconstrucao_pnadc + 1.96 * item.reconstrucao_ep, 1)}${
-              dentro != null ? ` · o número da FJP cai ${dentro ? "dentro" : "fora"} da faixa da reconstrução` : ""
-            }`
-          : "";
+      const faixaTxt = item.faixa
+        ? `faixa de 95% da reconstrução: ${formatar(item.faixa.inf, 1)} a ${formatar(item.faixa.sup, 1)}${
+            item.dentro != null ? ` · o valor sem CadÚnico cai ${item.dentro ? "dentro" : "fora"} da faixa` : ""
+          }`
+        : "";
       const subcomponentes = (item.fjp_subcomponentes ?? [])
-        .map((s) => `<div class="fjp-sub">${s.nome}: ${formatar(s.valor, 0)}</div>`)
+        .map((s) => `<div class="fjp-sub">${rotulo(s.nome)}: ${formatar(s.valor, 0)}</div>`)
         .join("");
       return `<div class="fjp-linha">
-        <h3>${NOME_INDICADOR[item.indicador] ?? item.indicador}</h3>
+        <h4>${NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador)}</h4>
         <div class="fjp-colunas">
           <div class="fjp-col"><div class="k">FJP (publicado)</div>
             <div class="v ${item.fjp_publicado == null ? "a-preencher" : ""}" data-num="${item.fjp_publicado ?? ""}">${
@@ -108,12 +104,12 @@ function renderizarFjp(el, referenciaFjp) {
             ${subcomponentes}
             ${item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` · <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : ""}
           </div>
-          <div class="fjp-col"><div class="k">Reconstrução na PNADc</div>
-            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${formatar(item.reconstrucao_pnadc, 1)}</div>
-            <div class="fjp-sub">${faixaTxt}</div>
+          <div class="fjp-col"><div class="k">Parte do CadÚnico</div>
+            <div class="v" data-num="${item.cadUnico}">${formatar(item.cadUnico, 0)}</div>
           </div>
-          <div class="fjp-col"><div class="k">Total do mapa</div>
-            <div class="v" data-num="${item.mapa ?? ""}">${formatar(item.mapa, 1)}</div>
+          <div class="fjp-col"><div class="k">FJP sem CadÚnico</div>
+            <div class="v" data-num="${item.semCadUnico ?? ""}">${formatar(item.semCadUnico, 0)}</div>
+            <div class="fjp-sub">${faixaTxt}</div>
           </div>
         </div>
         <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
@@ -177,7 +173,8 @@ export async function iniciarVisaoGeral() {
     carregarPacoteCompleto(edicao.origem),
     carregarJSON(edicao.origem, "referencia_fjp.json"),
   ]);
-  const { manifesto, totais, linhas } = dados;
+  const { manifesto, totais, linhas, ap } = dados;
+  const linhasArr = [...linhas.values()];
 
   renderizarMensagem($("f2-mensagem"), manifesto, totais);
   renderizarCartoes($("f2-cartoes"), manifesto, totais);
@@ -185,7 +182,51 @@ export async function iniciarVisaoGeral() {
   renderizarMarcas($("f2-marcas"), totais);
   renderizarCitar($("f2-citar"), manifesto, totais);
 
-  const { periodoRecente } = criarMiniMapa({ container: $("f2-minimapa"), manifesto, linhas });
+  // A4: mini-mapa interativo (arrastar/zoom), com dica (A3) e clique que abre
+  // Resultados no mesmo hexágono, componente e período.
+  const { periodoRecente } = criarMiniMapa({
+    container: $("f2-minimapa"), manifesto, linhas, ap, totais,
+    tooltip: $("f2-minimapa-tooltip"),
+    aoClicarHexagono: (h3) => {
+      prepararNavegacaoResultados({ tema: "deficit", medida: "relativo", componente: "total", periodo: periodoRecente, selecionado: h3 });
+      window.location.href = "resultados.html";
+    },
+  });
   const periodo = manifesto.periodos.find((p) => p.id === periodoRecente);
   $("f2-minimapa-sub").textContent = `Déficit relativo total, ${periodo?.rotulo ?? periodoRecente}.`;
+
+  // Ressalva do relativo (SPEC_F6, Visão geral), para o período padrão (ano mais recente).
+  const anoRecente = periodoRecenteAno(manifesto);
+  $("f2-ressalva-relativo").textContent = fraseRessalvaRelativo(linhasArr, totais, "total", anoRecente.id);
+
+  // B3/B6: pop-up "Detalhes" (4 painéis + frase de ruído + curva de concentração).
+  const backdrop = $("f2-detalhes-backdrop");
+  let detalhesRenderizados = false;
+  function renderizarDetalhes() {
+    if (detalhesRenderizados) return;
+    detalhesRenderizados = true;
+    renderizarPainelDetalhe($("f2-det-total"), manifesto, totais, "total", "Total");
+    renderizarPainelDetalhe($("f2-det-coabitacao"), manifesto, totais, "coabitacao", "Coabitação");
+    renderizarPainelDetalhe($("f2-det-onus"), manifesto, totais, "onus", "Ônus");
+    renderizarPainelDetalhe($("f2-det-precariedade"), manifesto, totais, "precariedade", "Precariedade");
+    $("f2-det-frase-ruido").textContent = fraseRuidoAnual(manifesto, totais);
+    renderizarCurvaConcentracao($("f2-det-concentracao"), linhasArr, "total", anoRecente.id);
+  }
+  function abrirDetalhes() {
+    backdrop.removeAttribute("hidden");
+    renderizarDetalhes();
+    $("f2-detalhes-fechar").focus();
+  }
+  function fecharDetalhes() {
+    backdrop.setAttribute("hidden", "");
+    $("f2-detalhes-btn").focus();
+  }
+  $("f2-detalhes-btn").onclick = abrirDetalhes;
+  $("f2-detalhes-fechar").onclick = fecharDetalhes;
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) fecharDetalhes();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !backdrop.hasAttribute("hidden")) fecharDetalhes();
+  });
 }

@@ -1,5 +1,6 @@
 ## Exportação
 
-<span class="pill warn">rascunho</span>
-
-Monta o pacote de publicação: só os números do contrato, com manifesto, hashes e sem microdado.
+O pacote público leva só números agregados: nada de microdado, e a estimativa direta por área só
+aparece em áreas com pelo menos 30 domicílios na amostra. Cada arquivo tem a sua impressão digital
+(hash) no manifesto, o pacote é validado antes de sair, e a edição citada é o commit exato do
+código que o gerou.

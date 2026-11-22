@@ -1,6 +1,7 @@
 ## Anos t
 
-<span class="pill warn">rascunho</span>
-
-Projeta o estoque de domicílios para os anos seguintes a 2022, reestima o déficit e sua faixa, e
-calcula as médias de período [@souza2020mapbiomas; @ibge_pnadc].
+O estoque de domicílios de cada ano é atualizado pela variação das edificações (Open Buildings até
+2023) e da área urbanizada (MapBiomas depois), com o total ajustado ao da PNADc. As taxas de 2022
+são mantidas e os totais são recalibrados na PNADc do ano. A precariedade dos anos seguintes é
+provisória e sai sem faixa. As médias de três anos reduzem o ruído da amostra, e uma mudança entre
+anos só é afirmada quando passa de 1,96 erro padrão. [@souza2020mapbiomas; @ibge_pnadc]

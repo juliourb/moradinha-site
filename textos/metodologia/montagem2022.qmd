@@ -1,6 +1,7 @@
 ## Montagem 2022
 
-<span class="pill warn">rascunho</span>
-
-Compõe o total de 2022 por hexágono: taxa do modelo (ou da repartição simples), fator da AP (área
-de ponderação), calibração e faixa de incerteza, ancorados no Censo [@ibge_censo2022].
+A taxa de cada pedaço sai da soma das contribuições do modelo pelas proporções do setor, uma conta
+exata. Um fator por área de ponderação alinha o resultado à estimativa da amostra naquela área. Na
+coabitação e no ônus, o total é ajustado ao da PNADc; a precariedade de 2022 vem da amostra do
+Censo. A faixa de incerteza vem de 200 réplicas da PNADc. O ajuste ao total é uma conta de
+fechamento e não mede a qualidade do modelo. [@ibge_censo2022]

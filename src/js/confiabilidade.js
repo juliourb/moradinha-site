@@ -1,9 +1,16 @@
-// Composição da aba Confiabilidade (SPEC_F3).
+// Composição da aba Confiabilidade (SPEC_F3, restruturada pela SPEC_F6 §6).
 import * as d3 from "d3";
 import { carregarJSON, escolherDominioEEdicao } from "./dados/pacote.js";
-import { BLOCOS_MODELO, CLAB, blocoModelo, achadosPublicos, limiteEixoP99 } from "./dados/confiabilidade.js";
-import { rotuloMarca } from "./util/marcas.js";
+import {
+  BLOCOS_MODELO, CLAB, blocoModelo, achadosPublicos, limiteEixoP99,
+  veredictoPergunta1, veredictoPergunta2, veredictoPergunta3, veredictoPergunta4, matrizOqueFalta,
+} from "./dados/confiabilidade.js";
+import { fjpTresValores } from "./dados/visaoGeral.js";
+import { rotuloMarca, rotuloFonteEstoque } from "./util/marcas.js";
+import { rotulo } from "./util/rotulos.js";
 import { formatar, formatarPercentual } from "./util/formato.js";
+
+const NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habitação precária", coabitacao: "Coabitação", onus: "Ônus excessivo com aluguel", domicilios: "Domicílios" };
 
 function $(id) {
   return document.getElementById(id);
@@ -12,21 +19,15 @@ function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 
-function renderizarFontes(el, qualidade, manifesto) {
-  const fontes = qualidade.fontes?.[0];
-  if (!fontes) {
-    el.innerHTML = `<p class="empty">Sem dados de fonte.</p>`;
-    return;
-  }
+function renderizarFontes(el, manifesto) {
   el.innerHTML = `<div class="timeline-fontes">${manifesto.periodos
     .map((p) => {
-      const uso = fontes.uso_por_periodo?.[p.id] ?? "—";
-      const troca = p.marcas?.includes("fonte_estoque_diferente");
-      return `<span class="passo${troca ? " troca" : ""}" title="${p.rotulo}: ${uso}">${p.rotulo}: ${uso}</span>`;
+      const fonte = rotuloFonteEstoque(p.fonte_estoque);
+      const troca = p.marcas?.includes("fonte_estoque_diferente") || p.marcas?.includes("media_inclui_fonte_diferente");
+      const marcasTxt = (p.marcas ?? []).map((m) => rotuloMarca(m)).join("; ");
+      return `<span class="passo${troca ? " troca" : ""}" title="${p.rotulo}: ${fonte}${marcasTxt ? ` — ${marcasTxt}` : ""}">${p.rotulo}: ${fonte}</span>`;
     })
-    .join("")}</div><div class="sub" style="margin-top:6px">${fontes.variavel} — fonte: ${fontes.fonte}. ${(fontes.marcas ?? [])
-    .map((m) => rotuloMarca(m))
-    .join("; ")}</div>`;
+    .join("")}</div>`;
 }
 
 function renderizarSigilo(el, sigilo) {
@@ -59,8 +60,119 @@ function renderizarPonte(el, ponte) {
     .join("")}</tbody></table>`;
 }
 
-function renderizarLacunas(el, lacunas) {
-  el.innerHTML = lacunas.map((l) => `<li><b>${l.item}</b> — ${l.efeito}</li>`).join("");
+function renderizarCnefe(el, cnefe) {
+  if (!cnefe) {
+    el.innerHTML = `<p class="empty">Sem dado de CNEFE neste pacote.</p>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="cartao-f3"><div class="k">Endereços</div><div class="v" data-num="${cnefe.enderecos}">${formatar(cnefe.enderecos, 0)}</div></div>
+    <div class="cartao-f3"><div class="k">Hexágonos sem endereço</div><div class="v" data-num="${cnefe.hex_sem_endereco}">${formatar(cnefe.hex_sem_endereco, 0)}</div>
+      <div class="sub">${formatar(cnefe.domicilios_nesses_hex, 0)} domicílios nesses hexágonos</div></div>
+    <div class="cartao-f3"><div class="k">Correlação com o hexágono</div><div class="v" data-num="${cnefe.correlacao_hex}">${formatar(cnefe.correlacao_hex, 2)}</div></div>`;
+}
+
+/** FJP × moradinha (N8/N9), nos mesmos três valores da Visão geral, para a seção "Números de partida". */
+function renderizarFjpConfiabilidade(el, referenciaFjp) {
+  const itens = fjpTresValores(referenciaFjp ?? []);
+  if (!itens.length) {
+    el.innerHTML = `<p class="empty">Sem referência da FJP neste pacote.</p>`;
+    return;
+  }
+  const anoRef = itens[0]?.ano_ref;
+  el.innerHTML = `<p class="sub">Comparação com a FJP${anoRef != null ? `, ${anoRef}` : ""}.</p><table class="ponte"><thead><tr><th>Indicador</th><th>FJP publicado</th><th>Parte do CadÚnico</th><th>FJP sem CadÚnico</th><th>Cai na faixa de 95%?</th></tr></thead><tbody>${itens
+    .map(
+      (item) => `<tr>
+        <td>${NOME_INDICADOR_FJP[item.indicador] ?? rotulo(item.indicador)}</td>
+        <td data-num="${item.fjp_publicado ?? ""}">${item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)}</td>
+        <td data-num="${item.cadUnico}">${formatar(item.cadUnico, 0)}</td>
+        <td data-num="${item.semCadUnico ?? ""}">${formatar(item.semCadUnico, 0)}</td>
+        <td>${item.dentro == null ? "—" : item.dentro ? "dentro" : "fora"}</td>
+      </tr>`
+    )
+    .join("")}</tbody></table>`;
+}
+
+/** Matriz "o que falta" (N12): variável × período, em linguagem simples. */
+function renderizarOqueFalta(el, qualidade, manifesto) {
+  const matriz = matrizOqueFalta(qualidade, manifesto);
+  if (!matriz.length) {
+    el.innerHTML = `<p class="empty">Sem lacunas registradas neste pacote.</p>`;
+    return;
+  }
+  el.innerHTML = `<table class="grade-oquefalta"><thead><tr><th>Variável</th>${manifesto.periodos
+    .map((p) => `<th>${p.rotulo}</th>`)
+    .join("")}</tr></thead><tbody>${matriz
+    .map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c) => `<td>${c.uso}</td>`).join("")}</tr>`)
+    .join("")}</tbody></table>`;
+}
+
+const SECOES_VEREDITOS = ["f3-secao-dados", "f3-secao-modelo", "f3-secao-consistencia", "f3-secao-achados"];
+let secaoAtual = 0;
+
+function irParaSecao(indice) {
+  const i = Math.max(0, Math.min(SECOES_VEREDITOS.length - 1, indice));
+  secaoAtual = i;
+  const el = $(SECOES_VEREDITOS[i]);
+  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  el?.focus();
+}
+
+function classeVeredicto(v) {
+  if (v === "sim" || v === "bate") return "ok";
+  if (v === "em parte") return "warn";
+  if (v === "não" || v === "não bate") return "crit";
+  return "";
+}
+
+/** Painel de vereditos (B1): grade de perguntas × componentes, com número e navegação (SPEC_F6 §6). */
+function renderizarVereditos(el, { qualidade, referenciaFjp, modelo, manifesto, totais, achados }) {
+  const componentes = ["coabitacao", "onus", "precariedade"];
+  const linhas = [
+    { pergunta: "1. Os números de partida batem?", secaoIdx: 0, cels: componentes.map((c) => ({ c, ...veredictoPergunta1(qualidade, referenciaFjp, c) })), fmt: (n) => (n == null ? "—" : formatar(n, 2)) },
+    { pergunta: "2. O modelo põe o déficit no lugar certo?", secaoIdx: 1, cels: componentes.map((c) => ({ c, ...veredictoPergunta2(modelo[c]) })), fmt: (n) => (n == null ? "—" : formatarPercentual(n, 0)) },
+    { pergunta: "3. A série é comparável entre anos?", secaoIdx: 2, cels: componentes.map((c) => ({ c, ...veredictoPergunta3(manifesto, totais, c) })), fmt: (_n, cel) => (cel.marcados == null ? "—" : `${cel.marcados}/${cel.total}`) },
+  ];
+  const p4 = veredictoPergunta4(achados);
+
+  const linhasHtml = linhas
+    .map(
+      (l) => `<tr><th scope="row">${l.pergunta}</th>${l.cels
+        .map(
+          (cel) => `<td><button type="button" class="vereditocel ${classeVeredicto(cel.veredicto)}" data-secao="${l.secaoIdx}" ${
+            cel.usado === false && cel.motivo ? `title="Não adotado: ${cel.motivo}"` : ""
+          }>
+            <span class="palavra">${cel.veredicto ?? "—"}</span>
+            <span class="numero">${l.fmt(cel.numero, cel)}</span>
+          </button></td>`
+        )
+        .join("")}</tr>`
+    )
+    .join("");
+
+  el.innerHTML = `<table class="grade-vereditos"><thead><tr><th></th>${componentes.map((c) => `<th>${CLAB[c]}</th>`).join("")}</tr></thead>
+    <tbody>${linhasHtml}
+      <tr><th scope="row">4. O que ainda não sabemos</th><td colspan="${componentes.length}"><button type="button" class="vereditocel" data-secao="3"><span class="numero">${formatar(p4.numero, 0)} achados públicos</span></button></td></tr>
+    </tbody></table>`;
+
+  el.querySelectorAll("button[data-secao]").forEach((b) => {
+    b.onclick = () => irParaSecao(Number(b.dataset.secao));
+  });
+
+  return { veredictoPergunta1Cels: linhas[0].cels, veredictoPergunta2Cels: linhas[1].cels, veredictoPergunta3Cels: linhas[2].cels };
+}
+
+function ligarNavegacaoSecoes() {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") irParaSecao(secaoAtual + 1);
+    else if (e.key === "ArrowLeft") irParaSecao(secaoAtual - 1);
+  });
+}
+
+/** Frase-resposta de uma pergunta (topo de cada seção), a partir dos vereditos por componente. */
+function fraseResposta(cels, rotuloVerbo) {
+  const partes = cels.map((c) => `${CLAB[c.c]} ${c.veredicto ?? "—"}`);
+  return `${rotuloVerbo}: ${partes.join("; ")}.`;
 }
 
 function linhaPergunta(titulo, respostaHtml, significado, { recolhido = false } = {}) {
@@ -69,6 +181,40 @@ function linhaPergunta(titulo, respostaHtml, significado, { recolhido = false } 
     return `<details class="pergunta-bloco"><summary>${titulo}</summary>${corpo}</details>`;
   }
   return `<div class="pergunta-bloco"><h4>${titulo}</h4>${corpo}</div>`;
+}
+
+/** Calibração por decis (N15): gráfico previsto × observado com a diagonal. */
+export function renderizarCalibracaoDecis(decis) {
+  if (!decis?.length) return "";
+  const W = 180;
+  const H = 180;
+  const m = { l: 32, r: 8, t: 8, b: 24 };
+  const max = d3.max(decis, (d) => Math.max(d.previsto, d.observado)) || 1;
+  const x = d3.scaleLinear().domain([0, max * 1.05]).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([0, max * 1.05]).range([H - m.b, m.t]);
+  const pontos = decis
+    .map((d) => `<circle cx="${x(d.previsto)}" cy="${y(d.observado)}" r="3.5" fill="${css("--accent")}"><title>decil ${d.decil}: previsto ${formatar(d.previsto, 1)}, observado ${formatar(d.observado, 1)}</title></circle>`)
+    .join("");
+  const ticks = d3.ticks(0, max, 4);
+  const eixoY = ticks
+    .map((t) => `<text x="${m.l - 4}" y="${y(t)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t, 0)}</text>`)
+    .join("");
+  return `<div class="sub" style="margin-top:6px">Previsto × observado, por decil:</div><svg viewBox="0 0 ${W} ${H}" width="180" height="180" role="img" aria-label="Calibração por decis: previsto contra observado">
+    <line x1="${x(0)}" y1="${y(0)}" x2="${x(max)}" y2="${y(max)}" stroke="${css("--line")}" stroke-dasharray="3,3"/>
+    ${eixoY}
+    ${pontos}
+  </svg>`;
+}
+
+/** Viés com destaque (N15): pílula marcada para todo grupo fora de 0,90–1,10, inclusive municípios. */
+export function renderizarViesComDestaque(vies) {
+  if (!vies?.length) return "<span class='empty'>Sem grupos de viés registrados.</span>";
+  return vies
+    .map((v) => {
+      const fora = v.razao_somas < 0.9 || v.razao_somas > 1.1;
+      return `<span class="vies-pill${fora ? " fora" : ""}" title="${v.grupo_tipo}">${v.grupo}: ${formatar(v.razao_somas, 2)}</span>`;
+    })
+    .join(" ");
 }
 
 /** Monta o HTML dos blocos do modelo — função pura (testável sem DOM). */
@@ -81,10 +227,14 @@ export function montarModeloHtml(modeloComponenteBruto) {
 
   const ganhoResp = `razão ${formatar(m.ganho.razao, 2)} (IC ${formatar(m.ganho.ic?.[0], 2)}–${formatar(m.ganho.ic?.[1], 2)})`;
   const ordemResp = `Spearman modelo ${formatar(m.ordem.spearman_modelo, 2)} · linha de base ${formatar(m.ordem.spearman_base, 2)} · top 20% ${formatarPercentual(m.ordem.top20_modelo * 100, 0)}`;
-  const calibResp = `inclinação ${formatar(m.calibracao.inclinacao, 2)} (IC ${formatar(m.calibracao.ic_inclinacao?.[0], 2)}–${formatar(m.calibracao.ic_inclinacao?.[1], 2)})`;
-  const viesResp = (m.vies ?? []).map((v) => `${v.grupo} (${v.grupo_tipo}): ${formatar(v.razao_somas, 2)}`).join(" · ");
-  const curvasResp = renderizarCurvas(m.curvas, m.importancia);
-  const confiancaResp = `Moran dos resíduos I=${formatar(m.confianca.moran_residuos?.I, 2)} (p=${formatar(m.confianca.moran_residuos?.p, 2)}) · cobertura (d): modelo ${formatarPercentual(m.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m.confianca.cobertura_d?.base * 100, 0)}`;
+  const calibResp = `inclinação ${formatar(m.calibracao.inclinacao, 2)} (IC ${formatar(m.calibracao.ic_inclinacao?.[0], 2)}–${formatar(m.calibracao.ic_inclinacao?.[1], 2)})${renderizarCalibracaoDecis(m.calibracao.decis)}`;
+  const viesResp = renderizarViesComDestaque(m.vies);
+  // N15/B1: as curvas ficam recolhidas, sem as linhas cruas — só a nota e a importância (pendência F7).
+  const curvasResp = `<div class="sub">Os nomes das categorias entram na próxima edição (pendência F7).</div><div class="sub" style="margin-top:6px">Importância: ${formatarListaImportancia(m.importancia)}</div>`;
+  const dobrasResp = (m.confianca.dobras ?? [])
+    .map((d) => `dobra ${d.dobra}: erro ${formatar(d.razao_erro, 2)} · Spearman ${formatar(d.spearman, 2)}`)
+    .join(" · ");
+  const confiancaResp = `${dobrasResp ? `<div class="sub">${dobrasResp}</div>` : ""}Moran dos resíduos I=${formatar(m.confianca.moran_residuos?.I, 2)} (p=${formatar(m.confianca.moran_residuos?.p, 2)}) · cobertura (d): modelo ${formatarPercentual(m.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m.confianca.cobertura_d?.base * 100, 0)}`;
 
   const respostas = { ganho: ganhoResp, ordem: ordemResp, calibracao: calibResp, vies: viesResp, curvas: curvasResp, confianca: confiancaResp };
   return BLOCOS_MODELO.map((b) => linhaPergunta(b.titulo, respostas[b.chave], b.significado, { recolhido: b.recolhido })).join("");
@@ -113,7 +263,20 @@ export function renderizarCurvas(curvas, importancia) {
         semFaixa ? `<div class="sub">faixa de oscilação não calculada nesta edição</div>` : ""
       }`;
     })
-    .join("") + `<div class="sub" style="margin-top:6px">Importância: ${(importancia ?? []).map((i) => `${i.rotulo} (${formatar(i.valor, 2)})`).join(" · ")}</div>`;
+    .join("") + `<div class="sub" style="margin-top:6px">Importância: ${formatarListaImportancia(importancia)}</div>`;
+}
+
+/** Importância de cada termo em % da soma das importâncias do componente (N14). */
+export function formatarImportancia(valor, soma) {
+  if (valor == null || !soma) return formatar(null);
+  const pct = (100 * valor) / soma;
+  return pct < 0.1 ? "< 0,1%" : `${formatar(pct, 1)}%`;
+}
+
+function formatarListaImportancia(importancia) {
+  const lista = importancia ?? [];
+  const soma = lista.reduce((s, i) => s + (i.valor ?? 0), 0);
+  return lista.map((i) => `${i.rotulo} (${formatarImportancia(i.valor, soma)})`).join(" · ");
 }
 
 function renderizarHeatmap(el, spearman) {
@@ -131,17 +294,21 @@ function renderizarHeatmap(el, spearman) {
     .join("");
 }
 
+/** Razão do total por hexágono (ano ÷ 2022), com eixo e rótulos sem sobreposição (N16). */
 function renderizarRazoes(el, razoes) {
   const porComponente = d3.group(razoes, (r) => r.componente);
   el.innerHTML = [...porComponente.entries()]
     .map(([comp, linhas]) => {
       const limite = limiteEixoP99(linhas.flatMap((l) => [l.p95, l.razao_total]));
-      const W = 200;
-      const H = 90;
-      const m = { l: 28, r: 6, t: 6, b: 16 };
-      const x = d3.scaleBand().domain(linhas.map((l) => l.periodo)).range([m.l, W - m.r]).padding(0.3);
-      const y = d3.scaleLinear().domain([0, Math.max(limite * 1.1, 1)]).range([H - m.b, m.t]);
+      const W = 260;
+      const H = 120;
+      const m = { l: 34, r: 8, t: 6, b: 28 };
+      const x = d3.scaleBand().domain(linhas.map((l) => l.periodo)).range([m.l, W - m.r]).padding(0.35);
+      const y = d3.scaleLinear().domain([0, Math.max(limite * 1.1, 1)]).nice().range([H - m.b, m.t]);
+      const ticksY = d3.ticks(0, y.domain()[1], 4);
+      const eixoY = ticksY.map((t) => `<text x="${m.l - 4}" y="${y(t)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t, 1)}</text>`).join("");
       const svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Razão do total por hexágono, ${CLAB[comp]}">
+        ${eixoY}
         <line x1="${m.l}" x2="${W - m.r}" y1="${y(1)}" y2="${y(1)}" stroke="${css("--line")}" stroke-dasharray="2,3"/>
         ${linhas
           .map(
@@ -149,7 +316,7 @@ function renderizarRazoes(el, razoes) {
                 <circle cx="${x(l.periodo) + x.bandwidth() / 2}" cy="${y(Math.min(l.mediana, limite))}" r="3" fill="${css("--accent")}"><title>${l.periodo}: mediana ${formatar(l.mediana, 2)}, razão dos totais ${formatar(l.razao_total, 2)}, n=${l.n_hexagonos}</title></circle>`
           )
           .join("")}
-        ${linhas.map((l) => `<text x="${x(l.periodo) + x.bandwidth() / 2}" y="${H - 4}" text-anchor="middle" font-size="9">${l.periodo}</text>`).join("")}
+        ${linhas.map((l) => `<text x="${x(l.periodo) + x.bandwidth() / 2}" y="${H - 6}" text-anchor="middle" font-size="9">${l.periodo}</text>`).join("")}
       </svg>`;
       return `<div class="mini"><h4>${CLAB[comp] ?? comp}</h4>${svg}</div>`;
     })
@@ -173,22 +340,35 @@ export async function iniciarConfiabilidade() {
 
   const catalogo = await carregarJSON(".", "catalogo.json");
   const { edicao } = escolherDominioEEdicao(catalogo);
-  const [manifesto, qualidade, modelo, consistencia, achados] = await Promise.all([
+  const [manifesto, qualidade, modelo, consistencia, achados, totais, referenciaFjp] = await Promise.all([
     carregarJSON(edicao.origem, "manifesto.json"),
     carregarJSON(edicao.origem, "qualidade.json"),
     carregarJSON(edicao.origem, "modelo.json"),
     carregarJSON(edicao.origem, "consistencia.json"),
     carregarJSON(edicao.origem, "achados.json"),
+    carregarJSON(edicao.origem, "totais.json"),
+    carregarJSON(edicao.origem, "referencia_fjp.json"),
   ]);
 
-  renderizarFontes($("f3-fontes-timeline"), qualidade, manifesto);
-  renderizarSigilo($("f3-sigilo-cartoes"), qualidade.sigilo);
-  renderizarAps($("f3-aps-cartoes"), qualidade.aps);
+  renderizarFjpConfiabilidade($("f3-fjp"), referenciaFjp);
   renderizarPonte($("f3-ponte-tabela"), qualidade.ponte);
-  renderizarLacunas($("f3-lacunas"), qualidade.lacunas);
+  renderizarFontes($("f3-fontes-timeline"), manifesto);
+  renderizarSigilo($("f3-sigilo-cartoes"), qualidade.sigilo);
+  renderizarCnefe($("f3-cnefe-cartoes"), qualidade.cnefe);
+  renderizarAps($("f3-aps-cartoes"), qualidade.aps);
   renderizarHeatmap($("f3-heatmap"), consistencia.spearman);
   renderizarRazoes($("f3-razoes"), consistencia.razoes);
   renderizarAchados($("f3-achados"), achados);
+  renderizarOqueFalta($("f3-oquefalta"), qualidade, manifesto);
+
+  const { veredictoPergunta1Cels, veredictoPergunta2Cels, veredictoPergunta3Cels } = renderizarVereditos($("f3-grade-vereditos"), {
+    qualidade, referenciaFjp, modelo, manifesto, totais, achados,
+  });
+  $("f3-resposta-1").textContent = fraseResposta(veredictoPergunta1Cels, "Batem");
+  $("f3-resposta-2").textContent = fraseResposta(veredictoPergunta2Cels, "Lugar certo");
+  $("f3-resposta-3").textContent = fraseResposta(veredictoPergunta3Cels, "Comparável");
+  $("f3-resposta-4").textContent = `${veredictoPergunta4(achados).numero} achado(s) público(s) registrado(s).`;
+  ligarNavegacaoSecoes();
 
   const segComp = $("f3-seg-comp");
   function atualizarModelo(componente) {

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { estadoInicial, textoPergunta } from "../../src/js/estado/pergunta.js";
+// @vitest-environment jsdom
+import { describe, expect, it, beforeEach } from "vitest";
+import { estadoInicial, textoPergunta, salvarLocalStorage } from "../../src/js/estado/pergunta.js";
 
 const MANIFESTO = {
   periodos: [
@@ -14,6 +15,15 @@ const MANIFESTO = {
 };
 
 describe("estado/pergunta.js", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("N6: a cortina (comparar) nunca persiste — recarregar sempre volta desligada", () => {
+    const comCortina = { ...estadoInicial(MANIFESTO), comparar: "2022" };
+    salvarLocalStorage(comCortina);
+    const recarregado = estadoInicial(MANIFESTO);
+    expect(recarregado.comparar).toBeNull();
+  });
+
   it("estado inicial usa o 4º período (2025) e liga a camada de AP", () => {
     const estado = estadoInicial(MANIFESTO);
     expect(estado.periodo).toBe("2025");

@@ -87,6 +87,13 @@ export async function carregarBinario(origem, arquivo) {
   return resposta.arrayBuffer();
 }
 
+/** Texto cru de um arquivo do próprio site (não do pacote) — usado para `grupos_pipeline.yml` (SPEC_F6 B4). */
+export async function carregarTexto(caminho) {
+  const resposta = await fetch(caminho);
+  if (!resposta.ok) throw new Error(`${caminho}: HTTP ${resposta.status}`);
+  return resposta.text();
+}
+
 export function dividirCodigos(campo) {
   return campo ? String(campo).split(";").filter(Boolean) : [];
 }

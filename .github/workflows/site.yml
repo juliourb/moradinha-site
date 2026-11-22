@@ -28,7 +28,7 @@ jobs:
 
       - name: Validar os pacotes do catálogo (contrato v1 ou v1.1, conforme manifesto.contrato)
         run: |
-          npm run validar -- pacotes/al_rm_maceio/69277fd
+          npm run validar -- pacotes/al_rm_maceio/bd10cbd
           npm run validar -- pacotes/al_rm_maceio/ficticio
           npm run validar -- pacotes/teste_pequeno/ficticio
 

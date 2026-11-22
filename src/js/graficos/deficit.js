@@ -3,6 +3,7 @@
 import * as d3 from "d3";
 import { formatar, rotuloCurto } from "../util/formato.js";
 import { valorHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
+import { curvaConcentracao } from "../dados/visaoGeral.js";
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
@@ -130,6 +131,99 @@ export function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo)
     .attr("stroke", (d) => (d.id === estado.periodo ? css("--warn") : "none"))
     .attr("stroke-width", 3);
   g.append("title").text((d) => `${d.lab}: ${d.v == null ? "sem dado" : formatar(d.v, isRel ? 2 : 0)}${d.lo != null ? ` (${formatar(d.lo, isRel ? 2 : 0)} a ${formatar(d.hi, isRel ? 2 : 0)})` : " (sem faixa)"}`);
+  box.replaceChildren(svg.node());
+}
+
+/**
+ * Painel de um componente no pop-up "Detalhes" da Visão geral (SPEC_F6 B3):
+ * mesmo desenho da série por ano (ponto + faixa de 95%, 2023 marcado), mais
+ * uma linha tracejada na média de cada período "media" do manifesto.
+ */
+export function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo) {
+  const anos = manifesto.periodos.filter((p) => p.tipo === "ano");
+  const medias = manifesto.periodos.filter((p) => p.tipo === "media");
+  const pontoDe = (p) => {
+    const t = totalDoMapa(totais, componente, p.id);
+    return {
+      id: p.id, lab: p.rotulo, media: p.tipo === "media",
+      v: t ? t.total : null, lo: t?.ep != null ? t.total - 1.96 * t.ep : null, hi: t?.ep != null ? t.total + 1.96 * t.ep : null,
+      critico: p.marcas?.includes("fonte_estoque_diferente"),
+      semFaixaProvisoria: t?.marcas?.includes("precariedade_provisoria_sem_faixa") ?? false,
+    };
+  };
+  const anosPts = anos.map(pontoDe);
+  const mediaPts = medias.map(pontoDe);
+  const W = Math.max(220, box.clientWidth || 260);
+  const H = 128;
+  const m = { l: 44, r: 8, t: 8, b: 20 };
+  const x = d3.scalePoint().domain(anos.map((p) => p.id)).range([m.l, W - m.r]);
+  const maxV = d3.max([...anosPts, ...mediaPts], (d) => d.hi ?? d.v ?? 0) || 1;
+  const y = d3.scaleLinear().domain([0, maxV * 1.15]).nice().range([H - m.b, m.t]);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", `Série de ${rotulo}`);
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => formatar(v, 0)));
+  svg.append("g").selectAll("text").data(anos).join("text").attr("x", (p) => x(p.id)).attr("y", H - 4).attr("text-anchor", "middle").text((p) => rotuloCurto(p.rotulo));
+  svg.append("path").attr("d", d3.line().defined((d) => d.v != null).x((d) => x(d.id)).y((d) => y(d.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-width", 1.2);
+  // Médias de período: linha tracejada horizontal (referência de comparação).
+  svg
+    .append("g")
+    .selectAll("line")
+    .data(mediaPts.filter((d) => d.v != null))
+    .join("line")
+    .attr("x1", m.l)
+    .attr("x2", W - m.r)
+    .attr("y1", (d) => y(d.v))
+    .attr("y2", (d) => y(d.v))
+    .attr("stroke", css("--accent"))
+    .attr("stroke-width", 1.4)
+    .attr("stroke-dasharray", "4,3")
+    .append("title")
+    .text((d) => `${d.lab} (média): ${formatar(d.v, 0)}`);
+  const g = svg.append("g").selectAll("g").data(anosPts).join("g");
+  g.filter((d) => d.lo != null)
+    .append("line")
+    .attr("x1", (d) => x(d.id))
+    .attr("x2", (d) => x(d.id))
+    .attr("y1", (d) => y(d.lo))
+    .attr("y2", (d) => y(d.hi))
+    .attr("stroke", css("--ink"))
+    .attr("stroke-width", 2)
+    .attr("opacity", 0.8);
+  g.filter((d) => d.v != null)
+    .append("circle")
+    .attr("cx", (d) => x(d.id))
+    .attr("cy", (d) => y(d.v))
+    .attr("r", 4)
+    .attr("fill", (d) => (d.critico ? css("--crit") : css("--ink")));
+  g.append("title").text((d) => {
+    if (d.v == null) return `${d.lab}: sem dado`;
+    const base = `${d.lab}: ${formatar(d.v, 0)}`;
+    if (d.critico) return `${base} (estoque por fonte diferente — não comparar por hexágono)`;
+    if (d.semFaixaProvisoria) return `${base} (provisória, sem faixa)`;
+    return d.lo != null ? `${base} (faixa de 95%: ${formatar(d.lo, 0)} a ${formatar(d.hi, 0)})` : `${base} (sem faixa)`;
+  });
+  box.replaceChildren(svg.node());
+}
+
+/** Curva de concentração do pop-up "Detalhes" (SPEC_F6 B6). */
+export function renderizarCurvaConcentracao(box, linhasArr, componente, periodo) {
+  const conc = curvaConcentracao(linhasArr, componente, periodo);
+  const W = Math.max(260, box.clientWidth || 320);
+  const H = 140;
+  const m = { l: 40, r: 10, t: 8, b: 22 };
+  const x = d3.scaleLinear().domain([0, 100]).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([0, 100]).range([H - m.b, m.t]);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Curva de concentração do déficit");
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat((v) => `${v}%`));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => `${v}%`));
+  svg
+    .append("path")
+    .attr("d", d3.line().x((d) => x(d.pctHex)).y((d) => y(d.pctDeficitAcumulado))([{ pctHex: 0, pctDeficitAcumulado: 0 }, ...conc.pontos]))
+    .attr("fill", "none")
+    .attr("stroke", css("--accent"))
+    .attr("stroke-width", 2);
+  svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(50)).attr("y2", y(50)).attr("stroke", css("--line")).attr("stroke-dasharray", "3,3");
+  svg.append("circle").attr("cx", x(conc.pctHexMeio)).attr("cy", y(50)).attr("r", 4).attr("fill", css("--crit"))
+    .append("title").text(`${formatar(conc.pctHexMeio, 1)}% dos hexágonos somam metade do déficit`);
   box.replaceChildren(svg.node());
 }
 

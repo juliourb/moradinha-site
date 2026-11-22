@@ -10,6 +10,7 @@
 | SPEC_F3_confiabilidade.md | dados e qualidade, métricas do modelo com perguntas, consistência, achados |
 | SPEC_F4_metodologia.md | pipeline em grafo, textos, parâmetros, rastreio, seção interna |
 | SPEC_F5_dominios_publicacao.md | vários domínios, origem plugável, builds público e interno, publicação |
+| SPEC_F6_ajustes.md | ajustes pedidos por Julio depois da revisão do pacote real (números, escala de cores, explorador, Visão geral, Confiabilidade, Metodologia, acabamento) |
 
 Ordem: 00 → F0 → … → F5. O Claude Code avança sozinho quando todas as validações da fase passam; para nas paradas obrigatórias (F0: ativar o Pages; F5: publicação pública) ou após 2 rodadas de correção sem sucesso.
 
