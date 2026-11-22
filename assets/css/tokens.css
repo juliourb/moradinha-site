@@ -309,3 +309,41 @@ svg .axis path, svg .axis line { stroke: var(--line); }
 @media (max-width: 980px) { .dock-body { flex-direction: column; } .dcard.min { max-width: none; } }
 
 .quadrante-contagem { font-size: 11px; fill: var(--muted); }
+
+/* Visão geral (SPEC_F2) */
+.mensagem { font-family: var(--display); font-size: 18px; line-height: 1.5; margin: 0; }
+.cartoes-bi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+@media (max-width: 980px) { .cartoes-bi { grid-template-columns: repeat(2, 1fr); } }
+.cartao-bi {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px;
+  cursor: pointer; text-align: left; display: grid; gap: 4px; color: var(--ink) !important;
+}
+.cartao-bi:hover { border-color: var(--accent); }
+.cartao-bi .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.cartao-bi .v { font-family: var(--display); font-size: 22px; font-weight: 650; }
+.cartao-bi .r { font-size: 12px; color: var(--muted); }
+.cartao-bi .spark { margin-top: 2px; }
+.cartao-bi .pills { margin-top: 4px; }
+
+.grid-visaogeral { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; align-items: start; }
+@media (max-width: 980px) { .grid-visaogeral { grid-template-columns: 1fr; } }
+.minimapa { position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+
+.marca-grupo { margin-bottom: 10px; }
+.marca-grupo h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 4px; }
+.marca-item { font-size: 13px; margin: 4px 0; }
+
+.fjp-linha { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.fjp-linha:last-child { border-bottom: none; }
+.fjp-linha h3 { font-size: 14px; margin: 0 0 6px; }
+.fjp-colunas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 980px) { .fjp-colunas { grid-template-columns: 1fr; } }
+.fjp-col .k { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.fjp-col .v { font-size: 16px; font-weight: 650; }
+.fjp-col .v.a-preencher { color: var(--muted); font-weight: 400; font-style: italic; }
+.fjp-sub { font-size: 12px; color: var(--muted); }
+.nota-fixa { font-size: 12px; color: var(--muted); margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+
+table.citar { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--ink) !important; background: transparent !important; }
+table.citar th, table.citar td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); color: inherit !important; background: transparent !important; }
+table.citar td.num { text-align: right; }

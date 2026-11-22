@@ -508,12 +508,21 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
                 item["reconstrucao_ep"] = totais_reais[comp]["ep"][idx_2023]
             referencia_fjp_json.append(item)
     else:
+        # "total" vem preenchido de propósito (F2-2 testa os dois casos num pacote só:
+        # fjp_publicado nulo -> "a preencher"; preenchido -> número, fonte e link).
         referencia_fjp_json = [
+            {"indicador": "total", "ano_ref": 2023, "fjp_publicado": 1234.5,
+             "fjp_fonte": "Fonte fictícia de teste", "fjp_tabela": "Tabela 1", "fjp_pagina": "1",
+             "fjp_url": "https://example.org/fjp-teste",
+             "reconstrucao_pnadc": r(sum(totais_reais[c]["v"][1] for c in COMPONENTES), 1),
+             "reconstrucao_ep": None, "mapa": r(sum(totais_reais[c]["v"][1] for c in COMPONENTES), 1),
+             "explicacao": "Pacote de teste; indicador preenchido de propósito para testar o caso com número."},
+        ] + [
             {"indicador": indicador, "ano_ref": 2023, "fjp_publicado": None,
              "fjp_fonte": "a preencher", "fjp_tabela": "a preencher", "fjp_pagina": "a preencher",
              "reconstrucao_pnadc": None, "mapa": None,
              "explicacao": "Pacote de teste; sem referência da FJP."}
-            for indicador in ["total", "habitacao_precaria", "coabitacao", "onus", "domicilios"]
+            for indicador in ["habitacao_precaria", "coabitacao", "onus", "domicilios"]
         ]
 
     # achados.json

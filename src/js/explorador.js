@@ -2,7 +2,7 @@
 // cria o estado e liga mapa, resposta, painel do hexágono e gráficos.
 import { criarLoja } from "./estado/loja.js";
 import { estadoInicial, salvarLocalStorage } from "./estado/pergunta.js";
-import { carregarJSON, carregarPacoteCompleto } from "./dados/pacote.js";
+import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
 import { valorHex } from "./dados/calculo.js";
 import { valorMedidaQualidade, medidaConstante, TIPO_MEDIDA } from "./dados/qualidade.js";
 import { criarMapa } from "./mapa/index.js";
@@ -27,8 +27,7 @@ export async function iniciarExplorador() {
   if (!painel) return;
 
   const catalogo = await carregarJSON(".", "catalogo.json");
-  const dominio = catalogo.dominios[0];
-  const edicao = dominio.edicoes.find((e) => e.padrao) ?? dominio.edicoes[0];
+  const { edicao } = escolherDominioEEdicao(catalogo);
   const dados = await carregarPacoteCompleto(edicao.origem);
   const { manifesto, totais, linhas, ap } = dados;
   const linhasArr = [...linhas.values()];

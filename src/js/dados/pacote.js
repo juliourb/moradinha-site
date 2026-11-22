@@ -40,6 +40,19 @@ function conexao() {
   return conexaoPromessa;
 }
 
+/**
+ * Escolhe o domínio do catálogo: `?dominio=<conjunto_id>` na URL, se existir e
+ * for conhecido (útil para conferir um pacote específico, ex. nos testes);
+ * senão a edição padrão do primeiro domínio (SPEC_F5 trará o seletor de
+ * verdade, com vários domínios públicos).
+ */
+export function escolherDominioEEdicao(catalogo) {
+  const pedido = new URLSearchParams(window.location.search).get("dominio");
+  const dominio = catalogo.dominios.find((d) => d.conjunto_id === pedido) ?? catalogo.dominios[0];
+  const edicao = dominio.edicoes.find((e) => e.padrao) ?? dominio.edicoes[0];
+  return { dominio, edicao };
+}
+
 /** Roda uma consulta SQL e devolve um array de objetos simples. */
 export async function consultar(sql) {
   const conn = await conexao();

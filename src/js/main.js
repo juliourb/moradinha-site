@@ -1,8 +1,9 @@
 // Ponto de entrada do bundle (assets/js/moradinha.js). As células do Quarto só
 // importam e chamam estes módulos; nenhuma lógica de mapa ou gráfico fica
 // presa numa célula (SPEC_00 §2).
-import { carregarJSON } from "./dados/pacote.js";
+import { carregarJSON, escolherDominioEEdicao } from "./dados/pacote.js";
 import { iniciarExplorador } from "./explorador.js";
+import { iniciarVisaoGeral } from "./visaoGeral.js";
 
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -12,8 +13,7 @@ async function preencherCabecalho() {
 
   try {
     const catalogo = await (await fetch("catalogo.json")).json();
-    const dominio = catalogo.dominios[0];
-    const edicao = dominio.edicoes.find((e) => e.padrao) ?? dominio.edicoes[0];
+    const { dominio, edicao } = escolherDominioEEdicao(catalogo);
     const manifesto = await carregarJSON(edicao.origem, "manifesto.json");
 
     chipDominio.textContent = dominio.nome;
@@ -30,4 +30,8 @@ preencherCabecalho();
 iniciarExplorador().catch((erro) => {
   // eslint-disable-next-line no-console
   console.error("Falha ao iniciar o explorador:", erro);
+});
+iniciarVisaoGeral().catch((erro) => {
+  // eslint-disable-next-line no-console
+  console.error("Falha ao iniciar a visão geral:", erro);
 });

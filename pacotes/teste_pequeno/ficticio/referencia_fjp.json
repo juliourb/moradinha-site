@@ -2,13 +2,15 @@
   {
     "indicador": "total",
     "ano_ref": 2023,
-    "fjp_publicado": null,
-    "fjp_fonte": "a preencher",
-    "fjp_tabela": "a preencher",
-    "fjp_pagina": "a preencher",
-    "reconstrucao_pnadc": null,
-    "mapa": null,
-    "explicacao": "Pacote de teste; sem referência da FJP."
+    "fjp_publicado": 1234.5,
+    "fjp_fonte": "Fonte fictícia de teste",
+    "fjp_tabela": "Tabela 1",
+    "fjp_pagina": "1",
+    "fjp_url": "https://example.org/fjp-teste",
+    "reconstrucao_pnadc": 2339.5,
+    "reconstrucao_ep": null,
+    "mapa": 2339.5,
+    "explicacao": "Pacote de teste; indicador preenchido de propósito para testar o caso com número."
   },
   {
     "indicador": "habitacao_precaria",

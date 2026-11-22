@@ -31,3 +31,22 @@ export function listarMarcas(campoMarcas) {
   if (!campoMarcas) return [];
   return campoMarcas.split(";").filter(Boolean);
 }
+
+/** Cor semântica da pílula (SPEC_00 §7): aviso, crítico, informação. */
+export function classeMarca(codigo) {
+  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
+  if (codigo === "fonte_estoque_diferente") return "crit";
+  return "info";
+}
+
+/** Ordem de importância para "a marca mais importante" (SPEC_F2 item 1). */
+export const PRIORIDADE_MARCAS = Object.freeze([
+  "total_fragil",
+  "fonte_estoque_diferente",
+  "ap_ressalva",
+  "mudanca_no_ruido",
+  "media_inclui_fonte_diferente",
+  "precariedade_provisoria_sem_faixa",
+  "parcial_sigilo",
+  "sem_dado",
+]);

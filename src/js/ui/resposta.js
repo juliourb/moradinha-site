@@ -1,18 +1,12 @@
 // Resposta, faixa, pílulas de marca e cartões dos componentes (SPEC_F1 §4).
 import { formatar, formatarPercentual } from "../util/formato.js";
-import { rotuloMarca } from "../util/marcas.js";
+import { rotuloMarca, classeMarca } from "../util/marcas.js";
 import { totalDoMapa, domiciliosTotal, mudanca, COMPONENTES_BASE } from "../dados/calculo.js";
 
 const CLAB = { total: "Total", coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
 
 function pill(classe, texto) {
   return `<span class="pill ${classe}">${texto}</span>`;
-}
-
-function classeMarca(codigo) {
-  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
-  if (codigo === "fonte_estoque_diferente") return "crit";
-  return "info";
 }
 
 /**

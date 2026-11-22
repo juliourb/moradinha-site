@@ -4,6 +4,10 @@ export default defineConfig({
   testDir: "tests/e2e",
   timeout: 30000,
   fullyParallel: false,
+  // Um worker só: várias páginas carregando DuckDB-WASM/deck.gl/MapLibre ao
+  // mesmo tempo disputam CPU e derrubavam o tempo de carregamento para além
+  // do timeout dos testes (flakiness só em suíte cheia, não isolado).
+  workers: 1,
   reporter: [["list"]],
   use: {
     baseURL: "http://localhost:4173",

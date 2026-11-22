@@ -4,17 +4,44 @@ title: ""
 
 {{< include textos/_cabecalho.qmd >}}
 
-::: panel
-## Visão geral
+```{=html}
+<div id="pane-visaogeral">
 
-::: sub
-Em construção (SPEC_F2). Vai trazer:
-:::
+<div class="panel" id="f2-mensagem-painel">
+  <p class="mensagem" id="f2-mensagem"></p>
+</div>
 
-- Mensagem principal do domínio, com o déficit absoluto e relativo por componente.
-- Cartões por componente (coabitação, ônus excessivo com aluguel, precariedade),
-  ano recente e média de 3 anos.
-- Comparação FJP × moradinha: número publicado pela FJP, reconstrução na PNADc
-  (Pesquisa Nacional por Amostra de Domicílios contínua) e total do mapa.
-- Marcas de cuidado em destaque e números para citar, com edição e hash.
-:::
+<div class="cartoes-bi" id="f2-cartoes"></div>
+
+<div class="grid-visaogeral">
+  <div class="panel">
+    <h2>Mapa do déficit relativo</h2>
+    <div class="sub" id="f2-minimapa-sub"></div>
+    <div class="minimapa" id="f2-minimapa"></div>
+    <a href="resultados.html" class="iconbtn" id="f2-link-explorar" style="display:inline-block;margin-top:8px">Explorar no mapa completo →</a>
+  </div>
+
+  <div class="panel">
+    <h2>Marcas de cuidado</h2>
+    <div class="sub">O que elas significam para quem lê o mapa.</div>
+    <div id="f2-marcas"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>FJP × moradinha</h2>
+  <div class="sub">Número publicado pela Fundação João Pinheiro (FJP), reconstrução do moradinha na PNADc (Pesquisa Nacional por Amostra de Domicílios contínua) e total que o mapa mostra.</div>
+  <div id="f2-fjp"></div>
+  <p class="nota-fixa">Os totais do mapa seguem a métrica da FJP, mas não são o número da FJP: a coabitação é reconstruída a partir dos núcleos familiares, a precariedade de 2022 vem da amostra do Censo e os totais da RM (região metropolitana) têm o ruído da amostra da PNADc.</p>
+</div>
+
+<div class="panel">
+  <h2>Números para citar</h2>
+  <table class="citar" id="f2-citar">
+    <thead><tr><th>Indicador</th><th>Período</th><th>Valor</th><th>Edição</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+</div>
+```

@@ -12846,6 +12846,12 @@ function conexao() {
   }
   return conexaoPromessa;
 }
+function escolherDominioEEdicao(catalogo) {
+  const pedido = new URLSearchParams(window.location.search).get("dominio");
+  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedido) ?? catalogo.dominios[0];
+  const edicao = dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
+  return { dominio, edicao };
+}
 async function consultar(sql) {
   const conn = await conexao();
   const tabela = await conn.query(sql);
@@ -13033,6 +13039,13 @@ function salvarLocalStorage(estado) {
   try {
     const { selecionado, faixa_hist, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
+  } catch {
+  }
+}
+function prepararNavegacaoResultados(parcial) {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(CHAVE_LOCALSTORAGE) ?? "{}");
+    localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify({ ...salvo, ...parcial }));
   } catch {
   }
 }
@@ -81220,7 +81233,7 @@ var libh3 = (function(libh32) {
         b11 = b11 | 0;
         T3 = a6;
       }
-      function $5(a6, c4) {
+      function $6(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         var d4 = 0, e68 = 0, f5 = 0;
@@ -93934,7 +93947,7 @@ var libh3 = (function(libh32) {
         _localIjToCell: Ic2,
         _malloc: Bd2,
         _maxFaceCount: Zb2,
-        _maxGridDiskSize: $5,
+        _maxGridDiskSize: $6,
         _maxPolygonToCellsSize: ha2,
         _maxPolygonToCellsSizeExperimental: Sc2,
         _memcpy: Ud2,
@@ -99984,6 +99997,65 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
     return baseFalhou;
   } };
 }
+function criarMiniMapa({ container, manifesto, linhas }) {
+  const linhasArr = [...linhas.values()];
+  const periodoRecente = [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano")?.id ?? manifesto.periodos.at(-1).id;
+  const mapa = new GF({
+    container,
+    style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+    center: manifesto.centro ?? [-35.715, -9.585],
+    zoom: Math.max((manifesto.zoom_inicial ?? 11) - 1.6, 0),
+    interactive: false,
+    attributionControl: false
+  });
+  const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
+  mapa.addControl(overlay);
+  function obterValor(l3) {
+    let soma = 0;
+    for (const c3 of ["coabitacao", "onus", "precariedade"]) {
+      const v4 = l3.hex[periodoRecente]?.[c3]?.absoluto;
+      if (v4 == null) return null;
+      soma += v4;
+    }
+    const dom = l3.dom[periodoRecente];
+    return dom != null && dom > 0.5 ? 100 * soma / dom : null;
+  }
+  function render() {
+    const vs8 = linhasArr.map(obterValor).filter((v4) => v4 != null && v4 > 0).sort(ascending);
+    const breaks = vs8.length ? [1, 2, 3, 4, 5, 6].map((i3) => quantileSorted(vs8, i3 / 7)) : [];
+    function cor(l3) {
+      const v4 = obterValor(l3);
+      if (v4 == null || v4 <= 0) return [...rgb3(css("--line")), 70];
+      let i3 = 0;
+      while (i3 < breaks.length && v4 > breaks[i3]) i3++;
+      return [...rgb3(RAMPA_DEFICIT[Math.min(i3, RAMPA_DEFICIT.length - 1)]), 215];
+    }
+    overlay.setProps({
+      layers: [
+        new h3_hexagon_layer_default({
+          id: "mini-hex",
+          data: linhasArr,
+          getHexagon: (l3) => l3.h3,
+          getFillColor: cor,
+          extruded: false,
+          highPrecision: true,
+          stroked: false,
+          updateTriggers: { getFillColor: [periodoRecente] }
+        })
+      ]
+    });
+  }
+  mapa.on("load", render);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
+    mapa.once("styledata", render);
+  });
+  new MutationObserver(() => {
+    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
+    mapa.once("styledata", render);
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return { periodoRecente };
+}
 
 // src/js/ui/pergunta.js
 var ROTULO_MEDIDA_QUALIDADE = {
@@ -100064,16 +100136,26 @@ function rotuloMarca(codigo) {
   }
   return MARCAS[codigo];
 }
+function classeMarca(codigo) {
+  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
+  if (codigo === "fonte_estoque_diferente") return "crit";
+  return "info";
+}
+var PRIORIDADE_MARCAS = Object.freeze([
+  "total_fragil",
+  "fonte_estoque_diferente",
+  "ap_ressalva",
+  "mudanca_no_ruido",
+  "media_inclui_fonte_diferente",
+  "precariedade_provisoria_sem_faixa",
+  "parcial_sigilo",
+  "sem_dado"
+]);
 
 // src/js/ui/resposta.js
 var CLAB = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 function pill(classe, texto) {
   return `<span class="pill ${classe}">${texto}</span>`;
-}
-function classeMarca(codigo) {
-  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
-  if (codigo === "fonte_estoque_diferente") return "crit";
-  return "info";
 }
 function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao) {
   const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
@@ -100488,8 +100570,7 @@ async function iniciarExplorador() {
   const painel = $4("pane-resultados");
   if (!painel) return;
   const catalogo = await carregarJSON(".", "catalogo.json");
-  const dominio = catalogo.dominios[0];
-  const edicao = dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
+  const { edicao } = escolherDominioEEdicao(catalogo);
   const dados = await carregarPacoteCompleto(edicao.origem);
   const { manifesto, totais, linhas, ap: ap2 } = dados;
   const linhasArr = [...linhas.values()];
@@ -100635,6 +100716,236 @@ async function iniciarExplorador() {
   renderTudo(loja.obter());
 }
 
+// src/js/dados/visaoGeral.js
+var NOME_COMPONENTE2 = { total: "total", coabitacao: "coabita\xE7\xE3o", onus: "\xF4nus", precariedade: "precariedade" };
+var CLAB4 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function periodoRecenteAno(manifesto) {
+  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano") ?? manifesto.periodos.at(-1);
+}
+function periodoRecenteMedia(manifesto) {
+  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "media") ?? null;
+}
+function componenteMaior(totais, periodoId) {
+  let maior = null;
+  for (const c3 of COMPONENTES_BASE) {
+    const t4 = totalDoMapa(totais, c3, periodoId);
+    if (t4 && (!maior || t4.total > maior.total)) maior = { componente: c3, total: t4.total };
+  }
+  return maior?.componente ?? null;
+}
+function marcaMaisImportante(totais, periodoId) {
+  for (const codigo of PRIORIDADE_MARCAS) {
+    for (const c3 of COMPONENTES_BASE) {
+      const t4 = totalDoMapa(totais, c3, periodoId);
+      if (t4?.marcas?.includes(codigo)) {
+        return { componente: c3, codigo };
+      }
+    }
+  }
+  return null;
+}
+function dadosCartoesBI(manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const anosTipo = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const dom = domiciliosTotal(totais, ano.id);
+  const domMedia = media ? domiciliosTotal(totais, media.id) : null;
+  return ["total", ...COMPONENTES_BASE].map((componente) => {
+    const tAno = totalDoMapa(totais, componente, ano.id);
+    const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
+    const serie = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id)?.total ?? null);
+    return {
+      componente,
+      rotulo: CLAB4[componente],
+      absolutoAno: tAno?.total ?? null,
+      relativoAno: tAno && dom ? 100 * tAno.total / dom : null,
+      absolutoMedia: tMedia?.total ?? null,
+      relativoMedia: tMedia && domMedia ? 100 * tMedia.total / domMedia : null,
+      marcas: tAno?.marcas ?? [],
+      serie,
+      anos: anosTipo.map((p4) => p4.rotulo),
+      periodoAno: ano.id,
+      periodoMedia: media?.id ?? null
+    };
+  });
+}
+function marcasDoDominio(totais) {
+  const vistas = /* @__PURE__ */ new Map();
+  const registrar = (codigo, componente) => {
+    if (!vistas.has(codigo)) vistas.set(codigo, /* @__PURE__ */ new Set());
+    vistas.get(codigo).add(componente);
+  };
+  for (const t4 of totais.totais) for (const m4 of t4.marcas ?? []) registrar(m4, t4.componente);
+  for (const mu2 of totais.mudancas ?? []) for (const m4 of mu2.marcas ?? []) registrar(m4, mu2.componente);
+  return [...vistas.entries()].map(([codigo, componentes]) => ({ codigo, componentes: [...componentes] }));
+}
+function linhasParaCitar(manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const data = manifesto.data_execucao.slice(0, 10).split("-").reverse().join("/");
+  const linhas = [];
+  for (const periodo of [ano, media].filter(Boolean)) {
+    for (const componente of ["total", ...COMPONENTES_BASE]) {
+      const t4 = totalDoMapa(totais, componente, periodo.id);
+      if (!t4) continue;
+      const rotulo = componente === "total" ? "D\xE9ficit total" : `D\xE9ficit de ${NOME_COMPONENTE2[componente]}`;
+      linhas.push({
+        componente,
+        periodo: periodo.id,
+        periodoRotulo: periodo.rotulo,
+        total: t4.total,
+        ep: t4.ep,
+        texto: `${rotulo}, ${manifesto.nome}, ${periodo.rotulo}: ${Math.round(t4.total).toLocaleString("pt-BR")} domic\xEDlios (moradinha, edi\xE7\xE3o ${manifesto.edicao}, ${data}).`
+      });
+    }
+  }
+  return linhas;
+}
+
+// src/js/visaoGeral.js
+var NOME_INDICADOR = {
+  total: "Total",
+  habitacao_precaria: "Habita\xE7\xE3o prec\xE1ria",
+  coabitacao: "Coabita\xE7\xE3o",
+  onus: "\xD4nus excessivo com aluguel",
+  domicilios: "Domic\xEDlios"
+};
+var GRAVIDADE_ORDEM = ["crit", "warn", "info"];
+var NOME_GRAVIDADE = { crit: "Cr\xEDtico", warn: "Aten\xE7\xE3o", info: "Informativo" };
+function $5(id3) {
+  return document.getElementById(id3);
+}
+function css5(nome) {
+  return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+}
+function sparkline2(serie) {
+  const ok2 = serie.filter((v4) => v4 != null);
+  if (!ok2.length) return "";
+  const W4 = 120;
+  const H4 = 32;
+  const x5 = point().domain(serie.map((_v3, i3) => i3)).range([4, W4 - 4]);
+  const y5 = linear2().domain([0, max4(ok2) * 1.15 || 1]).range([H4 - 4, 4]);
+  const linha = line().defined((v4) => v4 != null).x((_v3, i3) => x5(i3)).y((v4) => y5(v4));
+  return `<svg class="spark" viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="S\xE9rie de anos"><path d="${linha(serie)}" fill="none" stroke="${css5("--accent")}" stroke-width="1.6"/></svg>`;
+}
+function renderizarMensagem(el2, manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const cartoes = dadosCartoesBI(manifesto, totais);
+  const total = cartoes.find((c3) => c3.componente === "total");
+  const maior = componenteMaior(totais, ano.id);
+  const marca = marcaMaisImportante(totais, ano.id);
+  const linha1 = `O d\xE9ficit habitacional total na ${manifesto.nome} \xE9 de <b data-num="${total.absolutoAno}">${formatar(total.absolutoAno, 0)}</b> domic\xEDlios (<span data-num="${total.relativoAno}">${formatarPercentual(total.relativoAno, 2)}</span>) em ${ano.rotulo}${media ? `, e de ${formatar(total.absolutoMedia, 0)} (${formatarPercentual(total.relativoMedia, 2)}) na ${media.rotulo.toLowerCase()}` : ""}.`;
+  const linha2 = maior ? `O maior componente \xE9 ${NOME_COMPONENTE2[maior]}.` : "";
+  const linha3 = marca ? `${CLAB4[marca.componente]} com ${rotuloMarca(marca.codigo).toLowerCase()}.` : "";
+  el2.innerHTML = [linha1, linha2, linha3].filter(Boolean).join("<br>");
+}
+function renderizarCartoes(el2, manifesto, totais) {
+  const cartoes = dadosCartoesBI(manifesto, totais);
+  el2.innerHTML = cartoes.map(
+    (c3) => `<button type="button" class="cartao-bi" data-componente="${c3.componente}">
+        <span class="k">${c3.rotulo}</span>
+        <span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
+        <span class="r" data-num="${c3.relativoAno ?? ""}">${formatarPercentual(c3.relativoAno, 2)}</span>
+        ${sparkline2(c3.serie)}
+        <span class="pills">${(c3.marcas ?? []).map((m4) => `<span class="pill ${classeMarca(m4)}">${rotuloMarca(m4)}</span>`).join("")}</span>
+      </button>`
+  ).join("");
+  el2.querySelectorAll(".cartao-bi").forEach((b10) => {
+    b10.onclick = () => {
+      const componente = b10.dataset.componente;
+      const ano = periodoRecenteAno(manifesto);
+      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente, periodo: ano.id });
+      window.location.href = "resultados.html";
+    };
+  });
+}
+function dentroDaFaixa(publicado, reconstrucao, ep2) {
+  if (publicado == null || reconstrucao == null || ep2 == null) return null;
+  const lo2 = reconstrucao - 1.96 * ep2;
+  const hi2 = reconstrucao + 1.96 * ep2;
+  return publicado >= lo2 && publicado <= hi2;
+}
+function renderizarFjp(el2, referenciaFjp) {
+  el2.innerHTML = referenciaFjp.map((item) => {
+    const dentro = dentroDaFaixa(item.fjp_publicado, item.reconstrucao_pnadc, item.reconstrucao_ep);
+    const faixaTxt = item.reconstrucao_ep != null ? `faixa de 95%: ${formatar(item.reconstrucao_pnadc - 1.96 * item.reconstrucao_ep, 1)} a ${formatar(item.reconstrucao_pnadc + 1.96 * item.reconstrucao_ep, 1)}${dentro != null ? ` \xB7 o n\xFAmero da FJP cai ${dentro ? "dentro" : "fora"} da faixa da reconstru\xE7\xE3o` : ""}` : "";
+    const subcomponentes = (item.fjp_subcomponentes ?? []).map((s4) => `<div class="fjp-sub">${s4.nome}: ${formatar(s4.valor, 0)}</div>`).join("");
+    return `<div class="fjp-linha">
+        <h3>${NOME_INDICADOR[item.indicador] ?? item.indicador}</h3>
+        <div class="fjp-colunas">
+          <div class="fjp-col"><div class="k">FJP (publicado)</div>
+            <div class="v ${item.fjp_publicado == null ? "a-preencher" : ""}" data-num="${item.fjp_publicado ?? ""}">${item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)}</div>
+            ${subcomponentes}
+            ${item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : ""}
+          </div>
+          <div class="fjp-col"><div class="k">Reconstru\xE7\xE3o na PNADc</div>
+            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${formatar(item.reconstrucao_pnadc, 1)}</div>
+            <div class="fjp-sub">${faixaTxt}</div>
+          </div>
+          <div class="fjp-col"><div class="k">Total do mapa</div>
+            <div class="v" data-num="${item.mapa ?? ""}">${formatar(item.mapa, 1)}</div>
+          </div>
+        </div>
+        <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
+      </div>`;
+  }).join("");
+}
+function renderizarMarcas(el2, totais) {
+  const marcas = marcasDoDominio(totais);
+  const grupos = /* @__PURE__ */ new Map();
+  for (const m4 of marcas) {
+    const grav = classeMarca(m4.codigo);
+    if (!grupos.has(grav)) grupos.set(grav, []);
+    grupos.get(grav).push(m4);
+  }
+  el2.innerHTML = GRAVIDADE_ORDEM.filter((g4) => grupos.has(g4)).map(
+    (g4) => `<div class="marca-grupo"><h3>${NOME_GRAVIDADE[g4]}</h3>${grupos.get(g4).map((m4) => `<div class="marca-item"><span class="pill ${g4}">${rotuloMarca(m4.codigo)}</span> \u2014 ${m4.componentes.map((c3) => CLAB4[c3] ?? c3).join(", ")}</div>`).join("")}</div>`
+  ).join("");
+}
+function renderizarCitar(el2, manifesto, totais) {
+  const linhas = linhasParaCitar(manifesto, totais);
+  el2.querySelector("tbody").innerHTML = linhas.map(
+    (l3, i3) => `<tr>
+        <td>${l3.componente === "total" ? "D\xE9ficit total" : `D\xE9ficit de ${NOME_COMPONENTE2[l3.componente]}`}</td>
+        <td>${l3.periodoRotulo}</td>
+        <td class="num" data-num="${l3.total}">${formatar(l3.total, 0)} domic\xEDlios</td>
+        <td>${manifesto.edicao}</td>
+        <td><button type="button" class="iconbtn" data-i="${i3}">Copiar</button></td>
+      </tr>`
+  ).join("");
+  el2.querySelectorAll("button[data-i]").forEach((b10) => {
+    b10.onclick = async () => {
+      const texto = linhas[Number(b10.dataset.i)].texto;
+      try {
+        await navigator.clipboard.writeText(texto);
+        b10.textContent = "Copiado!";
+        setTimeout(() => b10.textContent = "Copiar", 1500);
+      } catch {
+      }
+    };
+  });
+}
+async function iniciarVisaoGeral() {
+  const painel = $5("pane-visaogeral");
+  if (!painel) return;
+  const catalogo = await carregarJSON(".", "catalogo.json");
+  const { edicao } = escolherDominioEEdicao(catalogo);
+  const [dados, referenciaFjp] = await Promise.all([
+    carregarPacoteCompleto(edicao.origem),
+    carregarJSON(edicao.origem, "referencia_fjp.json")
+  ]);
+  const { manifesto, totais, linhas } = dados;
+  renderizarMensagem($5("f2-mensagem"), manifesto, totais);
+  renderizarCartoes($5("f2-cartoes"), manifesto, totais);
+  renderizarFjp($5("f2-fjp"), referenciaFjp);
+  renderizarMarcas($5("f2-marcas"), totais);
+  renderizarCitar($5("f2-citar"), manifesto, totais);
+  const { periodoRecente } = criarMiniMapa({ container: $5("f2-minimapa"), manifesto, linhas });
+  const periodo = manifesto.periodos.find((p4) => p4.id === periodoRecente);
+  $5("f2-minimapa-sub").textContent = `D\xE9ficit relativo total, ${periodo?.rotulo ?? periodoRecente}.`;
+}
+
 // src/js/main.js
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -100643,8 +100954,7 @@ async function preencherCabecalho() {
   if (!chipDominio || !chipEdicao) return;
   try {
     const catalogo = await (await fetch("catalogo.json")).json();
-    const dominio = catalogo.dominios[0];
-    const edicao = dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
+    const { dominio, edicao } = escolherDominioEEdicao(catalogo);
     const manifesto = await carregarJSON(edicao.origem, "manifesto.json");
     chipDominio.textContent = dominio.nome;
     chipEdicao.textContent = `edi\xE7\xE3o ${manifesto.edicao} \xB7 ${manifesto.data_execucao.slice(0, 10)}`;
@@ -100657,6 +100967,9 @@ async function preencherCabecalho() {
 preencherCabecalho();
 iniciarExplorador().catch((erro) => {
   console.error("Falha ao iniciar o explorador:", erro);
+});
+iniciarVisaoGeral().catch((erro) => {
+  console.error("Falha ao iniciar a vis\xE3o geral:", erro);
 });
 /*! Bundled license information:
 

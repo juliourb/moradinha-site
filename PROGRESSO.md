@@ -8,8 +8,8 @@ antes da F5).
 |---|---|---|---|
 | F0 | concluída (Pages ativado, workflow verde, confirmado por Julio) | 2026-11-22 | `80e05a0` |
 | F1 | concluída (17/17 validações verdes; critério F1-5 ajustado para v1.3 por decisão de Julio) | 2026-11-22 | ver `git log` |
-| F2 | em andamento | 2026-11-22 | — |
-| F3 | pendente | — | — |
+| F2 | concluída (5/5 validações verdes) | 2026-11-22 | ver `git log` |
+| F3 | em andamento | 2026-11-22 | — |
 | F4 | pendente | — | — |
 | F5 | pendente | — | — |
 

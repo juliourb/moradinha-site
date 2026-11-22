@@ -333,3 +333,73 @@ export function criarMapa({ elementos, manifesto, linhas, ap, contornosAp, conto
 
   return { renderizar, renderizarCamadasUI, moverPara, agruparPorAp, get baseFalhou() { return baseFalhou; } };
 }
+
+/**
+ * Mini-mapa da Visão geral (SPEC_F2 §3): mesmo motor de cor/camada do
+ * explorador, sem cortina, sem camadas ligáveis e sem controles — só o
+ * déficit relativo total no período mais recente.
+ */
+export function criarMiniMapa({ container, manifesto, linhas }) {
+  const linhasArr = [...linhas.values()];
+  const periodoRecente = [...manifesto.periodos].reverse().find((p) => p.tipo === "ano")?.id ?? manifesto.periodos.at(-1).id;
+
+  const mapa = new MapaMapLibre({
+    container,
+    style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+    center: manifesto.centro ?? [-35.715, -9.585],
+    zoom: Math.max((manifesto.zoom_inicial ?? 11) - 1.6, 0),
+    interactive: false,
+    attributionControl: false,
+  });
+  const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
+  mapa.addControl(overlay);
+
+  function obterValor(l) {
+    let soma = 0;
+    for (const c of ["coabitacao", "onus", "precariedade"]) {
+      const v = l.hex[periodoRecente]?.[c]?.absoluto;
+      if (v == null) return null;
+      soma += v;
+    }
+    const dom = l.dom[periodoRecente];
+    return dom != null && dom > 0.5 ? (100 * soma) / dom : null;
+  }
+
+  function render() {
+    const vs = linhasArr.map(obterValor).filter((v) => v != null && v > 0).sort(ascending);
+    const breaks = vs.length ? [1, 2, 3, 4, 5, 6].map((i) => quantileSorted(vs, i / 7)) : [];
+    function cor(l) {
+      const v = obterValor(l);
+      if (v == null || v <= 0) return [...rgb(css("--line")), 70];
+      let i = 0;
+      while (i < breaks.length && v > breaks[i]) i++;
+      return [...rgb(RAMPA_DEFICIT[Math.min(i, RAMPA_DEFICIT.length - 1)]), 215];
+    }
+    overlay.setProps({
+      layers: [
+        new H3HexagonLayer({
+          id: "mini-hex",
+          data: linhasArr,
+          getHexagon: (l) => l.h3,
+          getFillColor: cor,
+          extruded: false,
+          highPrecision: true,
+          stroked: false,
+          updateTriggers: { getFillColor: [periodoRecente] },
+        }),
+      ],
+    });
+  }
+
+  mapa.on("load", render);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
+    mapa.once("styledata", render);
+  });
+  new MutationObserver(() => {
+    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
+    mapa.once("styledata", render);
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  return { periodoRecente };
+}

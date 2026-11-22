@@ -2,7 +2,7 @@
 // O hash da URL só guarda o nome da aba (cuidado do próprio Quarto); este
 // estado fica na memória e, opcionalmente, em localStorage.
 
-const CHAVE_LOCALSTORAGE = "moradinha.pergunta";
+export const CHAVE_LOCALSTORAGE = "moradinha.pergunta";
 
 export const COMPONENTES = ["total", "coabitacao", "onus", "precariedade"];
 export const NOME_COMPONENTE = {
@@ -60,6 +60,19 @@ export function salvarLocalStorage(estado) {
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
     // localStorage indisponível (modo privado, quota, etc.): segue sem persistir.
+  }
+}
+
+/**
+ * Grava um estado parcial da pergunta para a próxima vez que Resultados
+ * carregar (ex.: clique num cartão da Visão geral). SPEC_F2 item 2.
+ */
+export function prepararNavegacaoResultados(parcial) {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(CHAVE_LOCALSTORAGE) ?? "{}");
+    localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify({ ...salvo, ...parcial }));
+  } catch {
+    // localStorage indisponível: Resultados abre com o estado padrão.
   }
 }
 
