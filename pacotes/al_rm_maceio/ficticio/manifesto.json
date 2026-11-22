@@ -1,0 +1,121 @@
+{
+  "contrato": "1.0",
+  "conjunto_id": "al_rm_maceio",
+  "nome": "RM de Maceió",
+  "edicao": "c691276",
+  "commit_completo": "c691276e3743cfa5b5066614d467c2b41891cbee",
+  "data_execucao": "2026-11-22T00:00:00Z",
+  "publico": true,
+  "ficticio": true,
+  "h3_resolucao": 8,
+  "centro": [
+    -35.715,
+    -9.585
+  ],
+  "zoom_inicial": 11.1,
+  "contornos_tolerancia_m": 10,
+  "d17_conferido": true,
+  "periodos": [
+    {
+      "id": "2022",
+      "rotulo": "2022",
+      "tipo": "ano",
+      "anos": [
+        2022
+      ],
+      "fonte_estoque": "censo",
+      "marcas": []
+    },
+    {
+      "id": "2023",
+      "rotulo": "2023",
+      "tipo": "ano",
+      "anos": [
+        2023
+      ],
+      "fonte_estoque": "open_buildings",
+      "marcas": [
+        "fonte_estoque_diferente"
+      ]
+    },
+    {
+      "id": "2024",
+      "rotulo": "2024",
+      "tipo": "ano",
+      "anos": [
+        2024
+      ],
+      "fonte_estoque": "mapbiomas",
+      "marcas": []
+    },
+    {
+      "id": "2025",
+      "rotulo": "2025",
+      "tipo": "ano",
+      "anos": [
+        2025
+      ],
+      "fonte_estoque": "mapbiomas",
+      "marcas": []
+    },
+    {
+      "id": "m2024",
+      "rotulo": "Média 2022–24",
+      "tipo": "media",
+      "anos": [
+        2022,
+        2023,
+        2024
+      ],
+      "fonte_estoque": "mista",
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "id": "m2025",
+      "rotulo": "Média 2023–25",
+      "tipo": "media",
+      "anos": [
+        2023,
+        2024,
+        2025
+      ],
+      "fonte_estoque": "mista",
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    }
+  ],
+  "componentes": [
+    "coabitacao",
+    "onus",
+    "precariedade"
+  ],
+  "regime_mapa": "c",
+  "recortes": [
+    {
+      "id": "braskem",
+      "nome": "Área da Braskem",
+      "motivo": "Área de subsidência por mineração (reassentamento desde 2018); 99 setores no piloto",
+      "fonte": "Perímetro de risco da Defesa Civil de Maceió / Braskem (fictício neste pacote)"
+    }
+  ],
+  "arquivos": {
+    "achados.json": "7a59dec233660d436757594a578f8e700ea16a45cb738de50f6411135e2cd97e",
+    "ap.parquet": "95585fcc0fc1312732260c75491a51fe8907de24ba830c4aafaefaa9999d53f6",
+    "consistencia.json": "55030b689eda67deca2a4d852a14d17fa86d4cc5a973dd282d71e8f402a8b2a4",
+    "contornos/ap.geojson": "f7fc0045c1a7444150d5c0ad16ac6508f98f682dafc45ee461430c64740d9192",
+    "contornos/fcu.geojson": "c566ac16a0dac8411f9f395def39da2e81356f7161571447777db2ab02261919",
+    "contornos/municipios.geojson": "89a46567bb87512ffd2e6ffc09f45db4ceae6cf2782e32358178e7705eebf327",
+    "hex.parquet": "fddbdf4fac88289becc084cc598d0424a3062b9a2bc9a8ab33da583c9f729682",
+    "hex_atributos.parquet": "69a6b890c24b0b3a15af3387b0e940b3fb243b498f0c1eb55dd325dcd60d7cfe",
+    "hex_base.parquet": "7c8e98514bf9fa122f7f2f4e076ed096f4e8e84853fd4133e44262d4e52ad2e4",
+    "hex_qualidade.parquet": "7fab82320993f4b586f13ae4ca8f7d24e5e3888a7d0252ce89d2da9a9ccef566",
+    "modelo.json": "56a7541216d2f439494b68e0de7e7a76654fb893b1155a0db83b9a1c965811bf",
+    "pipeline.json": "4a90d30c597271db84ed0fdc02f08cb2436b28087ad01182bae2818a29809ee7",
+    "qualidade.json": "a14662557e48d71ddb0b03044a34fe0d6f280d248cf0fbd08a8e0728e78e877f",
+    "referencia_fjp.json": "29bc4030e5edbd30cc6488130c95c94ddaa9eac6c2621e6c0ae4de46664f2ebe",
+    "totais.json": "b76db999afce578ab5435a8b4e1f5201751069c342c6b956430243fea9647dbc"
+  }
+}

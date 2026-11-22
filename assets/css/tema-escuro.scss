@@ -1,0 +1,12 @@
+/*-- scss:defaults --*/
+$body-bg: #121718;
+$body-color: #e7ecea;
+$link-color: #6cc0c6;
+$navbar-bg: #1b2223;
+$navbar-fg: #e7ecea;
+$border-color: #2f393a;
+
+/*-- scss:rules --*/
+// Ver assets/css/tema-claro.scss: mesma lógica, para o modo escuro.
+.navbar { box-shadow: none; }
+.card, .panel { box-shadow: none; }

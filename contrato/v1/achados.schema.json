@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/achados.schema.json",
+  "title": "achados.json",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "data", "texto", "efeito", "situacao", "publico"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "type": "string" },
+      "data": { "type": "string", "format": "date" },
+      "texto": { "type": "string" },
+      "efeito": { "type": "string" },
+      "situacao": { "type": "string" },
+      "publico": { "type": "boolean" }
+    }
+  }
+}

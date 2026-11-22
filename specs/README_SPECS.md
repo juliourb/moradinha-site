@@ -2,6 +2,7 @@
 
 | arquivo | conteúdo |
 |---|---|
+| CHANGELOG_SPECS.md | o que mudou em cada versão |
 | SPEC_00_fundamentos.md | arquitetura, pilha, contrato do pacote v1, validador, design system, regras, protocolo das fases |
 | SPEC_F0_fundacao.md | repositório, contrato, validador, pacotes fictícios, CI |
 | SPEC_F1_resultados.md | explorador ligado (mapa, cortina, camadas, painel do hexágono, gráficos em carrossel) com tema de qualidade |

@@ -1,0 +1,57 @@
+[
+  {
+    "indicador": "total",
+    "ano_ref": 2023,
+    "fjp_publicado": null,
+    "fjp_fonte": "a preencher",
+    "fjp_tabela": "a preencher",
+    "fjp_pagina": "a preencher",
+    "reconstrucao_pnadc": null,
+    "mapa": null,
+    "explicacao": "Pacote de teste; sem referência da FJP."
+  },
+  {
+    "indicador": "habitacao_precaria",
+    "ano_ref": 2023,
+    "fjp_publicado": null,
+    "fjp_fonte": "a preencher",
+    "fjp_tabela": "a preencher",
+    "fjp_pagina": "a preencher",
+    "reconstrucao_pnadc": null,
+    "mapa": null,
+    "explicacao": "Pacote de teste; sem referência da FJP."
+  },
+  {
+    "indicador": "coabitacao",
+    "ano_ref": 2023,
+    "fjp_publicado": null,
+    "fjp_fonte": "a preencher",
+    "fjp_tabela": "a preencher",
+    "fjp_pagina": "a preencher",
+    "reconstrucao_pnadc": null,
+    "mapa": null,
+    "explicacao": "Pacote de teste; sem referência da FJP."
+  },
+  {
+    "indicador": "onus",
+    "ano_ref": 2023,
+    "fjp_publicado": null,
+    "fjp_fonte": "a preencher",
+    "fjp_tabela": "a preencher",
+    "fjp_pagina": "a preencher",
+    "reconstrucao_pnadc": null,
+    "mapa": null,
+    "explicacao": "Pacote de teste; sem referência da FJP."
+  },
+  {
+    "indicador": "domicilios",
+    "ano_ref": 2023,
+    "fjp_publicado": null,
+    "fjp_fonte": "a preencher",
+    "fjp_tabela": "a preencher",
+    "fjp_pagina": "a preencher",
+    "reconstrucao_pnadc": null,
+    "mapa": null,
+    "explicacao": "Pacote de teste; sem referência da FJP."
+  }
+]

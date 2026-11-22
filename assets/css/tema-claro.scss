@@ -1,0 +1,15 @@
+/*-- scss:defaults --*/
+$body-bg: #f4f5f2;
+$body-color: #1d2526;
+$link-color: #1f6f78;
+$navbar-bg: #ffffff;
+$navbar-fg: #1d2526;
+$border-color: #d9dedb;
+
+/*-- scss:rules --*/
+// A aparência fina (cores, tipografia) vem de assets/css/tokens.css,
+// que é a fonte única do design system (SPEC_00 §7). Este tema só
+// alinha as variáveis Sass do Bootstrap do Quarto para o modo claro
+// e desliga sombras/arredondamentos padrão que conflitam com o protótipo.
+.navbar { box-shadow: none; }
+.card, .panel { box-shadow: none; }

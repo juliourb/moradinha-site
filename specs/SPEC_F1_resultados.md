@@ -38,13 +38,15 @@ O explorador ligado: uma "pergunta" muda junto o mapa, a resposta, os cartões, 
    | `estoque` — mudança do estoque desde 2022 | `hex_qualidade.g_estoque` | divergente centrada em 1; período com `fonte_estoque_diferente` com a pílula crítica |
    | `hex_novo` — hexágono novo no período | `hex_qualidade.hex_novo` | categórica |
 
+   Medida com o mesmo valor em todos os hexágonos do período (ex.: `hex_novo` sempre falso no piloto) fica **desabilitada** no seletor, com a dica "igual em todos os hexágonos neste período"; nunca pinta o mapa de uma cor só.
+
    Cada medida tem, no seletor, uma frase de "o que significa" (ex.: incerteza = "largura da faixa de 95% em relação à estimativa; 0,5 quer dizer que a faixa tem metade do tamanho do valor").
 9. **Carrossel do dock:** o dock ganha conjuntos de gráficos navegáveis por setas e pontos ("Déficit", "Qualidade"; extensível a "Território" quando houver `contexto.parquet`). Trocar o tema troca o conjunto exibido; as setas permitem ver o outro conjunto sem trocar o mapa. Conjunto **Qualidade**:
    - histograma da medida de qualidade escolhida (clique destaca no mapa);
    - **dispersão déficit × incerteza** (um ponto por hexágono; quadrante "muito déficit e muita incerteza" sombreado e contado; clique seleciona o hexágono);
    - **composição da qualidade ponderada por domicílios** por período (barras empilhadas: ok, AP com ressalva, parte em sigilo, sem dado);
    - **estoque t ÷ 2022 por período** (caixas p10–p90; o período com `fonte_estoque_diferente` em vermelho).
-10. **Painel do hexágono** ganha o bloco "Qualidade deste hexágono": qualidade do dado, incerteza por componente, ressalva e CV da AP, fração imputada, fonte do estoque e `g_estoque`, hexágono novo — cada item com pílula semântica (bom, atenção, crítico) por limiares declarados em `src/js/util/limiares.js` (incerteza > 0,7 atenção; > 1,0 crítico; CV da AP > 30% crítico; fração imputada > 0,3 atenção).
+10. **Painel do hexágono** mostra a AP dominante e, quando `n_aps` > 1, o aviso "este hexágono cruza N áreas de ponderação; a comparação usa a dominante" (idem para município). Ganha também o bloco "Qualidade deste hexágono": qualidade do dado, incerteza por componente, ressalva e CV da AP, fração imputada, fonte do estoque e `g_estoque`, hexágono novo — cada item com pílula semântica (bom, atenção, crítico) por limiares declarados em `src/js/util/limiares.js` (incerteza > 0,7 atenção; > 1,0 crítico; CV da AP > 30% crítico; fração imputada > 0,3 atenção).
 
 ## Validações
 
@@ -65,4 +67,5 @@ O explorador ligado: uma "pergunta" muda junto o mapa, a resposta, os cartões, 
 | F1-13 | carrossel: setas e pontos trocam o conjunto de gráficos sem mudar o mapa; trocar o tema leva o carrossel ao conjunto do tema; teclado (setas) funciona |
 | F1-14 | dispersão déficit × incerteza: a contagem do quadrante = consulta DuckDB com os mesmos cortes (medianas do período) |
 | F1-15 | composição ponderada por domicílios: as barras de cada período somam 100% (± 0,1) e batem com `hex_base` + `ap.parquet` |
+| F1-17 | medida constante no período aparece desabilitada (teste com `hex_novo` do pacote de Maceió); hexágono com `n_aps` > 1 mostra o aviso |
 | F1-16 | mapa de base: OpenFreeMap `positron` no claro e `dark` no escuro, sem chave de API em nenhuma requisição (teste inspeciona as URLs) |

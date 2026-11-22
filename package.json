@@ -1,0 +1,36 @@
+{
+  "name": "moradinha-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Site público dos resultados do moradinha (déficit habitacional em hexágonos H3) por domínio.",
+  "type": "module",
+  "engines": {
+    "node": "26.13.1"
+  },
+  "scripts": {
+    "dev": "quarto preview",
+    "build:js": "node ferramentas/esbuild.mjs",
+    "build": "npm run build:js && quarto render",
+    "validar": "node ferramentas/validar.mjs",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test && npm run build && npm run test:e2e"
+  },
+  "dependencies": {
+    "@deck.gl/mapbox": "9.1.14",
+    "@duckdb/duckdb-wasm": "1.32.0",
+    "d3": "7.9.0",
+    "deck.gl": "9.1.14",
+    "h3-js": "4.2.1",
+    "maplibre-gl": "6.17.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@duckdb/node-api": "2.0.1-r.1",
+    "@playwright/test": "1.65.1",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "esbuild": "0.28.2",
+    "vitest": "5.1.1"
+  }
+}

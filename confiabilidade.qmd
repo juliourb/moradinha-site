@@ -1,0 +1,20 @@
+---
+title: ""
+---
+
+{{< include textos/_cabecalho.qmd >}}
+
+::: panel
+## Confiabilidade
+
+::: sub
+Em construção (SPEC_F3). Vai trazer:
+:::
+
+- Dados e qualidade: fontes do estoque por ano, sigilo, APs (áreas de
+  ponderação) com ressalva, ponte entre a PNADc e o Censo.
+- Métricas do modelo (EBM — *Explainable Boosting Machine*) com perguntas
+  objetivas: ganho sobre a linha de base, ordem e top 20%, calibração, viés
+  por grupo, curvas de forma.
+- Consistência entre anos (Spearman, razão dos totais) e achados registrados.
+:::

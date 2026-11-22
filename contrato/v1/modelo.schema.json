@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/modelo.schema.json",
+  "title": "modelo.json",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": ["configuracao", "usado", "motivo", "treino", "ganho", "ordem", "calibracao", "vies", "curvas", "importancia", "confianca"],
+    "properties": {
+      "configuracao": { "type": "string" },
+      "usado": { "type": "boolean" },
+      "motivo": { "type": "string" },
+      "treino": {
+        "type": "object",
+        "required": ["n_domicilios", "peso_total", "n_aps", "dobras", "motor", "versao", "semente"],
+        "properties": {
+          "n_domicilios": { "type": "number" },
+          "peso_total": { "type": "number" },
+          "n_aps": { "type": "integer" },
+          "dobras": { "type": "integer" },
+          "motor": { "type": "string" },
+          "versao": { "type": "string" },
+          "semente": { "type": "integer" }
+        }
+      },
+      "ganho": {
+        "type": "object",
+        "required": ["erro_modelo", "erro_base", "razao", "ic"],
+        "properties": {
+          "erro_modelo": { "type": "number" },
+          "erro_base": { "type": "number" },
+          "razao": { "type": "number" },
+          "ic": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+        }
+      },
+      "ordem": {
+        "type": "object",
+        "required": ["spearman_modelo", "spearman_base", "top20_modelo", "top20_base", "ic_spearman"],
+        "properties": {
+          "spearman_modelo": { "type": "number" },
+          "spearman_base": { "type": "number" },
+          "top20_modelo": { "type": "number" },
+          "top20_base": { "type": "number" },
+          "ic_spearman": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+        }
+      },
+      "calibracao": {
+        "type": "object",
+        "required": ["decis", "inclinacao", "intercepto", "ic_inclinacao"],
+        "properties": {
+          "decis": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["decil", "previsto", "observado"],
+              "properties": {
+                "decil": { "type": "integer" },
+                "previsto": { "type": "number" },
+                "observado": { "type": "number" }
+              }
+            }
+          },
+          "inclinacao": { "type": "number" },
+          "intercepto": { "type": "number" },
+          "ic_inclinacao": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+        }
+      },
+      "vies": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["grupo_tipo", "grupo", "razao_somas"],
+          "properties": {
+            "grupo_tipo": { "enum": ["tipo de AP", "município"] },
+            "grupo": { "type": "string" },
+            "razao_somas": { "type": "number" }
+          }
+        }
+      },
+      "curvas": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["variavel", "rotulo", "nivel", "escore", "desvio"],
+          "properties": {
+            "variavel": { "type": "string" },
+            "rotulo": { "type": "string" },
+            "nivel": { "type": "string" },
+            "escore": { "type": "number" },
+            "desvio": { "type": "number" }
+          }
+        }
+      },
+      "importancia": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["variavel", "rotulo", "valor"],
+          "properties": {
+            "variavel": { "type": "string" },
+            "rotulo": { "type": "string" },
+            "valor": { "type": "number" }
+          }
+        }
+      },
+      "confianca": {
+        "type": "object",
+        "required": ["dobras", "moran_residuos", "cobertura_d"],
+        "properties": {
+          "dobras": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["dobra", "razao_erro", "spearman"],
+              "properties": {
+                "dobra": { "type": "integer" },
+                "razao_erro": { "type": "number" },
+                "spearman": { "type": "number" }
+              }
+            }
+          },
+          "moran_residuos": {
+            "type": "object",
+            "required": ["I", "p"],
+            "properties": { "I": { "type": "number" }, "p": { "type": "number" } }
+          },
+          "cobertura_d": {
+            "type": "object",
+            "required": ["modelo", "base"],
+            "properties": { "modelo": { "type": "number" }, "base": { "type": "number" } }
+          }
+        }
+      },
+      "interno": {
+        "type": "object",
+        "description": "Só no pacote privado (manifesto.publico = false). Proibido no build público: SPEC_00 regra inviolável 5."
+      }
+    }
+  }
+}

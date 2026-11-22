@@ -1,0 +1,17 @@
+---
+title: ""
+---
+
+{{< include textos/_cabecalho.qmd >}}
+
+::: panel
+## Metodologia
+
+::: sub
+Em construção (SPEC_F4). Vai trazer:
+:::
+
+- Pipeline em grafo clicável, com o commit e a data de cada etapa.
+- Textos explicativos do método, parâmetros do domínio e rastreio da execução.
+- Seção interna (não aparece no build público).
+:::

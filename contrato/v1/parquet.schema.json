@@ -1,0 +1,83 @@
+{
+  "$id": "https://moradinha/contrato/v1/parquet.schema.json",
+  "descricao": "Colunas e tipos exigidos dos arquivos Parquet do pacote (contrato v1). Tipos no vocabulário do DuckDB. nulavel=true permite NULL na coluna (campo com '?' na SPEC_00 §5.1); nulavel=false não permite.",
+  "arquivos": {
+    "hex.parquet": {
+      "grao": "hexágono × período × componente",
+      "colunas": [
+        { "nome": "h3", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "periodo", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "componente", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "absoluto", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "minimo", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "maximo", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "relativo", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "marcas", "tipo": "VARCHAR", "nulavel": false }
+      ]
+    },
+    "hex_base.parquet": {
+      "grao": "hexágono × período",
+      "colunas": [
+        { "nome": "h3", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "periodo", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "domicilios", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "qualidade", "tipo": "VARCHAR", "nulavel": false }
+      ]
+    },
+    "hex_qualidade.parquet": {
+      "grao": "hexágono × período",
+      "colunas": [
+        { "nome": "h3", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "periodo", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "fracao_imputada", "tipo": "DOUBLE", "nulavel": true, "descricao": "média, nos 6 blocos da ponte, da fração dos domicílios 2022 do hexágono cujo bloco foi reconstruído além da AP (residuo_municipio, residuo_conjunto ou residuo_uniforme); reconstrução dentro da AP não conta" },
+        { "nome": "fracao_sigilo", "tipo": "DOUBLE", "nulavel": true, "descricao": "fração do peso da grade estatística (peso_construtor) do hexágono em setores com sigilo total" },
+        { "nome": "n_setores", "tipo": "INTEGER", "nulavel": false },
+        { "nome": "fonte_estoque", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "g_estoque", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "hex_novo", "tipo": "BOOLEAN", "nulavel": false },
+        { "nome": "enderecos_cnefe", "tipo": "DOUBLE", "nulavel": true }
+      ]
+    },
+    "hex_atributos.parquet": {
+      "grao": "hexágono",
+      "colunas": [
+        { "nome": "h3", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "municipio_cod", "tipo": "VARCHAR", "nulavel": false, "descricao": "município dominante por domicílios 2022" },
+        { "nome": "municipio_nome", "tipo": "VARCHAR", "nulavel": false, "descricao": "município dominante por domicílios 2022" },
+        { "nome": "n_municipios", "tipo": "INTEGER", "nulavel": false },
+        { "nome": "ap_cod", "tipo": "VARCHAR", "nulavel": false, "descricao": "AP dominante por domicílios 2022" },
+        { "nome": "n_aps", "tipo": "INTEGER", "nulavel": false },
+        { "nome": "fcu_fracao", "tipo": "DOUBLE", "nulavel": false },
+        { "nome": "recortes", "tipo": "VARCHAR", "nulavel": false, "descricao": "ids de manifesto.recortes separados por ';', vazio se nenhum" }
+      ]
+    },
+    "contexto.parquet": {
+      "grao": "hexágono × variável × período",
+      "opcional": true,
+      "colunas": [
+        { "nome": "h3", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "variavel", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "periodo", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "valor", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "unidade", "tipo": "VARCHAR", "nulavel": false }
+      ]
+    },
+    "ap.parquet": {
+      "grao": "AP × componente",
+      "colunas": [
+        { "nome": "ap_cod", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "ap_nome", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "municipio_cod", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "tipo", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "componente", "tipo": "VARCHAR", "nulavel": false },
+        { "nome": "direta", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "direta_cv", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "direta_ic_inf", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "direta_ic_sup", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "motor_2022", "tipo": "DOUBLE", "nulavel": true },
+        { "nome": "ressalva", "tipo": "BOOLEAN", "nulavel": false },
+        { "nome": "sem_direta", "tipo": "BOOLEAN", "nulavel": false }
+      ]
+    }
+  }
+}

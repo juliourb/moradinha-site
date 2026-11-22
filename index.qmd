@@ -1,0 +1,20 @@
+---
+title: ""
+---
+
+{{< include textos/_cabecalho.qmd >}}
+
+::: panel
+## Visão geral
+
+::: sub
+Em construção (SPEC_F2). Vai trazer:
+:::
+
+- Mensagem principal do domínio, com o déficit absoluto e relativo por componente.
+- Cartões por componente (coabitação, ônus excessivo com aluguel, precariedade),
+  ano recente e média de 3 anos.
+- Comparação FJP × moradinha: número publicado pela FJP, reconstrução na PNADc
+  (Pesquisa Nacional por Amostra de Domicílios contínua) e total do mapa.
+- Marcas de cuidado em destaque e números para citar, com edição e hash.
+:::

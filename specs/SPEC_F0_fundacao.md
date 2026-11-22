@@ -17,6 +17,7 @@ Repositório pronto para as próximas fases: site Quarto com as 4 abas vazias no
    - `pacotes/al_rm_maceio/ficticio/`: recorte de Maceió, totais reais do piloto (tabela em anexo A), distribuição fictícia, `hex_qualidade.parquet` fictício coerente (2023 com `fonte_estoque = open_buildings` e `g_estoque` com ruído de ±6%; 2024–2025 com `mapbiomas` e `g_estoque` = 1 em cerca de 60% dos hexágonos; `fracao_imputada` maior nas bordas das APs), contornos de AP fictícios (pais H3 resolução 7), FCU e recorte `braskem` fictícios, `modelo.json`, `qualidade.json`, `consistencia.json` (valores do anexo B), `referencia_fjp.json` com `fjp_publicado` nulo, `achados.json` com 3 itens, `pipeline.json` com as etapas da seção "pipeline" do anexo C;
    - `pacotes/teste_pequeno/ficticio/`: 20 hexágonos, para testes rápidos.
    - Todo pacote fictício tem `manifesto.ficticio = true`, e o site mostra o chip "dados fictícios" quando esse campo é verdadeiro.
+   - `referencia_fjp.json` do pacote de Maceió fictício usa os **valores reais da FJP 2023** do anexo D (eles são públicos), com `mapa` e `reconstrucao_pnadc` do anexo A, período 2023.
 7. `catalogo.json` com os dois pacotes.
 8. `src/js/` com os módulos vazios e as funções utilitárias já testáveis: `util/formato.js` (pt-BR), `util/marcas.js` (vocabulário §5.3), `dados/pacote.js` (carregar manifesto e JSON, abrir Parquet no DuckDB-WASM), `estado/loja.js` (estado global da "pergunta" com assinatura de mudanças).
 9. esbuild gerando `assets/js/moradinha.js`; `npm run build` = bundle + `quarto render`.
@@ -59,3 +60,15 @@ Spearman com 2022 e com o ano anterior; razão dos totais; mediana, p5 e p95 da 
 ## Anexo C — etapas do pipeline (para `pipeline.json` fictício)
 
 coleta (Censo, CNEFE, PNADc, luz, Open Buildings, MapBiomas, FCU, MDS) → grade (pedaços setor × hexágono) → classificação (regra da FJP na amostra e na PNADc) → treino (EBM, validação por AP fora da dobra) → montagem 2022 (composição, taxa, fator da AP, calibração, faixa) → anos t (estoque, estimativa, faixa, médias) → exportação (pacote de publicação).
+
+## Anexo D — FJP, Déficit habitacional no Brasil 2023 (FJP, 2025), RM de Maceió
+
+Fonte: FUNDAÇÃO JOÃO PINHEIRO. *Déficit habitacional no Brasil 2023*. Belo Horizonte: FJP, 2025 (relatório completo, versão de 25/09/2025). Dados básicos: PNADc 2023 (IBGE, 2024) e CadÚnico 2023.
+
+| indicador | FJP 2023 | onde | reconstrução do moradinha na PNADc 2023 (EP) | explicação |
+|---|---|---|---|---|
+| total | 50.099 (relativo 10,8%) | Tabela 1, p. 16 | 47.039 (CV 12,3%) | a FJP soma os improvisados do CadÚnico, que a PNADc não capta |
+| habitação precária | 11.936 = improvisados 5.812 + rústicos 6.124 | Tabelas 1 e 13, p. 16 e 46 | 5.704 (CV 96,8%) | comparar com os rústicos (6.124): mesmo conceito; improvisados vêm do CadÚnico |
+| coabitação | 5.666 (só unidade convivente; cômodos 0) | Tabelas 1 e 15, p. 16 e 52 | 6.891 (EP 1.408,8) | núcleos reconstruídos pela descrição secundária (E19); FJP dentro da faixa de 95% |
+| ônus | 32.498 | Tabela 1, p. 16 | 34.445 (EP 2.989,7) | FJP dentro da faixa de 95% |
+| domicílios | 462.956 = PNADc 457.144 + improvisados 5.812 | Apêndice A, p. 72 | 452.802 (visita 1) | a FJP soma os improvisados; diferença de visita da PNADc a conferir |

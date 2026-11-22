@@ -1,0 +1,121 @@
+{
+  "contrato": "1.0",
+  "conjunto_id": "teste_pequeno",
+  "nome": "Teste pequeno (20 hexágonos)",
+  "edicao": "3a0df75",
+  "commit_completo": "3a0df758403ba5df0c29cf14eec61938cc3ed7dc",
+  "data_execucao": "2026-11-22T00:00:00Z",
+  "publico": true,
+  "ficticio": true,
+  "h3_resolucao": 8,
+  "centro": [
+    -35.715,
+    -9.585
+  ],
+  "zoom_inicial": 11.1,
+  "contornos_tolerancia_m": 10,
+  "d17_conferido": true,
+  "periodos": [
+    {
+      "id": "2022",
+      "rotulo": "2022",
+      "tipo": "ano",
+      "anos": [
+        2022
+      ],
+      "fonte_estoque": "censo",
+      "marcas": []
+    },
+    {
+      "id": "2023",
+      "rotulo": "2023",
+      "tipo": "ano",
+      "anos": [
+        2023
+      ],
+      "fonte_estoque": "open_buildings",
+      "marcas": [
+        "fonte_estoque_diferente"
+      ]
+    },
+    {
+      "id": "2024",
+      "rotulo": "2024",
+      "tipo": "ano",
+      "anos": [
+        2024
+      ],
+      "fonte_estoque": "mapbiomas",
+      "marcas": []
+    },
+    {
+      "id": "2025",
+      "rotulo": "2025",
+      "tipo": "ano",
+      "anos": [
+        2025
+      ],
+      "fonte_estoque": "mapbiomas",
+      "marcas": []
+    },
+    {
+      "id": "m2024",
+      "rotulo": "Média 2022–24",
+      "tipo": "media",
+      "anos": [
+        2022,
+        2023,
+        2024
+      ],
+      "fonte_estoque": "mista",
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "id": "m2025",
+      "rotulo": "Média 2023–25",
+      "tipo": "media",
+      "anos": [
+        2023,
+        2024,
+        2025
+      ],
+      "fonte_estoque": "mista",
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    }
+  ],
+  "componentes": [
+    "coabitacao",
+    "onus",
+    "precariedade"
+  ],
+  "regime_mapa": "c",
+  "recortes": [
+    {
+      "id": "braskem",
+      "nome": "Área da Braskem",
+      "motivo": "Área de subsidência por mineração (reassentamento desde 2018); 99 setores no piloto",
+      "fonte": "Perímetro de risco da Defesa Civil de Maceió / Braskem (fictício neste pacote)"
+    }
+  ],
+  "arquivos": {
+    "achados.json": "7a59dec233660d436757594a578f8e700ea16a45cb738de50f6411135e2cd97e",
+    "ap.parquet": "599337388bb3425356d432c21033e58cf1945e487f312b275dfe5bfdacebf95f",
+    "consistencia.json": "01d6fda86e633253703ea2baeba74bdcaa47bec37e9c2746dc19ef62e104544e",
+    "contornos/ap.geojson": "403ccb7ed0a157214536105840ff350ae0c4b7232d5a15557a168792976dd046",
+    "contornos/fcu.geojson": "7d09e532fc380630caac6b4b1b5174a7a9f7a308f6544bcb79eefb97b1e12306",
+    "contornos/municipios.geojson": "16eadf4745884e9541cd31a99ad0f2748665a4c9c19f459d973bcd1f98ffbbe2",
+    "hex.parquet": "24c50a53ab51918d342be428f107158570614b99225968c979ab08804b5213a2",
+    "hex_atributos.parquet": "60622cbe14f0cc2e01e9a25a0727f9e88919a0bf901eb095a209496637fe9224",
+    "hex_base.parquet": "faff30648c1de692b9e4ec05c30f0ff7f4186f208cac1e663a9baf89edef880c",
+    "hex_qualidade.parquet": "d6ece7d114d5bf02cac9cf902ad879135ff55c680035cf9bb592384e799347ec",
+    "modelo.json": "d013d519d6aa7d68331f25b7628213221f0ca7948142a6fd73ddef56c23d7f24",
+    "pipeline.json": "a40d1987633faeae8468460a0eb86ccf6bc5390a99382309c27f8126aded138a",
+    "qualidade.json": "b0ec2c51317974141397bd228844f09356a0510f3623def24a6893ca08feb2aa",
+    "referencia_fjp.json": "d6f253a015b4e15375554a27757ad322edc50b8ae8b27fa0e10e990854d5a06d",
+    "totais.json": "48aba8d0a977d904abddac7e287b4d0cbe163d6bdd3fb7403141bd029b28fc79"
+  }
+}

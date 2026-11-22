@@ -1,0 +1,100 @@
+{
+  "etapas": [
+    {
+      "id": "coleta",
+      "nome": "Coleta",
+      "descricao": "Censo, CNEFE, PNADc, luz, Open Buildings, MapBiomas, FCU, MDS.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "coleta.parquet"
+      ]
+    },
+    {
+      "id": "grade",
+      "nome": "Grade",
+      "descricao": "Pedaços setor × hexágono.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "grade.parquet"
+      ]
+    },
+    {
+      "id": "classificacao",
+      "nome": "Classificação",
+      "descricao": "Regra da FJP na amostra e na PNADc.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "classificacao.parquet"
+      ]
+    },
+    {
+      "id": "treino",
+      "nome": "Treino",
+      "descricao": "EBM, validação por AP fora da dobra.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "treino.parquet"
+      ]
+    },
+    {
+      "id": "montagem2022",
+      "nome": "Montagem 2022",
+      "descricao": "Composição, taxa, fator da AP, calibração, faixa.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "montagem2022.parquet"
+      ]
+    },
+    {
+      "id": "anost",
+      "nome": "Anos t",
+      "descricao": "Estoque, estimativa, faixa, médias.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "anost.parquet"
+      ]
+    },
+    {
+      "id": "exportacao",
+      "nome": "Exportação",
+      "descricao": "Pacote de publicação.",
+      "commit": "c691276e3743cfa5b5066614d467c2b41891cbee",
+      "data": "2026-11-20",
+      "saidas": [
+        "exportacao.parquet"
+      ]
+    }
+  ],
+  "ligacoes": [
+    {
+      "de": "coleta",
+      "para": "grade"
+    },
+    {
+      "de": "grade",
+      "para": "classificacao"
+    },
+    {
+      "de": "classificacao",
+      "para": "treino"
+    },
+    {
+      "de": "treino",
+      "para": "montagem2022"
+    },
+    {
+      "de": "montagem2022",
+      "para": "anost"
+    },
+    {
+      "de": "anost",
+      "para": "exportacao"
+    }
+  ]
+}

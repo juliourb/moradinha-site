@@ -1,0 +1,26 @@
+[
+  {
+    "id": "E36",
+    "data": "2026-11-20",
+    "texto": "Ônus excessivo com aluguel tem razão de totais acima de 1 em todos os anos t, exceto no esperado por 2023 ter excesso de detecção.",
+    "efeito": "Leitura dos totais de ônus deve considerar a faixa de incerteza, não só o ponto.",
+    "situacao": "registrado",
+    "publico": true
+  },
+  {
+    "id": "E40",
+    "data": "2026-11-20",
+    "texto": "2023 fica a 0,85–0,86 de Spearman com todos os outros anos, nos três componentes; 2022, 2024 e 2025 ficam a 0,95–0,996 entre si.",
+    "efeito": "Não comparar 2023 por hexágono; usar a marca fonte_estoque_diferente.",
+    "situacao": "registrado",
+    "publico": true
+  },
+  {
+    "id": "E41",
+    "data": "2026-11-20",
+    "texto": "Arquivo de jornal do SQLite (.gpkg-journal) ficou ao lado do GeoPackage de 2022 no Volume depois da execução.",
+    "efeito": "Sem efeito nos números; item de limpeza operacional do moradinha.",
+    "situacao": "registrado",
+    "publico": false
+  }
+]

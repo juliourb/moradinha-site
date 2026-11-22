@@ -1,5 +1,7 @@
 # SPEC 00 — Fundamentos do site do moradinha
 
+*Versão 1.2, 22/11/2026 (definições de qualidade fechadas com a investigação G1 do moradinha; recortes especiais genéricos; AP dominante; referência da FJP com subcomponentes). Mudanças em `CHANGELOG_SPECS.md`.*
+
 *Versão 1.1, 22/11/2026 (tema de qualidade no explorador; mapa de base sem chave).*
 
 *Versão 1, 22/11/2026. Lida por inteiro antes de qualquer fase. As fases (SPEC_F0 a SPEC_F5) só acrescentam; quando uma fase contradiz este arquivo, este arquivo vence e a contradição é relatada.*
@@ -71,11 +73,11 @@ Um pacote = uma pasta `pacotes/<conjunto_id>/<edicao>/`. `edicao` = hash curto d
 
 | arquivo | grão (uma linha por) | colunas / campos |
 |---|---|---|
-| `manifesto.json` | pacote | `contrato` ("1.0"), `conjunto_id`, `nome`, `edicao`, `commit_completo`, `data_execucao` (ISO 8601 UTC), `publico` (bool), `h3_resolucao` (8), `centro` [lon, lat], `zoom_inicial`, `periodos` (lista, 5.2), `componentes` (["coabitacao","onus","precariedade"]), `regime_mapa` ("c"), `arquivos` {nome: sha256} |
+| `manifesto.json` | pacote | `contrato` ("1.0"), `conjunto_id`, `nome`, `edicao`, `commit_completo`, `data_execucao` (ISO 8601 UTC), `publico` (bool), `h3_resolucao` (8), `centro` [lon, lat], `zoom_inicial`, `periodos` (lista, 5.2), `componentes` (["coabitacao","onus","precariedade"]), `regime_mapa` ("c"), `recortes` [{`id`, `nome`, `motivo`, `fonte`}] (pode ser vazio; no piloto, `braskem`), `arquivos` {nome: sha256} |
 | `hex.parquet` | hexágono × período × componente | `h3` str, `periodo` str, `componente` str, `absoluto` double?, `minimo` double?, `maximo` double?, `relativo` double? (% dos domicílios), `marcas` str (códigos separados por `;`, vazio se nenhuma) |
 | `hex_base.parquet` | hexágono × período | `h3`, `periodo`, `domicilios` double?, `qualidade` ("ok" \| "parcial_sigilo" \| "sem_dado") |
-| `hex_qualidade.parquet` | hexágono × período | `h3`, `periodo`, `fracao_imputada` double? (fração dos domicílios do hexágono cuja composição por categoria veio da cascata do resíduo — município, conjunto ou divisão igual), `fracao_sigilo` double? (fração dos domicílios em setores com sigilo total), `n_setores` int (setores que tocam o hexágono), `fonte_estoque` ('censo' \| 'open_buildings' \| 'mapbiomas'), `g_estoque` double? (estoque antes do ajuste à PNADc, t ÷ 2022; 1 em 2022), `hex_novo` bool (hexágono absorvido sem domicílio em 2022), `enderecos_cnefe` double? (só 2022) |
-| `hex_atributos.parquet` | hexágono | `h3`, `municipio_cod`, `municipio_nome`, `ap_cod`, `fcu_fracao` (0–1), `recortes` str (códigos separados por `;`, ex.: `braskem`) |
+| `hex_qualidade.parquet` | hexágono × período | `h3`, `periodo`, `fracao_imputada` double? (média, nos 6 blocos da ponte, da fração dos domicílios 2022 do hexágono cujo bloco foi reconstruído **além da AP** — `marca_bloco` residuo_municipio, residuo_conjunto ou residuo_uniforme da composição do setor; a reconstrução dentro da AP não conta), `fracao_sigilo` double? (fração do peso da grade estatística — `peso_construtor` dos pedaços — do hexágono que está em setores com sigilo total; pedaço em sigilo não tem domicílio publicado), `n_setores` int (setores que tocam o hexágono), `fonte_estoque` ('censo' \| 'open_buildings' \| 'mapbiomas'), `g_estoque` double? (estoque antes do ajuste à PNADc, t ÷ 2022; 1 em 2022), `hex_novo` bool (hexágono absorvido sem domicílio em 2022), `enderecos_cnefe` double? (só 2022) |
+| `hex_atributos.parquet` | hexágono | `h3`, `municipio_cod`, `municipio_nome` (município dominante por domicílios 2022), `n_municipios` int, `ap_cod` (AP dominante por domicílios 2022), `n_aps` int, `fcu_fracao` (0–1), `recortes` str (ids de `manifesto.recortes` separados por `;`, vazio se nenhum) |
 | `contexto.parquet` (opcional) | hexágono × variável × período | `h3`, `variavel`, `periodo`, `valor` double?, `unidade` |
 | `contornos/ap.geojson`, `contornos/municipios.geojson`, `contornos/fcu.geojson` | feição | propriedades `cod`, `nome`; geometria simplificada (tolerância em `manifesto.contornos_tolerancia_m`) |
 | `ap.parquet` | AP × componente | `ap_cod`, `ap_nome`, `municipio_cod`, `tipo` ("capital" \| "resto"), `componente`, `direta` double?, `direta_cv` double? (%), `direta_ic_inf`, `direta_ic_sup`, `motor_2022` double?, `ressalva` bool, `sem_direta` bool |
@@ -83,9 +85,9 @@ Um pacote = uma pasta `pacotes/<conjunto_id>/<edicao>/`. `edicao` = hash curto d
 | `modelo.json` | — | por componente: SPEC_F3, seção 3 |
 | `consistencia.json` | — | `spearman`: {componente: {`periodos`[], `matriz`[[]]}}; `razoes`: [{`componente`, `periodo`, `razao_total`, `mediana`, `p5`, `p95`, `n_hexagonos`}] |
 | `qualidade.json` | — | SPEC_F3, seção 2 |
-| `referencia_fjp.json` | — | [{`indicador`, `fjp_publicado`?, `fjp_fonte`, `fjp_url`?, `fjp_pagina`?, `ano_ref`, `reconstrucao_pnadc`, `mapa`, `explicacao`}] (`fjp_publicado` nulo = "a preencher") |
+| `referencia_fjp.json` | — | [{`indicador` (total \| habitacao_precaria \| coabitacao \| onus \| domicilios), `ano_ref`, `fjp_publicado`?, `fjp_subcomponentes` [{`nome`, `valor`}]?, `fjp_fonte`, `fjp_tabela`, `fjp_pagina`, `fjp_url`?, `reconstrucao_pnadc`?, `reconstrucao_ep`?, `mapa`?, `explicacao`}] (`fjp_publicado` nulo = "a preencher"; `mapa` nulo quando o período não existe no pacote) |
 | `achados.json` | — | [{`id`, `data`, `texto`, `efeito`, `situacao`, `publico` bool}] |
-| `pipeline.json` | — | `etapas`: [{`id`, `nome`, `descricao`, `commit`, `data`, `saidas`[]}]; `ligacoes`: [{`de`, `para`}] |
+| `pipeline.json` | — | `etapas`: [{`id`, `nome`, `descricao`, `commit`, `data`, `saidas`[]}]; `ligacoes`: [{`de`, `para`}]. `saidas` só com tabelas agregadas (nunca `mor_restrito.*` nem caminhos de arquivo de microdado) |
 
 Campo com `?` aceita nulo. **Nulo = não medido; zero = medido e zero.** Nunca trocar um pelo outro.
 
@@ -99,7 +101,7 @@ Campo com `?` aceita nulo. **Nulo = não medido; zero = medido e zero.** Nunca t
 |---|---|---|
 | `total_fragil` | Total frágil (CV acima de 15%) | componente × período |
 | `mudanca_no_ruido` | Mudança dentro do ruído | componente × período (anos t) e `mudancas` |
-| `fonte_estoque_diferente` | Estoque por fonte diferente; não comparar por hexágono | período 2023 |
+| `fonte_estoque_diferente` | Estoque por fonte diferente dos demais anos (Open Buildings); não comparar por hexágono | período 2023 (a fonte real de cada período está em `hex_qualidade.fonte_estoque`) |
 | `media_inclui_fonte_diferente` | Média inclui ano com estoque por fonte diferente | médias |
 | `precariedade_provisoria_sem_faixa` | Precariedade provisória, sem faixa | precariedade nos anos t e médias |
 | `ap_ressalva` | AP com ressalva (CV acima de 30% ou direta zero) | hexágono, AP |
@@ -122,7 +124,7 @@ Sai com código diferente de zero se qualquer regra falhar e imprime a regra, o 
 | V6 | Σ `domicilios` por período = `totais.domicilios`, erro relativo ≤ 1e−6 |
 | V7 | `minimo` ≤ `absoluto` ≤ `maximo` onde os três existem; `minimo`/`maximo` nulos onde `absoluto` é nulo |
 | V8 | `relativo` = 100 × `absoluto` ÷ `domicilios` (tolerância 1e−9) onde `domicilios` > 0; nulo onde `domicilios` é nulo |
-| V9 | toda marca pertence ao vocabulário 5.3 |
+| V9 | toda marca pertence ao vocabulário 5.3; todo id em `hex_atributos.recortes` existe em `manifesto.recortes`; `n_aps` ≥ 1 e `n_municipios` ≥ 1 |
 | V10 | pacote com `publico = true` não tem a chave `interno` em `modelo.json`, e `ap.parquet` só tem `direta` em AP com ≥ 30 domicílios da amostra (campo `n_amostra` ausente do pacote público; a regra é conferida pelo moradinha e declarada em `manifesto.d17_conferido = true`) |
 | V11 | nenhuma coluna com nome da lista proibida (`domicilio_id`, `pessoa`, `v0001`… lista em `contrato/v1/REGRAS.md`) |
 | V12 | `hex.parquet` ≤ 5 MB; pacote inteiro ≤ 20 MB |
@@ -149,7 +151,7 @@ Extraído do protótipo aprovado (`referencia/prototipo/index.html`). Fonte úni
 
 ## 8. Regras invioláveis
 
-1. **Todo número exibido vem do pacote.** O site só soma componentes (total), divide por domicílios (relativo), calcula diferença entre períodos e z a partir de `ep` do pacote, e calcula as **medidas derivadas de qualidade** listadas na SPEC_F1 §8 (largura relativa da faixa, quantis e contagens para os gráficos). Qualquer outro número é proibido. Há teste para isso (F1 e seguintes).
+1. **Todo número exibido vem do pacote.** O site só soma componentes (total), divide por domicílios (relativo), calcula diferença entre períodos e z a partir de `ep` do pacote, diz se o número da FJP cai dentro da faixa de 95% da reconstrução (`reconstrucao_pnadc` ± 1,96 × `reconstrucao_ep`), e calcula as **medidas derivadas de qualidade** listadas na SPEC_F1 §8 (largura relativa da faixa, quantis e contagens para os gráficos). Qualquer outro número é proibido. Há teste para isso (F1 e seguintes).
 2. **Total sem faixa:** os percentis dos componentes não se somam; o site nunca inventa faixa para o total.
 3. **PNADc não existe por hexágono.** A comparação "amostra × motor" só aparece na AP (`ap.parquet`) e no domínio (`totais.json`).
 4. **Sem microdado.** O site nunca recebe linha de domicílio ou pessoa.

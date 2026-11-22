@@ -1,0 +1,17 @@
+---
+title: ""
+---
+
+{{< include textos/_cabecalho.qmd >}}
+
+::: panel
+## Resultados
+
+::: sub
+Em construção (SPEC_F1). Vai trazer o explorador ligado: mapa (deck.gl
+`H3HexagonLayer` sobre MapLibre GL), cortina de comparação entre períodos,
+camadas de contexto (áreas de ponderação, FCU — favelas e comunidades urbanas,
+recortes), painel do hexágono selecionado e gráficos em carrossel (histograma,
+ranking, série no tempo, distribuição por período).
+:::
+:::

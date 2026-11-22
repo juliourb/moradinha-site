@@ -1,0 +1,7 @@
+```{=html}
+<div class="chips" id="chips-edicao">
+  <span class="chip" id="chip-dominio">RM de Maceió</span>
+  <span class="chip ficticio" id="chip-ficticio" hidden>dados fictícios</span>
+  <span class="chip" id="chip-edicao"></span>
+</div>
+```

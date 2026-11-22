@@ -1,0 +1,77 @@
+{
+  "fontes": [
+    {
+      "variavel": "estoque de domicílios",
+      "fonte": "Censo 2022 / Open Buildings / MapBiomas",
+      "anos_disponiveis": [
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "uso_por_periodo": {
+        "2022": "fixa do Censo",
+        "2023": "do ano (open_buildings)",
+        "2024": "do ano (mapbiomas)",
+        "2025": "do ano (mapbiomas)",
+        "m2024": "do ano (mista)",
+        "m2025": "do ano (mista)"
+      },
+      "marcas": [
+        "fonte_estoque_diferente",
+        "media_inclui_fonte_diferente"
+      ]
+    }
+  ],
+  "sigilo": {
+    "hex_sem_dado": 0,
+    "hex_parcial": 0
+  },
+  "aps": [
+    {
+      "componente": "coabitacao",
+      "n_aps": 6,
+      "n_ressalva": 5,
+      "n_sem_direta": 0
+    },
+    {
+      "componente": "onus",
+      "n_aps": 6,
+      "n_ressalva": 0,
+      "n_sem_direta": 6
+    },
+    {
+      "componente": "precariedade",
+      "n_aps": 6,
+      "n_ressalva": 0,
+      "n_sem_direta": 6
+    }
+  ],
+  "ponte": [
+    {
+      "indicador": "coabitação 2022",
+      "pnadc": 419.5865,
+      "pnadc_ep": 79.69500000000001,
+      "censo": 407.0,
+      "censo_ep": null,
+      "razao": 0.97,
+      "leitura": "A reconstrução na PNADc fica próxima da base do Censo 2022, dentro do esperado para o ano âncora."
+    }
+  ],
+  "cnefe": {
+    "enderecos": 21787.404000000002,
+    "hex_sem_endereco": 0,
+    "domicilios_nesses_hex": 0.0,
+    "correlacao_hex": 0.93
+  },
+  "lacunas": [
+    {
+      "item": "IVCAD 2025 (MDS)",
+      "efeito": "Ainda não incorporado; entra quando sair o 2º retrato do MDS."
+    },
+    {
+      "item": "Precariedade sem faixa fora de 2022",
+      "efeito": "Estimativa provisória; mostrar sem intervalo."
+    }
+  ]
+}

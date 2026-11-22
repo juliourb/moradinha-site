@@ -1,0 +1,53 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - resultados.qmd
+    - confiabilidade.qmd
+    - metodologia.qmd
+  resources:
+    - catalogo.json
+    - pacotes/
+
+website:
+  title: "moradinha"
+  site-url: "https://julioamem.github.io/moradinha-site/"
+  description: "Déficit habitacional em hexágonos H3, por domínio."
+  navbar:
+    title: "moradinha"
+    left:
+      - href: index.qmd
+        text: "Visão geral"
+      - href: resultados.qmd
+        text: "Resultados"
+      - href: confiabilidade.qmd
+        text: "Confiabilidade"
+      - href: metodologia.qmd
+        text: "Metodologia"
+  page-navigation: false
+  back-to-top-navigation: false
+
+format:
+  html:
+    lang: pt-BR
+    theme:
+      light: [cosmo, assets/css/tema-claro.scss]
+      dark: [cosmo, assets/css/tema-escuro.scss]
+    css: assets/css/tokens.css
+    toc: false
+    page-layout: full
+    include-in-header:
+      - text: |
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    grid:
+      sidebar-width: 0px
+      body-width: 1440px
+      margin-width: 0px
+    include-after-body:
+      - text: '<script type="module" src="assets/js/moradinha.js"></script>'
+
+execute:
+  freeze: auto

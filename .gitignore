@@ -1,0 +1,14 @@
+node_modules/
+_site/
+.quarto/
+.venv-ficticio/
+/*.pyc
+__pycache__/
+test-results/
+playwright-report/
+
+/.quarto/
+**/*.quarto_ipynb
+
+# Binários do DuckDB-WASM, copiados de node_modules a cada build (ferramentas/esbuild.mjs).
+assets/js/duckdb/

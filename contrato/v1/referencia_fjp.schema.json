@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/referencia_fjp.schema.json",
+  "title": "referencia_fjp.json",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["indicador", "ano_ref", "fjp_fonte", "fjp_tabela", "fjp_pagina", "explicacao"],
+    "additionalProperties": false,
+    "properties": {
+      "indicador": { "enum": ["total", "habitacao_precaria", "coabitacao", "onus", "domicilios"] },
+      "ano_ref": { "type": "integer" },
+      "fjp_publicado": { "type": ["number", "null"] },
+      "fjp_subcomponentes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["nome", "valor"],
+          "properties": {
+            "nome": { "type": "string" },
+            "valor": { "type": "number" }
+          }
+        }
+      },
+      "fjp_fonte": { "type": "string" },
+      "fjp_tabela": { "type": "string" },
+      "fjp_pagina": { "type": "string" },
+      "fjp_url": { "type": "string" },
+      "reconstrucao_pnadc": { "type": ["number", "null"] },
+      "reconstrucao_ep": { "type": ["number", "null"] },
+      "mapa": { "type": ["number", "null"] },
+      "explicacao": { "type": "string" }
+    }
+  }
+}

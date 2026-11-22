@@ -1,0 +1,82 @@
+[
+  {
+    "indicador": "total",
+    "ano_ref": 2023,
+    "fjp_publicado": 50099.0,
+    "fjp_fonte": "FUNDAÇÃO JOÃO PINHEIRO. Déficit habitacional no Brasil 2023. Belo Horizonte: FJP, 2025 (relatório completo, versão de 25/09/2025). Dados básicos: PNADc 2023 (IBGE, 2024) e CadÚnico 2023.",
+    "fjp_tabela": "Tabela 1",
+    "fjp_pagina": "16",
+    "explicacao": "A FJP soma os improvisados do CadÚnico, que a PNADc não capta.",
+    "mapa": 46789.740000000005,
+    "reconstrucao_pnadc": 46789.740000000005,
+    "reconstrucao_ep": null
+  },
+  {
+    "indicador": "habitacao_precaria",
+    "ano_ref": 2023,
+    "fjp_publicado": 11936.0,
+    "fjp_subcomponentes": [
+      {
+        "nome": "improvisados",
+        "valor": 5812.0
+      },
+      {
+        "nome": "rústicos",
+        "valor": 6124.0
+      }
+    ],
+    "fjp_fonte": "FUNDAÇÃO JOÃO PINHEIRO. Déficit habitacional no Brasil 2023. Belo Horizonte: FJP, 2025 (relatório completo, versão de 25/09/2025). Dados básicos: PNADc 2023 (IBGE, 2024) e CadÚnico 2023.",
+    "fjp_tabela": "Tabelas 1 e 13",
+    "fjp_pagina": "16 e 46",
+    "explicacao": "Comparar com os rústicos (6.124): mesmo conceito; improvisados vêm do CadÚnico.",
+    "mapa": 5454.27,
+    "reconstrucao_pnadc": 5454.27,
+    "reconstrucao_ep": null
+  },
+  {
+    "indicador": "coabitacao",
+    "ano_ref": 2023,
+    "fjp_publicado": 5666.0,
+    "fjp_fonte": "FUNDAÇÃO JOÃO PINHEIRO. Déficit habitacional no Brasil 2023. Belo Horizonte: FJP, 2025 (relatório completo, versão de 25/09/2025). Dados básicos: PNADc 2023 (IBGE, 2024) e CadÚnico 2023.",
+    "fjp_tabela": "Tabelas 1 e 15",
+    "fjp_pagina": "16 e 52",
+    "explicacao": "Núcleos reconstruídos pela descrição secundária (E19); FJP dentro da faixa de 95%.",
+    "mapa": 6890.99,
+    "reconstrucao_pnadc": 6890.99,
+    "reconstrucao_ep": 1408.8
+  },
+  {
+    "indicador": "onus",
+    "ano_ref": 2023,
+    "fjp_publicado": 32498.0,
+    "fjp_fonte": "FUNDAÇÃO JOÃO PINHEIRO. Déficit habitacional no Brasil 2023. Belo Horizonte: FJP, 2025 (relatório completo, versão de 25/09/2025). Dados básicos: PNADc 2023 (IBGE, 2024) e CadÚnico 2023.",
+    "fjp_tabela": "Tabela 1",
+    "fjp_pagina": "16",
+    "explicacao": "FJP dentro da faixa de 95%.",
+    "mapa": 34444.48,
+    "reconstrucao_pnadc": 34444.48,
+    "reconstrucao_ep": 2989.7
+  },
+  {
+    "indicador": "domicilios",
+    "ano_ref": 2023,
+    "fjp_publicado": 462956.0,
+    "fjp_subcomponentes": [
+      {
+        "nome": "PNADc",
+        "valor": 457144.0
+      },
+      {
+        "nome": "improvisados",
+        "valor": 5812.0
+      }
+    ],
+    "fjp_fonte": "FUNDAÇÃO JOÃO PINHEIRO. Déficit habitacional no Brasil 2023. Belo Horizonte: FJP, 2025 (relatório completo, versão de 25/09/2025). Dados básicos: PNADc 2023 (IBGE, 2024) e CadÚnico 2023.",
+    "fjp_tabela": "Apêndice A",
+    "fjp_pagina": "72",
+    "explicacao": "A FJP soma os improvisados; diferença de visita da PNADc a conferir.",
+    "mapa": 444688.6,
+    "reconstrucao_pnadc": 444688.6,
+    "reconstrucao_ep": null
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "dominios": [
+    {
+      "conjunto_id": "al_rm_maceio",
+      "nome": "RM de Maceió",
+      "edicoes": [
+        { "edicao": "ficticio", "origem": "pacotes/al_rm_maceio/ficticio", "padrao": true }
+      ]
+    },
+    {
+      "conjunto_id": "teste_pequeno",
+      "nome": "Teste pequeno (20 hexágonos)",
+      "edicoes": [
+        { "edicao": "ficticio", "origem": "pacotes/teste_pequeno/ficticio", "padrao": true }
+      ]
+    }
+  ]
+}

@@ -15,7 +15,7 @@ A página que se lê em um minuto: quanto déficit há, onde está o principal, 
    - **FJP (publicado)**, com fonte, página e link; quando nulo: "a preencher" em cinza;
    - **Reconstrução na PNADc** (a regra da FJP aplicada pelo moradinha aos microdados da PNADc);
    - **Total do mapa** (o que o site mostra).
-   Abaixo, o texto `explicacao` e um bloco fixo: "Os totais do mapa seguem a métrica da FJP, mas não são o número da FJP: a coabitação é reconstruída a partir dos núcleos familiares, a precariedade de 2022 vem da amostra do Censo e os totais da RM têm o ruído da amostra da PNADc."
+   Quando houver `fjp_subcomponentes`, eles aparecem abaixo do número da FJP (ex.: improvisados e rústicos na habitação precária). Ao lado da reconstrução, a faixa de 95% e a frase "o número da FJP cai dentro / fora da faixa da reconstrução". Abaixo, o texto `explicacao` e um bloco fixo: "Os totais do mapa seguem a métrica da FJP, mas não são o número da FJP: a coabitação é reconstruída a partir dos núcleos familiares, a precariedade de 2022 vem da amostra do Censo e os totais da RM têm o ruído da amostra da PNADc."
 5. **Marcas de cuidado** do domínio, agrupadas por gravidade, cada uma com uma frase do que significa para o leitor.
 6. **Números para citar:** tabela com os principais totais e faixas, cada linha com edição e data; botão "Copiar" que copia a linha no formato `Déficit total, RM de Maceió, 2025: 48.638 domicílios (moradinha, edição 580a7cc, 20/11/2026).`
 

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moradinha/contrato/v1/consistencia.schema.json",
+  "title": "consistencia.json",
+  "type": "object",
+  "required": ["spearman", "razoes"],
+  "additionalProperties": false,
+  "properties": {
+    "spearman": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["periodos", "matriz"],
+        "properties": {
+          "periodos": { "type": "array", "items": { "type": "string" } },
+          "matriz": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": ["number", "null"] } }
+          }
+        }
+      }
+    },
+    "razoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["componente", "periodo", "razao_total", "mediana", "p5", "p95", "n_hexagonos"],
+        "properties": {
+          "componente": { "enum": ["coabitacao", "onus", "precariedade"] },
+          "periodo": { "type": "string" },
+          "razao_total": { "type": "number" },
+          "mediana": { "type": "number" },
+          "p5": { "type": "number" },
+          "p95": { "type": "number" },
+          "n_hexagonos": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

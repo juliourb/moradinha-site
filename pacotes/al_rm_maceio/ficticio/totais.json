@@ -1,0 +1,330 @@
+{
+  "totais": [
+    {
+      "componente": "coabitacao",
+      "periodo": "2022",
+      "regime": "c",
+      "total": 8391.73,
+      "ep": 1593.9,
+      "cv": 18.99,
+      "ic_inf": 5267.69,
+      "ic_sup": 11515.77,
+      "marcas": [
+        "total_fragil"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "2023",
+      "regime": "c",
+      "total": 6890.99,
+      "ep": 1408.8,
+      "cv": 20.44,
+      "ic_inf": 4129.74,
+      "ic_sup": 9652.24,
+      "marcas": [
+        "total_fragil",
+        "mudanca_no_ruido",
+        "fonte_estoque_diferente"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "2024",
+      "regime": "c",
+      "total": 6746.24,
+      "ep": 1289.8,
+      "cv": 19.12,
+      "ic_inf": 4218.23,
+      "ic_sup": 9274.25,
+      "marcas": [
+        "total_fragil",
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "2025",
+      "regime": "c",
+      "total": 7707.19,
+      "ep": 1497.0,
+      "cv": 19.42,
+      "ic_inf": 4773.07,
+      "ic_sup": 10641.31,
+      "marcas": [
+        "total_fragil",
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "m2024",
+      "regime": "c",
+      "total": 7342.99,
+      "ep": 816.7,
+      "cv": 11.12,
+      "ic_inf": 5742.26,
+      "ic_sup": 8943.72,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "m2025",
+      "regime": "c",
+      "total": 7114.81,
+      "ep": 852.2,
+      "cv": 11.98,
+      "ic_inf": 5444.5,
+      "ic_sup": 8785.12,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "componente": "onus",
+      "periodo": "2022",
+      "regime": "c",
+      "total": 27770.24,
+      "ep": 3258.2,
+      "cv": 11.73,
+      "ic_inf": 21384.17,
+      "ic_sup": 34156.31,
+      "marcas": []
+    },
+    {
+      "componente": "onus",
+      "periodo": "2023",
+      "regime": "c",
+      "total": 34444.48,
+      "ep": 2989.7,
+      "cv": 8.68,
+      "ic_inf": 28584.67,
+      "ic_sup": 40304.29,
+      "marcas": [
+        "mudanca_no_ruido",
+        "fonte_estoque_diferente"
+      ]
+    },
+    {
+      "componente": "onus",
+      "periodo": "2024",
+      "regime": "c",
+      "total": 29827.39,
+      "ep": 3525.3,
+      "cv": 11.82,
+      "ic_inf": 22917.8,
+      "ic_sup": 36736.98,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "periodo": "2025",
+      "regime": "c",
+      "total": 35356.44,
+      "ep": 3073.5,
+      "cv": 8.69,
+      "ic_inf": 29332.38,
+      "ic_sup": 41380.5,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "periodo": "m2024",
+      "regime": "c",
+      "total": 30680.7,
+      "ep": 1907.5,
+      "cv": 6.22,
+      "ic_inf": 26942.0,
+      "ic_sup": 34419.4,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "componente": "onus",
+      "periodo": "m2025",
+      "regime": "c",
+      "total": 33209.44,
+      "ep": 2013.7,
+      "cv": 6.06,
+      "ic_inf": 29262.59,
+      "ic_sup": 37156.29,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2022",
+      "regime": "amostra",
+      "total": 5081.73,
+      "ep": 263.3,
+      "cv": 5.18,
+      "ic_inf": 4565.66,
+      "ic_sup": 5597.8,
+      "marcas": []
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2023",
+      "regime": "c",
+      "total": 5454.27,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa",
+        "fonte_estoque_diferente"
+      ]
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2024",
+      "regime": "c",
+      "total": 5322.92,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa"
+      ]
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2025",
+      "regime": "c",
+      "total": 5573.96,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa"
+      ]
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "m2024",
+      "regime": "c",
+      "total": 5286.31,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa",
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "m2025",
+      "regime": "c",
+      "total": 5450.38,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa",
+        "media_inclui_fonte_diferente"
+      ]
+    }
+  ],
+  "domicilios": [
+    {
+      "periodo": "2022",
+      "total": 427204.0
+    },
+    {
+      "periodo": "2023",
+      "total": 444688.6
+    },
+    {
+      "periodo": "2024",
+      "total": 446574.5
+    },
+    {
+      "periodo": "2025",
+      "total": 466575.0
+    },
+    {
+      "periodo": "m2024",
+      "total": 439489.0
+    },
+    {
+      "periodo": "m2025",
+      "total": 452612.7
+    }
+  ],
+  "mudancas": [
+    {
+      "componente": "coabitacao",
+      "de": "2022",
+      "para": "2023",
+      "delta": -1500.74,
+      "z": 0.705,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "de": "2023",
+      "para": "2024",
+      "delta": -144.75,
+      "z": 0.076,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "de": "2024",
+      "para": "2025",
+      "delta": 960.95,
+      "z": 0.486,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "de": "2022",
+      "para": "2023",
+      "delta": 6674.24,
+      "z": 1.509,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "de": "2023",
+      "para": "2024",
+      "delta": -4617.09,
+      "z": 0.999,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "de": "2024",
+      "para": "2025",
+      "delta": 5529.05,
+      "z": 1.182,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    }
+  ]
+}
