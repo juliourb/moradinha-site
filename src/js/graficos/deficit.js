@@ -4,6 +4,7 @@ import * as d3 from "d3";
 import { formatar, rotuloCurto } from "../util/formato.js";
 import { valorHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
+import { alternarFaixa } from "../util/faixas.js";
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
@@ -20,9 +21,13 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
     box.innerHTML = `<p class="empty">Nenhum hexágono acima de zero nesta combinação.</p>`;
     return;
   }
-  const x = d3.scaleLinear().domain([0, (d3.quantile(vs.slice().sort(d3.ascending), 0.99) || vs[0]) * 1.05]).nice().range([m.l, W - m.r]);
+  const p99 = d3.quantile(vs.slice().sort(d3.ascending), 0.99) || vs[0];
+  const x = d3.scaleLinear().domain([0, p99 * 1.05]).nice().range([m.l, W - m.r]);
+  // N2: eixo cortado no p99; os valores acima entram na última barra ("p99 ou mais").
   const bins = d3.bin().domain(x.domain()).thresholds(x.ticks(28))(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
+  const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
+  const faixaSelecionada = (b) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b.x0);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hexágonos");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(6).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
@@ -36,13 +41,14 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
     .attr("y", (b) => y(b.length))
     .attr("height", (b) => y(0) - y(b.length))
     .attr("fill", css("--accent"))
-    .attr("stroke", (b) => (estado.faixa_hist && estado.faixa_hist[0] === b.x0 ? css("--ink") : "none"))
+    .attr("stroke", (b) => (faixaSelecionada(b) ? css("--ink") : "none"))
     .attr("stroke-width", 2)
     .style("cursor", "pointer")
-    .attr("opacity", (b) => (estado.faixa_hist && estado.faixa_hist[0] !== b.x0 ? 0.35 : 1))
-    .on("click", (_e, b) => aoClicarBarra(estado.faixa_hist && estado.faixa_hist[0] === b.x0 ? null : [b.x0, b.x1]))
+    .attr("opacity", (b) => (!estado.faixa_hist?.length || faixaSelecionada(b) ? 1 : 0.35))
+    .on("click", (_e, b) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b.x0, b === ultimoBin ? null : b.x1])))
     .append("title")
-    .text((b) => `${b.length} hexágonos entre ${formatar(b.x0, 1)} e ${formatar(b.x1, 1)}`);
+    .text((b) => (b === ultimoBin ? `${b.length} hexágonos de ${formatar(b.x0, 1)} (p99 ou mais)` : `${b.length} hexágonos entre ${formatar(b.x0, 1)} e ${formatar(b.x1, 1)}`));
+  svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("p99 ou mais →");
   box.replaceChildren(svg.node());
 }
 
@@ -57,7 +63,8 @@ export function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
   box.innerHTML = `<tbody>${rs
     .map(
       (d, i) =>
-        `<tr data-h3="${d.l.h3}" tabindex="0"><td>${i + 1}</td><td>${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod}${
+        // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
+        `<tr data-h3="${d.l.h3}" tabindex="0"><td>${i + 1}</td><td>${d.l.municipioNome} · ${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod} · <span class="num" style="font-size:10px;color:var(--muted)">${d.l.h3.slice(-6)}</span>${
           d.l.fcuFracao > 0 ? " · FCU" : ""
         }</td><td style="width:45%"><div class="b" style="width:${(100 * d.v) / mx}%"></div></td><td style="text-align:right">${formatar(
           d.v,
@@ -230,17 +237,24 @@ export function renderizarCurvaConcentracao(box, linhasArr, componente, periodo)
 export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const isRel = estado.medida === "relativo";
+  const todosValores = [];
   const st = manifesto.periodos.map((p) => {
     const vs = linhasArr.map((l) => valorHex(l, estado.componente, p.id, estado.medida)).filter((v) => v != null && v > 0).sort(d3.ascending);
+    todosValores.push(...vs);
     const q = (f) => d3.quantileSorted(vs, f);
     return { id: p.id, lab: p.rotulo, media: p.tipo === "media", critico: p.marcas?.includes("fonte_estoque_diferente"), q10: q(0.1), q25: q(0.25), q50: q(0.5), q75: q(0.75), q90: q(0.9) };
   });
   const W = Math.max(260, box.clientWidth || 300);
   const H = 122;
-  const m = { l: 40, r: 6, t: 8, b: 22 };
+  const m = { l: 40, r: 6, t: 14, b: 22 };
   const x = d3.scaleBand().domain(st.map((s) => s.id)).range([m.l, W - m.r]).padding(0.35);
-  const y = d3.scaleLinear().domain([0, d3.max(st, (s) => s.q90 ?? 0) * 1.1 || 1]).nice().range([H - m.b, m.t]);
-  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribuição dos hexágonos por período");
+  // N4: eixo cortado no p99 (do conjunto de todos os períodos), para as caixas ficarem comparáveis
+  // mesmo quando um período tem um valor bem fora da curva.
+  todosValores.sort(d3.ascending);
+  const p99 = todosValores.length ? d3.quantileSorted(todosValores, 0.99) : 1;
+  const y = d3.scaleLinear().domain([0, Math.max(p99 * 1.1, d3.max(st, (s) => s.q90 ?? 0) ?? 0, 1)]).nice().range([H - m.b, m.t]);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribuição dos hexágonos por período, eixo cortado no p99");
+  svg.append("text").attr("x", W - m.r).attr("y", 9).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("eixo cortado no p99");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((v) => formatar(v, isRel ? 1 : 1)));
   svg
     .append("g")

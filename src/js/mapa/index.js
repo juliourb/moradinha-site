@@ -12,6 +12,7 @@ import { cellToLatLng } from "h3-js";
 import { formatar, formatarPercentual } from "../util/formato.js";
 import { brutoHex, faixaHex, marcasHex, totalDoMapa } from "../dados/calculo.js";
 import { rotuloMarca } from "../util/marcas.js";
+import { valorDentroFaixas } from "../util/faixas.js";
 import {
   classeHex, calcularEscalasAbsolutas, calcularEscalasRelativas, taxaDominio,
   indiceClasse, indiceClasseVezesTaxa, CORTES_VEZES_TAXA, resumoLegendaClasses,
@@ -71,7 +72,7 @@ function temaEscuro() {
   return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosAp, contornosMunicipios, contornosFcu }) {
+export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes }) {
   const linhasArr = [...linhas.values()];
   const apGrupos = [];
   for (const [, idsPorAp] of agruparPorAp(linhasArr)) apGrupos.push({ ids: idsPorAp });
@@ -176,12 +177,18 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     return { tipo: "relativo_quebras", quebras: escalasRelativas.get(estado.componente) ?? [] };
   }
 
+  function alfasPara(estado) {
+    const base = Math.round(255 * (estado.opacidade ?? 0.8));
+    return { base, apagado: Math.round(base * 0.21) };
+  }
+
   function corHexDeficit(l, periodo, estado, v, contexto) {
     const dom = l.dom[periodo];
     const bruto = brutoHex(l, estado.componente, periodo);
     const classe = classeHex(dom, bruto);
-    let alfa = 215;
-    if (estado.faixa_hist && !(v != null && v >= estado.faixa_hist[0] && v < estado.faixa_hist[1])) alfa = 45;
+    const { base, apagado } = alfasPara(estado);
+    let alfa = base;
+    if (!valorDentroFaixas(v, estado.faixa_hist)) alfa = apagado;
     if (classe === "sem_dado") return [...rgb(css("--muted")), 110];
     if (classe === "hachura") return [...rgb(css("--muted")), alfa];
     if (classe === "menos_de_1") return [...rgb(css("--line")), Math.max(alfa, 160)];
@@ -214,8 +221,9 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     if (estado.tema === "deficit") return corHexDeficit(l, periodo, estado, v, contexto);
     const c = corPara(v, qualidade);
     if (!c) return [...rgb(css("--line")), 70];
-    let alfa = 215;
-    if (estado.faixa_hist && !(v >= estado.faixa_hist[0] && v < estado.faixa_hist[1])) alfa = 45;
+    const { base, apagado } = alfasPara(estado);
+    let alfa = base;
+    if (!valorDentroFaixas(v, estado.faixa_hist)) alfa = apagado;
     return [...rgb(c), alfa];
   }
 
@@ -274,7 +282,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         updateTriggers: {
           getFillColor: [
             periodo, estado.tema, estado.medida, estado.componente, estado.medida_qualidade,
-            estado.faixa_hist, tipoMedida, estado.relativo_modo, faixaEscala.join(","),
+            JSON.stringify(estado.faixa_hist), tipoMedida, estado.relativo_modo, estado.opacidade, faixaEscala.join(","),
           ],
         },
         extruded: false,
@@ -312,18 +320,31 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         );
       }
     }
-    if (estado.camadas.ap && apGrupos.length) {
-      L.push(
-        new H3ClusterLayer({
-          id: "ap-" + lado,
-          data: apGrupos,
-          getHexagons: (d) => d.ids,
-          filled: false,
-          stroked: true,
-          getLineColor: [...rgb(css("--apline")), 200],
-          lineWidthMinPixels: 1.2,
-        })
-      );
+    if (estado.camadas.ap) {
+      if (contornosAp) {
+        L.push(
+          new GeoJsonLayer({
+            id: "ap-" + lado,
+            data: contornosAp,
+            filled: false,
+            stroked: true,
+            getLineColor: [...rgb(css("--apline")), 200],
+            lineWidthMinPixels: 1.2,
+          })
+        );
+      } else if (apGrupos.length) {
+        L.push(
+          new H3ClusterLayer({
+            id: "ap-" + lado,
+            data: apGrupos,
+            getHexagons: (d) => d.ids,
+            filled: false,
+            stroked: true,
+            getLineColor: [...rgb(css("--apline")), 200],
+            lineWidthMinPixels: 1.2,
+          })
+        );
+      }
     }
     if (estado.camadas.municipios && contornosMunicipios) {
       L.push(
@@ -338,35 +359,74 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
       );
     }
     if (estado.camadas.fcu) {
-      L.push(
-        new H3HexagonLayer({
-          id: "fcu-" + lado,
-          data: linhasArr.filter((l) => l.fcuFracao > 0),
-          getHexagon: (l) => l.h3,
-          extruded: false,
-          highPrecision: true,
-          filled: false,
-          stroked: true,
-          getLineColor: rgb(css("--fcu")),
-          lineWidthMinPixels: 2.2,
-        })
-      );
+      if (contornosFcu) {
+        L.push(
+          new GeoJsonLayer({
+            id: "fcu-" + lado,
+            data: contornosFcu,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb(css("--fcu")),
+            lineWidthMinPixels: 2.2,
+          })
+        );
+      } else {
+        L.push(
+          new H3HexagonLayer({
+            id: "fcu-" + lado,
+            data: linhasArr.filter((l) => l.fcuFracao > 0),
+            getHexagon: (l) => l.h3,
+            extruded: false,
+            highPrecision: true,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb(css("--fcu")),
+            lineWidthMinPixels: 2.2,
+          })
+        );
+      }
     }
     for (const recorte of manifesto.recortes ?? []) {
       if (!estado.camadas[recorte.id]) continue;
-      const ids = linhasArr.filter((l) => l.recortes.includes(recorte.id)).map((l) => l.h3);
-      if (!ids.length) continue;
-      L.push(
-        new H3ClusterLayer({
-          id: "recorte-" + recorte.id + "-" + lado,
-          data: [{ ids }],
-          getHexagons: (d) => d.ids,
-          filled: false,
-          stroked: true,
-          getLineColor: rgb(css("--bk")),
-          lineWidthMinPixels: 3,
-        })
-      );
+      const featuresDoRecorte = contornosRecortes?.features?.filter((f) => f.properties?.id === recorte.id) ?? [];
+      if (featuresDoRecorte.length) {
+        L.push(
+          new GeoJsonLayer({
+            id: "recorte-" + recorte.id + "-" + lado,
+            data: { type: "FeatureCollection", features: featuresDoRecorte },
+            filled: false,
+            stroked: true,
+            getLineColor: rgb(css("--bk")),
+            lineWidthMinPixels: 3,
+            pickable: true,
+            onHover: ({ object, x, y }) => {
+              if (!elementos.tooltip) return;
+              if (!object) {
+                elementos.tooltip.setAttribute("hidden", "");
+                return;
+              }
+              elementos.tooltip.removeAttribute("hidden");
+              elementos.tooltip.style.left = `${x}px`;
+              elementos.tooltip.style.top = `${y}px`;
+              elementos.tooltip.innerHTML = `<b>${recorte.nome}</b><div class="linha">${recorte.motivo ?? ""}</div>`;
+            },
+          })
+        );
+      } else {
+        const ids = linhasArr.filter((l) => l.recortes.includes(recorte.id)).map((l) => l.h3);
+        if (!ids.length) continue;
+        L.push(
+          new H3ClusterLayer({
+            id: "recorte-" + recorte.id + "-" + lado,
+            data: [{ ids }],
+            getHexagons: (d) => d.ids,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb(css("--bk")),
+            lineWidthMinPixels: 3,
+          })
+        );
+      }
     }
     if (estado.selecionado) {
       const l = linhas.get(estado.selecionado);
@@ -514,7 +574,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     )}${unidade}</span><span>${formatar(t[6], 1)}${unidade}</span></div><div class="note" style="margin-top:4px">Classes por sétimos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
   }
 
-  function renderizarCamadasUI(estado, aoMudar) {
+  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBaseCinza) {
     const extras = [];
     extras.push(
       `<label><input type="checkbox" data-camada="ap" ${estado.camadas.ap ? "checked" : ""}> <span class="sw" style="border-color:var(--apline)"></span> Áreas de ponderação</label>`
@@ -534,10 +594,17 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         }> <span class="sw" style="border-color:var(--bk)"></span> ${recorte.nome}</label>`
       );
     }
-    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}`;
+    const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
+    const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
+    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}${opacidadeHtml}${cinzaHtml}`;
     elementos.layers.querySelectorAll("input[data-camada]").forEach((el) => {
       el.onchange = () => aoMudar(el.dataset.camada, el.checked);
     });
+    const opEl = elementos.layers.querySelector("#f1-opacidade");
+    if (opEl && aoMudarOpacidade) opEl.oninput = () => aoMudarOpacidade(Number(opEl.value));
+    const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
+    if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
+    elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
   }
 
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {

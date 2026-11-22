@@ -12969,12 +12969,14 @@ async function carregarPacoteCompleto(origem) {
     consultar(`SELECT * FROM read_parquet('${urlParquet(origem, "ap.parquet")}')`)
   ]);
   const { linhas, ap: ap2 } = montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows });
-  const [contornosAp, contornosMunicipios, contornosFcu] = await Promise.all([
-    carregarJSON(origem, "contornos/ap.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/municipios.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/fcu.geojson").catch(() => null)
+  const temArquivo = (nome) => nome in (manifesto.arquivos ?? {});
+  const [contornosAp, contornosMunicipios, contornosFcu, contornosRecortes] = await Promise.all([
+    temArquivo("contornos/ap.geojson") ? carregarJSON(origem, "contornos/ap.geojson").catch(() => null) : null,
+    temArquivo("contornos/municipios.geojson") ? carregarJSON(origem, "contornos/municipios.geojson").catch(() => null) : null,
+    temArquivo("contornos/fcu.geojson") ? carregarJSON(origem, "contornos/fcu.geojson").catch(() => null) : null,
+    temArquivo("contornos/recortes.geojson") ? carregarJSON(origem, "contornos/recortes.geojson").catch(() => null) : null
   ]);
-  return { manifesto, totais, qualidade, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu };
+  return { manifesto, totais, qualidade, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes };
 }
 
 // src/js/dados/catalogo.js
@@ -13047,10 +13049,12 @@ function estadoInicial(manifesto) {
     conjunto_graficos: 0,
     medida: "absoluto",
     relativo_modo: "quebras",
+    opacidade: 0.8,
+    mapa_base_cinza: false,
     componente: "total",
     periodo: periodoPadrao,
     selecionado: null,
-    faixa_hist: null,
+    faixa_hist: [],
     camadas,
     ...salvo,
     comparar: null
@@ -102904,6 +102908,18 @@ var PRIORIDADE_MARCAS = Object.freeze([
   "sem_dado"
 ]);
 
+// src/js/util/faixas.js
+function valorDentroFaixas(v4, faixas) {
+  if (!faixas?.length) return true;
+  if (v4 == null) return false;
+  return faixas.some(([x0, x1]) => v4 >= x0 && (x1 == null || v4 < x1));
+}
+function alternarFaixa(faixas, faixa) {
+  const atuais = faixas ?? [];
+  const existe = atuais.some(([x0]) => x0 === faixa[0]);
+  return existe ? atuais.filter(([x0]) => x0 !== faixa[0]) : [...atuais, faixa];
+}
+
 // node_modules/simple-statistics/dist/simple-statistics.mjs
 function makeMatrix(columns, rows) {
   const matrix = [];
@@ -103212,7 +103228,7 @@ function temaEscuro() {
   const t4 = document.documentElement.getAttribute("data-theme");
   return t4 ? t4 === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
 }
-function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp, contornosMunicipios, contornosFcu }) {
+function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes }) {
   const linhasArr = [...linhas.values()];
   const apGrupos = [];
   for (const [, idsPorAp] of agruparPorAp(linhasArr)) apGrupos.push({ ids: idsPorAp });
@@ -103304,12 +103320,17 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     }
     return { tipo: "relativo_quebras", quebras: escalasRelativas.get(estado.componente) ?? [] };
   }
+  function alfasPara(estado) {
+    const base = Math.round(255 * (estado.opacidade ?? 0.8));
+    return { base, apagado: Math.round(base * 0.21) };
+  }
   function corHexDeficit(l3, periodo, estado, v4, contexto) {
     const dom = l3.dom[periodo];
     const bruto = brutoHex(l3, estado.componente, periodo);
     const classe = classeHex(dom, bruto);
-    let alfa = 215;
-    if (estado.faixa_hist && !(v4 != null && v4 >= estado.faixa_hist[0] && v4 < estado.faixa_hist[1])) alfa = 45;
+    const { base, apagado } = alfasPara(estado);
+    let alfa = base;
+    if (!valorDentroFaixas(v4, estado.faixa_hist)) alfa = apagado;
     if (classe === "sem_dado") return [...rgb3(css("--muted")), 110];
     if (classe === "hachura") return [...rgb3(css("--muted")), alfa];
     if (classe === "menos_de_1") return [...rgb3(css("--line")), Math.max(alfa, 160)];
@@ -103340,8 +103361,9 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     if (estado.tema === "deficit") return corHexDeficit(l3, periodo, estado, v4, contexto);
     const c3 = corPara(v4, qualidade);
     if (!c3) return [...rgb3(css("--line")), 70];
-    let alfa = 215;
-    if (estado.faixa_hist && !(v4 >= estado.faixa_hist[0] && v4 < estado.faixa_hist[1])) alfa = 45;
+    const { base, apagado } = alfasPara(estado);
+    let alfa = base;
+    if (!valorDentroFaixas(v4, estado.faixa_hist)) alfa = apagado;
     return [...rgb3(c3), alfa];
   }
   function montarTooltipHtml(l3, periodo, estado, obterValor) {
@@ -103399,9 +103421,10 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
             estado.medida,
             estado.componente,
             estado.medida_qualidade,
-            estado.faixa_hist,
+            JSON.stringify(estado.faixa_hist),
             tipoMedida,
             estado.relativo_modo,
+            estado.opacidade,
             faixaEscala.join(",")
           ]
         },
@@ -103440,18 +103463,31 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
         );
       }
     }
-    if (estado.camadas.ap && apGrupos.length) {
-      L4.push(
-        new h3_cluster_layer_default({
-          id: "ap-" + lado,
-          data: apGrupos,
-          getHexagons: (d3) => d3.ids,
-          filled: false,
-          stroked: true,
-          getLineColor: [...rgb3(css("--apline")), 200],
-          lineWidthMinPixels: 1.2
-        })
-      );
+    if (estado.camadas.ap) {
+      if (contornosAp) {
+        L4.push(
+          new geojson_layer_default({
+            id: "ap-" + lado,
+            data: contornosAp,
+            filled: false,
+            stroked: true,
+            getLineColor: [...rgb3(css("--apline")), 200],
+            lineWidthMinPixels: 1.2
+          })
+        );
+      } else if (apGrupos.length) {
+        L4.push(
+          new h3_cluster_layer_default({
+            id: "ap-" + lado,
+            data: apGrupos,
+            getHexagons: (d3) => d3.ids,
+            filled: false,
+            stroked: true,
+            getLineColor: [...rgb3(css("--apline")), 200],
+            lineWidthMinPixels: 1.2
+          })
+        );
+      }
     }
     if (estado.camadas.municipios && contornosMunicipios) {
       L4.push(
@@ -103466,35 +103502,74 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
       );
     }
     if (estado.camadas.fcu) {
-      L4.push(
-        new h3_hexagon_layer_default({
-          id: "fcu-" + lado,
-          data: linhasArr.filter((l3) => l3.fcuFracao > 0),
-          getHexagon: (l3) => l3.h3,
-          extruded: false,
-          highPrecision: true,
-          filled: false,
-          stroked: true,
-          getLineColor: rgb3(css("--fcu")),
-          lineWidthMinPixels: 2.2
-        })
-      );
+      if (contornosFcu) {
+        L4.push(
+          new geojson_layer_default({
+            id: "fcu-" + lado,
+            data: contornosFcu,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--fcu")),
+            lineWidthMinPixels: 2.2
+          })
+        );
+      } else {
+        L4.push(
+          new h3_hexagon_layer_default({
+            id: "fcu-" + lado,
+            data: linhasArr.filter((l3) => l3.fcuFracao > 0),
+            getHexagon: (l3) => l3.h3,
+            extruded: false,
+            highPrecision: true,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--fcu")),
+            lineWidthMinPixels: 2.2
+          })
+        );
+      }
     }
     for (const recorte of manifesto.recortes ?? []) {
       if (!estado.camadas[recorte.id]) continue;
-      const ids = linhasArr.filter((l3) => l3.recortes.includes(recorte.id)).map((l3) => l3.h3);
-      if (!ids.length) continue;
-      L4.push(
-        new h3_cluster_layer_default({
-          id: "recorte-" + recorte.id + "-" + lado,
-          data: [{ ids }],
-          getHexagons: (d3) => d3.ids,
-          filled: false,
-          stroked: true,
-          getLineColor: rgb3(css("--bk")),
-          lineWidthMinPixels: 3
-        })
-      );
+      const featuresDoRecorte = contornosRecortes?.features?.filter((f4) => f4.properties?.id === recorte.id) ?? [];
+      if (featuresDoRecorte.length) {
+        L4.push(
+          new geojson_layer_default({
+            id: "recorte-" + recorte.id + "-" + lado,
+            data: { type: "FeatureCollection", features: featuresDoRecorte },
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--bk")),
+            lineWidthMinPixels: 3,
+            pickable: true,
+            onHover: ({ object: object2, x: x5, y: y5 }) => {
+              if (!elementos.tooltip) return;
+              if (!object2) {
+                elementos.tooltip.setAttribute("hidden", "");
+                return;
+              }
+              elementos.tooltip.removeAttribute("hidden");
+              elementos.tooltip.style.left = `${x5}px`;
+              elementos.tooltip.style.top = `${y5}px`;
+              elementos.tooltip.innerHTML = `<b>${recorte.nome}</b><div class="linha">${recorte.motivo ?? ""}</div>`;
+            }
+          })
+        );
+      } else {
+        const ids = linhasArr.filter((l3) => l3.recortes.includes(recorte.id)).map((l3) => l3.h3);
+        if (!ids.length) continue;
+        L4.push(
+          new h3_cluster_layer_default({
+            id: "recorte-" + recorte.id + "-" + lado,
+            data: [{ ids }],
+            getHexagons: (d3) => d3.ids,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--bk")),
+            lineWidthMinPixels: 3
+          })
+        );
+      }
     }
     if (estado.selecionado) {
       const l3 = linhas.get(estado.selecionado);
@@ -103615,7 +103690,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
       1
     )}${unidade}</span><span>${formatar(t4[6], 1)}${unidade}</span></div><div class="note" style="margin-top:4px">Classes por s\xE9timos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
   }
-  function renderizarCamadasUI(estado, aoMudar) {
+  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBaseCinza) {
     const extras = [];
     extras.push(
       `<label><input type="checkbox" data-camada="ap" ${estado.camadas.ap ? "checked" : ""}> <span class="sw" style="border-color:var(--apline)"></span> \xC1reas de pondera\xE7\xE3o</label>`
@@ -103633,10 +103708,17 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
         `<label title="${recorte.motivo ?? ""}"><input type="checkbox" data-camada="${recorte.id}" ${estado.camadas[recorte.id] ? "checked" : ""}> <span class="sw" style="border-color:var(--bk)"></span> ${recorte.nome}</label>`
       );
     }
-    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}`;
+    const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
+    const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
+    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}${opacidadeHtml}${cinzaHtml}`;
     elementos.layers.querySelectorAll("input[data-camada]").forEach((el2) => {
       el2.onchange = () => aoMudar(el2.dataset.camada, el2.checked);
     });
+    const opEl = elementos.layers.querySelector("#f1-opacidade");
+    if (opEl && aoMudarOpacidade) opEl.oninput = () => aoMudarOpacidade(Number(opEl.value));
+    const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
+    if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
+    elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
   }
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
     computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
@@ -103828,21 +103910,21 @@ function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
   elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option>` + manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
   elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id3) => `<option value="${id3}">${NOME_MEDIDA_QUALIDADE[id3]}</option>`).join("");
   elementos.segTema.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: null });
+    b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
   });
   elementos.segMedida.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: null });
+    b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: [] });
   });
   elementos.segComponente.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: null });
+    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: [] });
   });
   elementos.selPeriodo.onchange = () => {
     const periodo = elementos.selPeriodo.value;
-    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: null });
+    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: [] });
   };
   elementos.selComparar.onchange = () => {
     const comparar = elementos.selComparar.value || null;
-    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: null });
+    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: [] });
   };
   elementos.selMedidaQualidade.onchange = () => loja.definir({ medida_qualidade: elementos.selMedidaQualidade.value });
   function sincronizar(estado) {
@@ -104234,13 +104316,17 @@ function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
     box.innerHTML = `<p class="empty">Nenhum hex\xE1gono acima de zero nesta combina\xE7\xE3o.</p>`;
     return;
   }
-  const x5 = linear2().domain([0, (quantile(vs9.slice().sort(ascending), 0.99) || vs9[0]) * 1.05]).nice().range([m4.l, W4 - m4.r]);
+  const p99 = quantile(vs9.slice().sort(ascending), 0.99) || vs9[0];
+  const x5 = linear2().domain([0, p99 * 1.05]).nice().range([m4.l, W4 - m4.r]);
   const bins = bin().domain(x5.domain()).thresholds(x5.ticks(28))(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
+  const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
+  const faixaSelecionada = (b10) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b10.x0);
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hex\xE1gonos");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(6).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
-  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => estado.faixa_hist && estado.faixa_hist[0] === b10.x0 ? css3("--ink") : "none").attr("stroke-width", 2).style("cursor", "pointer").attr("opacity", (b10) => estado.faixa_hist && estado.faixa_hist[0] !== b10.x0 ? 0.35 : 1).on("click", (_e4, b10) => aoClicarBarra(estado.faixa_hist && estado.faixa_hist[0] === b10.x0 ? null : [b10.x0, b10.x1])).append("title").text((b10) => `${b10.length} hex\xE1gonos entre ${formatar(b10.x0, 1)} e ${formatar(b10.x1, 1)}`);
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) ? css3("--ink") : "none").attr("stroke-width", 2).style("cursor", "pointer").attr("opacity", (b10) => !estado.faixa_hist?.length || faixaSelecionada(b10) ? 1 : 0.35).on("click", (_e4, b10) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b10.x0, b10 === ultimoBin ? null : b10.x1]))).append("title").text((b10) => b10 === ultimoBin ? `${b10.length} hex\xE1gonos de ${formatar(b10.x0, 1)} (p99 ou mais)` : `${b10.length} hex\xE1gonos entre ${formatar(b10.x0, 1)} e ${formatar(b10.x1, 1)}`);
+  svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("p99 ou mais \u2192");
   box.replaceChildren(svg.node());
 }
 function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
@@ -104248,10 +104334,13 @@ function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
   const rs2 = linhasArr.map((l3) => ({ l: l3, v: valorHex(l3, estado.componente, estado.periodo, estado.medida) })).filter((d3) => d3.v != null).sort((a5, b10) => b10.v - a5.v).slice(0, 5);
   const mx2 = rs2[0]?.v || 1;
   box.innerHTML = `<tbody>${rs2.map(
-    (d3, i3) => `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod}${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
-      d3.v,
-      isRel ? 2 : 0
-    )}${isRel ? " %" : ""}</td></tr>`
+    (d3, i3) => (
+      // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
+      `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod} \xB7 <span class="num" style="font-size:10px;color:var(--muted)">${d3.l.h3.slice(-6)}</span>${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
+        d3.v,
+        isRel ? 2 : 0
+      )}${isRel ? " %" : ""}</td></tr>`
+    )
   ).join("")}</tbody>`;
   box.querySelectorAll("tr").forEach((tr2) => {
     const ir2 = () => aoIrPara(tr2.dataset.h3);
@@ -104358,17 +104447,22 @@ function renderizarCurvaConcentracao(box, linhasArr, componente, periodo) {
 function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const isRel = estado.medida === "relativo";
+  const todosValores = [];
   const st3 = manifesto.periodos.map((p4) => {
     const vs9 = linhasArr.map((l3) => valorHex(l3, estado.componente, p4.id, estado.medida)).filter((v4) => v4 != null && v4 > 0).sort(ascending);
+    todosValores.push(...vs9);
     const q4 = (f4) => quantileSorted(vs9, f4);
     return { id: p4.id, lab: p4.rotulo, media: p4.tipo === "media", critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
   });
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 122;
-  const m4 = { l: 40, r: 6, t: 8, b: 22 };
+  const m4 = { l: 40, r: 6, t: 14, b: 22 };
   const x5 = band().domain(st3.map((s4) => s4.id)).range([m4.l, W4 - m4.r]).padding(0.35);
-  const y5 = linear2().domain([0, max4(st3, (s4) => s4.q90 ?? 0) * 1.1 || 1]).nice().range([H4 - m4.b, m4.t]);
-  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o dos hex\xE1gonos por per\xEDodo");
+  todosValores.sort(ascending);
+  const p99 = todosValores.length ? quantileSorted(todosValores, 0.99) : 1;
+  const y5 = linear2().domain([0, Math.max(p99 * 1.1, max4(st3, (s4) => s4.q90 ?? 0) ?? 0, 1)]).nice().range([H4 - m4.b, m4.t]);
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o dos hex\xE1gonos por per\xEDodo, eixo cortado no p99");
+  svg.append("text").attr("x", W4 - m4.r).attr("y", 9).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("eixo cortado no p99");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(5).tickFormat((v4) => formatar(v4, isRel ? 1 : 1)));
   svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", H4 - 8).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab)).append("title").text((s4) => s4.lab);
   const g5 = svg.append("g").selectAll("g").data(st3).join("g").style("cursor", "pointer").on("click", (_e4, s4) => aoClicarPeriodo(s4.id));
@@ -104412,12 +104506,17 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
     box.innerHTML = `<p class="empty">Sem faixa para esta combina\xE7\xE3o (total ou precariedade provis\xF3ria n\xE3o t\xEAm incerteza).</p>`;
     return;
   }
-  const x5 = linear2().domain(extent(vs9)).nice().range([m4.l, W4 - m4.r]);
-  const bins = bin().domain(x5.domain()).thresholds(20)(vs9);
+  const minimo = min4(vs9);
+  const p99 = quantile(vs9.slice().sort(ascending), 0.99) ?? max4(vs9);
+  const x5 = linear2().domain([minimo, p99]).nice().range([m4.l, W4 - m4.r]);
+  const bins = bin().domain(x5.domain()).thresholds(20)(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
+  const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
+  const faixaSelecionada = (b10) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b10.x0);
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(5).tickFormat((v4) => formatar(v4, 2)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
-  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).style("cursor", "pointer").on("click", (_e4, b10) => aoClicarBarra([b10.x0, b10.x1]));
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) ? css4("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => !estado.faixa_hist?.length || faixaSelecionada(b10) ? 1 : 0.35).style("cursor", "pointer").on("click", (_e4, b10) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b10.x0, b10 === ultimoBin ? null : b10.x1])));
+  svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text("p99 ou mais \u2192");
   box.replaceChildren(svg.node());
 }
 function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
@@ -104531,6 +104630,7 @@ async function iniciarExplorador() {
   const linhasArr = [...linhas.values()];
   const loja = criarLoja(estadoInicial(manifesto));
   window.__moradinhaSelecionarHex = (h32) => loja.definir({ selecionado: h32 });
+  window.__moradinhaEstado = () => loja.obter();
   const elementosPergunta = {
     question: $4("f1-question"),
     segTema: $4("f1-seg-tema"),
@@ -104569,7 +104669,8 @@ async function iniciarExplorador() {
     totais,
     contornosAp: dados.contornosAp,
     contornosMunicipios: dados.contornosMunicipios,
-    contornosFcu: dados.contornosFcu
+    contornosFcu: dados.contornosFcu,
+    contornosRecortes: dados.contornosRecortes
   });
   window.__moradinhaMapas = mapa.instanciasMapLibre;
   const elementosResposta = { lab: $4("f1-ans-lab"), big: $4("f1-ans-big"), range: $4("f1-ans-range"), pills: $4("f1-ans-pills"), cards: $4("f1-cards") };
@@ -104591,8 +104692,8 @@ async function iniciarExplorador() {
     if (estado.conjunto_graficos === 0) {
       renderizarHistograma($4("f1-hist"), estado, linhasArr, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarRanking($4("f1-rank"), estado, linhasArr, ap2, (h32) => loja.definir({ selecionado: h32 }));
-      renderizarSerie($4("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: null }));
-      renderizarCaixas($4("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: null }));
+      renderizarSerie($4("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
+      renderizarCaixas($4("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($4("f1-qhist"), estado, linhasArr, ap2, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarDispersao($4("f1-disp"), estado, linhasArr, (h32) => loja.definir({ selecionado: h32 }));
@@ -104604,12 +104705,19 @@ async function iniciarExplorador() {
     sincronizarPergunta(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
-    mapa.renderizarCamadasUI(estado, (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }));
-    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: null }));
+    mapa.renderizarCamadasUI(
+      estado,
+      (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }),
+      (opacidade) => loja.definir({ opacidade }),
+      (mapa_base_cinza) => loja.definir({ mapa_base_cinza })
+    );
+    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: [] }));
     renderizarHexagono(elDetail, estado, linhas, ap2, manifesto, totais);
     renderizarGraficos(estado);
     salvarLocalStorage(estado);
   }
+  $4("f1-hist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
+  $4("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
   const dock = $4("f1-dock");
   const dockToggle = $4("f1-dock-toggle");
   const corpoDeficit = $4("f1-dock-body-deficit");
@@ -104634,7 +104742,7 @@ async function iniciarExplorador() {
     dockToggle.setAttribute("aria-expanded", String(!colapsado));
     if (!colapsado) renderizarGraficos(loja.obter());
   };
-  document.querySelectorAll(".dcard header .iconbtn").forEach((b10) => {
+  document.querySelectorAll(".dcard header .iconbtn[aria-label^='Minimizar']").forEach((b10) => {
     b10.onclick = () => {
       const card = b10.closest(".dcard");
       const min6 = card.classList.toggle("min");
@@ -105656,7 +105764,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "07f7c93a3dbf981e4ab178dae6c5fd35ccc1d93e");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "17e566b0b0df547642bbb6cd40688fa4da72e710");
   renderizarInterna($7("met-interna"), modelo);
 }
 

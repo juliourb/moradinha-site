@@ -36,6 +36,7 @@ export async function iniciarExplorador() {
   // Seam de teste (Playwright): seleciona um hexágono sem precisar simular o
   // clique no canvas do mapa. Não faz parte da API pública do explorador.
   window.__moradinhaSelecionarHex = (h3) => loja.definir({ selecionado: h3 });
+  window.__moradinhaEstado = () => loja.obter();
 
   const elementosPergunta = {
     question: $("f1-question"),
@@ -65,6 +66,7 @@ export async function iniciarExplorador() {
   const mapa = criarMapa({
     elementos: elementosMapa, manifesto, linhas, ap, totais,
     contornosAp: dados.contornosAp, contornosMunicipios: dados.contornosMunicipios, contornosFcu: dados.contornosFcu,
+    contornosRecortes: dados.contornosRecortes,
   });
   window.__moradinhaMapas = mapa.instanciasMapLibre;
 
@@ -90,8 +92,8 @@ export async function iniciarExplorador() {
     if (estado.conjunto_graficos === 0) {
       renderizarHistograma($("f1-hist"), estado, linhasArr, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarRanking($("f1-rank"), estado, linhasArr, ap, (h3) => loja.definir({ selecionado: h3 }));
-      renderizarSerie($("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: null }));
-      renderizarCaixas($("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: null }));
+      renderizarSerie($("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
+      renderizarCaixas($("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($("f1-qhist"), estado, linhasArr, ap, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarDispersao($("f1-disp"), estado, linhasArr, (h3) => loja.definir({ selecionado: h3 }));
@@ -104,12 +106,20 @@ export async function iniciarExplorador() {
     sincronizarPergunta(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
-    mapa.renderizarCamadasUI(estado, (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }));
-    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: null }));
+    mapa.renderizarCamadasUI(
+      estado,
+      (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }),
+      (opacidade) => loja.definir({ opacidade }),
+      (mapa_base_cinza) => loja.definir({ mapa_base_cinza })
+    );
+    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: [] }));
     renderizarHexagono(elDetail, estado, linhas, ap, manifesto, totais);
     renderizarGraficos(estado);
     salvarLocalStorage(estado);
   }
+
+  $("f1-hist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
+  $("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
 
   // Carrossel e dock
   const dock = $("f1-dock");
@@ -140,7 +150,7 @@ export async function iniciarExplorador() {
     dockToggle.setAttribute("aria-expanded", String(!colapsado));
     if (!colapsado) renderizarGraficos(loja.obter());
   };
-  document.querySelectorAll(".dcard header .iconbtn").forEach((b) => {
+  document.querySelectorAll(".dcard header .iconbtn[aria-label^='Minimizar']").forEach((b) => {
     b.onclick = () => {
       const card = b.closest(".dcard");
       const min = card.classList.toggle("min");

@@ -222,9 +222,10 @@ button, select, input {
    (cortina)" sai para o menu "Mais" (tema/medida/componente/período continuam
    sempre visíveis). */
 .ask {
-  display: flex; flex-wrap: nowrap; gap: 4px 14px; align-items: flex-end;
+  /* A6 (SPEC_F6): nunca rola na lateral — quebra ou recolhe (via menu "Mais") em vez disso. */
+  display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: flex-end;
   background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 .ask .q { font-family: var(--display); font-size: 15px; flex: 1 1 180px; min-width: 120px; }
 .ctl { display: grid; gap: 4px; flex: 0 0 auto; }
@@ -255,14 +256,18 @@ select { background: var(--surface); border: 1px solid var(--line); border-radiu
   .mais-menu[hidden] { display: none !important; }
 }
 
-#pane-resultados { --maph: max(560px, calc(100dvh - 310px)); }
-#pane-resultados.dock-off { --maph: max(560px, calc(100dvh - 290px)); }
+/* N5 (SPEC_F6): em 1440x900, o primeiro gráfico do dock aparece inteiro sem rolar. */
+#pane-resultados { --maph: max(420px, calc(100dvh - 460px)); }
+#pane-resultados.dock-off { --maph: max(420px, calc(100dvh - 290px)); }
 
 .grid-main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; margin-top: 12px; }
 .side { display: grid; gap: 12px; align-content: start; min-width: 0; max-height: var(--maph); overflow: auto; padding-right: 2px; }
 @media (max-width: 980px) { .side { max-height: none; } .grid-main { grid-template-columns: 1fr; } }
 
 .mapbox { position: relative; height: var(--maph); border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+/* C3: fundo "cinza" — dessatura só a base (MapLibre), sem provedor novo; os
+   hexágonos do deck.gl (canvas separado) continuam coloridos. */
+.mapbox.cinza .maplibregl-canvas-container canvas { filter: grayscale(1); }
 .mapbox .deck { position: absolute; inset: 0; }
 #f1-deckB { display: none; }
 .divider { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--ink); display: none; z-index: 5; }
@@ -285,6 +290,8 @@ select { background: var(--surface); border: 1px solid var(--line); border-radiu
 .layers .t { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .layers label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
 .layers label.off { color: var(--muted); cursor: not-allowed; }
+.layers .ctl-opacidade { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.layers .ctl-opacidade input[type="range"] { width: 90px; }
 .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 2px solid; }
 .attrib { position: absolute; left: 50%; transform: translateX(-50%); bottom: 2px; z-index: 4; font-size: 10px; color: var(--muted); background: var(--surface); padding: 0 6px; border-radius: 4px; white-space: nowrap; }
 .attrib a { color: var(--ink); text-decoration: underline; }
@@ -338,7 +345,7 @@ svg .axis path, svg .axis line { stroke: var(--line); }
 .carrossel .pontos { display: inline-flex; gap: 4px; }
 .carrossel .pontos button { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--line); background: var(--line); padding: 0; cursor: pointer; }
 .carrossel .pontos button[aria-current="true"] { background: var(--accent); border-color: var(--accent); }
-.dock-body { display: flex; gap: 10px; margin-top: 4px; align-items: stretch; }
+.dock-body { display: flex; gap: 10px; margin-top: 4px; align-items: flex-start; }
 .dock.collapsed .dock-body { display: none !important; }
 .dcard { flex: 1 1 0; min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; display: flex; flex-direction: column; }
 .dcard header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }

@@ -106,7 +106,7 @@ test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
     expect(labelAntes).toBeTruthy();
 
     // Minimizar um gráfico faz o mapa crescer (classe "min" aplicada)
-    await page.locator('[data-k="hist"] .iconbtn').click();
+    await page.locator('[data-k="hist"] .iconbtn[aria-label="Minimizar distribuição"]').click();
     await expect(page.locator('[data-k="hist"]')).toHaveClass(/min/);
 
     // Minimizar o dock inteiro

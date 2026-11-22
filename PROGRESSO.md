@@ -13,6 +13,7 @@ antes da F5).
 | F4 | concluída (6/6 validações verdes) | 2026-11-22 | ver `git log` |
 | F5 | implementada na branch `f5-publicacao`, não publicada; revisão de Julio pediu ajustes (F6, spec a chegar) | 2026-11-22 | ver `git log f5-publicacao` (não mesclada) |
 | F6.1 | concluída (pacote `bd10cbd`; conteúdo e leitura — números, escala de cores, explorador, Visão geral, Confiabilidade, Metodologia, dicas); suíte completa verde | 2026-11-22 | ver `git log f5-publicacao` (não mesclada) |
+| F6.2 | concluída (interação e acabamento — polígonos reais, seleção múltipla do histograma, opacidade, fundo cinza, sem rolagem lateral, eixos p99, ranking sem repetição, 1º gráfico dentro da janela); suíte completa verde; relatório em `relatorios/F6.md` | 2026-11-22 | ver `git log f5-publicacao` (não mesclada) |
 
 ## Notas
 

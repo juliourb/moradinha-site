@@ -28,21 +28,21 @@ export function ligarPergunta(elementos, manifesto, loja, medidaConstante) {
   elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id) => `<option value="${id}">${NOME_MEDIDA_QUALIDADE[id]}</option>`).join("");
 
   elementos.segTema.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ tema: b.dataset.v, conjunto_graficos: b.dataset.v === "qualidade" ? 1 : 0, faixa_hist: null });
+    b.onclick = () => loja.definir({ tema: b.dataset.v, conjunto_graficos: b.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
   });
   elementos.segMedida.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ medida: b.dataset.v, faixa_hist: null });
+    b.onclick = () => loja.definir({ medida: b.dataset.v, faixa_hist: [] });
   });
   elementos.segComponente.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ componente: b.dataset.v, faixa_hist: null });
+    b.onclick = () => loja.definir({ componente: b.dataset.v, faixa_hist: [] });
   });
   elementos.selPeriodo.onchange = () => {
     const periodo = elementos.selPeriodo.value;
-    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: null });
+    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: [] });
   };
   elementos.selComparar.onchange = () => {
     const comparar = elementos.selComparar.value || null;
-    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: null });
+    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: [] });
   };
   elementos.selMedidaQualidade.onchange = () => loja.definir({ medida_qualidade: elementos.selMedidaQualidade.value });
 

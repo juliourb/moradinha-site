@@ -5,6 +5,7 @@ import * as d3 from "d3";
 import { formatar, rotuloCurto } from "../util/formato.js";
 import { valorHex, incertezaHex, domiciliosTotal } from "../dados/calculo.js";
 import { valorMedidaQualidade, TIPO_MEDIDA } from "../dados/qualidade.js";
+import { alternarFaixa } from "../util/faixas.js";
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
@@ -48,9 +49,14 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
     box.innerHTML = `<p class="empty">Sem faixa para esta combinação (total ou precariedade provisória não têm incerteza).</p>`;
     return;
   }
-  const x = d3.scaleLinear().domain(d3.extent(vs)).nice().range([m.l, W - m.r]);
-  const bins = d3.bin().domain(x.domain()).thresholds(20)(vs);
+  const minimo = d3.min(vs);
+  const p99 = d3.quantile(vs.slice().sort(d3.ascending), 0.99) ?? d3.max(vs);
+  const x = d3.scaleLinear().domain([minimo, p99]).nice().range([m.l, W - m.r]);
+  // N2: eixo cortado no p99; os valores acima entram na última barra ("p99 ou mais").
+  const bins = d3.bin().domain(x.domain()).thresholds(20)(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
+  const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
+  const faixaSelecionada = (b) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b.x0);
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat((v) => formatar(v, 2)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
   svg
@@ -63,8 +69,12 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
     .attr("y", (b) => y(b.length))
     .attr("height", (b) => y(0) - y(b.length))
     .attr("fill", css("--accent"))
+    .attr("stroke", (b) => (faixaSelecionada(b) ? css("--ink") : "none"))
+    .attr("stroke-width", 2)
+    .attr("opacity", (b) => (!estado.faixa_hist?.length || faixaSelecionada(b) ? 1 : 0.35))
     .style("cursor", "pointer")
-    .on("click", (_e, b) => aoClicarBarra([b.x0, b.x1]));
+    .on("click", (_e, b) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b.x0, b === ultimoBin ? null : b.x1])));
+  svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("p99 ou mais →");
   box.replaceChildren(svg.node());
 }
 

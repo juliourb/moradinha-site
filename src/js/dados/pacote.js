@@ -201,11 +201,16 @@ export async function carregarPacoteCompleto(origem) {
 
   const { linhas, ap } = montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows });
 
-  const [contornosAp, contornosMunicipios, contornosFcu] = await Promise.all([
-    carregarJSON(origem, "contornos/ap.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/municipios.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/fcu.geojson").catch(() => null),
+  // Só busca um arquivo opcional se o manifesto o declarar (manifesto.arquivos):
+  // pedir um arquivo que não existe no pacote loga erro 404 no console do
+  // navegador mesmo com o fetch tratado, e isso quebraria o F2-5 (sem erro no console).
+  const temArquivo = (nome) => nome in (manifesto.arquivos ?? {});
+  const [contornosAp, contornosMunicipios, contornosFcu, contornosRecortes] = await Promise.all([
+    temArquivo("contornos/ap.geojson") ? carregarJSON(origem, "contornos/ap.geojson").catch(() => null) : null,
+    temArquivo("contornos/municipios.geojson") ? carregarJSON(origem, "contornos/municipios.geojson").catch(() => null) : null,
+    temArquivo("contornos/fcu.geojson") ? carregarJSON(origem, "contornos/fcu.geojson").catch(() => null) : null,
+    temArquivo("contornos/recortes.geojson") ? carregarJSON(origem, "contornos/recortes.geojson").catch(() => null) : null,
   ]);
 
-  return { manifesto, totais, qualidade, linhas, ap, contornosAp, contornosMunicipios, contornosFcu };
+  return { manifesto, totais, qualidade, linhas, ap, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes };
 }
