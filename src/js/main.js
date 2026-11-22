@@ -4,6 +4,7 @@
 import { carregarJSON, escolherDominioEEdicao } from "./dados/pacote.js";
 import { iniciarExplorador } from "./explorador.js";
 import { iniciarVisaoGeral } from "./visaoGeral.js";
+import { iniciarConfiabilidade } from "./confiabilidade.js";
 
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -34,4 +35,8 @@ iniciarExplorador().catch((erro) => {
 iniciarVisaoGeral().catch((erro) => {
   // eslint-disable-next-line no-console
   console.error("Falha ao iniciar a visão geral:", erro);
+});
+iniciarConfiabilidade().catch((erro) => {
+  // eslint-disable-next-line no-console
+  console.error("Falha ao iniciar a confiabilidade:", erro);
 });

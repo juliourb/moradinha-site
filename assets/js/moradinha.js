@@ -7973,12 +7973,12 @@ var Uint642 = class _Uint64 extends BaseInt64 {
     const length4 = str5.length;
     const out = new _Uint64(out_buffer);
     for (let posn = 0; posn < length4; ) {
-      const group = kInt32DecimalDigits < length4 - posn ? kInt32DecimalDigits : length4 - posn;
-      const chunk = new _Uint64(new Uint32Array([Number.parseInt(str5.slice(posn, posn + group), 10), 0]));
-      const multiple = new _Uint64(new Uint32Array([kPowersOfTen[group], 0]));
+      const group2 = kInt32DecimalDigits < length4 - posn ? kInt32DecimalDigits : length4 - posn;
+      const chunk = new _Uint64(new Uint32Array([Number.parseInt(str5.slice(posn, posn + group2), 10), 0]));
+      const multiple = new _Uint64(new Uint32Array([kPowersOfTen[group2], 0]));
       out.times(multiple);
       out.plus(chunk);
-      posn += group;
+      posn += group2;
     }
     return out;
   }
@@ -8037,12 +8037,12 @@ var Int642 = class _Int64 extends BaseInt64 {
     const length4 = str5.length;
     const out = new _Int64(out_buffer);
     for (let posn = negate4 ? 1 : 0; posn < length4; ) {
-      const group = kInt32DecimalDigits < length4 - posn ? kInt32DecimalDigits : length4 - posn;
-      const chunk = new _Int64(new Uint32Array([Number.parseInt(str5.slice(posn, posn + group), 10), 0]));
-      const multiple = new _Int64(new Uint32Array([kPowersOfTen[group], 0]));
+      const group2 = kInt32DecimalDigits < length4 - posn ? kInt32DecimalDigits : length4 - posn;
+      const chunk = new _Int64(new Uint32Array([Number.parseInt(str5.slice(posn, posn + group2), 10), 0]));
+      const multiple = new _Int64(new Uint32Array([kPowersOfTen[group2], 0]));
       out.times(multiple);
       out.plus(chunk);
-      posn += group;
+      posn += group2;
     }
     return negate4 ? out.negate() : out;
   }
@@ -8163,12 +8163,12 @@ var Int128 = class _Int128 {
     const length4 = str5.length;
     const out = new _Int128(out_buffer);
     for (let posn = negate4 ? 1 : 0; posn < length4; ) {
-      const group = kInt32DecimalDigits < length4 - posn ? kInt32DecimalDigits : length4 - posn;
-      const chunk = new _Int128(new Uint32Array([Number.parseInt(str5.slice(posn, posn + group), 10), 0, 0, 0]));
-      const multiple = new _Int128(new Uint32Array([kPowersOfTen[group], 0, 0, 0]));
+      const group2 = kInt32DecimalDigits < length4 - posn ? kInt32DecimalDigits : length4 - posn;
+      const chunk = new _Int128(new Uint32Array([Number.parseInt(str5.slice(posn, posn + group2), 10), 0, 0, 0]));
+      const multiple = new _Int128(new Uint32Array([kPowersOfTen[group2], 0, 0, 0]));
       out.times(multiple);
       out.plus(chunk);
-      posn += group;
+      posn += group2;
     }
     return negate4 ? out.negate() : out;
   }
@@ -81233,7 +81233,7 @@ var libh3 = (function(libh32) {
         b11 = b11 | 0;
         T3 = a6;
       }
-      function $6(a6, c4) {
+      function $7(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         var d4 = 0, e68 = 0, f5 = 0;
@@ -93947,7 +93947,7 @@ var libh3 = (function(libh32) {
         _localIjToCell: Ic2,
         _malloc: Bd2,
         _maxFaceCount: Zb2,
-        _maxGridDiskSize: $6,
+        _maxGridDiskSize: $7,
         _maxPolygonToCellsSize: ha2,
         _maxPolygonToCellsSizeExperimental: Sc2,
         _memcpy: Ud2,
@@ -95117,6 +95117,9 @@ function keyof(value2) {
 function identity2(x5) {
   return x5;
 }
+function group(values, ...keys) {
+  return nest(values, identity2, identity2, keys);
+}
 function rollup(values, reduce, ...keys) {
   return nest(values, identity2, reduce, keys);
 }
@@ -95128,8 +95131,8 @@ function nest(values, map4, reduce, keys) {
     let index = -1;
     for (const value2 of values2) {
       const key = keyof2(value2, ++index, values2);
-      const group = groups.get(key);
-      if (group) group.push(value2);
+      const group2 = groups.get(key);
+      if (group2) group2.push(value2);
       else groups.set(key, [value2]);
     }
     for (const [key, values3] of groups) {
@@ -95621,8 +95624,8 @@ function selector(selector2) {
 function selection_select(select2) {
   if (typeof select2 !== "function") select2 = selector(select2);
   for (var groups = this._groups, m4 = groups.length, subgroups = new Array(m4), j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, subgroup = subgroups[j4] = new Array(n3), node, subnode, i3 = 0; i3 < n3; ++i3) {
-      if ((node = group[i3]) && (subnode = select2.call(node, node.__data__, i3, group))) {
+    for (var group2 = groups[j4], n3 = group2.length, subgroup = subgroups[j4] = new Array(n3), node, subnode, i3 = 0; i3 < n3; ++i3) {
+      if ((node = group2[i3]) && (subnode = select2.call(node, node.__data__, i3, group2))) {
         if ("__data__" in node) subnode.__data__ = node.__data__;
         subgroup[i3] = subnode;
       }
@@ -95650,9 +95653,9 @@ function selection_selectAll(select2) {
   if (typeof select2 === "function") select2 = arrayAll(select2);
   else select2 = selectorAll(select2);
   for (var groups = this._groups, m4 = groups.length, subgroups = [], parents = [], j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, node, i3 = 0; i3 < n3; ++i3) {
-      if (node = group[i3]) {
-        subgroups.push(select2.call(node, node.__data__, i3, group));
+    for (var group2 = groups[j4], n3 = group2.length, node, i3 = 0; i3 < n3; ++i3) {
+      if (node = group2[i3]) {
+        subgroups.push(select2.call(node, node.__data__, i3, group2));
         parents.push(node);
       }
     }
@@ -95696,8 +95699,8 @@ function selection_selectChildren(match) {
 function selection_filter(match) {
   if (typeof match !== "function") match = matcher(match);
   for (var groups = this._groups, m4 = groups.length, subgroups = new Array(m4), j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, subgroup = subgroups[j4] = [], node, i3 = 0; i3 < n3; ++i3) {
-      if ((node = group[i3]) && match.call(node, node.__data__, i3, group)) {
+    for (var group2 = groups[j4], n3 = group2.length, subgroup = subgroups[j4] = [], node, i3 = 0; i3 < n3; ++i3) {
+      if ((node = group2[i3]) && match.call(node, node.__data__, i3, group2)) {
         subgroup.push(node);
       }
     }
@@ -95737,10 +95740,10 @@ function constant2(x5) {
     return x5;
   };
 }
-function bindIndex(parent, group, enter, update, exit, data) {
-  var i3 = 0, node, groupLength = group.length, dataLength = data.length;
+function bindIndex(parent, group2, enter, update, exit, data) {
+  var i3 = 0, node, groupLength = group2.length, dataLength = data.length;
   for (; i3 < dataLength; ++i3) {
-    if (node = group[i3]) {
+    if (node = group2[i3]) {
       node.__data__ = data[i3];
       update[i3] = node;
     } else {
@@ -95748,16 +95751,16 @@ function bindIndex(parent, group, enter, update, exit, data) {
     }
   }
   for (; i3 < groupLength; ++i3) {
-    if (node = group[i3]) {
+    if (node = group2[i3]) {
       exit[i3] = node;
     }
   }
 }
-function bindKey(parent, group, enter, update, exit, data, key) {
-  var i3, node, nodeByKeyValue = /* @__PURE__ */ new Map(), groupLength = group.length, dataLength = data.length, keyValues = new Array(groupLength), keyValue;
+function bindKey(parent, group2, enter, update, exit, data, key) {
+  var i3, node, nodeByKeyValue = /* @__PURE__ */ new Map(), groupLength = group2.length, dataLength = data.length, keyValues = new Array(groupLength), keyValue;
   for (i3 = 0; i3 < groupLength; ++i3) {
-    if (node = group[i3]) {
-      keyValues[i3] = keyValue = key.call(node, node.__data__, i3, group) + "";
+    if (node = group2[i3]) {
+      keyValues[i3] = keyValue = key.call(node, node.__data__, i3, group2) + "";
       if (nodeByKeyValue.has(keyValue)) {
         exit[i3] = node;
       } else {
@@ -95776,7 +95779,7 @@ function bindKey(parent, group, enter, update, exit, data, key) {
     }
   }
   for (i3 = 0; i3 < groupLength; ++i3) {
-    if ((node = group[i3]) && nodeByKeyValue.get(keyValues[i3]) === node) {
+    if ((node = group2[i3]) && nodeByKeyValue.get(keyValues[i3]) === node) {
       exit[i3] = node;
     }
   }
@@ -95789,8 +95792,8 @@ function selection_data(value2, key) {
   var bind2 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
   if (typeof value2 !== "function") value2 = constant2(value2);
   for (var m4 = groups.length, update = new Array(m4), enter = new Array(m4), exit = new Array(m4), j4 = 0; j4 < m4; ++j4) {
-    var parent = parents[j4], group = groups[j4], groupLength = group.length, data = arraylike(value2.call(parent, parent && parent.__data__, j4, parents)), dataLength = data.length, enterGroup = enter[j4] = new Array(dataLength), updateGroup = update[j4] = new Array(dataLength), exitGroup = exit[j4] = new Array(groupLength);
-    bind2(parent, group, enterGroup, updateGroup, exitGroup, data, key);
+    var parent = parents[j4], group2 = groups[j4], groupLength = group2.length, data = arraylike(value2.call(parent, parent && parent.__data__, j4, parents)), dataLength = data.length, enterGroup = enter[j4] = new Array(dataLength), updateGroup = update[j4] = new Array(dataLength), exitGroup = exit[j4] = new Array(groupLength);
+    bind2(parent, group2, enterGroup, updateGroup, exitGroup, data, key);
     for (var i0 = 0, i1 = 0, previous, next; i0 < dataLength; ++i0) {
       if (previous = enterGroup[i0]) {
         if (i0 >= i1) i1 = i0 + 1;
@@ -95842,8 +95845,8 @@ function selection_merge(context) {
 }
 function selection_order() {
   for (var groups = this._groups, j4 = -1, m4 = groups.length; ++j4 < m4; ) {
-    for (var group = groups[j4], i3 = group.length - 1, next = group[i3], node; --i3 >= 0; ) {
-      if (node = group[i3]) {
+    for (var group2 = groups[j4], i3 = group2.length - 1, next = group2[i3], node; --i3 >= 0; ) {
+      if (node = group2[i3]) {
         if (next && node.compareDocumentPosition(next) ^ 4) next.parentNode.insertBefore(node, next);
         next = node;
       }
@@ -95857,8 +95860,8 @@ function selection_sort(compare) {
     return a5 && b10 ? compare(a5.__data__, b10.__data__) : !a5 - !b10;
   }
   for (var groups = this._groups, m4 = groups.length, sortgroups = new Array(m4), j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, sortgroup = sortgroups[j4] = new Array(n3), node, i3 = 0; i3 < n3; ++i3) {
-      if (node = group[i3]) {
+    for (var group2 = groups[j4], n3 = group2.length, sortgroup = sortgroups[j4] = new Array(n3), node, i3 = 0; i3 < n3; ++i3) {
+      if (node = group2[i3]) {
         sortgroup[i3] = node;
       }
     }
@@ -95880,8 +95883,8 @@ function selection_nodes() {
 }
 function selection_node() {
   for (var groups = this._groups, j4 = 0, m4 = groups.length; j4 < m4; ++j4) {
-    for (var group = groups[j4], i3 = 0, n3 = group.length; i3 < n3; ++i3) {
-      var node = group[i3];
+    for (var group2 = groups[j4], i3 = 0, n3 = group2.length; i3 < n3; ++i3) {
+      var node = group2[i3];
       if (node) return node;
     }
   }
@@ -95897,8 +95900,8 @@ function selection_empty() {
 }
 function selection_each(callback) {
   for (var groups = this._groups, j4 = 0, m4 = groups.length; j4 < m4; ++j4) {
-    for (var group = groups[j4], i3 = 0, n3 = group.length, node; i3 < n3; ++i3) {
-      if (node = group[i3]) callback.call(node, node.__data__, i3, group);
+    for (var group2 = groups[j4], i3 = 0, n3 = group2.length, node; i3 < n3; ++i3) {
+      if (node = group2[i3]) callback.call(node, node.__data__, i3, group2);
     }
   }
   return this;
@@ -96221,8 +96224,8 @@ function selection_dispatch(type2, params) {
 }
 function* selection_iterator() {
   for (var groups = this._groups, j4 = 0, m4 = groups.length; j4 < m4; ++j4) {
-    for (var group = groups[j4], i3 = 0, n3 = group.length, node; i3 < n3; ++i3) {
-      if (node = group[i3]) yield node;
+    for (var group2 = groups[j4], i3 = 0, n3 = group2.length, node; i3 < n3; ++i3) {
+      if (node = group2[i3]) yield node;
     }
   }
 }
@@ -97380,7 +97383,7 @@ var STARTED = 3;
 var RUNNING = 4;
 var ENDING = 5;
 var ENDED = 6;
-function schedule(node, name2, id3, index, group, timing) {
+function schedule(node, name2, id3, index, group2, timing) {
   var schedules = node.__transition;
   if (!schedules) node.__transition = {};
   else if (id3 in schedules) return;
@@ -97388,7 +97391,7 @@ function schedule(node, name2, id3, index, group, timing) {
     name: name2,
     index,
     // For context during callback.
-    group,
+    group: group2,
     // For context during callback.
     on: emptyOn,
     tween: emptyTween,
@@ -97703,8 +97706,8 @@ function transition_easeVarying(value2) {
 function transition_filter(match) {
   if (typeof match !== "function") match = matcher(match);
   for (var groups = this._groups, m4 = groups.length, subgroups = new Array(m4), j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, subgroup = subgroups[j4] = [], node, i3 = 0; i3 < n3; ++i3) {
-      if ((node = group[i3]) && match.call(node, node.__data__, i3, group)) {
+    for (var group2 = groups[j4], n3 = group2.length, subgroup = subgroups[j4] = [], node, i3 = 0; i3 < n3; ++i3) {
+      if ((node = group2[i3]) && match.call(node, node.__data__, i3, group2)) {
         subgroup.push(node);
       }
     }
@@ -97758,8 +97761,8 @@ function transition_select(select2) {
   var name2 = this._name, id3 = this._id;
   if (typeof select2 !== "function") select2 = selector(select2);
   for (var groups = this._groups, m4 = groups.length, subgroups = new Array(m4), j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, subgroup = subgroups[j4] = new Array(n3), node, subnode, i3 = 0; i3 < n3; ++i3) {
-      if ((node = group[i3]) && (subnode = select2.call(node, node.__data__, i3, group))) {
+    for (var group2 = groups[j4], n3 = group2.length, subgroup = subgroups[j4] = new Array(n3), node, subnode, i3 = 0; i3 < n3; ++i3) {
+      if ((node = group2[i3]) && (subnode = select2.call(node, node.__data__, i3, group2))) {
         if ("__data__" in node) subnode.__data__ = node.__data__;
         subgroup[i3] = subnode;
         schedule(subgroup[i3], name2, id3, i3, subgroup, get2(node, id3));
@@ -97772,9 +97775,9 @@ function transition_selectAll(select2) {
   var name2 = this._name, id3 = this._id;
   if (typeof select2 !== "function") select2 = selectorAll(select2);
   for (var groups = this._groups, m4 = groups.length, subgroups = [], parents = [], j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, node, i3 = 0; i3 < n3; ++i3) {
-      if (node = group[i3]) {
-        for (var children2 = select2.call(node, node.__data__, i3, group), child, inherit2 = get2(node, id3), k5 = 0, l3 = children2.length; k5 < l3; ++k5) {
+    for (var group2 = groups[j4], n3 = group2.length, node, i3 = 0; i3 < n3; ++i3) {
+      if (node = group2[i3]) {
+        for (var children2 = select2.call(node, node.__data__, i3, group2), child, inherit2 = get2(node, id3), k5 = 0, l3 = children2.length; k5 < l3; ++k5) {
           if (child = children2[k5]) {
             schedule(child, name2, id3, k5, children2, inherit2);
           }
@@ -97890,10 +97893,10 @@ function transition_textTween(value2) {
 function transition_transition() {
   var name2 = this._name, id0 = this._id, id1 = newId();
   for (var groups = this._groups, m4 = groups.length, j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, node, i3 = 0; i3 < n3; ++i3) {
-      if (node = group[i3]) {
+    for (var group2 = groups[j4], n3 = group2.length, node, i3 = 0; i3 < n3; ++i3) {
+      if (node = group2[i3]) {
         var inherit2 = get2(node, id0);
-        schedule(node, name2, id1, i3, group, {
+        schedule(node, name2, id1, i3, group2, {
           time: inherit2.time + inherit2.delay + inherit2.duration,
           delay: 0,
           duration: inherit2.duration,
@@ -97993,9 +97996,9 @@ function selection_transition(name2) {
     id3 = newId(), (timing = defaultTiming).time = now(), name2 = name2 == null ? null : name2 + "";
   }
   for (var groups = this._groups, m4 = groups.length, j4 = 0; j4 < m4; ++j4) {
-    for (var group = groups[j4], n3 = group.length, node, i3 = 0; i3 < n3; ++i3) {
-      if (node = group[i3]) {
-        schedule(node, name2, id3, i3, group, timing || inherit(node, id3));
+    for (var group2 = groups[j4], n3 = group2.length, node, i3 = 0; i3 < n3; ++i3) {
+      if (node = group2[i3]) {
+        schedule(node, name2, id3, i3, group2, timing || inherit(node, id3));
       }
     }
   }
@@ -98281,7 +98284,7 @@ function identity5(x5) {
 var map3 = Array.prototype.map;
 var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
 function formatLocale(locale2) {
-  var group = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity5 : formatGroup(map3.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity5 : formatNumerals(map3.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
+  var group2 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity5 : formatGroup(map3.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity5 : formatNumerals(map3.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
   function newFormat(specifier, options) {
     specifier = formatSpecifier(specifier);
     var fill = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero6 = specifier.zero, width = specifier.width, comma = specifier.comma, precision = specifier.precision, trim = specifier.trim, type2 = specifier.type;
@@ -98315,9 +98318,9 @@ function formatLocale(locale2) {
           }
         }
       }
-      if (comma && !zero6) value2 = group(value2, Infinity);
+      if (comma && !zero6) value2 = group2(value2, Infinity);
       var length4 = valuePrefix.length + value2.length + valueSuffix.length, padding = length4 < width ? new Array(width - length4 + 1).join(fill) : "";
-      if (comma && zero6) value2 = group(padding + value2, padding.length ? width - valueSuffix.length : Infinity), padding = "";
+      if (comma && zero6) value2 = group2(padding + value2, padding.length ? width - valueSuffix.length : Infinity), padding = "";
       switch (align) {
         case "<":
           value2 = valuePrefix + value2 + valueSuffix + padding;
@@ -100141,6 +100144,13 @@ function classeMarca(codigo) {
   if (codigo === "fonte_estoque_diferente") return "crit";
   return "info";
 }
+var ROTULOS_FONTE_ESTOQUE = Object.freeze({
+  mista: "M\xE9dia de anos com fontes de estoque diferentes"
+});
+function rotuloFonteEstoque(valor) {
+  if (valor == null) return "\u2014";
+  return ROTULOS_FONTE_ESTOQUE[valor] ?? valor;
+}
 var PRIORIDADE_MARCAS = Object.freeze([
   "total_fragil",
   "fonte_estoque_diferente",
@@ -100279,7 +100289,7 @@ function blocoQualidade(linha, estado) {
       const n3 = nivelFracaoImputada(qq.fracaoImputada);
       itens.push(`<span class="pill ${NIVEL_CLASSE[n3]}">fra\xE7\xE3o imputada: ${formatar(qq.fracaoImputada * 100, 0)}%</span>`);
     }
-    itens.push(`<span class="pill info">fonte do estoque: ${qq.fonteEstoque}</span>`);
+    itens.push(`<span class="pill info">fonte do estoque: ${rotuloFonteEstoque(qq.fonteEstoque)}</span>`);
     if (qq.gEstoque != null) itens.push(`<span class="pill info">estoque \xF7 2022: ${formatar(qq.gEstoque, 2)}</span>`);
     if (qq.hexNovo) itens.push(`<span class="pill warn">hex\xE1gono novo neste per\xEDodo</span>`);
   }
@@ -100946,6 +100956,213 @@ async function iniciarVisaoGeral() {
   $5("f2-minimapa-sub").textContent = `D\xE9ficit relativo total, ${periodo?.rotulo ?? periodoRecente}.`;
 }
 
+// src/js/dados/confiabilidade.js
+var CLAB5 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var BLOCOS_MODELO = [
+  {
+    chave: "ganho",
+    titulo: "O modelo ajuda?",
+    significado: 'Compara o modelo com o jeito mais simples de repartir o total: dar a todas as \xE1reas a mesma taxa. "Erra 42% menos" quer dizer que, nas \xE1reas deixadas de fora do treino, o erro m\xE9dio do modelo \xE9 58% do erro dessa reparti\xE7\xE3o simples.'
+  },
+  {
+    chave: "ordem",
+    titulo: "Acha onde est\xE1?",
+    significado: "Mede se o modelo p\xF5e as \xE1reas na ordem certa, da que tem mais d\xE9ficit para a que tem menos. 1 \xE9 a ordem perfeita; perto de 0, a ordem \xE9 aleat\xF3ria. O top 20% diz que parte do d\xE9ficit real cai nas 20% de \xE1reas que o modelo aponta como piores."
+  },
+  {
+    chave: "calibracao",
+    titulo: "Erra o tamanho?",
+    significado: "Quando o modelo diz que uma \xE1rea tem 3% de domic\xEDlios em d\xE9ficit, ela tem mesmo 3%? Pontos sobre a diagonal = acerta o tamanho; inclina\xE7\xE3o menor que 1 = exagera nas \xE1reas altas e subestima nas baixas."
+  },
+  {
+    chave: "vies",
+    titulo: "Erra para quem?",
+    significado: "Mostra se o erro se concentra em algum grupo: acima de 1, o modelo p\xF5e d\xE9ficit demais naquele grupo; abaixo de 1, de menos. A faixa entre 0,90 e 1,10 \xE9 a toler\xE2ncia do protocolo."
+  },
+  {
+    chave: "curvas",
+    titulo: "Por qu\xEA?",
+    significado: "O modelo (EBM, Explainable Boosting Machine) soma uma contribui\xE7\xE3o por caracter\xEDstica do domic\xEDlio ou do territ\xF3rio. A curva mostra quanto cada categoria aumenta ou diminui a chance de d\xE9ficit; a import\xE2ncia, quanto cada vari\xE1vel pesa no total."
+  },
+  {
+    chave: "confianca",
+    titulo: "Quanto confiar nesses n\xFAmeros?",
+    recolhido: true,
+    significado: "Com poucas \xE1reas (53 no piloto), cada m\xE9trica oscila; os intervalos mostram quanto. O Moran dos res\xEDduos diz se os erros se agrupam no mapa (se sim, falta ao modelo alguma informa\xE7\xE3o espacial). A cobertura diz em quantas \xE1reas o modelo cai dentro do intervalo de 95% da amostra \u2014 um teste exigente, porque pede ao modelo a precis\xE3o da pr\xF3pria amostra."
+  }
+];
+function blocoModelo(modeloComponente) {
+  const { configuracao, usado, motivo, treino, ganho, ordem, calibracao, vies, curvas, importancia, confianca } = modeloComponente;
+  return { configuracao, usado, motivo, treino, ganho, ordem, calibracao, vies, curvas, importancia, confianca };
+}
+function achadosPublicos(achados) {
+  const grupos = /* @__PURE__ */ new Map();
+  for (const a5 of achados) {
+    if (!a5.publico) continue;
+    if (!grupos.has(a5.situacao)) grupos.set(a5.situacao, []);
+    grupos.get(a5.situacao).push(a5);
+  }
+  return [...grupos.entries()].map(([situacao, itens]) => ({ situacao, itens }));
+}
+function limiteEixoP99(valores) {
+  const vs8 = valores.filter((v4) => v4 != null).sort(ascending);
+  if (!vs8.length) return 1;
+  return quantileSorted(vs8, 0.99) || vs8.at(-1) || 1;
+}
+
+// src/js/confiabilidade.js
+function $6(id3) {
+  return document.getElementById(id3);
+}
+function css6(nome) {
+  return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+}
+function renderizarFontes(el2, qualidade, manifesto) {
+  const fontes = qualidade.fontes?.[0];
+  if (!fontes) {
+    el2.innerHTML = `<p class="empty">Sem dados de fonte.</p>`;
+    return;
+  }
+  el2.innerHTML = `<div class="timeline-fontes">${manifesto.periodos.map((p4) => {
+    const uso = fontes.uso_por_periodo?.[p4.id] ?? "\u2014";
+    const troca = p4.marcas?.includes("fonte_estoque_diferente");
+    return `<span class="passo${troca ? " troca" : ""}" title="${p4.rotulo}: ${uso}">${p4.rotulo}: ${uso}</span>`;
+  }).join("")}</div><div class="sub" style="margin-top:6px">${fontes.variavel} \u2014 fonte: ${fontes.fonte}. ${(fontes.marcas ?? []).map((m4) => rotuloMarca(m4)).join("; ")}</div>`;
+}
+function renderizarSigilo(el2, sigilo) {
+  el2.innerHTML = `
+    <div class="cartao-f3"><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos</div></div>
+    <div class="cartao-f3"><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos</div></div>`;
+}
+function renderizarAps(el2, aps) {
+  el2.innerHTML = aps.map(
+    (a5) => `<div class="cartao-f3"><div class="k">${CLAB5[a5.componente] ?? a5.componente}</div>
+        <div class="v" data-num="${a5.n_aps}">${formatar(a5.n_aps, 0)} APs</div>
+        <div class="sub">${formatar(a5.n_ressalva, 0)} com ressalva \xB7 ${formatar(a5.n_sem_direta, 0)} sem amostra direta</div></div>`
+  ).join("");
+}
+function renderizarPonte(el2, ponte) {
+  el2.innerHTML = `<table class="ponte"><thead><tr><th>Indicador</th><th>PNADc</th><th>Censo</th><th>Raz\xE3o</th><th>Leitura</th></tr></thead><tbody>${ponte.map(
+    (p4) => `<tr>
+        <td>${p4.indicador}</td>
+        <td data-num="${p4.pnadc ?? ""}">${p4.pnadc == null ? "\u2014" : `${formatar(p4.pnadc, 1)} (EP ${formatar(p4.pnadc_ep, 1)})`}</td>
+        <td data-num="${p4.censo ?? ""}">${p4.censo == null ? "\u2014" : formatar(p4.censo, 1)}</td>
+        <td data-num="${p4.razao ?? ""}">${p4.razao == null ? "\u2014" : formatar(p4.razao, 2)}</td>
+        <td class="sub">${p4.leitura}</td>
+      </tr>`
+  ).join("")}</tbody></table>`;
+}
+function renderizarLacunas(el2, lacunas) {
+  el2.innerHTML = lacunas.map((l3) => `<li><b>${l3.item}</b> \u2014 ${l3.efeito}</li>`).join("");
+}
+function linhaPergunta(titulo, respostaHtml, significado, { recolhido = false } = {}) {
+  const corpo = `<div class="resposta">${respostaHtml}</div><div class="significado">${significado}</div>`;
+  if (recolhido) {
+    return `<details class="pergunta-bloco"><summary>${titulo}</summary>${corpo}</details>`;
+  }
+  return `<div class="pergunta-bloco"><h4>${titulo}</h4>${corpo}</div>`;
+}
+function montarModeloHtml(modeloComponenteBruto) {
+  const m4 = blocoModelo(modeloComponenteBruto);
+  if (!m4.usado) {
+    return `<div class="pergunta-bloco"><div class="significado">${m4.motivo || "Nesta \xE1rea, o modelo n\xE3o superou a reparti\xE7\xE3o pela taxa m\xE9dia; o mapa usa a reparti\xE7\xE3o simples."}</div></div>`;
+  }
+  const ganhoResp = `raz\xE3o ${formatar(m4.ganho.razao, 2)} (IC ${formatar(m4.ganho.ic?.[0], 2)}\u2013${formatar(m4.ganho.ic?.[1], 2)})`;
+  const ordemResp = `Spearman modelo ${formatar(m4.ordem.spearman_modelo, 2)} \xB7 linha de base ${formatar(m4.ordem.spearman_base, 2)} \xB7 top 20% ${formatarPercentual(m4.ordem.top20_modelo * 100, 0)}`;
+  const calibResp = `inclina\xE7\xE3o ${formatar(m4.calibracao.inclinacao, 2)} (IC ${formatar(m4.calibracao.ic_inclinacao?.[0], 2)}\u2013${formatar(m4.calibracao.ic_inclinacao?.[1], 2)})`;
+  const viesResp = (m4.vies ?? []).map((v4) => `${v4.grupo} (${v4.grupo_tipo}): ${formatar(v4.razao_somas, 2)}`).join(" \xB7 ");
+  const curvasResp = renderizarCurvas(m4.curvas, m4.importancia);
+  const confiancaResp = `Moran dos res\xEDduos I=${formatar(m4.confianca.moran_residuos?.I, 2)} (p=${formatar(m4.confianca.moran_residuos?.p, 2)}) \xB7 cobertura (d): modelo ${formatarPercentual(m4.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m4.confianca.cobertura_d?.base * 100, 0)}`;
+  const respostas = { ganho: ganhoResp, ordem: ordemResp, calibracao: calibResp, vies: viesResp, curvas: curvasResp, confianca: confiancaResp };
+  return BLOCOS_MODELO.map((b10) => linhaPergunta(b10.titulo, respostas[b10.chave], b10.significado, { recolhido: b10.recolhido })).join("");
+}
+function renderizarModelo(el2, modeloComponenteBruto) {
+  el2.innerHTML = montarModeloHtml(modeloComponenteBruto);
+}
+function renderizarCurvas(curvas, importancia) {
+  if (!curvas?.length) return "<span class='empty'>Sem curvas registradas.</span>";
+  const W4 = 220;
+  const H4 = 70;
+  const m4 = { l: 8, r: 8, t: 8, b: 18 };
+  return curvas.map((c3) => {
+    const semFaixa = c3.desvio == null;
+    const y5 = linear2().domain(extent([c3.escore - (c3.desvio ?? 0), c3.escore + (c3.desvio ?? 0)])).nice().range([H4 - m4.b, m4.t]);
+    const cy2 = y5(c3.escore);
+    const svg = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Curva de forma: ${c3.rotulo}">
+        <line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(0)}" y2="${y5(0)}" stroke="${css6("--line")}" stroke-dasharray="2,3"/>
+        ${!semFaixa ? `<line x1="${W4 / 2}" x2="${W4 / 2}" y1="${y5(c3.escore - c3.desvio)}" y2="${y5(c3.escore + c3.desvio)}" stroke="${css6("--accent")}" stroke-width="3" opacity="0.5"/>` : ""}
+        <circle cx="${W4 / 2}" cy="${cy2}" r="4" fill="${css6("--ink")}"/>
+      </svg>`;
+    return `<div class="comp-row" style="grid-template-columns:120px 1fr 60px"><span>${c3.rotulo} <span class="sub">(${c3.nivel})</span></span>${svg}<span class="num" style="text-align:right">${formatar(c3.escore, 2)}</span></div>${semFaixa ? `<div class="sub">faixa de oscila\xE7\xE3o n\xE3o calculada nesta edi\xE7\xE3o</div>` : ""}`;
+  }).join("") + `<div class="sub" style="margin-top:6px">Import\xE2ncia: ${(importancia ?? []).map((i3) => `${i3.rotulo} (${formatar(i3.valor, 2)})`).join(" \xB7 ")}</div>`;
+}
+function renderizarHeatmap(el2, spearman) {
+  el2.innerHTML = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
+    const cel = (i3, j4) => {
+      const v4 = matriz[i3][j4];
+      const cor = v4 == null ? css6("--line") : rgb2(css6("--warn-soft"), css6("--accent"))(Math.max(0, v4));
+      return `<td style="background:${cor};text-align:center;padding:4px;font-size:11px" data-num="${v4 ?? ""}">${v4 == null ? "\u2014" : formatar(v4, 2)}</td>`;
+    };
+    return `<div class="sub" style="margin-top:8px">${CLAB5[comp] ?? comp}</div>
+        <table class="ponte"><thead><tr><th></th>${periodos.map((p4) => `<th>${p4}</th>`).join("")}</tr></thead>
+        <tbody>${periodos.map((p4, i3) => `<tr><th>${p4}</th>${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table>`;
+  }).join("");
+}
+function renderizarRazoes(el2, razoes) {
+  const porComponente = group(razoes, (r3) => r3.componente);
+  el2.innerHTML = [...porComponente.entries()].map(([comp, linhas]) => {
+    const limite = limiteEixoP99(linhas.flatMap((l3) => [l3.p95, l3.razao_total]));
+    const W4 = 200;
+    const H4 = 90;
+    const m4 = { l: 28, r: 6, t: 6, b: 16 };
+    const x5 = band().domain(linhas.map((l3) => l3.periodo)).range([m4.l, W4 - m4.r]).padding(0.3);
+    const y5 = linear2().domain([0, Math.max(limite * 1.1, 1)]).range([H4 - m4.b, m4.t]);
+    const svg = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Raz\xE3o do total por hex\xE1gono, ${CLAB5[comp]}">
+        <line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(1)}" y2="${y5(1)}" stroke="${css6("--line")}" stroke-dasharray="2,3"/>
+        ${linhas.map(
+      (l3) => `<line x1="${x5(l3.periodo) + x5.bandwidth() / 2}" x2="${x5(l3.periodo) + x5.bandwidth() / 2}" y1="${y5(Math.min(l3.p95, limite))}" y2="${y5(Math.min(l3.p5, limite))}" stroke="${css6("--ink")}" stroke-width="2"/>
+                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"><title>${l3.periodo}: mediana ${formatar(l3.mediana, 2)}, raz\xE3o dos totais ${formatar(l3.razao_total, 2)}, n=${l3.n_hexagonos}</title></circle>`
+    ).join("")}
+        ${linhas.map((l3) => `<text x="${x5(l3.periodo) + x5.bandwidth() / 2}" y="${H4 - 4}" text-anchor="middle" font-size="9">${l3.periodo}</text>`).join("")}
+      </svg>`;
+    return `<div class="mini"><h4>${CLAB5[comp] ?? comp}</h4>${svg}</div>`;
+  }).join("");
+}
+function renderizarAchados(el2, achados) {
+  const grupos = achadosPublicos(achados);
+  el2.innerHTML = grupos.map(
+    (g4) => `<div class="achados-grupo"><h3>${g4.situacao}</h3>${g4.itens.map((a5) => `<div class="achado-item">${a5.texto}<div class="efeito">${a5.efeito}</div></div>`).join("")}</div>`
+  ).join("");
+}
+async function iniciarConfiabilidade() {
+  const painel = $6("pane-confiabilidade");
+  if (!painel) return;
+  const catalogo = await carregarJSON(".", "catalogo.json");
+  const { edicao } = escolherDominioEEdicao(catalogo);
+  const [manifesto, qualidade, modelo, consistencia, achados] = await Promise.all([
+    carregarJSON(edicao.origem, "manifesto.json"),
+    carregarJSON(edicao.origem, "qualidade.json"),
+    carregarJSON(edicao.origem, "modelo.json"),
+    carregarJSON(edicao.origem, "consistencia.json"),
+    carregarJSON(edicao.origem, "achados.json")
+  ]);
+  renderizarFontes($6("f3-fontes-timeline"), qualidade, manifesto);
+  renderizarSigilo($6("f3-sigilo-cartoes"), qualidade.sigilo);
+  renderizarAps($6("f3-aps-cartoes"), qualidade.aps);
+  renderizarPonte($6("f3-ponte-tabela"), qualidade.ponte);
+  renderizarLacunas($6("f3-lacunas"), qualidade.lacunas);
+  renderizarHeatmap($6("f3-heatmap"), consistencia.spearman);
+  renderizarRazoes($6("f3-razoes"), consistencia.razoes);
+  renderizarAchados($6("f3-achados"), achados);
+  const segComp = $6("f3-seg-comp");
+  function atualizarModelo(componente) {
+    segComp.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === componente)));
+    renderizarModelo($6("f3-modelo-blocos"), modelo[componente]);
+  }
+  segComp.querySelectorAll("button").forEach((b10) => b10.onclick = () => atualizarModelo(b10.dataset.v));
+  atualizarModelo("coabitacao");
+}
+
 // src/js/main.js
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -100970,6 +101187,9 @@ iniciarExplorador().catch((erro) => {
 });
 iniciarVisaoGeral().catch((erro) => {
   console.error("Falha ao iniciar a vis\xE3o geral:", erro);
+});
+iniciarConfiabilidade().catch((erro) => {
+  console.error("Falha ao iniciar a confiabilidade:", erro);
 });
 /*! Bundled license information:
 

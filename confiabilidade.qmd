@@ -4,17 +4,63 @@ title: ""
 
 {{< include textos/_cabecalho.qmd >}}
 
-::: panel
-## Confiabilidade
+```{=html}
+<div id="pane-confiabilidade" class="com-nav-lateral">
+  <nav class="nav-lateral" aria-label="Seções de Confiabilidade">
+    <a href="#f3-secao-dados">Dados e qualidade</a>
+    <a href="#f3-secao-modelo">O modelo</a>
+    <a href="#f3-secao-consistencia">Consistência entre anos</a>
+    <a href="#f3-secao-achados">Achados</a>
+  </nav>
 
-::: sub
-Em construção (SPEC_F3). Vai trazer:
-:::
+  <div class="conteudo-nav-lateral">
+    <section class="panel" id="f3-secao-dados">
+      <h2>Dados e qualidade</h2>
+      <div class="como-ler">Esta seção resume o domínio inteiro: de onde vem o estoque de cada ano, quanto está em sigilo, como a amostra da AP (área de ponderação) se compara ao Censo, e o que falta. A qualidade por hexágono fica no tema Qualidade da aba Resultados.</div>
 
-- Dados e qualidade: fontes do estoque por ano, sigilo, APs (áreas de
-  ponderação) com ressalva, ponte entre a PNADc e o Censo.
-- Métricas do modelo (EBM — *Explainable Boosting Machine*) com perguntas
-  objetivas: ganho sobre a linha de base, ordem e top 20%, calibração, viés
-  por grupo, curvas de forma.
-- Consistência entre anos (Spearman, razão dos totais) e achados registrados.
-:::
+      <h3>De onde vem o estoque, ano a ano?</h3>
+      <div id="f3-fontes-timeline"></div>
+
+      <h3>Quanto está em sigilo?</h3>
+      <div class="cartoes-f3" id="f3-sigilo-cartoes"></div>
+
+      <h3>As APs têm amostra direta confiável?</h3>
+      <div class="cartoes-f3" id="f3-aps-cartoes"></div>
+
+      <h3>A amostra da PNADc bate com o Censo?</h3>
+      <div class="sub">PNADc = Pesquisa Nacional por Amostra de Domicílios contínua.</div>
+      <div id="f3-ponte-tabela"></div>
+
+      <h3>O que falta</h3>
+      <ul id="f3-lacunas"></ul>
+    </section>
+
+    <section class="panel" id="f3-secao-modelo">
+      <h2>O modelo</h2>
+      <div class="como-ler">Cada bloco responde uma pergunta sobre o modelo (EBM, Explainable Boosting Machine) que repartiu o total entre os hexágonos. Os números vêm da validação fora da dobra, nunca do treino.</div>
+
+      <div class="ctl"><span class="lab" id="f3-lab-comp">Componente</span><div class="seg" role="group" aria-labelledby="f3-lab-comp" id="f3-seg-comp">
+        <button type="button" data-v="coabitacao" aria-pressed="true">Coabitação</button><button type="button" data-v="onus" aria-pressed="false">Ônus</button><button type="button" data-v="precariedade" aria-pressed="false">Precariedade</button></div></div>
+
+      <div id="f3-modelo-blocos"></div>
+    </section>
+
+    <section class="panel" id="f3-secao-consistencia">
+      <h2>Consistência entre anos</h2>
+      <div class="como-ler">O quanto a ordem dos hexágonos (quem tem mais ou menos déficit) se mantém de um ano para o outro, e como o total de cada ano se compara a 2022.</div>
+
+      <h3>Spearman entre todos os pares de anos</h3>
+      <div id="f3-heatmap"></div>
+
+      <h3>Razão do total por hexágono (ano ÷ 2022)</h3>
+      <div class="grid-razoes" id="f3-razoes"></div>
+    </section>
+
+    <section class="panel" id="f3-secao-achados">
+      <h2>Achados</h2>
+      <div class="como-ler">Observações registradas durante a execução do moradinha, públicas quando não dependem de microdado.</div>
+      <div id="f3-achados"></div>
+    </section>
+  </div>
+</div>
+```

@@ -1,5 +1,14 @@
 # Mudanças nas especificações
 
+## v1.5 (22/11/2026) — complemento ao contrato v1.1: `fonte_estoque` pode ser "mista"
+- `fonte_estoque` (em `manifesto.periodos[]` e `hex_qualidade.fonte_estoque`) pode vir `"mista"` nos
+  períodos do tipo `media` (já era o caso nos pacotes fictícios: `m2024`, `m2025`). Decisão de Julio:
+  o site traduz esse valor para o rótulo "Média de anos com fontes de estoque diferentes"; qualquer
+  outro valor do campo (fonte pontual de um ano) aparece como texto cru, sem quebrar.
+  Implementado em `src/js/util/marcas.js` (`rotuloFonteEstoque`), usado no painel do hexágono
+  (`src/js/ui/hexagono.js`). Não muda o esquema: `fonte_estoque` já era `VARCHAR`/`string` livre em
+  `contrato/v1/` e `contrato/v1.1/`.
+
 ## v1.4 (22/11/2026) — contrato do pacote sobe para v1.1 (pedido do moradinha)
 - Criado `contrato/v1.1/` (cópia de `contrato/v1/`), com uma única mudança:
   `modelo.schema.json`, `<componente>.curvas[].desvio` passa a aceitar `null` (algumas variáveis não

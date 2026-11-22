@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listarMarcas, MARCAS, rotuloMarca } from "../../src/js/util/marcas.js";
+import { listarMarcas, MARCAS, rotuloMarca, rotuloFonteEstoque } from "../../src/js/util/marcas.js";
 
 describe("marcas.js", () => {
   it("retorna o rótulo de um código válido", () => {
@@ -16,5 +16,14 @@ describe("marcas.js", () => {
 
   it("campo vazio não tem marcas", () => {
     expect(listarMarcas("")).toEqual([]);
+  });
+
+  it("rotuloFonteEstoque traduz 'mista' (período de média)", () => {
+    expect(rotuloFonteEstoque("mista")).toBe("Média de anos com fontes de estoque diferentes");
+  });
+
+  it("rotuloFonteEstoque mostra valor desconhecido cru, sem quebrar", () => {
+    expect(rotuloFonteEstoque("open_buildings")).toBe("open_buildings");
+    expect(rotuloFonteEstoque(null)).toBe("—");
   });
 });

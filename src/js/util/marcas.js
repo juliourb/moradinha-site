@@ -39,6 +39,20 @@ export function classeMarca(codigo) {
   return "info";
 }
 
+/** Rótulos conhecidos para `hex_qualidade.fonte_estoque`/`manifesto.periodos[].fonte_estoque` (CHANGELOG_SPECS v1.5). */
+const ROTULOS_FONTE_ESTOQUE = Object.freeze({
+  mista: "Média de anos com fontes de estoque diferentes",
+});
+
+/**
+ * @param {string|null|undefined} valor
+ * @returns {string} rótulo conhecido, ou o próprio valor cru se não houver rótulo (nunca quebra)
+ */
+export function rotuloFonteEstoque(valor) {
+  if (valor == null) return "—";
+  return ROTULOS_FONTE_ESTOQUE[valor] ?? valor;
+}
+
 /** Ordem de importância para "a marca mais importante" (SPEC_F2 item 1). */
 export const PRIORIDADE_MARCAS = Object.freeze([
   "total_fragil",

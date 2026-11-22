@@ -1,7 +1,7 @@
 // Painel do hexágono selecionado (SPEC_F1 §5, §10).
 import * as d3 from "d3";
 import { formatar } from "../util/formato.js";
-import { rotuloMarca } from "../util/marcas.js";
+import { rotuloMarca, rotuloFonteEstoque } from "../util/marcas.js";
 import { valorHex, brutoHex, faixaHex, incertezaHex, COMPONENTES_BASE } from "../dados/calculo.js";
 import { nivelIncerteza, nivelCvAp, nivelFracaoImputada } from "../util/limiares.js";
 
@@ -67,7 +67,7 @@ function blocoQualidade(linha, estado) {
       const n = nivelFracaoImputada(qq.fracaoImputada);
       itens.push(`<span class="pill ${NIVEL_CLASSE[n]}">fração imputada: ${formatar(qq.fracaoImputada * 100, 0)}%</span>`);
     }
-    itens.push(`<span class="pill info">fonte do estoque: ${qq.fonteEstoque}</span>`);
+    itens.push(`<span class="pill info">fonte do estoque: ${rotuloFonteEstoque(qq.fonteEstoque)}</span>`);
     if (qq.gEstoque != null) itens.push(`<span class="pill info">estoque ÷ 2022: ${formatar(qq.gEstoque, 2)}</span>`);
     if (qq.hexNovo) itens.push(`<span class="pill warn">hexágono novo neste período</span>`);
   }
