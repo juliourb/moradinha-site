@@ -7,6 +7,13 @@ export const LIMIARES = Object.freeze({
   fracao_imputada: { atencao: 0.3 },
 });
 
+/** Limiares fixos do protocolo, exibidos na tabela de parâmetros da F4 (SPEC_00 §5.3/§7). */
+export const LIMIARES_RASTREIO = Object.freeze({
+  cv_total_fragil: { valor: 15, unidade: "%", rotulo: "CV do total (marca total_fragil)" },
+  z_significancia: { valor: 1.96, unidade: "", rotulo: "z (mudança afirmável vs. dentro do ruído)" },
+  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: "CV da AP (marca ap_ressalva)" },
+});
+
 /** @returns {"ok"|"atencao"|"critico"} */
 export function nivelIncerteza(valor) {
   if (valor == null) return "ok";

@@ -10,8 +10,8 @@ antes da F5).
 | F1 | concluída (17/17 validações verdes; critério F1-5 ajustado para v1.3 por decisão de Julio) | 2026-11-22 | ver `git log` |
 | F2 | concluída (5/5 validações verdes) | 2026-11-22 | ver `git log` |
 | F3 | concluída (6/6 validações verdes; contrato v1.1 e complemento `fonte_estoque` por decisão de Julio) | 2026-11-22 | ver `git log` |
-| F4 | pendente | — | — |
-| F5 | pendente | — | — |
+| F4 | concluída (6/6 validações verdes) | 2026-11-22 | ver `git log` |
+| F5 | pendente — **parada obrigatória**: preciso do pacote real e dos termos do mapa de base antes de seguir | — | — |
 
 ## Notas
 

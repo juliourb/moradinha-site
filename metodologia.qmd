@@ -8,10 +8,62 @@ title: ""
 ## Metodologia
 
 ::: sub
-Em construção (SPEC_F4). Vai trazer:
+Como o número nasce: o pipeline que gerou este pacote, os parâmetros do domínio e o rastreio até o
+commit exato do moradinha e deste site.
 :::
 
-- Pipeline em grafo clicável, com o commit e a data de cada etapa.
-- Textos explicativos do método, parâmetros do domínio e rastreio da execução.
-- Seção interna (não aparece no build público).
+### O pipeline
+
+<div class="como-ler">Cada caixa é uma etapa, com o commit e a data da execução. Clique numa caixa
+(ou use Tab e Enter) para ir direto ao texto dela.</div>
+<div id="met-pipeline"></div>
+
+<section id="met-texto-coleta">
+{{< include textos/metodologia/coleta.qmd >}}
+</section>
+
+<section id="met-texto-grade">
+{{< include textos/metodologia/grade.qmd >}}
+</section>
+
+<section id="met-texto-classificacao">
+{{< include textos/metodologia/classificacao.qmd >}}
+</section>
+
+<section id="met-texto-treino">
+{{< include textos/metodologia/treino.qmd >}}
+</section>
+
+<section id="met-texto-montagem2022">
+{{< include textos/metodologia/montagem2022.qmd >}}
+</section>
+
+<section id="met-texto-anost">
+{{< include textos/metodologia/anost.qmd >}}
+</section>
+
+<section id="met-texto-exportacao">
+{{< include textos/metodologia/exportacao.qmd >}}
+</section>
+
+### Parâmetros do domínio
+
+<div id="met-parametros"></div>
+
+### Rastreio da execução
+
+<div id="met-rastreio"></div>
+:::
+
+::: {.content-visible when-profile="interno"}
+::: panel
+## Seção interna (uso interno — não publicada)
+
+::: sub
+Só existe no build gerado com `--profile interno`; no build público (o deste site), esta seção
+inteira é removida do HTML.
+:::
+
+<div id="met-interna"></div>
+:::
 :::

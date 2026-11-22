@@ -31,11 +31,20 @@ jobs:
           npm run validar -- pacotes/al_rm_maceio/ficticio
           npm run validar -- pacotes/teste_pequeno/ficticio
 
+      - name: Validar citações da Metodologia (referencias.bib)
+        run: npm run validar:citacoes
+
       - name: Testes de unidade (vitest)
         run: npm test
 
-      - name: Build (esbuild + quarto render)
+      - name: Build público (esbuild + quarto render)
         run: npm run build
+
+      - name: Build interno (--profile interno, só para a checagem F4-4)
+        run: npm run build:interno
+
+      - name: Validar a seção interna (ausente no público, presente no --profile interno)
+        run: npm run validar:build-interno
 
       - name: Instalar o Chromium do Playwright
         run: npx playwright install --with-deps chromium

@@ -77,6 +77,13 @@ export async function carregarJSON(origem, arquivo) {
   return resposta.json();
 }
 
+/** Bytes crus de um arquivo do pacote — usado no rastreio da F4 para conferir o sha256 contra o manifesto. */
+export async function carregarBinario(origem, arquivo) {
+  const resposta = await fetch(`${origem}/${arquivo}`);
+  if (!resposta.ok) throw new Error(`${arquivo}: HTTP ${resposta.status}`);
+  return resposta.arrayBuffer();
+}
+
 export function dividirCodigos(campo) {
   return campo ? String(campo).split(";").filter(Boolean) : [];
 }

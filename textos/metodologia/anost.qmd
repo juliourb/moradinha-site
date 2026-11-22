@@ -1,0 +1,6 @@
+## Anos t
+
+<span class="pill warn">rascunho</span>
+
+Projeta o estoque de domicílios para os anos seguintes a 2022, reestima o déficit e sua faixa, e
+calcula as médias de período [@souza2020mapbiomas; @ibge_pnadc].

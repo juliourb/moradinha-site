@@ -1,0 +1,5 @@
+## Exportação
+
+<span class="pill warn">rascunho</span>
+
+Monta o pacote de publicação: só os números do contrato, com manifesto, hashes e sem microdado.

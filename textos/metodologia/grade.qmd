@@ -1,0 +1,6 @@
+## Grade
+
+<span class="pill warn">rascunho</span>
+
+Cruza setor censitário e hexágono H3 (resolução 8), gerando o pedaço setor × hexágono que carrega o
+peso de cada fonte até o nível do mapa [@brodsky2018h3].

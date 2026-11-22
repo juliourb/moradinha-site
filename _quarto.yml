@@ -12,6 +12,8 @@ project:
     - assets/js/duckdb/
     - assets/js/maplibre-gl-worker.mjs
 
+bibliography: referencias.bib
+
 website:
   title: "moradinha"
   site-url: "https://julioamem.github.io/moradinha-site/"

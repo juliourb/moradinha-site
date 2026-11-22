@@ -1,0 +1,6 @@
+## Classificação
+
+<span class="pill warn">rascunho</span>
+
+Aplica a regra de déficit habitacional da Fundação João Pinheiro na amostra direta e, de forma
+equivalente, na PNADc [@fjp2023deficit].

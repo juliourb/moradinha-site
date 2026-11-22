@@ -5,6 +5,7 @@ import { carregarJSON, escolherDominioEEdicao } from "./dados/pacote.js";
 import { iniciarExplorador } from "./explorador.js";
 import { iniciarVisaoGeral } from "./visaoGeral.js";
 import { iniciarConfiabilidade } from "./confiabilidade.js";
+import { iniciarMetodologia } from "./metodologia.js";
 
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -39,4 +40,8 @@ iniciarVisaoGeral().catch((erro) => {
 iniciarConfiabilidade().catch((erro) => {
   // eslint-disable-next-line no-console
   console.error("Falha ao iniciar a confiabilidade:", erro);
+});
+iniciarMetodologia().catch((erro) => {
+  // eslint-disable-next-line no-console
+  console.error("Falha ao iniciar a metodologia:", erro);
 });

@@ -12868,6 +12868,11 @@ async function carregarJSON(origem, arquivo) {
   if (!resposta.ok) throw new Error(`${arquivo}: HTTP ${resposta.status}`);
   return resposta.json();
 }
+async function carregarBinario(origem, arquivo) {
+  const resposta = await fetch(`${origem}/${arquivo}`);
+  if (!resposta.ok) throw new Error(`${arquivo}: HTTP ${resposta.status}`);
+  return resposta.arrayBuffer();
+}
 function dividirCodigos(campo) {
   return campo ? String(campo).split(";").filter(Boolean) : [];
 }
@@ -81233,7 +81238,7 @@ var libh3 = (function(libh32) {
         b11 = b11 | 0;
         T3 = a6;
       }
-      function $7(a6, c4) {
+      function $8(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         var d4 = 0, e68 = 0, f5 = 0;
@@ -93947,7 +93952,7 @@ var libh3 = (function(libh32) {
         _localIjToCell: Ic2,
         _malloc: Bd2,
         _maxFaceCount: Zb2,
-        _maxGridDiskSize: $7,
+        _maxGridDiskSize: $8,
         _maxPolygonToCellsSize: ha2,
         _maxPolygonToCellsSizeExperimental: Sc2,
         _memcpy: Ud2,
@@ -100223,6 +100228,11 @@ var LIMIARES = Object.freeze({
   // direta_cv em % (SPEC_00 ap.parquet)
   fracao_imputada: { atencao: 0.3 }
 });
+var LIMIARES_RASTREIO = Object.freeze({
+  cv_total_fragil: { valor: 15, unidade: "%", rotulo: "CV do total (marca total_fragil)" },
+  z_significancia: { valor: 1.96, unidade: "", rotulo: "z (mudan\xE7a afirm\xE1vel vs. dentro do ru\xEDdo)" },
+  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: "CV da AP (marca ap_ressalva)" }
+});
 function nivelIncerteza(valor) {
   if (valor == null) return "ok";
   if (valor > LIMIARES.incerteza.critico) return "critico";
@@ -101163,6 +101173,183 @@ async function iniciarConfiabilidade() {
   atualizarModelo("coabitacao");
 }
 
+// src/js/dados/metodologia.js
+var COMPONENTES_MODELO = ["coabitacao", "onus", "precariedade"];
+var CLAB6 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function camadasPipeline(pipeline) {
+  const { etapas, ligacoes } = pipeline;
+  const predecessores = new Map(etapas.map((e67) => [e67.id, []]));
+  for (const l3 of ligacoes) predecessores.get(l3.para)?.push(l3.de);
+  const camadaPorId = /* @__PURE__ */ new Map();
+  function camadaDe(id3) {
+    if (camadaPorId.has(id3)) return camadaPorId.get(id3);
+    const preds = predecessores.get(id3) ?? [];
+    const c3 = preds.length ? 1 + Math.max(...preds.map(camadaDe)) : 0;
+    camadaPorId.set(id3, c3);
+    return c3;
+  }
+  for (const e67 of etapas) camadaDe(e67.id);
+  const porCamada = /* @__PURE__ */ new Map();
+  for (const e67 of etapas) {
+    const c3 = camadaPorId.get(e67.id);
+    if (!porCamada.has(c3)) porCamada.set(c3, []);
+    porCamada.get(c3).push(e67.id);
+  }
+  const nos = etapas.map((e67) => ({
+    ...e67,
+    camada: camadaPorId.get(e67.id),
+    posicao: porCamada.get(camadaPorId.get(e67.id)).indexOf(e67.id)
+  }));
+  const nCamadas = Math.max(...[...camadaPorId.values()]) + 1;
+  const maiorCamada = Math.max(...[...porCamada.values()].map((v4) => v4.length));
+  return { nos, arestas: ligacoes, nCamadas, maiorCamada };
+}
+function parametrosDominio(manifesto) {
+  return {
+    periodos: manifesto.periodos.map((p4) => ({
+      id: p4.id,
+      rotulo: p4.rotulo,
+      tipo: p4.tipo,
+      fonteEstoque: rotuloFonteEstoque(p4.fonte_estoque)
+    })),
+    limiares: LIMIARES_RASTREIO
+  };
+}
+function linhasRastreio(manifesto) {
+  return {
+    edicao: manifesto.edicao,
+    commitCompleto: manifesto.commit_completo,
+    dataExecucao: manifesto.data_execucao,
+    contrato: manifesto.contrato,
+    arquivos: Object.entries(manifesto.arquivos).map(([nome, hashEsperado]) => ({ nome, hashEsperado }))
+  };
+}
+
+// src/js/util/hash.js
+async function sha256Hex(buffer) {
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return [...new Uint8Array(digest)].map((b10) => b10.toString(16).padStart(2, "0")).join("");
+}
+
+// src/js/metodologia.js
+function $7(id3) {
+  return document.getElementById(id3);
+}
+function css7(nome) {
+  return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+}
+var LARGURA_NO = 150;
+var ALTURA_NO = 46;
+var ESPACO_X = 60;
+var ESPACO_Y = 14;
+function renderizarPipeline(el2, pipeline) {
+  const { nos, arestas, nCamadas, maiorCamada } = camadasPipeline(pipeline);
+  const W4 = nCamadas * (LARGURA_NO + ESPACO_X) - ESPACO_X;
+  const H4 = maiorCamada * (ALTURA_NO + ESPACO_Y) - ESPACO_Y;
+  const porId = new Map(nos.map((n3) => [n3.id, n3]));
+  const xy2 = (n3) => ({
+    x: n3.camada * (LARGURA_NO + ESPACO_X),
+    y: n3.posicao * (ALTURA_NO + ESPACO_Y)
+  });
+  const linhas = arestas.map((a5) => {
+    const de4 = xy2(porId.get(a5.de));
+    const para = xy2(porId.get(a5.para));
+    const x1 = de4.x + LARGURA_NO;
+    const y1 = de4.y + ALTURA_NO / 2;
+    const x22 = para.x;
+    const y22 = para.y + ALTURA_NO / 2;
+    return `<path d="M${x1},${y1} C${x1 + ESPACO_X / 2},${y1} ${x22 - ESPACO_X / 2},${y22} ${x22},${y22}" fill="none" stroke="${css7("--line")}" stroke-width="2"/>`;
+  }).join("");
+  const caixas = nos.map((n3) => {
+    const { x: x5, y: y5 } = xy2(n3);
+    const dataCommit = `${n3.commit.slice(0, 7)} \xB7 ${n3.data}`;
+    return `<g class="no-pipeline" tabindex="0" role="button" data-etapa="${n3.id}" transform="translate(${x5},${y5})" aria-label="${n3.nome} ${dataCommit} \u2014 ir para o texto desta etapa">
+        <rect width="${LARGURA_NO}" height="${ALTURA_NO}" rx="8" fill="${css7("--surface")}" stroke="${css7("--accent")}" stroke-width="1.5"/>
+        <text x="10" y="18" font-size="13" font-weight="650" fill="${css7("--ink")}">${n3.nome}</text>
+        <text x="10" y="34" font-size="10" fill="${css7("--muted")}">${dataCommit}</text>
+      </g>`;
+  }).join("");
+  el2.innerHTML = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="group" aria-label="Pipeline do moradinha, da coleta \xE0 exporta\xE7\xE3o">${linhas}${caixas}</svg>`;
+  el2.querySelectorAll(".no-pipeline").forEach((no2) => {
+    const irParaTexto = () => {
+      const destino = $7(`met-texto-${no2.dataset.etapa}`);
+      destino?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    no2.addEventListener("click", irParaTexto);
+    no2.addEventListener("keydown", (ev2) => {
+      if (ev2.key === "Enter" || ev2.key === " ") {
+        ev2.preventDefault();
+        irParaTexto();
+      }
+    });
+  });
+}
+function renderizarParametros(el2, manifesto) {
+  const { periodos, limiares } = parametrosDominio(manifesto);
+  const linhasPeriodos = periodos.map((p4) => `<tr><td>${p4.rotulo}</td><td>${p4.tipo}</td><td>${p4.fonteEstoque}</td></tr>`).join("");
+  const linhasLimiares = Object.values(limiares).map((l3) => `<tr><td>${l3.rotulo}</td><td data-num="${l3.valor}">${formatar(l3.valor, l3.valor < 10 ? 2 : 0)}${l3.unidade}</td></tr>`).join("");
+  el2.innerHTML = `
+    <h4>Per\xEDodos</h4>
+    <table class="ponte"><thead><tr><th>Per\xEDodo</th><th>Tipo</th><th>Fonte do estoque</th></tr></thead><tbody>${linhasPeriodos}</tbody></table>
+    <h4 style="margin-top:14px">Limiares do protocolo</h4>
+    <table class="ponte"><thead><tr><th>Limiar</th><th>Valor</th></tr></thead><tbody>${linhasLimiares}</tbody></table>`;
+}
+async function renderizarRastreio(el2, manifesto, edicaoOrigem, versaoSite) {
+  const { edicao, commitCompleto, dataExecucao, contrato, arquivos } = linhasRastreio(manifesto);
+  el2.innerHTML = `
+    <div class="pills">
+      <span class="pill info">edi\xE7\xE3o: ${edicao}</span>
+      <span class="pill info">commit do moradinha: ${commitCompleto}</span>
+      <span class="pill info">executado em: ${dataExecucao.slice(0, 10)}</span>
+      <span class="pill info">contrato: v${contrato}</span>
+      <span class="pill info">commit deste site: ${versaoSite}</span>
+    </div>
+    <table class="ponte" id="met-rastreio-arquivos"><thead><tr><th>Arquivo</th><th>Hash esperado (manifesto)</th><th>Confer\xEAncia</th></tr></thead><tbody>${arquivos.map(
+    (a5) => `<tr data-arquivo="${a5.nome}"><td>${a5.nome}</td><td style="font-family:monospace;font-size:11px">${a5.hashEsperado}</td><td class="status">verificando\u2026</td></tr>`
+  ).join("")}</tbody></table>`;
+  await Promise.all(
+    arquivos.map(async (a5) => {
+      const linha = el2.querySelector(`tr[data-arquivo="${a5.nome}"] .status`);
+      try {
+        const bytes = await carregarBinario(edicaoOrigem, a5.nome);
+        const real = await sha256Hex(bytes);
+        const ok2 = real === a5.hashEsperado;
+        linha.innerHTML = `<span class="pill ${ok2 ? "ok" : "crit"}" data-status="${ok2 ? "ok" : "divergente"}">${ok2 ? "ok" : "divergente"}</span>`;
+      } catch {
+        linha.innerHTML = `<span class="pill crit" data-status="erro">erro ao buscar</span>`;
+      }
+    })
+  );
+}
+function montarInternaHtml(modelo) {
+  const cartoes = COMPONENTES_MODELO.map((c3) => {
+    const interno = modelo[c3]?.interno;
+    if (!interno) return `<div class="cartao-f3"><div class="k">${CLAB6[c3]}</div><div class="sub">sem dados internos registrados</div></div>`;
+    const itens = Object.entries(interno).map(([k5, v4]) => `<span class="pill info">${k5}: ${typeof v4 === "number" ? formatar(v4, 2) : v4}</span>`).join("");
+    return `<div class="cartao-f3"><div class="k">${CLAB6[c3]}</div><div class="pills">${itens}</div></div>`;
+  }).join("");
+  return `<div class="aviso-interno">Aten\xE7\xE3o: desfecho interno, n\xE3o publicado.</div><div class="cartoes-f3">${cartoes}</div>`;
+}
+function renderizarInterna(el2, modelo) {
+  if (!el2) return;
+  el2.innerHTML = montarInternaHtml(modelo);
+}
+async function iniciarMetodologia() {
+  const painel = $7("met-pipeline");
+  if (!painel) return;
+  const catalogo = await carregarJSON(".", "catalogo.json");
+  const { edicao } = escolherDominioEEdicao(catalogo);
+  const [manifesto, pipeline, modelo] = await Promise.all([
+    carregarJSON(edicao.origem, "manifesto.json"),
+    carregarJSON(edicao.origem, "pipeline.json"),
+    carregarJSON(edicao.origem, "modelo.json")
+  ]);
+  renderizarPipeline(painel, pipeline);
+  renderizarParametros($7("met-parametros"), manifesto);
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "e0b72229e25847fc879eb20a1f47c8b2f7cd01b3");
+  renderizarInterna($7("met-interna"), modelo);
+}
+
 // src/js/main.js
 async function preencherCabecalho() {
   const chipDominio = document.getElementById("chip-dominio");
@@ -101190,6 +101377,9 @@ iniciarVisaoGeral().catch((erro) => {
 });
 iniciarConfiabilidade().catch((erro) => {
   console.error("Falha ao iniciar a confiabilidade:", erro);
+});
+iniciarMetodologia().catch((erro) => {
+  console.error("Falha ao iniciar a metodologia:", erro);
 });
 /*! Bundled license information:
 

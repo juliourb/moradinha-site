@@ -1,0 +1,6 @@
+## Coleta
+
+<span class="pill warn">rascunho</span>
+
+Reúne o Censo, o CNEFE, a PNADc, dados de luz noturna, Open Buildings e MapBiomas, FCU e MDS, cada
+um na sua resolução original [@ibge_censo2022; @ibge_pnadc; @sirko2021openbuildings; @souza2020mapbiomas].

@@ -6,8 +6,19 @@ import { build } from "esbuild";
 import { copyFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+// Commit deste repositório, gravado no bundle (rastreio da F4). "dev" fora de
+// um checkout git (ex.: zip baixado sem histórico).
+function versaoSite() {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd: RAIZ }).toString().trim();
+  } catch {
+    return "dev";
+  }
+}
 const SAIDA_JS = join(RAIZ, "assets", "js", "moradinha.js");
 const SAIDA_DUCKDB = join(RAIZ, "assets", "js", "duckdb");
 const DUCKDB_DIST = join(RAIZ, "node_modules", "@duckdb", "duckdb-wasm", "dist");
@@ -24,6 +35,7 @@ async function empacotarJS() {
     target: "es2022",
     sourcemap: true,
     logLevel: "info",
+    define: { __VERSAO_SITE__: JSON.stringify(versaoSite()) },
   });
 }
 

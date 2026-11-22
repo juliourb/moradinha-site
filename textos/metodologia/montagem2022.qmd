@@ -1,0 +1,6 @@
+## Montagem 2022
+
+<span class="pill warn">rascunho</span>
+
+Compõe o total de 2022 por hexágono: taxa do modelo (ou da repartição simples), fator da AP (área
+de ponderação), calibração e faixa de incerteza, ancorados no Censo [@ibge_censo2022].

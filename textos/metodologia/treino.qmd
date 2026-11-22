@@ -1,0 +1,6 @@
+## Treino
+
+<span class="pill warn">rascunho</span>
+
+Treina um EBM (Explainable Boosting Machine) por componente, validado fora da dobra por área de
+ponderação [@nori2019interpretml].

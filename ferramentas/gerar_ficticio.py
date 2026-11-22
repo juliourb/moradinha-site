@@ -425,6 +425,10 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
                 "moran_residuos": {"I": 0.04, "p": 0.21},
                 "cobertura_d": {"modelo": 0.91, "base": 0.80},
             },
+            # Nunca 'interno' aqui: os dois pacotes fictícios são manifesto.publico = true, e o
+            # validador (V10) proíbe a chave 'interno' em modelo.json nesse caso (SPEC_00 regra
+            # inviolável 5). A seção interna da F4 (SPEC_F4 item 5) é testada com dados sintéticos
+            # nos testes de unidade, e mostra "sem dados internos registrados" com estes pacotes.
         }
 
     # qualidade.json
