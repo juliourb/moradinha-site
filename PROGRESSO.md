@@ -11,7 +11,7 @@ antes da F5).
 | F2 | concluída (5/5 validações verdes) | 2026-11-22 | ver `git log` |
 | F3 | concluída (6/6 validações verdes; contrato v1.1 e complemento `fonte_estoque` por decisão de Julio) | 2026-11-22 | ver `git log` |
 | F4 | concluída (6/6 validações verdes) | 2026-11-22 | ver `git log` |
-| F5 | pendente — **parada obrigatória**: preciso do pacote real e dos termos do mapa de base antes de seguir | — | — |
+| F5 | implementada na branch `f5-publicacao` (4/4 validações testáveis verdes); **parada obrigatória**: aguardando Julio conferir `PUBLICAR.md` e autorizar o merge para `main` | 2026-11-22 | ver `git log f5-publicacao` (não mesclada) |
 
 ## Notas
 

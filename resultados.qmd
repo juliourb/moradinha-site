@@ -32,7 +32,7 @@ title: ""
     <div class="divider" id="f1-divider" tabindex="0" role="slider" aria-label="Arrastar a cortina" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50"><button type="button" aria-label="Arrastar a cortina">↔</button></div>
     <div class="maplab" id="f1-labA"></div><div class="maplab" id="f1-labB"></div>
     <div class="legend" id="f1-legend"></div>
-    <div class="attrib">Mapa: © OpenStreetMap contributors · OpenFreeMap</div>
+    <div class="attrib"><a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://openmaptiles.org">OpenMapTiles</a> · Dados © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a></div>
     <div class="basefail" id="f1-basefail">Mapa de fundo indisponível nesta sessão; o mapa segue sem base.</div>
     <div class="layers" role="group" aria-label="Camadas de contexto" id="f1-layers">
       <span class="t">Camadas</span>
@@ -75,3 +75,5 @@ title: ""
 </section>
 </div>
 ```
+
+{{< include textos/_rodape.qmd >}}

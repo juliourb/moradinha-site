@@ -10,11 +10,12 @@
   "scripts": {
     "dev": "quarto preview",
     "build:js": "node ferramentas/esbuild.mjs",
-    "build": "npm run build:js && quarto render",
+    "build": "npm run validar:catalogo-publico && npm run build:js && quarto render",
     "build:interno": "npm run build:js && quarto render --profile interno --output-dir _site_interno",
     "validar": "node ferramentas/validar.mjs",
     "validar:citacoes": "node ferramentas/validar_citacoes.mjs",
     "validar:build-interno": "node ferramentas/validar_build_interno.mjs",
+    "validar:catalogo-publico": "node ferramentas/validar_catalogo_publico.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:all": "npm run test && npm run build && npm run test:e2e"

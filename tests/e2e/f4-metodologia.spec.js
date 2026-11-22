@@ -15,7 +15,7 @@ function lerJSON(nome) {
 test.describe("F4-1: o grafo tem exatamente as etapas e ligações do pipeline.json", () => {
   test("contagem e nomes das caixas batem com o pacote", async ({ page }) => {
     const pipeline = lerJSON("pipeline.json");
-    await page.goto("/metodologia.html");
+    await page.goto("/metodologia.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
 
     const caixas = page.locator("#met-pipeline .no-pipeline");
@@ -31,7 +31,7 @@ test.describe("F4-1: o grafo tem exatamente as etapas e ligações do pipeline.j
 
 test.describe("F4-2: clicar numa etapa leva à âncora da seção", () => {
   test("clicar na caixa 'treino' rola até o texto de Treino", async ({ page }) => {
-    await page.goto("/metodologia.html");
+    await page.goto("/metodologia.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     await page.locator('#met-pipeline .no-pipeline[data-etapa="treino"]').click();
     await page.waitForTimeout(400);
@@ -42,7 +42,7 @@ test.describe("F4-2: clicar numa etapa leva à âncora da seção", () => {
 test.describe("F4-3: todo hash do rastreio confere com o manifesto", () => {
   test("todas as linhas da tabela de rastreio mostram a pílula 'ok'", async ({ page }) => {
     const manifesto = lerJSON("manifesto.json");
-    await page.goto("/metodologia.html");
+    await page.goto("/metodologia.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     await expect(page.locator("#met-rastreio-arquivos tbody tr")).toHaveCount(Object.keys(manifesto.arquivos).length, {
       timeout: 15000,
@@ -61,7 +61,7 @@ test.describe("F4-6: página inteira, claro/escuro, axe", () => {
       page.on("pageerror", (e) => erros.push(String(e)));
 
       await page.emulateMedia({ colorScheme: tema });
-      await page.goto("/metodologia.html");
+      await page.goto("/metodologia.html?edicao=ficticio");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(1000);
 

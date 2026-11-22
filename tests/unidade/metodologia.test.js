@@ -50,6 +50,35 @@ describe("dados/metodologia.js", () => {
     expect(camadaPorId.f).toBe(4);
   });
 
+  it("camadasPipeline resolve ligações por nome de saída (pipeline real do moradinha), não só por id", () => {
+    const pipeline = {
+      etapas: [
+        { id: "e1", nome: "Coleta", commit: "x", data: "2026-01-01", saidas: ["coleta.tabela"] },
+        { id: "e2", nome: "Grade", commit: "x", data: "2026-01-01", saidas: ["grade.tabela"] },
+      ],
+      ligacoes: [{ de: "coleta.tabela", para: "grade.tabela" }],
+    };
+    const { nos, arestas } = camadasPipeline(pipeline);
+    const camadaPorId = Object.fromEntries(nos.map((n) => [n.id, n.camada]));
+    expect(camadaPorId.e1).toBe(0);
+    expect(camadaPorId.e2).toBe(1);
+    expect(arestas).toEqual([{ de: "e1", para: "e2" }]);
+  });
+
+  it("camadasPipeline não trava quando duas etapas produzem a mesma saída (reprocessamento)", () => {
+    const pipeline = {
+      etapas: [
+        { id: "e1", nome: "Coleta v1", commit: "x", data: "2026-01-01", saidas: ["coleta.tabela"] },
+        { id: "e1b", nome: "Coleta v2", commit: "x", data: "2026-01-02", saidas: ["coleta.tabela"] },
+        { id: "e2", nome: "Grade", commit: "x", data: "2026-01-01", saidas: ["grade.tabela"] },
+      ],
+      ligacoes: [{ de: "coleta.tabela", para: "grade.tabela" }],
+    };
+    const { nos } = camadasPipeline(pipeline);
+    const camadaPorId = Object.fromEntries(nos.map((n) => [n.id, n.camada]));
+    expect(camadaPorId.e2).toBe(1);
+  });
+
   it("parametrosDominio lê os períodos do manifesto e traduz fonte_estoque", () => {
     const manifesto = {
       periodos: [

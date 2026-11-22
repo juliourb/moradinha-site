@@ -15,7 +15,7 @@ function lerJSON(nome) {
 test.describe("F3-1: números da aba conferem com o pacote (data-num)", () => {
   test("sigilo, APs e ponte", async ({ page }) => {
     const qualidade = lerJSON("qualidade.json");
-    await page.goto("/confiabilidade.html");
+    await page.goto("/confiabilidade.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
 
     const semDado = Number(await page.locator("#f3-sigilo-cartoes .cartao-f3 .v").first().getAttribute("data-num"));
@@ -33,7 +33,7 @@ test.describe("F3-1: números da aba conferem com o pacote (data-num)", () => {
 
 test.describe("F3-2: 'interno' nunca aparece no HTML gerado", () => {
   test("nenhum traço de R²/interno na página renderizada", async ({ page }) => {
-    await page.goto("/confiabilidade.html");
+    await page.goto("/confiabilidade.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     const html = await page.content();
     expect(html).not.toMatch(/r2_ap|"interno"/i);
@@ -42,7 +42,7 @@ test.describe("F3-2: 'interno' nunca aparece no HTML gerado", () => {
 
 test.describe("F3-3: blocos do modelo têm título-pergunta e significado", () => {
   test("os 6 blocos aparecem para o componente padrão (coabitação)", async ({ page }) => {
-    await page.goto("/confiabilidade.html");
+    await page.goto("/confiabilidade.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     const titulos = ["O modelo ajuda?", "Acha onde está?", "Erra o tamanho?", "Erra para quem?", "Por quê?", "Quanto confiar nesses números?"];
     for (const t of titulos) {
@@ -54,7 +54,7 @@ test.describe("F3-3: blocos do modelo têm título-pergunta e significado", () =
 
 test.describe("F3-4: componente com usado=false mostra só a mensagem própria", () => {
   test("precariedade não mostra os blocos de pergunta nem curvas", async ({ page }) => {
-    await page.goto("/confiabilidade.html");
+    await page.goto("/confiabilidade.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     await page.click('#f3-seg-comp button[data-v="precariedade"]');
     await expect(page.locator("#f3-modelo-blocos")).not.toContainText("O modelo ajuda?");
@@ -64,7 +64,7 @@ test.describe("F3-4: componente com usado=false mostra só a mensagem própria",
 
 test.describe("F3-5: razões por hexágono não têm eixo dominado por extremos", () => {
   test("os SVGs de razões existem e têm viewBox finito", async ({ page }) => {
-    await page.goto("/confiabilidade.html");
+    await page.goto("/confiabilidade.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     const viewBoxes = await page.locator("#f3-razoes svg").evaluateAll((els) => els.map((e) => e.getAttribute("viewBox")));
     expect(viewBoxes.length).toBeGreaterThan(0);
@@ -83,7 +83,7 @@ test.describe("F3-6: página inteira, claro/escuro, axe", () => {
       page.on("pageerror", (e) => erros.push(String(e)));
 
       await page.emulateMedia({ colorScheme: tema });
-      await page.goto("/confiabilidade.html");
+      await page.goto("/confiabilidade.html?edicao=ficticio");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(500);
 

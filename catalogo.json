@@ -4,12 +4,14 @@
       "conjunto_id": "al_rm_maceio",
       "nome": "RM de Maceió",
       "edicoes": [
-        { "edicao": "ficticio", "origem": "pacotes/al_rm_maceio/ficticio", "padrao": true }
+        { "edicao": "69277fd", "origem": "pacotes/al_rm_maceio/69277fd", "padrao": true },
+        { "edicao": "ficticio", "origem": "pacotes/al_rm_maceio/ficticio", "padrao": false, "teste_apenas": true }
       ]
     },
     {
       "conjunto_id": "teste_pequeno",
       "nome": "Teste pequeno (20 hexágonos)",
+      "teste_apenas": true,
       "edicoes": [
         { "edicao": "ficticio", "origem": "pacotes/teste_pequeno/ficticio", "padrao": true }
       ]

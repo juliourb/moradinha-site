@@ -12847,9 +12847,11 @@ function conexao() {
   return conexaoPromessa;
 }
 function escolherDominioEEdicao(catalogo) {
-  const pedido = new URLSearchParams(window.location.search).get("dominio");
-  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedido) ?? catalogo.dominios[0];
-  const edicao = dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
+  const params = new URLSearchParams(window.location.search);
+  const pedidoDominio = params.get("dominio");
+  const pedidoEdicao = params.get("edicao");
+  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedidoDominio) ?? catalogo.dominios[0];
+  const edicao = dominio.edicoes.find((e67) => e67.edicao === pedidoEdicao) ?? dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
   return { dominio, edicao };
 }
 async function consultar(sql) {
@@ -12968,6 +12970,22 @@ async function carregarPacoteCompleto(origem) {
     carregarJSON(origem, "contornos/fcu.geojson").catch(() => null)
   ]);
   return { manifesto, totais, qualidade, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu };
+}
+
+// src/js/dados/catalogo.js
+function dominiosPublicos(catalogo) {
+  return catalogo.dominios.filter((d3) => !d3.teste_apenas);
+}
+function edicoesPublicas(dominio) {
+  return dominio.edicoes.filter((e67) => !e67.teste_apenas);
+}
+function opcoesDominio(catalogo, dominioAtual) {
+  const base = dominiosPublicos(catalogo);
+  return base.some((d3) => d3.conjunto_id === dominioAtual.conjunto_id) ? base : [...base, dominioAtual];
+}
+function opcoesEdicao(dominio, edicaoAtual) {
+  const base = edicoesPublicas(dominio);
+  return base.some((e67) => e67.edicao === edicaoAtual.edicao) ? base : [...base, edicaoAtual];
 }
 
 // src/js/estado/loja.js
@@ -101176,15 +101194,30 @@ async function iniciarConfiabilidade() {
 // src/js/dados/metodologia.js
 var COMPONENTES_MODELO = ["coabitacao", "onus", "precariedade"];
 var CLAB6 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function resolverEtapa(etapas, chave) {
+  if (etapas.some((e67) => e67.id === chave)) return [chave];
+  return etapas.filter((e67) => e67.saidas?.includes(chave)).map((e67) => e67.id);
+}
 function camadasPipeline(pipeline) {
   const { etapas, ligacoes } = pipeline;
   const predecessores = new Map(etapas.map((e67) => [e67.id, []]));
-  for (const l3 of ligacoes) predecessores.get(l3.para)?.push(l3.de);
+  const arestas = [];
+  for (const l3 of ligacoes) {
+    for (const paraId of resolverEtapa(etapas, l3.para)) {
+      for (const deId of resolverEtapa(etapas, l3.de)) {
+        if (deId === paraId) continue;
+        predecessores.get(paraId)?.push(deId);
+        arestas.push({ de: deId, para: paraId });
+      }
+    }
+  }
   const camadaPorId = /* @__PURE__ */ new Map();
-  function camadaDe(id3) {
+  function camadaDe(id3, emProgresso = /* @__PURE__ */ new Set()) {
     if (camadaPorId.has(id3)) return camadaPorId.get(id3);
+    if (emProgresso.has(id3)) return 0;
+    emProgresso.add(id3);
     const preds = predecessores.get(id3) ?? [];
-    const c3 = preds.length ? 1 + Math.max(...preds.map(camadaDe)) : 0;
+    const c3 = preds.length ? 1 + Math.max(...preds.map((p4) => camadaDe(p4, emProgresso))) : 0;
     camadaPorId.set(id3, c3);
     return c3;
   }
@@ -101202,7 +101235,7 @@ function camadasPipeline(pipeline) {
   }));
   const nCamadas = Math.max(...[...camadaPorId.values()]) + 1;
   const maiorCamada = Math.max(...[...porCamada.values()].map((v4) => v4.length));
-  return { nos, arestas: ligacoes, nCamadas, maiorCamada };
+  return { nos, arestas, nCamadas, maiorCamada };
 }
 function parametrosDominio(manifesto) {
   return {
@@ -101346,25 +101379,36 @@ async function iniciarMetodologia() {
   ]);
   renderizarPipeline(painel, pipeline);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "e0b72229e25847fc879eb20a1f47c8b2f7cd01b3");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "c6e75129e4b0587ced3b6f225a5d325c263a9e05");
   renderizarInterna($7("met-interna"), modelo);
 }
 
 // src/js/main.js
+function navegarPara(dominioId, edicaoId) {
+  const params = new URLSearchParams(window.location.search);
+  params.set("dominio", dominioId);
+  if (edicaoId) params.set("edicao", edicaoId);
+  else params.delete("edicao");
+  window.location.search = params.toString();
+}
 async function preencherCabecalho() {
-  const chipDominio = document.getElementById("chip-dominio");
-  const chipEdicao = document.getElementById("chip-edicao");
+  const selDominio = document.getElementById("sel-dominio");
+  const selEdicao = document.getElementById("sel-edicao");
   const chipFicticio = document.getElementById("chip-ficticio");
-  if (!chipDominio || !chipEdicao) return;
+  const chipData = document.getElementById("chip-data");
+  if (!selDominio || !selEdicao) return;
   try {
     const catalogo = await (await fetch("catalogo.json")).json();
     const { dominio, edicao } = escolherDominioEEdicao(catalogo);
     const manifesto = await carregarJSON(edicao.origem, "manifesto.json");
-    chipDominio.textContent = dominio.nome;
-    chipEdicao.textContent = `edi\xE7\xE3o ${manifesto.edicao} \xB7 ${manifesto.data_execucao.slice(0, 10)}`;
+    selDominio.innerHTML = opcoesDominio(catalogo, dominio).map((d3) => `<option value="${d3.conjunto_id}" ${d3.conjunto_id === dominio.conjunto_id ? "selected" : ""}>${d3.nome}</option>`).join("");
+    selEdicao.innerHTML = opcoesEdicao(dominio, edicao).map((e67) => `<option value="${e67.edicao}" ${e67.edicao === edicao.edicao ? "selected" : ""}>edi\xE7\xE3o ${e67.edicao}</option>`).join("");
+    if (chipData) chipData.textContent = manifesto.data_execucao.slice(0, 10);
     if (manifesto.ficticio && chipFicticio) chipFicticio.hidden = false;
+    selDominio.addEventListener("change", () => navegarPara(selDominio.value, null));
+    selEdicao.addEventListener("change", () => navegarPara(dominio.conjunto_id, selEdicao.value));
   } catch (erro) {
-    chipEdicao.textContent = "pacote indispon\xEDvel";
+    if (chipData) chipData.textContent = "pacote indispon\xEDvel";
     console.error("Falha ao carregar o cat\xE1logo/manifesto:", erro);
   }
 }

@@ -29,7 +29,7 @@ test.describe("F2-1: todo número da página confere com o pacote (data-num)", (
     const ano = [...manifesto.periodos].reverse().find((p) => p.tipo === "ano").id;
     const dom = totais.domicilios.find((d) => d.periodo === ano).total;
 
-    await page.goto("/index.html");
+    await page.goto("/index.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
 
     for (const comp of ["total", "coabitacao", "onus", "precariedade"]) {
@@ -48,7 +48,7 @@ test.describe("F2-1: todo número da página confere com o pacote (data-num)", (
     const manifesto = lerJSON("manifesto.json");
     const ano = [...manifesto.periodos].reverse().find((p) => p.tipo === "ano").id;
 
-    await page.goto("/index.html");
+    await page.goto("/index.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
 
     const esperadoTotal = totalNoMapa(totais, "total", ano);
@@ -59,7 +59,7 @@ test.describe("F2-1: todo número da página confere com o pacote (data-num)", (
 
 test.describe("F2-2: FJP publicado nulo vira 'a preencher'; preenchido mostra número/fonte/link", () => {
   test("pacote de Maceió: todos os indicadores reais vêm preenchidos", async ({ page }) => {
-    await page.goto("/index.html");
+    await page.goto("/index.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     const linhas = page.locator(".fjp-linha");
     await expect(linhas).toHaveCount(5);
@@ -80,7 +80,7 @@ test.describe("F2-2: FJP publicado nulo vira 'a preencher'; preenchido mostra n�
 
 test.describe("F2-3: clicar num cartão abre Resultados com o estado correto", () => {
   test("cartão de ônus leva a Resultados com componente=ônus", async ({ page }) => {
-    await page.goto("/index.html");
+    await page.goto("/index.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     await page.click('.cartao-bi[data-componente="onus"]');
     await page.waitForURL(/resultados\.html/);
@@ -96,7 +96,7 @@ test.describe("F2-4: Copiar usa o formato exato de citação", () => {
     const manifesto = lerJSON("manifesto.json");
     const data = manifesto.data_execucao.slice(0, 10).split("-").reverse().join("/");
 
-    await page.goto("/index.html");
+    await page.goto("/index.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
     await page.click('#f2-citar tbody tr:first-child button[data-i="0"]');
     const texto = await page.evaluate(() => navigator.clipboard.readText());
@@ -114,7 +114,7 @@ test.describe("F2-5: página inteira, claro/escuro, axe", () => {
       page.on("pageerror", (e) => erros.push(String(e)));
 
       await page.emulateMedia({ colorScheme: tema });
-      await page.goto("/index.html");
+      await page.goto("/index.html?edicao=ficticio");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(500);
 

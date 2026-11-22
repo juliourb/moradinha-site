@@ -7,6 +7,19 @@ export const COMPONENTES_MODELO = ["coabitacao", "onus", "precariedade"];
 export const CLAB = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
 
 /**
+ * Resolve uma ponta de ligação (`de`/`para`) para o(s) id(s) de etapa: o
+ * contrato não fixa se `ligacoes` referencia `etapas[].id` diretamente (como
+ * nos pacotes fictícios) ou um nome em `etapas[].saidas` (como no pipeline
+ * real do moradinha, onde a ligação é pela tabela de saída); aqui aceita os
+ * dois. Mais de uma etapa pode produzir a mesma saída (reprocessamento) —
+ * nesse caso resolve para todas.
+ */
+function resolverEtapa(etapas, chave) {
+  if (etapas.some((e) => e.id === chave)) return [chave];
+  return etapas.filter((e) => e.saidas?.includes(chave)).map((e) => e.id);
+}
+
+/**
  * Camadas do grafo do pipeline por caminho mais longo a partir das raízes
  * (sem predecessor): cada etapa fica à direita de todas as que a alimentam,
  * o layout fica determinístico mesmo que o pipeline vire um DAG com ramos.
@@ -14,13 +27,24 @@ export const CLAB = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "
 export function camadasPipeline(pipeline) {
   const { etapas, ligacoes } = pipeline;
   const predecessores = new Map(etapas.map((e) => [e.id, []]));
-  for (const l of ligacoes) predecessores.get(l.para)?.push(l.de);
+  const arestas = [];
+  for (const l of ligacoes) {
+    for (const paraId of resolverEtapa(etapas, l.para)) {
+      for (const deId of resolverEtapa(etapas, l.de)) {
+        if (deId === paraId) continue;
+        predecessores.get(paraId)?.push(deId);
+        arestas.push({ de: deId, para: paraId });
+      }
+    }
+  }
 
   const camadaPorId = new Map();
-  function camadaDe(id) {
+  function camadaDe(id, emProgresso = new Set()) {
     if (camadaPorId.has(id)) return camadaPorId.get(id);
+    if (emProgresso.has(id)) return 0; // ciclo (não devia existir numa linhagem de tabelas, mas não trava o grafo)
+    emProgresso.add(id);
     const preds = predecessores.get(id) ?? [];
-    const c = preds.length ? 1 + Math.max(...preds.map(camadaDe)) : 0;
+    const c = preds.length ? 1 + Math.max(...preds.map((p) => camadaDe(p, emProgresso))) : 0;
     camadaPorId.set(id, c);
     return c;
   }
@@ -40,7 +64,7 @@ export function camadasPipeline(pipeline) {
   }));
   const nCamadas = Math.max(...[...camadaPorId.values()]) + 1;
   const maiorCamada = Math.max(...[...porCamada.values()].map((v) => v.length));
-  return { nos, arestas: ligacoes, nCamadas, maiorCamada };
+  return { nos, arestas, nCamadas, maiorCamada };
 }
 
 /** Tabela de parâmetros do domínio: períodos do manifesto + limiares fixos do protocolo. */

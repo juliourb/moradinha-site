@@ -67,3 +67,5 @@ inteira é removida do HTML.
 <div id="met-interna"></div>
 :::
 :::
+
+{{< include textos/_rodape.qmd >}}
