@@ -10,6 +10,10 @@ O explorador ligado: uma "pergunta" muda junto o mapa, a resposta, os cartões, 
 
 1. **Estado (`estado/loja.js`):** `tema` (deficit \| qualidade), `medida_qualidade` (id da §8), `conjunto_graficos` (índice do carrossel), `medida` (absoluto \| relativo), `componente` (total \| coabitacao \| onus \| precariedade), `periodo` (id do manifesto), `comparar` (id \| nulo), `selecionado` (h3 \| nulo), `faixa_hist` ([de, até] \| nulo), camadas ligadas. Estado refletido no hash da URL (`#resultados`) só pelo nome da aba; o resto fica na memória e, opcionalmente, em `localStorage` com try/catch.
 2. **Pergunta em texto** montada a partir do estado ("Onde está o déficit relativo de ônus em 2025? Comparado com 2022.").
+   A barra da pergunta fica sempre numa linha só. Abaixo de 1600 px de largura, os controles de
+   camadas e "comparar com (cortina)" saem da barra e vão para um menu "mais" (botão com
+   `aria-expanded`, abre por clique e por teclado); tema, medida, componente e período continuam
+   visíveis na barra em qualquer largura (decisão de Julio, v1.3 — `CHANGELOG_SPECS.md`).
 3. **Mapa (`mapa/`):**
    - camada de base MapLibre (SPEC_00 §6) com a camada do deck.gl sobreposta, atribuição e aviso de falha;
    - `H3HexagonLayer` única, sem extrusão, `highPrecision: true`, cor pela rampa de 7 quantis calculados sobre os valores > 0 do período (e do período comparado, quando houver cortina, para a escala ser a mesma);
@@ -24,7 +28,13 @@ O explorador ligado: uma "pergunta" muda junto o mapa, a resposta, os cartões, 
    - total do domínio no tempo (pontos = anos; losangos = médias; barras = faixa de 95%; clique troca o período);
    - distribuição por período (caixa p25–p75, mediana, haste p10–p90; clique troca o período).
    Os gráficos se redesenham pela largura do contêiner (ResizeObserver) e ao abrir/fechar.
-7. **Altura:** o mapa ocupa a altura livre da janela com o dock aberto, com mínimo de 560 px; com o dock minimizado, cresce. A coluna da direita tem a mesma altura do mapa e rola por dentro.
+7. **Altura (critério v1.3 — decisão de Julio, substitui a v1):** o mapa ocupa a altura livre da
+   janela com o dock aberto, com mínimo de 560 px; com o dock minimizado, cresce. A coluna da
+   direita tem a mesma altura do mapa e rola por dentro. `--maph` é calculada para que, em qualquer
+   largura, a borda superior do dock de gráficos (pelo menos 24 px dos títulos dos cartões) apareça
+   na primeira tela, sem rolagem horizontal; os gráficos do dock começam abertos em qualquer
+   largura e podem exigir rolagem vertical para serem vistos por inteiro. O piso de 560 px do mapa
+   não muda.
 
 8. **Tema de qualidade** (controle "Tema: Déficit \| Qualidade" na barra da pergunta; no tema Qualidade aparece o seletor "Medida de qualidade" e a pergunta em texto vira, por exemplo, "Quão confiável é a estimativa de coabitação em 2025?"):
 
@@ -56,7 +66,7 @@ O explorador ligado: uma "pergunta" muda junto o mapa, a resposta, os cartões, 
 | F1-2 | soma dos valores dos hexágonos desenhados (lida do estado do layer) = total da resposta, por componente, nos 6 períodos (erro relativo ≤ 1e−6) |
 | F1-3 | total nunca mostra faixa; precariedade nos períodos com `precariedade_provisoria_sem_faixa` nunca mostra faixa |
 | F1-4 | Playwright, roteiro: trocar cada controle → a pergunta em texto, a legenda, o número grande e o título do histograma mudam; ligar a cortina → aparecem as duas legendas de período e a divisória; arrastar a divisória → `clip-path` muda; clicar num hexágono → o painel mostra o mesmo código H3; clicar numa barra do histograma → hexágonos fora da faixa ficam com alfa ≤ 60; clicar num ponto da série → o período muda; minimizar cada gráfico e o dock → o mapa cresce |
-| F1-5 | **sem rolar:** em janela 1920×1080, com o dock aberto, o mapa e os quatro gráficos ficam inteiros na tela sem rolagem da página; em 1440×900, rolagem da página ≤ 40 px |
+| F1-5 | **critério v1.3** (medido em 1920×1080 e 1440×900): cabeçalho + barra de pergunta + mapa inteiro visíveis sem rolar; borda superior do dock visível na primeira tela (≥ 24 px dos títulos dos cartões); gráficos abertos por padrão em qualquer largura (podem exigir rolagem vertical); nenhuma rolagem horizontal |
 | F1-6 | o período com `fonte_estoque_diferente` mostra a pílula crítica e aparece em vermelho na série e na série do hexágono |
 | F1-7 | tempo até o evento `mapa-pronto` ≤ 4 s no CI com o pacote de Maceió (cache frio), medido 3 vezes, mediana registrada |
 | F1-8 | axe-core sem violação serious/critical; todos os controles operáveis por teclado (roteiro Tab/Enter/setas) |

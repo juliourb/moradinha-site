@@ -34,6 +34,9 @@ export async function iniciarExplorador() {
   const linhasArr = [...linhas.values()];
 
   const loja = criarLoja(estadoInicial(manifesto));
+  // Seam de teste (Playwright): seleciona um hexágono sem precisar simular o
+  // clique no canvas do mapa. Não faz parte da API pública do explorador.
+  window.__moradinhaSelecionarHex = (h3) => loja.definir({ selecionado: h3 });
 
   const elementosPergunta = {
     question: $("f1-question"),
@@ -149,6 +152,30 @@ export async function iniciarExplorador() {
     clearTimeout(rt);
     rt = setTimeout(() => renderizarGraficos(loja.obter()), 120);
   }).observe(dock);
+
+  // Menu "Mais" (SPEC_F1 v1.3): abaixo de 1600px, "comparar com (cortina)" só
+  // aparece ao abrir o menu; acima de 1600px, o CSS mostra tudo em linha
+  // (display:contents) e o botão fica escondido.
+  const maisBtn = $("f1-mais-btn");
+  const maisMenu = $("f1-mais-menu");
+  maisBtn.onclick = () => {
+    const aberto = maisMenu.hasAttribute("hidden");
+    if (aberto) maisMenu.removeAttribute("hidden");
+    else maisMenu.setAttribute("hidden", "");
+    maisBtn.setAttribute("aria-expanded", String(aberto));
+  };
+  document.addEventListener("click", (e) => {
+    if (!$("f1-ctl-mais").contains(e.target) && !maisMenu.hasAttribute("hidden") && matchMedia("(max-width: 1599.98px)").matches) {
+      maisMenu.setAttribute("hidden", "");
+      maisBtn.setAttribute("aria-expanded", "false");
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !maisMenu.hasAttribute("hidden")) {
+      maisMenu.setAttribute("hidden", "");
+      maisBtn.setAttribute("aria-expanded", "false");
+    }
+  });
 
   loja.assinar((estado) => {
     atualizarCarrossel(estado);

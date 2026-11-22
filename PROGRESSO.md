@@ -7,8 +7,8 @@ antes da F5).
 | fase | status | data | commit |
 |---|---|---|---|
 | F0 | concluída (Pages ativado, workflow verde, confirmado por Julio) | 2026-11-22 | `80e05a0` |
-| F1 | 16/17 validações verdes; parada na correção do F1-5 (layout em janelas < ~1600px, 2 rodadas sem sucesso — SPEC_00 §9.5), aguardando Julio | 2026-11-22 | ver `git log` |
-| F2 | pendente | — | — |
+| F1 | concluída (17/17 validações verdes; critério F1-5 ajustado para v1.3 por decisão de Julio) | 2026-11-22 | ver `git log` |
+| F2 | em andamento | 2026-11-22 | — |
 | F3 | pendente | — | — |
 | F4 | pendente | — | — |
 | F5 | pendente | — | — |

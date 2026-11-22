@@ -17,7 +17,12 @@ title: ""
   <div class="ctl"><span class="lab" id="f1-lab-comp">Componente</span><div class="seg" role="group" aria-labelledby="f1-lab-comp" id="f1-seg-comp">
     <button type="button" data-v="total" aria-pressed="true">Total</button><button type="button" data-v="coabitacao" aria-pressed="false">Coabitação</button><button type="button" data-v="onus" aria-pressed="false">Ônus</button><button type="button" data-v="precariedade" aria-pressed="false">Precariedade</button></div></div>
   <div class="ctl"><label for="f1-sel-per">Período</label><select id="f1-sel-per"></select></div>
-  <div class="ctl"><label for="f1-sel-cmp">Comparar com (cortina)</label><select id="f1-sel-cmp"></select></div>
+  <div class="mais-wrap" id="f1-ctl-mais">
+    <button type="button" class="iconbtn mais-btn" id="f1-mais-btn" aria-expanded="false" aria-controls="f1-mais-menu">Mais ▾</button>
+    <div class="mais-menu" id="f1-mais-menu" hidden>
+      <div class="ctl" id="f1-ctl-comparar"><label for="f1-sel-cmp">Comparar com (cortina)</label><select id="f1-sel-cmp"></select></div>
+    </div>
+  </div>
 </div>
 
 <div class="grid-main">

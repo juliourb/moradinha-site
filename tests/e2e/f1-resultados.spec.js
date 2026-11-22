@@ -1,11 +1,34 @@
 // SPEC_F1: validações do explorador (aba Resultados).
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { DuckDBInstance } from "@duckdb/node-api";
 
 const PASTA_RELATORIO = join(process.cwd(), "relatorios", "F1");
+const PASTA_PACOTE = join(process.cwd(), "pacotes", "al_rm_maceio", "ficticio");
 mkdirSync(PASTA_RELATORIO, { recursive: true });
+
+function lerJSON(nome) {
+  return JSON.parse(readFileSync(join(PASTA_PACOTE, nome), "utf8"));
+}
+
+function parsePtBr(texto) {
+  return parseFloat(texto.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", "."));
+}
+
+function totalNoMapa(totais, componente, periodo) {
+  const COMPONENTES = ["coabitacao", "onus", "precariedade"];
+  if (componente === "total") {
+    let soma = 0;
+    for (const c of COMPONENTES) {
+      const l = totais.totais.find((t) => t.componente === c && t.periodo === periodo && t.no_mapa === true);
+      soma += l.total;
+    }
+    return soma;
+  }
+  return totais.totais.find((t) => t.componente === componente && t.periodo === periodo && t.no_mapa === true).total;
+}
 
 async function aguardarMapaPronto(page) {
   await page.evaluate(
@@ -39,6 +62,9 @@ test.describe("F1-7: tempo até mapa-pronto", () => {
 
 test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
   test("trocar controles muda pergunta, legenda e histograma; cortina liga; clique no hexágono; carrossel", async ({ page }) => {
+    // Viewport largo: "comparar com (cortina)" fica sempre na barra (sem
+    // precisar abrir o menu "Mais" — isso tem teste próprio, F1-5).
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto("/resultados.html");
     await aguardarMapaPronto(page);
 
@@ -101,6 +127,36 @@ test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
   });
 });
 
+test.describe("F1-5: menu 'Mais' abaixo de 1600px", () => {
+  test("abre por clique e por teclado (Escape fecha); comparar funciona de dentro do menu", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/resultados.html");
+    await aguardarMapaPronto(page);
+
+    await expect(page.locator("#f1-mais-btn")).toBeVisible();
+    await expect(page.locator("#f1-mais-menu")).toBeHidden();
+
+    await page.click("#f1-mais-btn");
+    await expect(page.locator("#f1-mais-btn")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#f1-mais-menu")).toBeVisible();
+
+    await page.selectOption("#f1-sel-cmp", "2022");
+    await expect(page.locator("#f1-labB")).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#f1-mais-menu")).toBeHidden();
+    await expect(page.locator("#f1-mais-btn")).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("acima de 1600px o menu some e o controle fica sempre visível na barra", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto("/resultados.html");
+    await aguardarMapaPronto(page);
+    await expect(page.locator("#f1-mais-btn")).toBeHidden();
+    await expect(page.locator("#f1-sel-cmp")).toBeVisible();
+  });
+});
+
 test.describe("F1-16: mapa de base sem chave de API", () => {
   test("nenhuma requisição ao mapa de base contém chave/token", async ({ page }) => {
     const urls = [];
@@ -159,20 +215,92 @@ test.describe("F1-8: axe-core e teclado", () => {
   });
 });
 
-test.describe("F1-5: sem rolar / rolagem limitada", () => {
-  test("1920x1080 com dock aberto: sem rolagem da página", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto("/resultados.html");
-    await aguardarMapaPronto(page);
-    const rolagem = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
-    expect(rolagem).toBeLessThanOrEqual(5);
-  });
+test.describe("F1-5 (critério v1.3): cabeçalho+pergunta+mapa visíveis; dock espia; sem rolagem horizontal", () => {
+  for (const [w, h] of [
+    [1920, 1080],
+    [1440, 900],
+  ]) {
+    test(`${w}x${h}`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await page.goto("/resultados.html");
+      await aguardarMapaPronto(page);
+      const medidas = await page.evaluate(() => {
+        const mapbox = document.getElementById("f1-mapbox").getBoundingClientRect();
+        const dock = document.getElementById("f1-dock").getBoundingClientRect();
+        return {
+          scrollWidth: document.documentElement.scrollWidth,
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight,
+          mapboxBottom: mapbox.bottom,
+          dockTop: dock.top,
+        };
+      });
+      // sem rolagem horizontal
+      expect(medidas.scrollWidth).toBeLessThanOrEqual(medidas.innerWidth + 1);
+      // cabeçalho + pergunta + mapa inteiro visíveis sem rolar
+      expect(medidas.mapboxBottom).toBeLessThanOrEqual(medidas.innerHeight + 1);
+      // borda superior do dock visível na 1ª tela, com pelo menos 24px dos títulos
+      expect(medidas.dockTop).toBeLessThanOrEqual(medidas.innerHeight - 24);
+    });
+  }
 
-  test("1440x900: rolagem da página <= 40px", async ({ page }) => {
+  test("gráficos abertos por padrão em 1440x900 (não minimizados)", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/resultados.html");
     await aguardarMapaPronto(page);
-    const rolagem = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
-    expect(rolagem).toBeLessThanOrEqual(40);
+    await expect(page.locator(".dcard.min")).toHaveCount(0);
+  });
+});
+
+test.describe("F1-1: número grande da resposta lido do DOM bate com o pacote", () => {
+  test("12 combinações (medida × componente × período)", async ({ page }) => {
+    const totais = lerJSON("totais.json");
+    const manifesto = lerJSON("manifesto.json");
+    const COMPONENTES = ["total", "coabitacao", "onus", "precariedade"];
+    const MEDIDAS = ["absoluto", "relativo"];
+    const periodos = manifesto.periodos.slice(0, 2).map((p) => p.id);
+
+    const combos = [];
+    for (const medida of MEDIDAS) for (const comp of COMPONENTES) for (const per of periodos) combos.push({ medida, comp, per });
+    const amostra = combos.slice(0, 12);
+    expect(amostra.length).toBe(12);
+
+    await page.goto("/resultados.html");
+    await aguardarMapaPronto(page);
+
+    for (const { medida, comp, per } of amostra) {
+      await page.click(`#f1-seg-med button[data-v="${medida}"]`);
+      await page.click(`#f1-seg-comp button[data-v="${comp}"]`);
+      await page.selectOption("#f1-sel-per", per);
+
+      const total = totalNoMapa(totais, comp, per);
+      let esperado = total;
+      if (medida === "relativo") {
+        const dom = totais.domicilios.find((d) => d.periodo === per).total;
+        esperado = (100 * total) / dom;
+      }
+      const texto = await page.locator("#f1-ans-big").textContent();
+      const valor = parsePtBr(texto);
+      const erro = Math.abs(valor - esperado) / Math.max(Math.abs(esperado), 1e-9);
+      expect(erro, `medida=${medida} comp=${comp} per=${per}: DOM="${texto}" esperado=${esperado}`).toBeLessThan(0.01);
+    }
+  });
+});
+
+test.describe("F1-17 (DOM): hexágono com n_aps > 1 mostra o aviso", () => {
+  test("clique num hexágono fictício com n_aps=2", async ({ page }) => {
+    const instancia = await DuckDBInstance.create(":memory:");
+    const conn = await instancia.connect();
+    const caminho = join(PASTA_PACOTE, "hex_atributos.parquet").replace(/\\/g, "/");
+    const resultado = await conn.run(`SELECT h3 FROM read_parquet('${caminho}') WHERE n_aps > 1 LIMIT 1`);
+    const linhas = await resultado.getRowObjects();
+    expect(linhas.length).toBe(1);
+    const h3DeBorda = linhas[0].h3;
+
+    await page.goto("/resultados.html");
+    await aguardarMapaPronto(page);
+    await page.evaluate((h3) => window.__moradinhaSelecionarHex(h3), h3DeBorda);
+    await expect(page.locator("#f1-detail")).toContainText(/cruza/i);
+    await expect(page.locator("#f1-detail")).toContainText(h3DeBorda);
   });
 });

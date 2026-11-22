@@ -100494,6 +100494,7 @@ async function iniciarExplorador() {
   const { manifesto, totais, linhas, ap: ap2 } = dados;
   const linhasArr = [...linhas.values()];
   const loja = criarLoja(estadoInicial(manifesto));
+  window.__moradinhaSelecionarHex = (h32) => loja.definir({ selecionado: h32 });
   const elementosPergunta = {
     question: $4("f1-question"),
     segTema: $4("f1-seg-tema"),
@@ -100606,6 +100607,26 @@ async function iniciarExplorador() {
     clearTimeout(rt3);
     rt3 = setTimeout(() => renderizarGraficos(loja.obter()), 120);
   }).observe(dock);
+  const maisBtn = $4("f1-mais-btn");
+  const maisMenu = $4("f1-mais-menu");
+  maisBtn.onclick = () => {
+    const aberto = maisMenu.hasAttribute("hidden");
+    if (aberto) maisMenu.removeAttribute("hidden");
+    else maisMenu.setAttribute("hidden", "");
+    maisBtn.setAttribute("aria-expanded", String(aberto));
+  };
+  document.addEventListener("click", (e67) => {
+    if (!$4("f1-ctl-mais").contains(e67.target) && !maisMenu.hasAttribute("hidden") && matchMedia("(max-width: 1599.98px)").matches) {
+      maisMenu.setAttribute("hidden", "");
+      maisBtn.setAttribute("aria-expanded", "false");
+    }
+  });
+  document.addEventListener("keydown", (e67) => {
+    if (e67.key === "Escape" && !maisMenu.hasAttribute("hidden")) {
+      maisMenu.setAttribute("hidden", "");
+      maisBtn.setAttribute("aria-expanded", "false");
+    }
+  });
   loja.assinar((estado) => {
     atualizarCarrossel(estado);
     renderTudo(estado);

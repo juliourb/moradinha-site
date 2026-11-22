@@ -1,5 +1,15 @@
 # Mudanças nas especificações
 
+## v1.3 (22/11/2026) — decisão de Julio sobre o layout do explorador (F1-5)
+- F1-5 (SPEC_F1 §7 e Validações) substituído: não exige mais zero rolagem em 1920×1080 e ≤ 40 px em
+  1440×900 contando o dock inteiro; passa a exigir cabeçalho + barra de pergunta + mapa inteiro
+  visíveis sem rolar, e a borda superior do dock (≥ 24 px dos títulos) visível na primeira tela, em
+  qualquer uma das duas larguras; os gráficos continuam abertos por padrão (podem pedir rolagem
+  vertical para serem vistos por inteiro); nenhuma rolagem horizontal. O piso de 560 px do mapa
+  continua.
+- SPEC_F1 §2: a barra da pergunta nunca quebra linha; abaixo de 1600 px, camadas e "comparar com
+  (cortina)" saem para um menu "mais"; tema, medida, componente e período continuam sempre visíveis.
+
 ## v1.2 (22/11/2026) — depois da investigação G1 no moradinha
 - `hex_qualidade.fracao_imputada`: só reconstrução **além da AP** (município, conjunto, divisão igual), média dos 6 blocos, ponderada por domicílios 2022.
 - `hex_qualidade.fracao_sigilo`: denominador = peso da grade estatística (`peso_construtor`), porque pedaço em sigilo não tem domicílio.

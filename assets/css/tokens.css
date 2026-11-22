@@ -199,22 +199,44 @@ button, select, input {
   color: var(--ink) !important;
 }
 
+/* SPEC_F1 v1.3: a barra nunca quebra linha; abaixo de 1600px, "comparar com
+   (cortina)" sai para o menu "Mais" (tema/medida/componente/período continuam
+   sempre visíveis). */
 .ask {
-  display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: flex-end;
+  display: flex; flex-wrap: nowrap; gap: 4px 14px; align-items: flex-end;
   background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;
+  overflow-x: auto;
 }
-.ask .q { font-family: var(--display); font-size: 15px; flex: 1 1 260px; }
-.ctl { display: grid; gap: 4px; }
+.ask .q { font-family: var(--display); font-size: 15px; flex: 1 1 180px; min-width: 120px; }
+.ctl { display: grid; gap: 4px; flex: 0 0 auto; }
 .ctl label, .ctl .lab {
   font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600;
 }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; background: transparent; padding: 6px 10px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button { border: 0; background: transparent; padding: 6px 10px; cursor: pointer; border-right: 1px solid var(--line); white-space: nowrap; }
 .seg button:last-child { border-right: 0; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); font-weight: 600; }
 select { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
 
-#pane-resultados { --maph: max(560px, calc(100dvh - 520px)); }
+.mais-wrap { position: relative; flex: 0 0 auto; }
+.mais-btn { height: 32px; }
+.mais-menu {
+  display: grid; gap: 8px;
+}
+@media (min-width: 1600px) {
+  .mais-btn { display: none; }
+  .mais-menu, .mais-menu[hidden] { display: grid !important; }
+}
+@media (max-width: 1599.98px) {
+  .mais-menu {
+    position: absolute; right: 0; top: calc(100% + 6px); z-index: 6;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px; min-width: 220px; box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+  }
+  .mais-menu[hidden] { display: none !important; }
+}
+
+#pane-resultados { --maph: max(560px, calc(100dvh - 310px)); }
 #pane-resultados.dock-off { --maph: max(560px, calc(100dvh - 290px)); }
 
 .grid-main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; margin-top: 12px; }
