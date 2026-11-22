@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>moradinha · explorador de resultados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: barra de pergunta no topo; mapa grande à esquerda ligado a cartões e detalhe à direita; distribuição, ranking e série embaixo. */
+:root{
+  --bg:#f4f5f2; --surface:#ffffff; --ink:#1d2526; --muted:#5d6a6b; --line:#d9dedb;
+  --accent:#1f6f78; --accent-soft:#dcecec; --warn:#a8641a; --warn-soft:#f7ead6; --crit:#9c2f22; --crit-soft:#f5dfdb; --ok:#3c7a4a;
+  --fcu:#6b3fa0; --bk:#c2410c; --apline:#3d4a4b;
+  --display:"Literata", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121718; --surface:#1b2223; --ink:#e7ecea; --muted:#9aa8a8; --line:#2f393a;
+    --accent:#6cc0c6; --accent-soft:#1f3537; --warn:#e2a35a; --warn-soft:#3a2c1a; --crit:#ef8b7c; --crit-soft:#3d221e; --ok:#7cc48c;
+    --fcu:#b993ea; --bk:#fb923c; --apline:#c7d2d2; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121718; --surface:#1b2223; --ink:#e7ecea; --muted:#9aa8a8; --line:#2f393a;
+  --accent:#6cc0c6; --accent-soft:#1f3537; --warn:#e2a35a; --warn-soft:#3a2c1a; --crit:#ef8b7c; --crit-soft:#3d221e; --ok:#7cc48c;
+  --fcu:#b993ea; --bk:#fb923c; --apline:#c7d2d2; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:var(--display);font-weight:650;text-wrap:balance;margin:0}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+header.top{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:flex-end;justify-content:space-between;padding:10px 20px 0;max-width:1440px;margin:0 auto;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.brand h1{font-size:22px}
+.brand .dom{color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 auto}
+.brand{padding-bottom:8px}
+.chips{padding-bottom:8px}
+.chip.proto{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+nav.tabs a{padding:8px 14px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--muted);font-weight:600;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);background:var(--surface);border:1px solid var(--line);border-bottom-color:var(--surface);margin-bottom:-1px}
+main{max-width:1440px;margin:0 auto;padding:12px 20px 24px;display:grid;gap:12px}
+.banner{background:var(--warn-soft);border:1px solid var(--line);border-left:4px solid var(--warn);padding:8px 12px;border-radius:8px;font-size:13px}
+.ask{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:flex-end;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.ask .q{font-family:var(--display);font-size:15px;flex:1 1 260px}
+.ctl{display:grid;gap:4px}
+.ctl label,.ctl .lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface);font-weight:600}
+select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.grid-main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}
+.side{display:grid;gap:12px;align-content:start;min-width:0;max-height:var(--maph);overflow:auto;padding-right:2px}
+@media (max-width:980px){.side{max-height:none}}
+@media (max-width:980px){.grid-main{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.panel h2{font-size:16px;margin-bottom:8px}
+.panel .sub{color:var(--muted);font-size:12px}
+.mapbox{position:relative;height:var(--maph);background:var(--bg);border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.mapbox .deck{position:absolute;inset:0}
+#deckB{display:none}
+.divider{position:absolute;top:0;bottom:0;width:0;border-left:2px solid var(--ink);display:none;z-index:5}
+.divider button{position:absolute;top:50%;left:-15px;width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);background:var(--surface);cursor:ew-resize;transform:translateY(-50%);padding:0;font-size:12px}
+.maplab{position:absolute;top:10px;z-index:4;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
+#labA{left:10px} #labB{right:10px;display:none}
+.legend{position:absolute;left:10px;bottom:10px;z-index:4;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11px;max-width:300px}
+.legend .ramp{display:flex;margin:4px 0 2px}
+.legend .ramp span{flex:1;height:10px}
+.legend .ticks{display:flex;justify-content:space-between;color:var(--muted)}
+.layers{position:absolute;right:10px;bottom:10px;z-index:4;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;display:grid;gap:3px}
+.layers .t{font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.layers label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.layers label.off{color:var(--muted);cursor:not-allowed}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid}
+.answer .big{font-family:var(--display);font-size:34px;line-height:1.1}
+.answer .range{color:var(--muted);font-size:12px;margin-top:2px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pill{font-size:12px;border-radius:999px;padding:2px 9px;border:1px solid transparent}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.pill.crit{background:var(--crit-soft);color:var(--crit);border-color:var(--crit)}
+.pill.info{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.pill.ok{color:var(--ok);border-color:var(--ok)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;background:transparent;text-align:left}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.card .k{font-size:11px;color:var(--muted)}
+.card .v{font-weight:700;font-size:16px}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:8px 0}
+.detail dt{color:var(--muted)}
+.detail dd{margin:0;text-align:right}
+.comp-row{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;font-size:12px;margin:4px 0}
+.bar{position:relative;height:8px;background:var(--line);border-radius:4px}
+.bar .rng{position:absolute;top:0;bottom:0;background:var(--accent-soft);border:1px solid var(--accent);border-radius:4px}
+.bar .pt{position:absolute;top:-3px;width:3px;height:14px;background:var(--ink);border-radius:2px}
+.empty{color:var(--muted);font-size:13px}
+.grid-bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:980px){.grid-bottom{grid-template-columns:1fr}}
+svg text{fill:var(--muted);font-size:11px;font-family:var(--body)}
+svg .axis path,svg .axis line{stroke:var(--line)}
+.rank{width:100%;border-collapse:collapse;font-size:12px}
+.rank td{padding:3px 4px;border-bottom:1px solid var(--line)}
+.rank tr{cursor:pointer}
+.rank tr:hover td{background:var(--accent-soft)}
+.rank .b{height:8px;background:var(--accent);border-radius:3px}
+.note{font-size:12px;color:var(--muted);margin-top:6px}
+.dock{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 10px 8px}
+.dock-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dock-head h2{font-size:14px}
+.dock-body{display:flex;gap:10px;margin-top:4px;align-items:stretch}
+.dock.collapsed .dock-body{display:none}
+.dcard{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column}
+.dcard header{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.dcard h3{font-family:var(--body);font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dcard .body{flex:1}
+.dcard.min{flex:0 0 auto;max-width:170px}
+.dcard.min .body{display:none}
+.iconbtn{border:1px solid var(--line);background:transparent;border-radius:6px;padding:1px 7px;cursor:pointer;font-size:12px;color:var(--muted);white-space:nowrap}
+.iconbtn:hover{color:var(--ink);border-color:var(--ink)}
+@media (max-width:980px){.dock-body{flex-direction:column}.dcard.min{max-width:none}}
+.attrib{position:absolute;left:50%;transform:translateX(-50%);bottom:2px;z-index:4;font-size:10px;color:var(--muted);background:color-mix(in srgb,var(--surface) 80%,transparent);padding:0 6px;border-radius:4px;white-space:nowrap}
+.basefail{position:absolute;left:10px;top:44px;z-index:4;font-size:11px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--muted);display:none}
+.tabpane{display:none}
+/* o mapa ocupa a altura que sobra da tela com os gráficos abertos (mínimo 560px); com os gráficos minimizados, cresce */
+#pane-resultados{--maph:max(560px,calc(100dvh - 400px))}
+#pane-resultados.dock-off{--maph:max(560px,calc(100dvh - 190px))}
+.tabpane.on{display:grid;gap:12px}
+.todo ul{margin:6px 0 0 18px;padding:0}
+.todo li{margin:3px 0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><h1>moradinha</h1><span class="dom">RM de Maceió</span></div>
+  <nav class="tabs" aria-label="Seções do relatório">
+    <a href="#visao-geral" data-tab="visao-geral">Visão geral</a>
+    <a href="#resultados" data-tab="resultados">Resultados</a>
+    <a href="#confiabilidade" data-tab="confiabilidade">Confiabilidade</a>
+    <a href="#metodologia" data-tab="metodologia">Metodologia</a>
+  </nav>
+  <div class="chips"><span class="chip proto" title="Distribuição por hexágono fictícia, só um recorte de Maceió; totais do domínio e faixas reais do piloto (regime c).">protótipo · hexágonos fictícios, totais reais</span><span class="chip">edição 580a7cc · 20/11/2026</span></div>
+</header>
+<main>
+  <section class="tabpane" id="pane-resultados">
+    <div class="ask">
+      <div class="q" id="question">Onde está o déficit absoluto, total, em 2025?</div>
+      <div class="ctl"><span class="lab" id="lab-med">Medida</span><div class="seg" role="group" aria-labelledby="lab-med" id="seg-med">
+        <button type="button" data-v="abs" aria-pressed="true">Absoluto</button><button type="button" data-v="rel" aria-pressed="false">Relativo</button></div></div>
+      <div class="ctl"><span class="lab" id="lab-comp">Componente</span><div class="seg" role="group" aria-labelledby="lab-comp" id="seg-comp">
+        <button type="button" data-v="total" aria-pressed="true">Total</button><button type="button" data-v="coabitacao" aria-pressed="false">Coabitação</button><button type="button" data-v="onus" aria-pressed="false">Ônus</button><button type="button" data-v="precariedade" aria-pressed="false">Precariedade</button></div></div>
+      <div class="ctl"><label for="sel-per">Período</label><select id="sel-per"></select></div>
+      <div class="ctl"><label for="sel-cmp">Comparar com (cortina)</label><select id="sel-cmp"></select></div>
+    </div>
+
+    <div class="grid-main">
+      <div class="mapbox" id="mapbox">
+        <div class="deck" id="deckA"></div>
+        <div class="deck" id="deckB"></div>
+        <div class="divider" id="divider"><button type="button" aria-label="Arrastar a cortina">↔</button></div>
+        <div class="maplab" id="labA"></div><div class="maplab" id="labB"></div>
+        <div class="legend" id="legend"></div>
+        <div class="attrib">Base: Esri, HERE, Garmin, © OpenStreetMap contributors e GIS user community</div>
+        <div class="basefail" id="basefail">Mapa de fundo bloqueado nesta prévia; aparece no site publicado.</div>
+        <div class="layers" role="group" aria-label="Camadas de contexto">
+          <span class="t">Camadas</span>
+          <label><input type="checkbox" id="ly-ap" checked> <span class="sw" style="border-color:var(--apline)"></span> Áreas de ponderação</label>
+          <label><input type="checkbox" id="ly-fcu"> <span class="sw" style="border-color:var(--fcu)"></span> Favelas e comunidades (FCU)</label>
+          <label><input type="checkbox" id="ly-bk"> <span class="sw" style="border-color:var(--bk)"></span> Área da Braskem</label>
+          <label class="off" title="Entra quando sair o 2º retrato do MDS"><input type="checkbox" disabled> IVCAD 2025 (em breve)</label>
+        </div>
+      </div>
+      <div class="side">
+        <div class="panel answer" aria-live="polite">
+          <div class="sub" id="ans-lab"></div>
+          <div class="big num" id="ans-big"></div>
+          <div class="range num" id="ans-range"></div>
+          <div class="pills" id="ans-pills"></div>
+          <div class="cards" id="cards"></div>
+        </div>
+        <div class="panel detail" id="detail"></div>
+      </div>
+    </div>
+
+    <section class="dock" id="dock" aria-label="Gráficos ligados ao mapa">
+      <div class="dock-head"><h2>Gráficos ligados ao mapa</h2><button type="button" class="iconbtn" id="dock-toggle" aria-expanded="true">Minimizar todos</button></div>
+      <div class="dock-body">
+        <article class="dcard" data-k="hist"><header><h3 title="Clique numa barra para destacar esses hexágonos no mapa">Distribuição nos hexágonos</h3><button type="button" class="iconbtn" aria-label="Minimizar distribuição">–</button></header><div class="body" id="hist"></div></article>
+        <article class="dcard" data-k="rank"><header><h3>Os 10 hexágonos com mais déficit</h3><button type="button" class="iconbtn" aria-label="Minimizar ranking">–</button></header><div class="body"><table class="rank num" id="rank"></table></div></article>
+        <article class="dcard" data-k="series"><header><h3 title="Ponto = total; barra = faixa de 95%; losango = média de 3 anos. Clique num período para levá-lo ao mapa.">Total do domínio no tempo</h3><button type="button" class="iconbtn" aria-label="Minimizar série">–</button></header><div class="body" id="series"></div></article>
+        <article class="dcard" data-k="boxes"><header><h3 title="Caixa = p25–p75; traço = mediana; haste = p10–p90; só hexágonos acima de zero.">Distribuição por período</h3><button type="button" class="iconbtn" aria-label="Minimizar caixas">–</button></header><div class="body" id="boxes"></div></article>
+      </div>
+    </section>
+  </section>
+
+  <section class="tabpane todo" id="pane-visao-geral"><div class="panel"><h2>Visão geral</h2><p class="sub">Próxima versão do protótipo.</p><ul>
+    <li>Cartões: déficit absoluto e relativo, por componente, ano recente e média de 3 anos.</li>
+    <li>FJP × moradinha: número publicado pela FJP, reconstrução na PNADc e total do mapa, com a explicação da diferença.</li>
+    <li>Marcas de cuidado em destaque e "números para citar" com edição e hash.</li></ul></div></section>
+  <section class="tabpane todo" id="pane-confiabilidade"><div class="panel"><h2>Confiabilidade</h2><p class="sub">Próxima versão do protótipo.</p><ul>
+    <li>Dados e qualidade: fontes por ano, sigilo, APs com ressalva, ponte PNADc × Censo.</li>
+    <li>Modelo EBM: ganho sobre a linha de base, ordem e top 20%, calibração, viés por grupo, curvas de forma.</li>
+    <li>Consistência entre anos e achados.</li></ul></div></section>
+  <section class="tabpane todo" id="pane-metodologia"><div class="panel"><h2>Metodologia</h2><p class="sub">Próxima versão do protótipo.</p><ul>
+    <li>Pipeline em grafo clicável, com commit e data por etapa.</li>
+    <li>Textos explicativos, parâmetros do domínio e rastreio da execução.</li></ul></div></section>
+</main>
+
+<script src="https://unpkg.com/h3-js@4.2.1/dist/h3-js.umd.js"></script>
+<script src="https://unpkg.com/deck.gl@9.1.14/dist.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const PER=["2022","2023","2024","2025","Média 2022–24","Média 2023–25"];
+const COMPS=["coabitacao","onus","precariedade"];
+const CNAME={total:"total",coabitacao:"coabitação",onus:"ônus",precariedade:"precariedade"};
+const CLAB={total:"Total",coabitacao:"Coabitação",onus:"Ônus",precariedade:"Precariedade"};
+const RAMP=["#fbf3d5","#f6dc9b","#f0b864","#e48a3f","#cc5a2c","#a2361f","#6e1d16"];
+const S={med:"abs",comp:"total",per:3,cmp:-1,sel:null,bin:null,clip:50,ap:true,fcu:false,bk:false};
+let D,ROWS,APG=[],view={longitude:-35.715,latitude:-9.585,zoom:11.1,pitch:0,bearing:0},deckA,deckB,scaleBreaks=[];
+const fmt=d3.format(",.0f"), fmt1=d3.format(",.1f"), fmt2=d3.format(",.2f");
+const nf=(v,dec)=>v==null?"—":(dec===1?fmt1(v):dec===2?fmt2(v):fmt(v)).replace(/,/g,"X").replace(/\./g,",").replace(/X/g,".");
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const rgb=h=>{const c=d3.color(h);return c?[c.r,c.g,c.b]:[128,128,128]};
+
+function raw(r,comp,p){if(comp==="total"){let s=0;for(const c of COMPS){if(r[c][p]==null)return null;s+=r[c][p]}return s}return r[comp][p]}
+function val(r,comp,p,med){const v=raw(r,comp,p);if(v==null)return null;if(med==="rel"){const d=r.dom[p];return d>0.5?100*v/d:null}return v}
+function band(r,comp,p){if(comp==="total")return null;const w=D.larg[comp][p];const v=raw(r,comp,p);if(w==null||v==null)return null;return[v*(1-w/2),v*(1+w/2)]}
+function totalOf(comp,p){if(comp==="total"){let s=0,e2=0,ok=true;for(const c of COMPS){s+=D.totais[c].v[p];const e=D.totais[c].ep[p];if(e==null)ok=false;else e2+=e*e}return{v:s,ep:null}}return{v:D.totais[comp].v[p],ep:D.totais[comp].ep[p]}}
+
+function marks(comp,p,row){const m=[];
+  const coabFragil=(c)=>c==="coabitacao"&&p<=3;
+  if(comp==="coabitacao"&&p<=3)m.push(["warn","Total frágil (CV > 15%)"]);
+  if(comp==="total"&&p<=3)m.push(["warn","Coabitação com total frágil"]);
+  if(p>=1&&p<=3&&comp!=="precariedade")m.push(["info","Mudança dentro do ruído"]);
+  if(p===1)m.push(["crit","2023: estoque por fonte diferente; não comparar por hexágono"]);
+  if(p>=4)m.push(["crit","Média inclui 2023 (estoque por fonte diferente)"]);
+  if((comp==="precariedade"||comp==="total")&&p>=1)m.push(["warn","Precariedade provisória, sem faixa"]);
+  if(comp==="total")m.push(["info","Total sem faixa: percentis não se somam"]);
+  if(row&&D.ap[row.ap]&&D.ap[row.ap].ressalva)m.push(["warn","AP com ressalva (CV > 30%)"]);
+  return m}
+
+function computeScale(){const vs=[];for(const r of ROWS){for(const p of [S.per,S.cmp]){if(p<0)continue;const v=val(r,S.comp,p,S.med);if(v!=null&&v>0)vs.push(v)}}
+  vs.sort(d3.ascending);scaleBreaks=[1,2,3,4,5,6].map(i=>d3.quantileSorted(vs,i/7))}
+function colorFor(v){if(v==null)return null;if(v<=0)return null;let i=0;while(i<scaleBreaks.length&&v>scaleBreaks[i])i++;return RAMP[i]}
+function fillFor(r,p){const v=val(r,S.comp,p,S.med);
+  if(r.dom[p]==null)return[...rgb(css("--muted")),110];
+  if(v==null||v<=0)return[...rgb(css("--line")),70];
+  let a=215;if(S.bin&&!(v>=S.bin[0]&&v<S.bin[1]))a=45;
+  return[...rgb(colorFor(v)),a]}
+
+const BASE={light:"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",dark:"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"};
+function isDark(){const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches}
+let baseFail=false;
+function baseLayer(side){const url=isDark()?BASE.dark:BASE.light;return new deck.TileLayer({id:"base-"+side+(isDark()?"-d":"-l"),data:url,minZoom:0,maxZoom:16,tileSize:256,
+  onTileError:()=>{if(!baseFail){baseFail=true;document.getElementById("basefail").style.display="block"}},
+  renderSubLayers:props=>{const b=props.tile.boundingBox;return new deck.BitmapLayer(props,{data:null,image:props.data,bounds:[b[0][0],b[0][1],b[1][0],b[1][1]]})}})}
+function layersFor(p,side){const L=[baseLayer(side)];
+  L.push(new deck.H3HexagonLayer({id:"hex-"+side,data:ROWS,getHexagon:r=>r.h,getFillColor:r=>fillFor(r,p),extruded:false,highPrecision:true,stroked:true,getLineColor:[...rgb(css("--surface")),120],lineWidthMinPixels:0.4,pickable:true,
+    updateTriggers:{getFillColor:[S.med,S.comp,p,S.bin,scaleBreaks.join()]},onClick:({object})=>{if(object){S.sel=object;renderAll(false)}}}));
+  if(S.ap)L.push(new deck.H3ClusterLayer({id:"ap-"+side,data:APG,getHexagons:d=>d.ids,filled:false,stroked:true,getLineColor:[...rgb(css("--apline")),200],lineWidthMinPixels:1.2}));
+  if(S.fcu)L.push(new deck.H3HexagonLayer({id:"fcu-"+side,data:ROWS.filter(r=>r.fcu),getHexagon:r=>r.h,extruded:false,highPrecision:true,filled:false,stroked:true,getLineColor:rgb(css("--fcu")),lineWidthMinPixels:2.2}));
+  if(S.bk)L.push(new deck.H3ClusterLayer({id:"bk-"+side,data:[{ids:ROWS.filter(r=>r.bk).map(r=>r.h)}],getHexagons:d=>d.ids,filled:false,stroked:true,getLineColor:rgb(css("--bk")),lineWidthMinPixels:3}));
+  if(S.sel)L.push(new deck.H3HexagonLayer({id:"sel-"+side,data:[S.sel],getHexagon:r=>r.h,extruded:false,highPrecision:true,filled:false,stroked:true,getLineColor:rgb(css("--ink")),lineWidthMinPixels:3}));
+  return L}
+
+function tooltip(p){return({object})=>{if(!object||!object.h||!object.dom)return null;const v=val(object,S.comp,p,S.med);
+  return{html:`<b>${PER[p]}</b> · ${D.ap[object.ap].nome}<br>${CLAB[S.comp]}: <b>${v==null?"sem dado":nf(v,S.med==="rel"?2:1)}${S.med==="rel"&&v!=null?" %":""}</b><br>domicílios: ${nf(object.dom[p],0)}`,
+   style:{background:css("--surface"),color:css("--ink"),border:"1px solid "+css("--line"),borderRadius:"8px",fontSize:"12px",fontFamily:css("--body")}}}}
+
+function initDecks(){
+  const onV=({viewState})=>{view=viewState;deckA.setProps({viewState:view});deckB.setProps({viewState:view})};
+  deckA=new deck.Deck({parent:document.getElementById("deckA"),viewState:view,controller:true,onViewStateChange:onV,getTooltip:tooltip(S.per),layers:[]});
+  deckB=new deck.Deck({parent:document.getElementById("deckB"),viewState:view,controller:true,onViewStateChange:onV,getTooltip:tooltip(Math.max(S.cmp,0)),layers:[]});
+}
+function renderMap(){computeScale();
+  deckA.setProps({layers:layersFor(S.per,"a"),getTooltip:tooltip(S.per)});
+  const on=S.cmp>=0;const B=document.getElementById("deckB"),dv=document.getElementById("divider"),lb=document.getElementById("labB");
+  B.style.display=on?"block":"none";dv.style.display=on?"block":"none";lb.style.display=on?"block":"none";
+  document.getElementById("labA").textContent=PER[S.per];
+  if(on){deckB.setProps({layers:layersFor(S.cmp,"b"),getTooltip:tooltip(S.cmp)});lb.textContent=PER[S.cmp];
+    B.style.clipPath=`inset(0 0 0 ${S.clip}%)`;dv.style.left=S.clip+"%"}
+  const u=S.med==="rel"?" %":"";const t=[0,...scaleBreaks];
+  document.getElementById("legend").innerHTML=`<b>${CLAB[S.comp]} · ${S.med==="rel"?"relativo (% dos domicílios)":"absoluto (domicílios)"}</b><div class="ramp">${RAMP.map(c=>`<span style="background:${c}"></span>`).join("")}</div><div class="ticks num"><span>${nf(t[1],S.med==="rel"?1:1)}${u}</span><span>${nf(t[4],1)}${u}</span><span>${nf(t[6],1)}${u}</span></div><div class="note" style="margin-top:4px">Classes por sétimos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
+}
+
+function question(){const per=S.per>=4?`na ${PER[S.per].toLowerCase()}`:`em ${PER[S.per]}`;
+  return `Onde está o déficit ${S.med==="abs"?"absoluto":"relativo"}${S.comp==="total"?", total,":" de "+CNAME[S.comp]+","} ${per}?`+(S.cmp>=0?` Comparado com ${PER[S.cmp]}.`:"")}
+
+function renderAnswer(){const t=totalOf(S.comp,S.per),dom=D.dom[S.per];
+  document.getElementById("ans-lab").textContent=`${CLAB[S.comp]} · ${PER[S.per]} · domínio inteiro`;
+  const isRel=S.med==="rel";const k=isRel?100/dom:1;
+  document.getElementById("ans-big").textContent=isRel?nf(t.v*k,2)+" %":nf(t.v,0)+" domicílios";
+  let rng="";if(t.ep){const lo=(t.v-1.96*t.ep)*k,hi=(t.v+1.96*t.ep)*k;rng=`faixa de 95%: ${isRel?nf(lo,2)+" a "+nf(hi,2)+" %":nf(lo,0)+" a "+nf(hi,0)} · CV ${nf(100*t.ep/t.v,1)}%`}
+  else rng=S.comp==="total"?"sem faixa: percentis dos componentes não se somam":"sem faixa (provisória)";
+  if(S.cmp>=0){const c=totalOf(S.comp,S.cmp);const dlt=(t.v-c.v)*(isRel?1:1);
+    let z="";if(t.ep&&c.ep){const zz=Math.abs(t.v-c.v)/Math.sqrt(t.ep*t.ep+c.ep*c.ep);z=` · z = ${nf(zz,2)} (${zz<1.96?"dentro do ruído":"mudança afirmável"})`}
+    rng+=`<br>contra ${PER[S.cmp]}: ${dlt>=0?"+":"−"}${nf(Math.abs(dlt),0)} domicílios${z}`}
+  document.getElementById("ans-range").innerHTML=rng;
+  document.getElementById("ans-pills").innerHTML=marks(S.comp,S.per,null).map(([c,t])=>`<span class="pill ${c}">${t}</span>`).join("");
+  document.getElementById("cards").innerHTML=COMPS.map(c=>{const tv=totalOf(c,S.per).v;return`<button type="button" class="card" data-c="${c}" aria-pressed="${S.comp===c}"><div class="k">${CLAB[c]}</div><div class="v num">${isRel?nf(100*tv/dom,2)+" %":nf(tv,0)}</div></button>`}).join("");
+  document.querySelectorAll("#cards .card").forEach(b=>b.onclick=()=>{S.comp=S.comp===b.dataset.c?"total":b.dataset.c;S.bin=null;syncCtl();renderAll()});
+}
+
+function renderDetail(){const el=document.getElementById("detail");const r=S.sel;
+  if(!r){el.innerHTML=`<h2>Hexágono</h2><p class="empty">Clique num hexágono do mapa ou do ranking para ver a estimativa, a faixa, as marcas e a comparação com a amostra na AP.</p>`;return}
+  const p=S.per,ap=D.ap[r.ap];
+  const rows=COMPS.map(c=>{const v=raw(r,c,p),b=band(r,c,p);if(v==null)return`<div class="comp-row"><span>${CLAB[c]}</span><span class="empty">sem dado</span><span></span></div>`;
+    const mx=Math.max(b?b[1]:v,0.01)*1.15;const pc=x=>100*x/mx;
+    return`<div class="comp-row"><span>${CLAB[c]}</span><div class="bar">${b?`<div class="rng" style="left:${pc(b[0])}%;width:${pc(b[1]-b[0])}%"></div>`:""}<div class="pt" style="left:${pc(v)}%"></div></div><span class="num" style="text-align:right">${nf(v,1)}</span></div>`}).join("");
+  const sp=[0,1,2,3].map(i=>val(r,S.comp,i,S.med));
+  const W=300,Hh=54;const ok=sp.filter(v=>v!=null);let spark="";
+  if(ok.length){const x=d3.scalePoint().domain([0,1,2,3]).range([16,W-16]),y=d3.scaleLinear().domain([0,d3.max(ok)*1.2||1]).range([Hh-16,6]);
+    const line=d3.line().defined(v=>v!=null).x((v,i)=>x(i)).y(v=>y(v));
+    spark=`<svg viewBox="0 0 ${W} ${Hh}" width="100%" height="${Hh}" role="img" aria-label="Série do hexágono"><path d="${line(sp)}" fill="none" stroke="${css("--accent")}" stroke-width="2"/>${sp.map((v,i)=>v==null?"":`<circle cx="${x(i)}" cy="${y(v)}" r="${i===p?4.5:3}" fill="${i===1?css("--crit"):css("--accent")}"/><text x="${x(i)}" y="${Hh-2}" text-anchor="middle">${PER[i]}</text>`).join("")}</svg>`}
+  el.innerHTML=`<h2>Hexágono <span class="num" style="font-family:var(--body);font-size:12px;color:var(--muted)">${r.h}</span></h2>
+   <div class="pills">${r.fcu?`<span class="pill info" style="color:var(--fcu);border-color:var(--fcu)">FCU</span>`:""}${r.bk?`<span class="pill crit" style="color:var(--bk);border-color:var(--bk)">Área da Braskem</span>`:""}${marks(S.comp,p,r).filter(m=>m[1].startsWith("AP")).map(([c,t])=>`<span class="pill ${c}">${t}</span>`).join("")}</div>
+   <dl class="num"><dt>Área de ponderação</dt><dd>${ap.nome} (fictícia)</dd><dt>Município</dt><dd>Maceió</dd><dt>Domicílios em ${PER[p]}</dt><dd>${r.dom[p]==null?"sigilo":nf(r.dom[p],1)}</dd></dl>
+   <div class="sub">Estimativa e faixa de 95% em ${PER[p]} (domicílios)</div>${rows}
+   <div class="sub" style="margin-top:10px">${CLAB[S.comp]} ${S.med==="rel"?"relativo":"absoluto"} no tempo (2023 em vermelho: outra fonte do estoque)</div>${spark}
+   <div class="sub" style="margin-top:8px">Na AP, coabitação 2022: <b>direta da amostra ${nf(ap.direta,0)}</b> (CV ${ap.cv==null?"—":nf(ap.cv,1)+"%"}) · <b>soma do motor ${nf(ap.motor,0)}</b>. A PNADc não existe por hexágono; a comparação honesta é na AP e no domínio.</div>`;
+}
+
+function renderHist(){const box=document.getElementById("hist");if(box.closest(".dcard").classList.contains("min"))return;const vs=ROWS.map(r=>val(r,S.comp,S.per,S.med)).filter(v=>v!=null&&v>0);
+  const W=Math.max(260,box.clientWidth||300),H=128,m={l:34,r:8,t:6,b:22};const x=d3.scaleLinear().domain([0,d3.quantile(vs.slice().sort(d3.ascending),0.99)*1.05]).nice().range([m.l,W-m.r]);
+  const bins=d3.bin().domain(x.domain()).thresholds(x.ticks(28))(vs.map(v=>Math.min(v,x.domain()[1]-1e-9)));
+  const y=d3.scaleLinear().domain([0,d3.max(bins,b=>b.length)]).nice().range([H-m.b,m.t]);
+  const svg=d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%").attr("role","img").attr("aria-label","Histograma dos hexágonos");
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-m.b})`).call(d3.axisBottom(x).ticks(6).tickFormat(v=>nf(v,S.med==="rel"?1:0)));
+  svg.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x",b=>x(b.x0)+0.5).attr("width",b=>Math.max(0,x(b.x1)-x(b.x0)-1)).attr("y",b=>y(b.length)).attr("height",b=>y(0)-y(b.length))
+    .attr("fill",b=>colorFor((b.x0+b.x1)/2)||css("--line")).attr("stroke",b=>S.bin&&S.bin[0]===b.x0?css("--ink"):"none").attr("stroke-width",2).style("cursor","pointer")
+    .attr("opacity",b=>S.bin&&S.bin[0]!==b.x0?0.35:1).on("click",(e,b)=>{S.bin=S.bin&&S.bin[0]===b.x0?null:[b.x0,b.x1];renderMap();renderHist()})
+    .append("title").text(b=>`${b.length} hexágonos entre ${nf(b.x0,1)} e ${nf(b.x1,1)}`);
+  
+  box.replaceChildren(svg.node());
+  const n=ROWS.filter(r=>r.dom[S.per]!=null&&r.dom[S.per]>0.5).length;
+  box.closest(".dcard").querySelector("h3").title=`${vs.length} de ${n} hexágonos acima de zero; mediana ${nf(d3.median(vs),S.med==="rel"?2:1)}. Clique numa barra para destacar esses hexágonos no mapa.`}
+
+function renderRank(){const rs=ROWS.map(r=>({r,v:val(r,S.comp,S.per,S.med)})).filter(d=>d.v!=null).sort((a,b)=>b.v-a.v).slice(0,5);const mx=rs[0]?rs[0].v:1;
+  const tb=document.getElementById("rank");tb.innerHTML=`<tbody>${rs.map((d,i)=>`<tr data-i="${ROWS.indexOf(d.r)}" tabindex="0"><td>${i+1}</td><td>${D.ap[d.r.ap].nome}${d.r.fcu?" · FCU":""}</td><td style="width:45%"><div class="b" style="width:${100*d.v/mx}%"></div></td><td style="text-align:right">${nf(d.v,S.med==="rel"?2:0)}${S.med==="rel"?" %":""}</td></tr>`).join("")}</tbody>`;
+  tb.querySelectorAll("tr").forEach(tr=>{const go=()=>{const r=ROWS[+tr.dataset.i];S.sel=r;const [la,lo]=h3.cellToLatLng(r.h);view={...view,latitude:la,longitude:lo,zoom:12.6,transitionDuration:600,transitionInterpolator:new deck.FlyToInterpolator()};deckA.setProps({viewState:view});deckB.setProps({viewState:view});renderAll(false)};tr.onclick=go;tr.onkeydown=e=>{if(e.key==="Enter")go()}})}
+
+function renderSeries(){const box=document.getElementById("series");if(box.closest(".dcard").classList.contains("min"))return;const W=Math.max(260,box.clientWidth||300),H=146,m={l:46,r:8,t:8,b:22};
+  const isRel=S.med==="rel";const pts=PER.map((lab,p)=>{const t=totalOf(S.comp,p);const k=isRel?100/D.dom[p]:1;return{p,lab,v:t.v*k,lo:t.ep?(t.v-1.96*t.ep)*k:null,hi:t.ep?(t.v+1.96*t.ep)*k:null}});
+  const xpos=p=>p<4?p:p-2+0.28; const x=d3.scaleLinear().domain([-0.4,3.6]).range([m.l,W-m.r]);
+  const y=d3.scaleLinear().domain([0,d3.max(pts,d=>d.hi??d.v)*1.1]).nice().range([H-m.b,m.t]);
+  const svg=d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%").attr("role","img").attr("aria-label","Total do domínio no tempo");
+  svg.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W-m.l-m.r)).tickFormat(v=>nf(v,isRel?1:0))).call(g=>g.selectAll(".tick line").attr("stroke",css("--line")).attr("stroke-dasharray","2,3")).call(g=>g.select(".domain").remove());
+  svg.append("g").selectAll("text").data([0,1,2,3]).join("text").attr("x",p=>x(p)).attr("y",H-8).attr("text-anchor","middle").text(p=>PER[p]);
+  const yr=pts.slice(0,4);
+  svg.append("path").attr("d",d3.line().x(d=>x(xpos(d.p))).y(d=>y(d.v))(yr)).attr("fill","none").attr("stroke",css("--muted")).attr("stroke-width",1.2);
+  const g=svg.append("g").selectAll("g").data(pts).join("g").style("cursor","pointer").on("click",(e,d)=>{S.per=d.p;S.bin=null;syncCtl();renderAll()});
+  g.filter(d=>d.lo!=null).append("line").attr("x1",d=>x(xpos(d.p))).attr("x2",d=>x(xpos(d.p))).attr("y1",d=>y(d.lo)).attr("y2",d=>y(d.hi)).attr("stroke",d=>d.p>=4?css("--accent"):css("--ink")).attr("stroke-width",d=>d.p>=4?4:2).attr("opacity",d=>d.p>=4?0.55:0.8);
+  g.append("path").attr("transform",d=>`translate(${x(xpos(d.p))},${y(d.v)})`).attr("d",d=>d3.symbol(d.p>=4?d3.symbolDiamond:d3.symbolCircle,d.p===S.per?130:60)()).attr("fill",d=>d.p===1?css("--crit"):d.p>=4?css("--accent"):css("--ink")).attr("stroke",d=>d.p===S.per?css("--warn"):"none").attr("stroke-width",3);
+  g.append("title").text(d=>`${d.lab}: ${nf(d.v,isRel?2:0)}${d.lo!=null?` (${nf(d.lo,isRel?2:0)} a ${nf(d.hi,isRel?2:0)})`:" (sem faixa)"}`);
+  box.replaceChildren(svg.node());
+}
+
+function renderBoxes(){const box=document.getElementById("boxes");if(box.closest(".dcard").classList.contains("min"))return;const W=Math.max(260,box.clientWidth||300),H=146,m={l:40,r:6,t:8,b:22};
+  const st=PER.map((lab,p)=>{const vs=ROWS.map(r=>val(r,S.comp,p,S.med)).filter(v=>v!=null&&v>0).sort(d3.ascending);const q=f=>d3.quantileSorted(vs,f);return{p,lab,q10:q(.1),q25:q(.25),q50:q(.5),q75:q(.75),q90:q(.9)}});
+  const x=d3.scaleBand().domain(PER).range([m.l,W-m.r]).padding(0.35);const y=d3.scaleLinear().domain([0,d3.max(st,s=>s.q90)*1.1]).nice().range([H-m.b,m.t]);
+  const svg=d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%").attr("role","img").attr("aria-label","Distribuição dos hexágonos por período");
+  svg.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W-m.l-m.r)).tickFormat(v=>nf(v,S.med==="rel"?1:1))).call(g=>g.selectAll(".tick line").attr("stroke",css("--line")).attr("stroke-dasharray","2,3")).call(g=>g.select(".domain").remove());
+  svg.append("g").selectAll("text").data(st).join("text").attr("x",s=>x(s.lab)+x.bandwidth()/2).attr("y",H-8).attr("text-anchor","middle").text(s=>s.p>=4?(s.p===4?"M22–24":"M23–25"):s.lab);
+  const g=svg.append("g").selectAll("g").data(st).join("g").style("cursor","pointer").on("click",(e,s)=>{S.per=s.p;S.bin=null;syncCtl();renderAll()});
+  const cx=s=>x(s.lab)+x.bandwidth()/2;const col=s=>s.p===1?css("--crit"):s.p>=4?css("--accent"):css("--ink");
+  g.append("line").attr("x1",cx).attr("x2",cx).attr("y1",s=>y(s.q10)).attr("y2",s=>y(s.q90)).attr("stroke",col);
+  g.append("rect").attr("x",s=>x(s.lab)).attr("width",x.bandwidth()).attr("y",s=>y(s.q75)).attr("height",s=>y(s.q25)-y(s.q75)).attr("fill",s=>s.p===S.per?css("--accent-soft"):css("--surface")).attr("stroke",col).attr("stroke-width",s=>s.p===S.per?2.5:1.2).attr("rx",3);
+  g.append("line").attr("x1",s=>x(s.lab)).attr("x2",s=>x(s.lab)+x.bandwidth()).attr("y1",s=>y(s.q50)).attr("y2",s=>y(s.q50)).attr("stroke",col).attr("stroke-width",2.5);
+  g.append("title").text(s=>`${s.lab}: mediana ${nf(s.q50,2)}; p25–p75 ${nf(s.q25,2)}–${nf(s.q75,2)}`);
+  box.replaceChildren(svg.node())}
+
+function syncCtl(){document.querySelectorAll("#seg-med button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.med));
+  document.querySelectorAll("#seg-comp button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.comp));
+  document.getElementById("sel-per").value=S.per;document.getElementById("sel-cmp").value=S.cmp;
+  document.getElementById("question").textContent=question()}
+function renderCharts(){if(!D||document.getElementById("dock").classList.contains("collapsed"))return;renderHist();renderRank();renderSeries();renderBoxes()}
+function renderAll(full=true){syncCtl();renderMap();renderAnswer();renderDetail();if(full)renderCharts()}
+
+function tabs(){const go=()=>{let t=(location.hash||"#resultados").slice(1);if(!document.getElementById("pane-"+t))t="resultados";
+  document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on",p.id==="pane-"+t));
+  document.querySelectorAll("nav.tabs a").forEach(a=>{if(a.dataset.tab===t)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  if(t==="resultados"&&deckA){deckA.redraw(true)}};window.addEventListener("hashchange",go);go()}
+
+function wire(){const sp=document.getElementById("sel-per"),sc=document.getElementById("sel-cmp");
+  sp.innerHTML=PER.map((l,i)=>`<option value="${i}">${l}</option>`).join("");
+  sc.innerHTML=`<option value="-1">sem comparação</option>`+PER.map((l,i)=>`<option value="${i}">${l}</option>`).join("");
+  sp.onchange=()=>{S.per=+sp.value;S.bin=null;if(S.cmp===S.per)S.cmp=-1;renderAll()};
+  sc.onchange=()=>{S.cmp=+sc.value;if(S.cmp===S.per)S.cmp=-1;S.bin=null;renderAll()};
+  document.querySelectorAll("#seg-med button").forEach(b=>b.onclick=()=>{S.med=b.dataset.v;S.bin=null;renderAll()});
+  document.querySelectorAll("#seg-comp button").forEach(b=>b.onclick=()=>{S.comp=b.dataset.v;S.bin=null;renderAll()});
+  ["ap","fcu","bk"].forEach(k=>{const el=document.getElementById("ly-"+k);el.onchange=()=>{S[k]=el.checked;renderMap()}});
+  const mb=document.getElementById("mapbox"),hd=document.querySelector("#divider button");
+  hd.addEventListener("pointerdown",e=>{e.preventDefault();hd.setPointerCapture(e.pointerId);const mv=ev=>{const r=mb.getBoundingClientRect();S.clip=Math.max(5,Math.min(95,100*(ev.clientX-r.left)/r.width));document.getElementById("deckB").style.clipPath=`inset(0 0 0 ${S.clip}%)`;document.getElementById("divider").style.left=S.clip+"%"};
+    const up=()=>{hd.removeEventListener("pointermove",mv);hd.removeEventListener("pointerup",up)};hd.addEventListener("pointermove",mv);hd.addEventListener("pointerup",up)});
+  hd.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){S.clip=Math.max(5,Math.min(95,S.clip+(e.key==="ArrowLeft"?-5:5)));renderMap()}});
+  const dock=document.getElementById("dock"),dt=document.getElementById("dock-toggle");
+  dt.onclick=()=>{const c=dock.classList.toggle("collapsed");document.getElementById("pane-resultados").classList.toggle("dock-off",c);setTimeout(()=>{deckA.redraw(true);deckB.redraw(true)},50);dt.textContent=c?"Mostrar gráficos":"Minimizar todos";dt.setAttribute("aria-expanded",!c);if(!c)renderCharts()};
+  document.querySelectorAll(".dcard header .iconbtn").forEach(b=>b.onclick=()=>{const c=b.closest(".dcard");const m=c.classList.toggle("min");b.textContent=m?"+":"–";b.setAttribute("aria-label",(m?"Abrir ":"Minimizar ")+c.querySelector("h3").textContent);renderCharts()});
+  let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(renderCharts,120)}).observe(dock);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>renderAll());
+  new MutationObserver(()=>renderAll()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]})}
+
+fetch("dados.json").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{D=d;ROWS=d.hex;
+  const g={};ROWS.forEach(r=>{(g[r.ap]=g[r.ap]||[]).push(r.h)});APG=Object.values(g).map(ids=>({ids}));
+  wire();tabs();initDecks();renderAll()}).catch(e=>{document.querySelector("main").insertAdjacentHTML("afterbegin",`<div class="banner">Não foi possível carregar os dados do protótipo (${e.message}). Recarregue a página.</div>`)});
+</script>
+</body>
+</html>
