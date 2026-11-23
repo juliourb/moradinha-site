@@ -15,6 +15,7 @@ import { criarMiniMapa } from "./mapa/index.js";
 import { renderizarPainelDetalhe, renderizarCurvaConcentracao } from "./graficos/deficit.js";
 import { ligarDica, marcarGrafico, htmlDica, instalarAjudas, criarAjuda } from "./ui/ajuda.js";
 import { renderizarFjp } from "./ui/fjp.js";
+import { eixoSerie, svgQuebraEixo, NOTA_EIXO_SEM_ZERO } from "./util/eixoSerie.js";
 
 const GRAVIDADE_ORDEM = ["crit", "warn", "info"];
 const NOME_GRAVIDADE = { crit: "Crítico", warn: "Atenção", info: "Informativo" };
@@ -44,16 +45,21 @@ function sparkline(c) {
   const W = 150;
   const H = 30;
   const m = { l: 40, r: 4, t: 4, b: 10 };
-  const lo = d3.min(ok);
-  const hi = d3.max(ok);
+  // Acréscimo A: eixo da faixa de 95% (ou do valor), 10% de folga, pontas redondas.
+  const eixo = eixoSerie(serie.map((v, i) => ({ v, lo: c.faixas?.[i]?.[0] ?? null, hi: c.faixas?.[i]?.[1] ?? null })), 2);
+  const [lo, hi] = eixo.dominio;
   const x = d3.scalePoint().domain(serie.map((_v, i) => i)).range([m.l, W - m.r]);
-  const y = d3.scaleLinear().domain([lo === hi ? 0 : lo, hi]).range([H - m.b, m.t]);
+  const y = d3.scaleLinear().domain(eixo.dominio).range([H - m.b, m.t]);
   const linha = d3.line().defined((v) => v != null).x((_v, i) => x(i)).y((v) => y(v));
   const svg = d3.create("svg").attr("class", "spark").attr("viewBox", `0 0 ${W} ${H}`).attr("width", W).attr("height", H).attr("role", "img").attr("aria-label", `Série de ${c.rotulo}, ${c.anos[0]} a ${c.anos.at(-1)}`);
   svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css("--accent")).attr("stroke-width", 1.6);
   const rot = (txt, px, py, anchor) => svg.append("text").attr("x", px).attr("y", py).attr("text-anchor", anchor).attr("font-size", 7.5).attr("fill", css("--muted")).text(txt);
   rot(formatar(hi, 0), m.l - 4, m.t + 3, "end");
   rot(formatar(lo, 0), m.l - 4, H - m.b + 1, "end");
+  if (eixo.naoComecaEmZero) {
+    svg.node().insertAdjacentHTML("beforeend", svgQuebraEixo(m.l + 5, H - m.b + 2, css("--muted")));
+    svg.attr("aria-label", `${svg.attr("aria-label")} (${NOTA_EIXO_SEM_ZERO})`);
+  }
   rot(c.anos[0], m.l, H - 1, "start");
   rot(c.anos.at(-1), W - m.r, H - 1, "end");
   const pts = serie.map((v, i) => ({ v, i, ano: c.anos[i], faixa: c.faixas?.[i] ?? null })).filter((d) => d.v != null);
@@ -100,7 +106,7 @@ function renderizarCartoes(el, manifesto, totais) {
         <span class="spark-slot"></span>
       </button>`;
     card.querySelector("header").appendChild(
-      criarAjuda("Evolução do total do indicador por ano. O eixo vertical vai do menor ao maior valor da série; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
+      criarAjuda("Evolução do total do indicador por ano. O eixo vertical vai da menor à maior ponta da faixa de 95% (ou do valor, quando não há faixa), com folga, e nem sempre começa em zero; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
     );
     const svg = sparkline(c);
     if (svg) card.querySelector(".spark-slot").appendChild(svg);
