@@ -390,6 +390,9 @@ svg .axis path, svg .axis line { stroke: var(--line); }
   cursor: pointer; text-align: left; display: grid; gap: 4px; color: var(--ink) !important;
 }
 .cartao-bi:hover { border-color: var(--accent); }
+.cartao-bi > header { display: flex; align-items: center; justify-content: space-between; }
+.cartao-bi .cartao-corpo { all: unset; display: grid; gap: 4px; cursor: pointer; color: var(--ink); }
+.cartao-bi .cartao-corpo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cartao-bi .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .cartao-bi .v { font-family: var(--display); font-size: 22px; font-weight: 650; }
 .cartao-bi .r { font-size: 12px; color: var(--muted); }
@@ -481,3 +484,20 @@ table.ponte th, table.ponte td { text-align: left; padding: 6px 8px; border-bott
 .achados-grupo h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .achado-item { border-bottom: 1px solid var(--line); padding: 6px 0; font-size: 13px; }
 .achado-item .efeito { color: var(--muted); font-size: 12px; }
+
+/* Regra geral de gráficos (SPEC F6.4): ícone (?) e caixa de valor */
+.ajuda {
+  flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--muted);
+  background: transparent; color: var(--muted) !important; font-size: 10px; font-weight: 700; line-height: 1;
+  padding: 0; cursor: help; display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; vertical-align: middle;
+}
+.ajuda:hover, .ajuda:focus-visible { border-color: var(--accent); color: var(--accent) !important; }
+.dica-flutuante, .ajuda-pop {
+  position: fixed; z-index: 1000; pointer-events: none; max-width: 280px; background: var(--surface);
+  color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 12px;
+  line-height: 1.35; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+}
+.dica-flutuante[hidden], .ajuda-pop[hidden] { display: none; }
+.dica-flutuante b { font-weight: 700; }
+.dica-flutuante .d-sub { color: var(--muted); display: block; }
+.dica-alvo { cursor: default; }

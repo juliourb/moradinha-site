@@ -23,14 +23,14 @@ title: ""
     </div>
     <div class="como-ler">Cada painel mostra o total do domínio por ano, com a faixa de 95% quando houver; a linha tracejada é a média de 3 anos.</div>
     <div class="grid-detalhes">
-      <div class="dpanel"><h3>Total</h3><div id="f2-det-total"></div></div>
-      <div class="dpanel"><h3>Coabitação</h3><div id="f2-det-coabitacao"></div></div>
-      <div class="dpanel"><h3>Ônus</h3><div id="f2-det-onus"></div></div>
-      <div class="dpanel"><h3>Precariedade</h3><div id="f2-det-precariedade"></div></div>
+      <div class="dpanel"><h3>Total</h3><div class="grafico-dica">Total do domínio por ano, com a faixa de 95% quando houver; a linha tracejada é a média de 3 anos. Passe o mouse num ponto para ver o valor.</div><div id="f2-det-total"></div></div>
+      <div class="dpanel"><h3>Coabitação</h3><div class="grafico-dica">Total do domínio por ano, com a faixa de 95% quando houver; a linha tracejada é a média de 3 anos. Passe o mouse num ponto para ver o valor.</div><div id="f2-det-coabitacao"></div></div>
+      <div class="dpanel"><h3>Ônus</h3><div class="grafico-dica">Total do domínio por ano, com a faixa de 95% quando houver; a linha tracejada é a média de 3 anos. Passe o mouse num ponto para ver o valor.</div><div id="f2-det-onus"></div></div>
+      <div class="dpanel"><h3>Precariedade</h3><div class="grafico-dica">Total do domínio por ano, com a faixa de 95% quando houver; a linha tracejada é a média de 3 anos. Passe o mouse num ponto para ver o valor.</div><div id="f2-det-precariedade"></div></div>
     </div>
     <p class="sub" id="f2-det-frase-ruido"></p>
     <h3 id="f2-det-concentracao-titulo">Curva de concentração</h3>
-    <div class="como-ler">% dos hexágonos com domicílio (do maior para o menor déficit) no eixo x; % do déficit acumulado no eixo y.</div>
+    <div class="grafico-dica">% dos hexágonos com domicílio (do maior para o menor déficit) no eixo x; % do déficit acumulado no eixo y. Passe o mouse na curva para ler os valores.</div>
     <div id="f2-det-concentracao"></div>
   </div>
 </div>

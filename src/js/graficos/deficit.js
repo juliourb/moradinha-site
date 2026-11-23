@@ -5,6 +5,7 @@ import { formatar, rotuloCurto } from "../util/formato.js";
 import { valorHex, brutoHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
 import { classeHex } from "../dados/escalaCor.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
+import { ligarDica, marcarGrafico, htmlDica, mostrarDica, esconderDica } from "../ui/ajuda.js";
 
 /**
  * Hexágonos "normal" no período (SPEC_F6.3 item 3): 1+ domicílio e déficit
@@ -46,6 +47,7 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const faixaAtual = estado.faixa_hist?.[0] ?? null;
   const faixaSelecionada = (b) => !faixaAtual || (b.x0 < (faixaAtual[1] ?? Infinity) && b.x1 > faixaAtual[0]);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hexágonos");
+  marcarGrafico(svg.node(), "histograma");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(6).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
   const g = svg.append("g");
@@ -69,8 +71,13 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
       e.stopPropagation();
       aoClicarBarra([[b.x0, b === ultimoBin ? null : b.x1]]);
     })
-    .append("title")
-    .text((b) => (b === ultimoBin ? `${b.length} hexágonos de ${formatar(b.x0, 1)} (p99 ou mais)` : `${b.length} hexágonos entre ${formatar(b.x0, 1)} e ${formatar(b.x1, 1)}`));
+    ;
+  ligarDica(g.selectAll("rect.coluna"), (b) =>
+    htmlDica({
+      titulo: b === ultimoBin ? `${formatar(b.x0, 1)} ou mais (p99 ou mais)` : `${formatar(b.x0, 1)} a ${formatar(b.x1, 1)}`,
+      valor: `${formatar(b.length, 0)} hexágonos`,
+      base: `de ${formatar(vs.length, 0)} hexágonos com déficit`,
+    }));
   g.selectAll("rect.barra")
     .data(bins)
     .join("rect")
@@ -204,6 +211,16 @@ export function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
         )}${isRel ? " %" : ""}</td></tr>`
     )
     .join("")}</tbody>`;
+  marcarGrafico(box, "ranking");
+  ligarDica(box.querySelectorAll("tr"), (_d, tr) => {
+    const d = rs[Number(tr.rowIndex)];
+    if (!d) return "";
+    return htmlDica({
+      titulo: `${d.l.municipioNome} · ${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod}`,
+      valor: `${formatar(d.v, isRel ? 2 : 0)}${isRel ? " %" : ""}`,
+      base: `hexágono ${codigoCurtoH3(d.l.h3)}`,
+    });
+  });
   box.querySelectorAll("tr").forEach((tr) => {
     const ir = () => aoIrPara(tr.dataset.h3);
     tr.onclick = ir;
@@ -269,7 +286,14 @@ export function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo)
     .attr("fill", (d) => (d.critico ? css("--crit") : d.media ? css("--accent") : css("--ink")))
     .attr("stroke", (d) => (d.id === estado.periodo ? css("--warn") : "none"))
     .attr("stroke-width", 3);
-  g.append("title").text((d) => `${d.lab}: ${d.v == null ? "sem dado" : formatar(d.v, isRel ? 2 : 0)}${d.lo != null ? ` (${formatar(d.lo, isRel ? 2 : 0)} a ${formatar(d.hi, isRel ? 2 : 0)})` : " (sem faixa)"}`);
+  ligarDica(g, (d) =>
+    htmlDica({
+      titulo: d.lab + (d.media ? " (média)" : ""),
+      valor: d.v == null ? "sem dado" : formatar(d.v, isRel ? 2 : 0),
+      faixa: d.lo != null ? `${formatar(d.lo, isRel ? 2 : 0)} a ${formatar(d.hi, isRel ? 2 : 0)}` : null,
+      base: d.lo == null && d.v != null ? "sem faixa de 95% para este período" : null,
+    }));
+  marcarGrafico(svg.node(), "serie");
   box.replaceChildren(svg.node());
 }
 
@@ -317,8 +341,9 @@ export function renderizarPainelDetalhe(box, manifesto, totais, componente, rotu
     .attr("stroke", css("--accent"))
     .attr("stroke-width", 1.4)
     .attr("stroke-dasharray", "4,3")
-    .append("title")
-    .text((d) => `${d.lab} (média): ${formatar(d.v, 0)}`);
+    ;
+  ligarDica(svg.selectAll("line[stroke-dasharray]"), (d) => htmlDica({ titulo: `${d.lab} (média)`, valor: formatar(d.v, 0) }));
+  marcarGrafico(svg.node(), "serie-detalhe");
   const g = svg.append("g").selectAll("g").data(anosPts).join("g");
   g.filter((d) => d.lo != null)
     .append("line")
@@ -335,12 +360,10 @@ export function renderizarPainelDetalhe(box, manifesto, totais, componente, rotu
     .attr("cy", (d) => y(d.v))
     .attr("r", 4)
     .attr("fill", (d) => (d.critico ? css("--crit") : css("--ink")));
-  g.append("title").text((d) => {
-    if (d.v == null) return `${d.lab}: sem dado`;
-    const base = `${d.lab}: ${formatar(d.v, 0)}`;
-    if (d.critico) return `${base} (estoque por fonte diferente — não comparar por hexágono)`;
-    if (d.semFaixaProvisoria) return `${base} (provisória, sem faixa)`;
-    return d.lo != null ? `${base} (faixa de 95%: ${formatar(d.lo, 0)} a ${formatar(d.hi, 0)})` : `${base} (sem faixa)`;
+  ligarDica(g, (d) => {
+    if (d.v == null) return htmlDica({ titulo: d.lab, valor: "sem dado" });
+    const nota = d.critico ? "estoque por fonte diferente — não comparar por hexágono" : d.semFaixaProvisoria ? "provisória, sem faixa" : d.lo == null ? "sem faixa de 95%" : null;
+    return htmlDica({ titulo: d.lab, valor: formatar(d.v, 0), faixa: d.lo != null && !d.semFaixaProvisoria ? `${formatar(d.lo, 0)} a ${formatar(d.hi, 0)}` : null, base: nota });
   });
   box.replaceChildren(svg.node());
 }
@@ -363,8 +386,20 @@ export function renderizarCurvaConcentracao(box, linhasArr, componente, periodo)
     .attr("stroke", css("--accent"))
     .attr("stroke-width", 2);
   svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(50)).attr("y2", y(50)).attr("stroke", css("--line")).attr("stroke-dasharray", "3,3");
-  svg.append("circle").attr("cx", x(conc.pctHexMeio)).attr("cy", y(50)).attr("r", 4).attr("fill", css("--crit"))
-    .append("title").text(`${formatar(conc.pctHexMeio, 1)}% dos hexágonos somam metade do déficit`);
+  svg.append("circle").attr("cx", x(conc.pctHexMeio)).attr("cy", y(50)).attr("r", 4).attr("fill", css("--crit"));
+  marcarGrafico(svg.node(), "concentracao");
+  // Faixa sensível ao mouse em todo o gráfico: mostra o ponto da curva mais próximo do ponteiro.
+  const alvo = svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent");
+  const marcador = svg.append("circle").attr("r", 3.5).attr("fill", css("--ink")).attr("visibility", "hidden").style("pointer-events", "none");
+  alvo.classed("dica-alvo", true);
+  alvo.on("mousemove.curva", (e) => {
+    const [px] = d3.pointer(e, svg.node());
+    const alvoX = Math.max(0, Math.min(100, x.invert(px)));
+    const p = conc.pontos.reduce((a, b) => (Math.abs(b.pctHex - alvoX) < Math.abs(a.pctHex - alvoX) ? b : a), conc.pontos[0]);
+    marcador.attr("cx", x(p.pctHex)).attr("cy", y(p.pctDeficitAcumulado)).attr("visibility", "visible");
+    mostrarDica(e, htmlDica({ titulo: `${formatar(p.pctHex, 1)}% dos hexágonos`, valor: `${formatar(p.pctDeficitAcumulado, 1)}% do déficit`, base: `de ${formatar(conc.n, 0)} hexágonos com domicílio` }));
+  });
+  alvo.on("mouseleave.curva", () => { marcador.attr("visibility", "hidden"); esconderDica(); });
   box.replaceChildren(svg.node());
 }
 
@@ -379,7 +414,7 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
       .sort(d3.ascending);
     todosValores.push(...vs);
     const q = (f) => d3.quantileSorted(vs, f);
-    return { id: p.id, lab: p.rotulo, media: p.tipo === "media", critico: p.marcas?.includes("fonte_estoque_diferente"), q10: q(0.1), q25: q(0.25), q50: q(0.5), q75: q(0.75), q90: q(0.9) };
+    return { id: p.id, lab: p.rotulo, media: p.tipo === "media", critico: p.marcas?.includes("fonte_estoque_diferente"), n: vs.length, q10: q(0.1), q25: q(0.25), q50: q(0.5), q75: q(0.75), q90: q(0.9) };
   });
   const W = Math.max(260, box.clientWidth || 300);
   const H = 122;
@@ -419,6 +454,10 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
     .attr("stroke-width", (s) => (s.id === estado.periodo ? 2.5 : 1.2))
     .attr("rx", 3);
   g.filter((s) => s.q50 != null).append("line").attr("x1", (s) => x(s.id)).attr("x2", (s) => x(s.id) + x.bandwidth()).attr("y1", (s) => y(s.q50)).attr("y2", (s) => y(s.q50)).attr("stroke", col).attr("stroke-width", 2.5);
-  g.append("title").text((s) => (s.q50 == null ? `${s.lab}: sem hexágono acima de zero` : `${s.lab}: mediana ${formatar(s.q50, 2)}; p25–p75 ${formatar(s.q25, 2)}–${formatar(s.q75, 2)}`));
+  ligarDica(g, (s) =>
+    s.q50 == null
+      ? htmlDica({ titulo: s.lab, valor: "sem hexágono acima de zero" })
+      : htmlDica({ titulo: s.lab, valor: `mediana ${formatar(s.q50, 2)}`, faixa: null, base: `p25–p75: ${formatar(s.q25, 2)} a ${formatar(s.q75, 2)} · p10–p90: ${formatar(s.q10, 2)} a ${formatar(s.q90, 2)} · ${formatar(s.n, 0)} hexágonos` }));
+  marcarGrafico(svg.node(), "caixas");
   box.replaceChildren(svg.node());
 }

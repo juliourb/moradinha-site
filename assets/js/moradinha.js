@@ -438,12 +438,12 @@ var require_earcut = __commonJS({
       return polygonArea === 0 && trianglesArea === 0 ? 0 : Math.abs((trianglesArea - polygonArea) / polygonArea);
     };
     function signedArea(data, start2, end, dim) {
-      var sum = 0;
+      var sum2 = 0;
       for (var i3 = start2, j4 = end - dim; i3 < end; i3 += dim) {
-        sum += (data[j4] - data[i3]) * (data[i3 + 1] + data[j4 + 1]);
+        sum2 += (data[j4] - data[i3]) * (data[i3 + 1] + data[j4 + 1]);
         j4 = i3;
       }
-      return sum;
+      return sum2;
     }
     earcut3.flatten = function(data) {
       var dim = data[0][0].length, result = { vertices: [], holes: [], dimensions: dim }, holeIndex = 0;
@@ -5664,11 +5664,11 @@ function popcnt_bit_range(data, lhs, rhs) {
     return 0;
   }
   if (rhs - lhs < 8) {
-    let sum = 0;
+    let sum2 = 0;
     for (const bit of new BitIterator(data, lhs, rhs - lhs, data, getBit)) {
-      sum += bit;
+      sum2 += bit;
     }
-    return sum;
+    return sum2;
   }
   const rhsInside = rhs >> 3 << 3;
   const lhsInside = lhs + (lhs % 8 === 0 ? 0 : 8 - lhs % 8);
@@ -7918,25 +7918,25 @@ var BaseInt64 = class {
     ]);
     let product = L4[3] * R4[3];
     this.buffer[0] = product & 65535;
-    let sum = product >>> 16;
+    let sum2 = product >>> 16;
     product = L4[2] * R4[3];
-    sum += product;
+    sum2 += product;
     product = L4[3] * R4[2] >>> 0;
-    sum += product;
-    this.buffer[0] += sum << 16;
-    this.buffer[1] = sum >>> 0 < product ? carryBit16 : 0;
-    this.buffer[1] += sum >>> 16;
+    sum2 += product;
+    this.buffer[0] += sum2 << 16;
+    this.buffer[1] = sum2 >>> 0 < product ? carryBit16 : 0;
+    this.buffer[1] += sum2 >>> 16;
     this.buffer[1] += L4[1] * R4[3] + L4[2] * R4[2] + L4[3] * R4[1];
     this.buffer[1] += L4[0] * R4[3] + L4[1] * R4[2] + L4[2] * R4[1] + L4[3] * R4[0] << 16;
     return this;
   }
   _plus(other) {
-    const sum = this.buffer[0] + other.buffer[0] >>> 0;
+    const sum2 = this.buffer[0] + other.buffer[0] >>> 0;
     this.buffer[1] += other.buffer[1];
-    if (sum < this.buffer[0] >>> 0) {
+    if (sum2 < this.buffer[0] >>> 0) {
       ++this.buffer[1];
     }
-    this.buffer[0] = sum;
+    this.buffer[0] = sum2;
   }
   lessThan(other) {
     return this.buffer[1] < other.buffer[1] || this.buffer[1] === other.buffer[1] && this.buffer[0] < other.buffer[0];
@@ -8102,14 +8102,14 @@ var Int128 = class _Int128 {
     const R32 = new Uint642(new Uint32Array([other.buffer[0], 0]));
     let product = Uint642.multiply(L32, R32);
     this.buffer[0] = product.low();
-    const sum = new Uint642(new Uint32Array([product.high(), 0]));
+    const sum2 = new Uint642(new Uint32Array([product.high(), 0]));
     product = Uint642.multiply(L22, R32);
-    sum.plus(product);
+    sum2.plus(product);
     product = Uint642.multiply(L32, R22);
-    sum.plus(product);
-    this.buffer[1] = sum.low();
-    this.buffer[3] = sum.lessThan(product) ? 1 : 0;
-    this.buffer[2] = sum.high();
+    sum2.plus(product);
+    this.buffer[1] = sum2.low();
+    this.buffer[3] = sum2.lessThan(product) ? 1 : 0;
+    this.buffer[2] = sum2.high();
     const high = new Uint642(new Uint32Array(this.buffer.buffer, this.buffer.byteOffset + 8, 2));
     high.plus(Uint642.multiply(L1, R32)).plus(Uint642.multiply(L22, R22)).plus(Uint642.multiply(L32, R1));
     this.buffer[3] += Uint642.multiply(L0, R32).plus(Uint642.multiply(L1, R22)).plus(Uint642.multiply(L22, R1)).plus(Uint642.multiply(L32, R0)).low();
@@ -9988,7 +9988,7 @@ function buffersFromJSON(xs2, buffers = []) {
   return buffers;
 }
 function nullCountFromJSON(validity) {
-  return (validity || []).reduce((sum, val) => sum + +(val === 0), 0);
+  return (validity || []).reduce((sum2, val) => sum2 + +(val === 0), 0);
 }
 function fieldFromJSON(_field, dictionaries) {
   let id3;
@@ -13162,7 +13162,7 @@ function totalDoMapa(totais, componente, periodo) {
       soma += linha2.total;
       if (linha2.ep == null) semEp = true;
       else epQuad += linha2.ep * linha2.ep;
-      for (const m4 of linha2.marcas ?? []) marcas.add(m4);
+      for (const m4 of linha2.marcas ?? []) if (m4 !== "total_fragil") marcas.add(m4);
     }
     return { total: soma, ep: semEp ? null : Math.sqrt(epQuad), regime: "misto", marcas: [...marcas] };
   }
@@ -57294,13 +57294,13 @@ function computeIntervalInputData(session, input) {
 }
 
 // node_modules/mjolnir.js/dist/hammerjs/input/compute-input-data.js
-function getPointerId(pointer, index) {
-  return "pointerId" in pointer ? pointer.pointerId : index;
+function getPointerId(pointer2, index) {
+  return "pointerId" in pointer2 ? pointer2.pointerId : index;
 }
 function resetPointerMovementData(session, pointers) {
-  session.movementOrigin = new Map(pointers.map((pointer, index) => [
-    getPointerId(pointer, index),
-    { clientX: pointer.clientX, clientY: pointer.clientY }
+  session.movementOrigin = new Map(pointers.map((pointer2, index) => [
+    getPointerId(pointer2, index),
+    { clientX: pointer2.clientX, clientY: pointer2.clientY }
   ]));
   session.firstMovementTime = void 0;
 }
@@ -57310,14 +57310,14 @@ function computePointerMovementData(session, input) {
   if (!hasSamePointers) {
     resetPointerMovementData(session, input.pointers);
   }
-  input.distancePerPointer = input.pointers.map((pointer, index) => getEventDistance(session.movementOrigin.get(pointerIds[index]), pointer));
+  input.distancePerPointer = input.pointers.map((pointer2, index) => getEventDistance(session.movementOrigin.get(pointerIds[index]), pointer2));
   if (input.eventType & InputEvent.Move && input.distancePerPointer.some((distance5) => distance5 > 0)) {
     session.firstMovementTime ?? (session.firstMovementTime = input.timeStamp);
   }
   input.movementDeltaTime = session.firstMovementTime === void 0 ? 0 : input.timeStamp - session.firstMovementTime;
   if (input.eventType & (InputEvent.End | InputEvent.Cancel)) {
-    const removedPointerIds = input.changedPointers.map((pointer) => getPointerId(pointer, input.pointers.indexOf(pointer)));
-    resetPointerMovementData(session, input.pointers.filter((pointer, index) => !removedPointerIds.includes(pointerIds[index])));
+    const removedPointerIds = input.changedPointers.map((pointer2) => getPointerId(pointer2, input.pointers.indexOf(pointer2)));
+    resetPointerMovementData(session, input.pointers.filter((pointer2, index) => !removedPointerIds.includes(pointerIds[index])));
   }
 }
 function computeInputData(manager, input) {
@@ -58092,12 +58092,12 @@ var TrackpadRecognizer = class extends AttrRecognizer {
     const deltaY = overrides.deltaY ?? event.deltaY;
     const direction = getDirection(deltaX, deltaY);
     const pointerDistance = Math.sqrt(event.deltaX * event.deltaX + event.deltaY * event.deltaY);
-    const pointer = srcEvent;
+    const pointer2 = srcEvent;
     return {
-      pointers: [pointer, pointer],
-      changedPointers: [pointer, pointer],
+      pointers: [pointer2, pointer2],
+      changedPointers: [pointer2, pointer2],
       pointerType: "trackpad",
-      srcEvent: pointer,
+      srcEvent: pointer2,
       eventType: event.eventType,
       timeStamp: event.timeStamp,
       deltaTime: event.deltaTime,
@@ -98173,16 +98173,16 @@ function blurf(radius) {
   const w4 = 2 * radius + 1;
   return (T3, S4, start2, stop, step) => {
     if (!((stop -= step) >= start2)) return;
-    let sum = radius0 * S4[start2];
+    let sum2 = radius0 * S4[start2];
     const s0 = step * radius0;
     const s1 = s0 + step;
     for (let i3 = start2, j4 = start2 + s0; i3 < j4; i3 += step) {
-      sum += S4[Math.min(stop, i3)];
+      sum2 += S4[Math.min(stop, i3)];
     }
     for (let i3 = start2, j4 = stop; i3 <= j4; i3 += step) {
-      sum += S4[Math.min(stop, i3 + s0)];
-      T3[i3] = (sum + t4 * (S4[Math.max(start2, i3 - s1)] + S4[Math.min(stop, i3 + s1)])) / w4;
-      sum -= S4[Math.max(start2, i3 - s0)];
+      sum2 += S4[Math.min(stop, i3 + s0)];
+      T3[i3] = (sum2 + t4 * (S4[Math.max(start2, i3 - s1)] + S4[Math.min(stop, i3 + s1)])) / w4;
+      sum2 -= S4[Math.max(start2, i3 - s0)];
     }
   };
 }
@@ -98190,15 +98190,15 @@ function bluri(radius) {
   const w4 = 2 * radius + 1;
   return (T3, S4, start2, stop, step) => {
     if (!((stop -= step) >= start2)) return;
-    let sum = radius * S4[start2];
+    let sum2 = radius * S4[start2];
     const s4 = step * radius;
     for (let i3 = start2, j4 = start2 + s4; i3 < j4; i3 += step) {
-      sum += S4[Math.min(stop, i3)];
+      sum2 += S4[Math.min(stop, i3)];
     }
     for (let i3 = start2, j4 = stop; i3 <= j4; i3 += step) {
-      sum += S4[Math.min(stop, i3 + s4)];
-      T3[i3] = sum / w4;
-      sum -= S4[Math.max(start2, i3 - s4)];
+      sum2 += S4[Math.min(stop, i3 + s4)];
+      T3[i3] = sum2 / w4;
+      sum2 -= S4[Math.max(start2, i3 - s4)];
     }
   };
 }
@@ -98591,6 +98591,24 @@ function shuffler(random4) {
     }
     return array4;
   };
+}
+function sum(values, valueof) {
+  let sum2 = 0;
+  if (valueof === void 0) {
+    for (let value2 of values) {
+      if (value2 = +value2) {
+        sum2 += value2;
+      }
+    }
+  } else {
+    let index = -1;
+    for (let value2 of values) {
+      if (value2 = +valueof(value2, ++index, values)) {
+        sum2 += value2;
+      }
+    }
+  }
+  return sum2;
 }
 
 // node_modules/d3-axis/dist/d3-axis.mjs
@@ -99483,6 +99501,29 @@ Local.prototype = local.prototype = {
     return this._;
   }
 };
+function sourceEvent(event) {
+  let sourceEvent2;
+  while (sourceEvent2 = event.sourceEvent) event = sourceEvent2;
+  return event;
+}
+function pointer(event, node) {
+  event = sourceEvent(event);
+  if (node === void 0) node = event.currentTarget;
+  if (node) {
+    var svg = node.ownerSVGElement || node;
+    if (svg.createSVGPoint) {
+      var point3 = svg.createSVGPoint();
+      point3.x = event.clientX, point3.y = event.clientY;
+      point3 = point3.matrixTransform(node.getScreenCTM().inverse());
+      return [point3.x, point3.y];
+    }
+    if (node.getBoundingClientRect) {
+      var rect = node.getBoundingClientRect();
+      return [event.clientX - rect.left - node.clientLeft, event.clientY - rect.top - node.clientTop];
+    }
+  }
+  return [event.pageX, event.pageY];
+}
 
 // node_modules/d3-color/dist/d3-color.mjs
 function define(constructor, factory, prototype) {
@@ -103082,13 +103123,13 @@ var g4 = 607 / 128;
 var LOGSQRT2PI = Math.log(Math.sqrt(2 * Math.PI));
 var SQRT_2PI$1 = Math.sqrt(2 * Math.PI);
 function cumulativeDistribution(z4) {
-  let sum = z4;
+  let sum2 = z4;
   let tmp2 = z4;
   for (let i3 = 1; i3 < 30; i3++) {
     tmp2 *= z4 * z4 / (2 * i3 + 1);
-    sum += tmp2;
+    sum2 += tmp2;
   }
-  return Math.round((0.5 + sum / SQRT_2PI$1 * Math.exp(-z4 * z4 / 2)) * 1e4) / 1e4;
+  return Math.round((0.5 + sum2 / SQRT_2PI$1 * Math.exp(-z4 * z4 / 2)) * 1e4) / 1e4;
 }
 var standardNormalTable = [];
 for (let z4 = 0; z4 <= 3.09; z4 += 0.01) {
@@ -103994,7 +104035,7 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
         1
       )}%`;
     } else {
-      faixa = estado.componente === "total" ? "sem faixa: percentis dos componentes n\xE3o se somam" : "sem faixa (provis\xF3ria)";
+      faixa = estado.componente === "total" ? "o total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas" : "sem faixa (provis\xF3ria)";
     }
     if (estado.comparar) {
       const m4 = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
@@ -104008,7 +104049,7 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
     }
     elementos.range.innerHTML = faixa;
     const pills = (t4.marcas ?? []).map((m4) => pill(classeMarca(m4), rotuloMarca(m4)));
-    if (estado.componente === "total") pills.push(pill("info", "Total sem faixa: percentis n\xE3o se somam"));
+    if (estado.componente === "total") pills.push(pill("info", "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas"));
     elementos.pills.innerHTML = pills.join("");
   }
   elementos.cards.innerHTML = COMPONENTES_BASE.map((c3) => {
@@ -104208,7 +104249,9 @@ function dadosCartoesBI(manifesto, totais) {
   return ["total", ...COMPONENTES_BASE].map((componente) => {
     const tAno = totalDoMapa(totais, componente, ano.id);
     const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
-    const serie = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id)?.total ?? null);
+    const rowsAno = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id));
+    const serie = rowsAno.map((t4) => t4?.total ?? null);
+    const faixas = rowsAno.map((t4) => componente !== "total" && t4?.ep != null ? [t4.total - 1.96 * t4.ep, t4.total + 1.96 * t4.ep] : null);
     return {
       componente,
       rotulo: CLAB3[componente],
@@ -104218,6 +104261,7 @@ function dadosCartoesBI(manifesto, totais) {
       relativoMedia: tMedia && domMedia ? 100 * tMedia.total / domMedia : null,
       marcas: tAno?.marcas ?? [],
       serie,
+      faixas,
       anos: anosTipo.map((p4) => p4.rotulo),
       periodoAno: ano.id,
       periodoMedia: media?.id ?? null
@@ -104321,6 +104365,104 @@ function fraseRuidoAnual(manifesto, totais) {
   return `Passa(m) do ru\xEDdo da amostra: ${nomes.join("; ")}.`;
 }
 
+// src/js/ui/ajuda.js
+var flutuante = null;
+var popAjuda = null;
+function criarFlutuante(classe) {
+  const el2 = document.createElement("div");
+  el2.className = classe;
+  el2.setAttribute("role", "tooltip");
+  el2.hidden = true;
+  document.body.appendChild(el2);
+  return el2;
+}
+function posicionar(el2, x5, y5) {
+  const margem = 12;
+  el2.style.left = "0px";
+  el2.style.top = "0px";
+  const { width, height } = el2.getBoundingClientRect();
+  let px2 = x5 + margem;
+  let py2 = y5 + margem;
+  if (px2 + width > window.innerWidth - 4) px2 = Math.max(4, x5 - width - margem);
+  if (py2 + height > window.innerHeight - 4) py2 = Math.max(4, y5 - height - margem);
+  el2.style.left = `${px2}px`;
+  el2.style.top = `${py2}px`;
+}
+function mostrarDica(evento, html) {
+  flutuante ??= criarFlutuante("dica-flutuante");
+  flutuante.innerHTML = html;
+  flutuante.hidden = false;
+  posicionar(flutuante, evento.clientX, evento.clientY);
+}
+function esconderDica() {
+  if (flutuante) flutuante.hidden = true;
+}
+function ligarDica(alvos, texto) {
+  const lista = alvos?.nodes ? alvos.nodes() : alvos instanceof Element ? [alvos] : [...alvos ?? []];
+  for (const el2 of lista) {
+    el2.classList.add("dica-alvo");
+    const dado = () => el2.__data__;
+    const mostrar = (e67) => {
+      const html = texto(dado(), el2);
+      if (html) mostrarDica(e67, html);
+      else esconderDica();
+    };
+    el2.addEventListener("mouseenter", mostrar);
+    el2.addEventListener("mousemove", mostrar);
+    el2.addEventListener("mouseleave", esconderDica);
+  }
+}
+function marcarGrafico(el2, nome) {
+  el2.setAttribute("data-grafico", nome);
+  return el2;
+}
+function fecharAjuda() {
+  if (popAjuda) popAjuda.hidden = true;
+}
+function abrirAjuda(botao) {
+  popAjuda ??= criarFlutuante("ajuda-pop");
+  popAjuda.textContent = botao.dataset.texto;
+  popAjuda.hidden = false;
+  const r3 = botao.getBoundingClientRect();
+  posicionar(popAjuda, r3.left, r3.bottom);
+}
+function criarAjuda(texto) {
+  const b10 = document.createElement("button");
+  b10.type = "button";
+  b10.className = "ajuda";
+  b10.textContent = "?";
+  b10.dataset.texto = texto;
+  b10.setAttribute("aria-label", "O que mede e como ler este gr\xE1fico");
+  b10.addEventListener("mouseenter", () => abrirAjuda(b10));
+  b10.addEventListener("focus", () => abrirAjuda(b10));
+  b10.addEventListener("mouseleave", fecharAjuda);
+  b10.addEventListener("blur", fecharAjuda);
+  b10.addEventListener("click", (e67) => {
+    e67.stopPropagation();
+    if (popAjuda && !popAjuda.hidden && popAjuda.textContent === texto) fecharAjuda();
+    else abrirAjuda(b10);
+  });
+  b10.addEventListener("keydown", (e67) => {
+    if (e67.key === "Escape") fecharAjuda();
+  });
+  return b10;
+}
+function instalarAjudas(raiz = document) {
+  for (const dica of raiz.querySelectorAll(".grafico-dica")) {
+    const alvo = dica.previousElementSibling;
+    const texto = dica.textContent.trim();
+    if (!alvo || !texto) continue;
+    if (/^(HEADER|H[1-6])$/.test(alvo.tagName)) {
+      alvo.appendChild(criarAjuda(texto));
+      dica.remove();
+    }
+  }
+}
+var esc = (s4) => String(s4).replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
+function htmlDica({ titulo, valor, faixa, base }) {
+  return `<b>${esc(titulo)}</b>${valor != null ? `<span class="d-v">${esc(valor)}</span>` : ""}${faixa ? `<span class="d-sub">faixa de 95%: ${esc(faixa)}</span>` : ""}${base ? `<span class="d-sub">${esc(base)}</span>` : ""}`;
+}
+
 // src/js/graficos/deficit.js
 function linhasNormais(linhasArr, componente, periodo) {
   return linhasArr.filter((l3) => classeHex(l3.dom[periodo], brutoHex(l3, componente, periodo)) === "normal");
@@ -104349,13 +104491,19 @@ function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const faixaAtual = estado.faixa_hist?.[0] ?? null;
   const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hex\xE1gonos");
+  marcarGrafico(svg.node(), "histograma");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(6).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
   const g5 = svg.append("g");
   g5.selectAll("rect.coluna").data(bins).join("rect").attr("class", "coluna").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
     e67.stopPropagation();
     aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
-  }).append("title").text((b10) => b10 === ultimoBin ? `${b10.length} hex\xE1gonos de ${formatar(b10.x0, 1)} (p99 ou mais)` : `${b10.length} hex\xE1gonos entre ${formatar(b10.x0, 1)} e ${formatar(b10.x1, 1)}`);
+  });
+  ligarDica(g5.selectAll("rect.coluna"), (b10) => htmlDica({
+    titulo: b10 === ultimoBin ? `${formatar(b10.x0, 1)} ou mais (p99 ou mais)` : `${formatar(b10.x0, 1)} a ${formatar(b10.x1, 1)}`,
+    valor: `${formatar(b10.length, 0)} hex\xE1gonos`,
+    base: `de ${formatar(vs9.length, 0)} hex\xE1gonos com d\xE9ficit`
+  }));
   g5.selectAll("rect.barra").data(bins).join("rect").attr("class", "barra").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css3("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
   svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("p99 ou mais \u2192");
   svg.on("click", () => aoClicarBarra([]));
@@ -104451,6 +104599,16 @@ function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
       )}${isRel ? " %" : ""}</td></tr>`
     )
   ).join("")}</tbody>`;
+  marcarGrafico(box, "ranking");
+  ligarDica(box.querySelectorAll("tr"), (_d3, tr2) => {
+    const d3 = rs2[Number(tr2.rowIndex)];
+    if (!d3) return "";
+    return htmlDica({
+      titulo: `${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod}`,
+      valor: `${formatar(d3.v, isRel ? 2 : 0)}${isRel ? " %" : ""}`,
+      base: `hex\xE1gono ${codigoCurtoH3(d3.l.h3)}`
+    });
+  });
   box.querySelectorAll("tr").forEach((tr2) => {
     const ir2 = () => aoIrPara(tr2.dataset.h3);
     tr2.onclick = ir2;
@@ -104494,7 +104652,13 @@ function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo) {
   const g5 = svg.append("g").selectAll("g").data(pts).join("g").style("cursor", "pointer").on("click", (_e4, d3) => aoClicarPeriodo(d3.id));
   g5.filter((d3) => d3.lo != null).append("line").attr("x1", (d3) => x5(xpos(d3.p))).attr("x2", (d3) => x5(xpos(d3.p))).attr("y1", (d3) => y5(d3.lo)).attr("y2", (d3) => y5(d3.hi)).attr("stroke", (d3) => d3.media ? css3("--accent") : css3("--ink")).attr("stroke-width", (d3) => d3.media ? 4 : 2).attr("opacity", (d3) => d3.media ? 0.55 : 0.8);
   g5.filter((d3) => d3.v != null).append("path").attr("transform", (d3) => `translate(${x5(xpos(d3.p))},${y5(d3.v)})`).attr("d", (d3) => Symbol2(d3.media ? diamond : circle, d3.id === estado.periodo ? 130 : 60)()).attr("fill", (d3) => d3.critico ? css3("--crit") : d3.media ? css3("--accent") : css3("--ink")).attr("stroke", (d3) => d3.id === estado.periodo ? css3("--warn") : "none").attr("stroke-width", 3);
-  g5.append("title").text((d3) => `${d3.lab}: ${d3.v == null ? "sem dado" : formatar(d3.v, isRel ? 2 : 0)}${d3.lo != null ? ` (${formatar(d3.lo, isRel ? 2 : 0)} a ${formatar(d3.hi, isRel ? 2 : 0)})` : " (sem faixa)"}`);
+  ligarDica(g5, (d3) => htmlDica({
+    titulo: d3.lab + (d3.media ? " (m\xE9dia)" : ""),
+    valor: d3.v == null ? "sem dado" : formatar(d3.v, isRel ? 2 : 0),
+    faixa: d3.lo != null ? `${formatar(d3.lo, isRel ? 2 : 0)} a ${formatar(d3.hi, isRel ? 2 : 0)}` : null,
+    base: d3.lo == null && d3.v != null ? "sem faixa de 95% para este per\xEDodo" : null
+  }));
+  marcarGrafico(svg.node(), "serie");
   box.replaceChildren(svg.node());
 }
 function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo2) {
@@ -104525,16 +104689,16 @@ function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo2) {
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
   svg.append("g").selectAll("text").data(anos).join("text").attr("x", (p4) => x5(p4.id)).attr("y", H4 - 4).attr("text-anchor", "middle").text((p4) => rotuloCurto(p4.rotulo));
   svg.append("path").attr("d", line().defined((d3) => d3.v != null).x((d3) => x5(d3.id)).y((d3) => y5(d3.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css3("--muted")).attr("stroke-width", 1.2);
-  svg.append("g").selectAll("line").data(mediaPts.filter((d3) => d3.v != null)).join("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", (d3) => y5(d3.v)).attr("y2", (d3) => y5(d3.v)).attr("stroke", css3("--accent")).attr("stroke-width", 1.4).attr("stroke-dasharray", "4,3").append("title").text((d3) => `${d3.lab} (m\xE9dia): ${formatar(d3.v, 0)}`);
+  svg.append("g").selectAll("line").data(mediaPts.filter((d3) => d3.v != null)).join("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", (d3) => y5(d3.v)).attr("y2", (d3) => y5(d3.v)).attr("stroke", css3("--accent")).attr("stroke-width", 1.4).attr("stroke-dasharray", "4,3");
+  ligarDica(svg.selectAll("line[stroke-dasharray]"), (d3) => htmlDica({ titulo: `${d3.lab} (m\xE9dia)`, valor: formatar(d3.v, 0) }));
+  marcarGrafico(svg.node(), "serie-detalhe");
   const g5 = svg.append("g").selectAll("g").data(anosPts).join("g");
   g5.filter((d3) => d3.lo != null).append("line").attr("x1", (d3) => x5(d3.id)).attr("x2", (d3) => x5(d3.id)).attr("y1", (d3) => y5(d3.lo)).attr("y2", (d3) => y5(d3.hi)).attr("stroke", css3("--ink")).attr("stroke-width", 2).attr("opacity", 0.8);
   g5.filter((d3) => d3.v != null).append("circle").attr("cx", (d3) => x5(d3.id)).attr("cy", (d3) => y5(d3.v)).attr("r", 4).attr("fill", (d3) => d3.critico ? css3("--crit") : css3("--ink"));
-  g5.append("title").text((d3) => {
-    if (d3.v == null) return `${d3.lab}: sem dado`;
-    const base = `${d3.lab}: ${formatar(d3.v, 0)}`;
-    if (d3.critico) return `${base} (estoque por fonte diferente \u2014 n\xE3o comparar por hex\xE1gono)`;
-    if (d3.semFaixaProvisoria) return `${base} (provis\xF3ria, sem faixa)`;
-    return d3.lo != null ? `${base} (faixa de 95%: ${formatar(d3.lo, 0)} a ${formatar(d3.hi, 0)})` : `${base} (sem faixa)`;
+  ligarDica(g5, (d3) => {
+    if (d3.v == null) return htmlDica({ titulo: d3.lab, valor: "sem dado" });
+    const nota = d3.critico ? "estoque por fonte diferente \u2014 n\xE3o comparar por hex\xE1gono" : d3.semFaixaProvisoria ? "provis\xF3ria, sem faixa" : d3.lo == null ? "sem faixa de 95%" : null;
+    return htmlDica({ titulo: d3.lab, valor: formatar(d3.v, 0), faixa: d3.lo != null && !d3.semFaixaProvisoria ? `${formatar(d3.lo, 0)} a ${formatar(d3.hi, 0)}` : null, base: nota });
   });
   box.replaceChildren(svg.node());
 }
@@ -104550,7 +104714,22 @@ function renderizarCurvaConcentracao(box, linhasArr, componente, periodo) {
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => `${v4}%`));
   svg.append("path").attr("d", line().x((d3) => x5(d3.pctHex)).y((d3) => y5(d3.pctDeficitAcumulado))([{ pctHex: 0, pctDeficitAcumulado: 0 }, ...conc.pontos])).attr("fill", "none").attr("stroke", css3("--accent")).attr("stroke-width", 2);
   svg.append("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", y5(50)).attr("y2", y5(50)).attr("stroke", css3("--line")).attr("stroke-dasharray", "3,3");
-  svg.append("circle").attr("cx", x5(conc.pctHexMeio)).attr("cy", y5(50)).attr("r", 4).attr("fill", css3("--crit")).append("title").text(`${formatar(conc.pctHexMeio, 1)}% dos hex\xE1gonos somam metade do d\xE9ficit`);
+  svg.append("circle").attr("cx", x5(conc.pctHexMeio)).attr("cy", y5(50)).attr("r", 4).attr("fill", css3("--crit"));
+  marcarGrafico(svg.node(), "concentracao");
+  const alvo = svg.append("rect").attr("x", m4.l).attr("y", m4.t).attr("width", W4 - m4.l - m4.r).attr("height", H4 - m4.t - m4.b).attr("fill", "transparent");
+  const marcador = svg.append("circle").attr("r", 3.5).attr("fill", css3("--ink")).attr("visibility", "hidden").style("pointer-events", "none");
+  alvo.classed("dica-alvo", true);
+  alvo.on("mousemove.curva", (e67) => {
+    const [px2] = pointer(e67, svg.node());
+    const alvoX = Math.max(0, Math.min(100, x5.invert(px2)));
+    const p4 = conc.pontos.reduce((a5, b10) => Math.abs(b10.pctHex - alvoX) < Math.abs(a5.pctHex - alvoX) ? b10 : a5, conc.pontos[0]);
+    marcador.attr("cx", x5(p4.pctHex)).attr("cy", y5(p4.pctDeficitAcumulado)).attr("visibility", "visible");
+    mostrarDica(e67, htmlDica({ titulo: `${formatar(p4.pctHex, 1)}% dos hex\xE1gonos`, valor: `${formatar(p4.pctDeficitAcumulado, 1)}% do d\xE9ficit`, base: `de ${formatar(conc.n, 0)} hex\xE1gonos com domic\xEDlio` }));
+  });
+  alvo.on("mouseleave.curva", () => {
+    marcador.attr("visibility", "hidden");
+    esconderDica();
+  });
   box.replaceChildren(svg.node());
 }
 function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
@@ -104561,7 +104740,7 @@ function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
     const vs9 = linhasNormais(linhasArr, estado.componente, p4.id).map((l3) => valorHex(l3, estado.componente, p4.id, estado.medida)).filter((v4) => v4 != null).sort(ascending);
     todosValores.push(...vs9);
     const q4 = (f4) => quantileSorted(vs9, f4);
-    return { id: p4.id, lab: p4.rotulo, media: p4.tipo === "media", critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
+    return { id: p4.id, lab: p4.rotulo, media: p4.tipo === "media", critico: p4.marcas?.includes("fonte_estoque_diferente"), n: vs9.length, q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
   });
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 122;
@@ -104580,7 +104759,8 @@ function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   g5.filter((s4) => s4.q10 != null).append("line").attr("x1", cx2).attr("x2", cx2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
   g5.filter((s4) => s4.q25 != null).append("rect").attr("x", (s4) => x5(s4.id)).attr("width", x5.bandwidth()).attr("y", (s4) => y5(s4.q75)).attr("height", (s4) => y5(s4.q25) - y5(s4.q75)).attr("fill", (s4) => s4.id === estado.periodo ? css3("--accent-soft") : css3("--surface")).attr("stroke", col).attr("stroke-width", (s4) => s4.id === estado.periodo ? 2.5 : 1.2).attr("rx", 3);
   g5.filter((s4) => s4.q50 != null).append("line").attr("x1", (s4) => x5(s4.id)).attr("x2", (s4) => x5(s4.id) + x5.bandwidth()).attr("y1", (s4) => y5(s4.q50)).attr("y2", (s4) => y5(s4.q50)).attr("stroke", col).attr("stroke-width", 2.5);
-  g5.append("title").text((s4) => s4.q50 == null ? `${s4.lab}: sem hex\xE1gono acima de zero` : `${s4.lab}: mediana ${formatar(s4.q50, 2)}; p25\u2013p75 ${formatar(s4.q25, 2)}\u2013${formatar(s4.q75, 2)}`);
+  ligarDica(g5, (s4) => s4.q50 == null ? htmlDica({ titulo: s4.lab, valor: "sem hex\xE1gono acima de zero" }) : htmlDica({ titulo: s4.lab, valor: `mediana ${formatar(s4.q50, 2)}`, faixa: null, base: `p25\u2013p75: ${formatar(s4.q25, 2)} a ${formatar(s4.q75, 2)} \xB7 p10\u2013p90: ${formatar(s4.q10, 2)} a ${formatar(s4.q90, 2)} \xB7 ${formatar(s4.n, 0)} hex\xE1gonos` }));
+  marcarGrafico(svg.node(), "caixas");
   box.replaceChildren(svg.node());
 }
 
@@ -104605,7 +104785,8 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
     const x6 = band().domain(dados.map((d3) => d3[0])).range([m4.l, W4 - m4.r]).padding(0.25);
     const y6 = linear2().domain([0, max4(dados, (d3) => d3[1]) || 1]).nice().range([H4 - m4.b, m4.t]);
     svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y6).ticks(4));
-    svg.append("g").selectAll("rect").data(dados).join("rect").attr("x", (d3) => x6(d3[0])).attr("width", x6.bandwidth()).attr("y", (d3) => y6(d3[1])).attr("height", (d3) => y6(0) - y6(d3[1])).attr("fill", css4("--accent"));
+    svg.append("g").selectAll("rect").data(dados).join("rect").attr("x", (d3) => x6(d3[0])).attr("width", x6.bandwidth()).attr("y", (d3) => y6(d3[1])).attr("height", (d3) => y6(0) - y6(d3[1])).attr("fill", css4("--accent")).call((sel) => ligarDica(sel, (d3) => htmlDica({ titulo: String(d3[0]), valor: `${formatar(d3[1], 0)} hex\xE1gonos`, base: `de ${formatar(sum(dados, (e67) => e67[1]), 0)} hex\xE1gonos` })));
+    marcarGrafico(svg.node(), "histograma-qualidade");
     svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d3) => x6(d3[0]) + x6.bandwidth() / 2).attr("y", H4 - 10).attr("text-anchor", "middle").text((d3) => d3[0]);
     box.replaceChildren(svg.node());
     return;
@@ -104628,7 +104809,17 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
   svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
     e67.stopPropagation();
     aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
-  });
+  }).call(
+    (sel) => ligarDica(
+      sel,
+      (b10) => htmlDica({
+        titulo: b10 === ultimoBin ? `${formatar(b10.x0, 2)} ou mais (p99 ou mais)` : `${formatar(b10.x0, 2)} a ${formatar(b10.x1, 2)}`,
+        valor: `${formatar(b10.length, 0)} hex\xE1gonos`,
+        base: `de ${formatar(vs9.length, 0)} hex\xE1gonos`
+      })
+    )
+  );
+  marcarGrafico(svg.node(), "histograma-qualidade");
   svg.on("click", () => aoClicarBarra([]));
   svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css4("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
   svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text("p99 ou mais \u2192");
@@ -104653,13 +104844,20 @@ function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
   svg.append("rect").attr("x", x5(medX)).attr("y", m4.t).attr("width", Math.max(0, W4 - m4.r - x5(medX))).attr("height", Math.max(0, y5(medY) - m4.t)).attr("fill", css4("--warn-soft")).attr("opacity", 0.5);
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 1)));
-  svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.6).attr("fill", css4("--accent")).attr("opacity", 0.6).style("cursor", "pointer").on("click", (_e4, d3) => aoSelecionar(d3.l.h3));
+  svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.6).attr("fill", css4("--accent")).attr("opacity", 0.6).style("cursor", "pointer").on("click", (_e4, d3) => aoSelecionar(d3.l.h3)).call(
+    (sel) => ligarDica(
+      sel,
+      (d3) => htmlDica({ titulo: `${d3.l.municipioNome ?? "Hex\xE1gono"} \xB7 ${d3.l.h3.slice(-8)}`, valor: `d\xE9ficit ${formatar(d3.x, 0)}`, base: `incerteza (m\xE1x \u2212 m\xEDn) \xF7 valor: ${formatar(d3.y, 2)} \xB7 ${formatar(pontos.length, 0)} hex\xE1gonos no gr\xE1fico` })
+    )
+  );
+  marcarGrafico(svg.node(), "dispersao");
   svg.append("text").attr("class", "quadrante-contagem").attr("x", W4 - m4.r - 4).attr("y", m4.t + 12).attr("text-anchor", "end").text(`${noQuadrante} no quadrante`);
   box.replaceChildren(svg.node());
 }
 function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const categorias = ["ok", "ressalva", "sigilo", "sem_dado"];
+  const NOME_CAT = { ok: "sem ressalva", ressalva: "com ressalva", sigilo: "em sigilo", sem_dado: "sem dado" };
   const cores = { ok: css4("--ok"), ressalva: css4("--warn"), sigilo: css4("--muted"), sem_dado: css4("--line") };
   const dados = manifesto.periodos.map((p4) => {
     const somas = { ok: 0, ressalva: 0, sigilo: 0, sem_dado: 0 };
@@ -104692,10 +104890,11 @@ function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
     let acum = 0;
     categorias.forEach((cat, i3) => {
       const altura = y5(acum) - y5(acum + d3.fracoes[i3]);
-      svg.append("rect").attr("x", x5(d3.id)).attr("width", x5.bandwidth()).attr("y", y5(acum + d3.fracoes[i3])).attr("height", Math.max(0, altura)).attr("fill", cores[cat]).append("title").text(`${cat}: ${formatar(d3.fracoes[i3] * 100, 1)}%`);
+      svg.append("rect").attr("x", x5(d3.id)).attr("width", x5.bandwidth()).attr("y", y5(acum + d3.fracoes[i3])).attr("height", Math.max(0, altura)).attr("fill", cores[cat]).datum({ lab: d3.lab, cat, fracao: d3.fracoes[i3] }).call((sel) => ligarDica(sel, (e67) => htmlDica({ titulo: e67.lab, valor: `${NOME_CAT[e67.cat]}: ${formatar(e67.fracao * 100, 1)}%`, base: "% dos domic\xEDlios dos hex\xE1gonos" })));
       acum += d3.fracoes[i3];
     });
   }
+  marcarGrafico(svg.node(), "composicao");
   box.replaceChildren(svg.node());
 }
 function renderizarEstoque(box, manifesto, linhasArr) {
@@ -104703,7 +104902,7 @@ function renderizarEstoque(box, manifesto, linhasArr) {
   const st3 = manifesto.periodos.map((p4) => {
     const vs9 = linhasArr.map((l3) => l3.qualidade[p4.id]?.gEstoque).filter((v4) => v4 != null).sort(ascending);
     const q4 = (f4) => quantileSorted(vs9, f4);
-    return { id: p4.id, lab: p4.rotulo, critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
+    return { id: p4.id, lab: p4.rotulo, n: vs9.length, critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
   });
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 122;
@@ -104718,6 +104917,11 @@ function renderizarEstoque(box, manifesto, linhasArr) {
   const g5 = svg.append("g").selectAll("g").data(st3).join("g");
   g5.filter((s4) => s4.q10 != null).append("line").attr("x1", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("x2", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
   g5.filter((s4) => s4.q25 != null).append("rect").attr("x", (s4) => x5(s4.id)).attr("width", x5.bandwidth()).attr("y", (s4) => y5(s4.q75)).attr("height", (s4) => y5(s4.q25) - y5(s4.q75)).attr("fill", css4("--surface")).attr("stroke", col).attr("rx", 3);
+  ligarDica(
+    g5,
+    (s4) => s4.q50 == null ? htmlDica({ titulo: s4.lab, valor: "sem dado" }) : htmlDica({ titulo: s4.lab, valor: `mediana ${formatar(s4.q50, 2)} \xD7 o estoque de 2022`, base: `p25\u2013p75: ${formatar(s4.q25, 2)} a ${formatar(s4.q75, 2)} \xB7 ${formatar(s4.n, 0)} hex\xE1gonos` })
+  );
+  marcarGrafico(svg.node(), "estoque");
   box.replaceChildren(svg.node());
 }
 
@@ -104953,15 +105157,35 @@ function css5(nome) {
 function primeiraMinuscula(texto) {
   return texto ? texto[0].toLowerCase() + texto.slice(1) : texto;
 }
-function sparkline2(serie) {
+function sparkline2(c3) {
+  const serie = c3.serie;
   const ok2 = serie.filter((v4) => v4 != null);
-  if (!ok2.length) return "";
-  const W4 = 120;
-  const H4 = 32;
-  const x5 = point().domain(serie.map((_v3, i3) => i3)).range([4, W4 - 4]);
-  const y5 = linear2().domain([0, max4(ok2) * 1.15 || 1]).range([H4 - 4, 4]);
+  if (!ok2.length) return null;
+  const W4 = 170;
+  const H4 = 62;
+  const m4 = { l: 38, r: 8, t: 6, b: 16 };
+  const lo2 = min4(ok2);
+  const hi2 = max4(ok2);
+  const x5 = point().domain(serie.map((_v3, i3) => i3)).range([m4.l, W4 - m4.r]);
+  const y5 = linear2().domain([lo2 === hi2 ? 0 : lo2, hi2]).range([H4 - m4.b, m4.t]);
   const linha = line().defined((v4) => v4 != null).x((_v3, i3) => x5(i3)).y((v4) => y5(v4));
-  return `<svg class="spark" viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="S\xE9rie de anos"><path d="${linha(serie)}" fill="none" stroke="${css5("--accent")}" stroke-width="1.6"/></svg>`;
+  const svg = create5("svg").attr("class", "spark").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `S\xE9rie de ${c3.rotulo}, ${c3.anos[0]} a ${c3.anos.at(-1)}`);
+  svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css5("--accent")).attr("stroke-width", 1.6);
+  const rot = (txt, px2, py2, anchor) => svg.append("text").attr("x", px2).attr("y", py2).attr("text-anchor", anchor).attr("font-size", 9).attr("fill", css5("--muted")).text(txt);
+  rot(formatar(hi2, 0), m4.l - 4, m4.t + 3, "end");
+  rot(formatar(lo2, 0), m4.l - 4, H4 - m4.b + 1, "end");
+  rot(c3.anos[0], m4.l, H4 - 3, "start");
+  rot(c3.anos.at(-1), W4 - m4.r, H4 - 3, "end");
+  const pts = serie.map((v4, i3) => ({ v: v4, i: i3, ano: c3.anos[i3], faixa: c3.faixas?.[i3] ?? null })).filter((d3) => d3.v != null);
+  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d3) => x5(d3.i)).attr("cy", (d3) => y5(d3.v)).attr("r", 3.2).attr("fill", css5("--accent"));
+  svg.append("g").selectAll("rect").data(pts).join("rect").attr("x", (d3) => x5(d3.i) - 9).attr("width", 18).attr("y", 0).attr("height", H4).attr("fill", "transparent");
+  ligarDica(
+    svg.selectAll("rect"),
+    (d3) => htmlDica({ titulo: d3.ano, valor: `${formatar(d3.v, 0)} domic\xEDlios`, faixa: d3.faixa ? `${formatar(d3.faixa[0], 0)} a ${formatar(d3.faixa[1], 0)}` : null, base: d3.faixa ? null : "sem faixa de 95% para este indicador" })
+  );
+  marcarGrafico(svg.node(), "mini-serie");
+  void bolas;
+  return svg.node();
 }
 function renderizarMensagem(el2, manifesto, totais) {
   const ano = periodoRecenteAno(manifesto);
@@ -104977,47 +105201,58 @@ function renderizarMensagem(el2, manifesto, totais) {
 }
 function renderizarCartoes(el2, manifesto, totais) {
   const cartoes = dadosCartoesBI(manifesto, totais);
-  el2.innerHTML = cartoes.map(
-    (c3) => `<button type="button" class="cartao-bi" data-componente="${c3.componente}">
-        <span class="k">${c3.rotulo}</span>
+  el2.innerHTML = "";
+  for (const c3 of cartoes) {
+    const card = document.createElement("article");
+    card.className = "cartao-bi";
+    card.dataset.componente = c3.componente;
+    card.innerHTML = `<header><span class="k">${c3.rotulo}</span></header>
+      <button type="button" class="cartao-corpo" aria-label="Abrir ${c3.rotulo} no mapa de Resultados">
         <span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
         <span class="r" data-num="${c3.relativoAno ?? ""}">${formatarPercentual(c3.relativoAno, 2)}</span>
-        ${sparkline2(c3.serie)}
+        <span class="spark-slot"></span>
         <span class="pills">${(c3.marcas ?? []).map((m4) => `<span class="pill ${classeMarca(m4)}">${rotuloMarca(m4)}</span>`).join("")}</span>
-      </button>`
-  ).join("");
-  el2.querySelectorAll(".cartao-bi").forEach((b10) => {
-    b10.onclick = () => {
-      const componente = b10.dataset.componente;
+      </button>`;
+    card.querySelector("header").appendChild(
+      criarAjuda("Evolu\xE7\xE3o do total do indicador por ano. O eixo vertical vai do menor ao maior valor da s\xE9rie; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
+    );
+    const svg = sparkline2(c3);
+    if (svg) card.querySelector(".spark-slot").appendChild(svg);
+    card.onclick = (e67) => {
+      if (e67.target.closest(".ajuda")) return;
       const ano = periodoRecenteAno(manifesto);
-      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente, periodo: ano.id });
+      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente: c3.componente, periodo: ano.id });
       window.location.href = "resultados.html";
     };
-  });
+    el2.appendChild(card);
+  }
 }
 function renderizarFjp(el2, referenciaFjp) {
   const itens = fjpTresValores(referenciaFjp);
   const anoRef = itens[0]?.ano_ref;
+  const num = (v4) => v4 == null ? "\u2014" : formatar(v4, 0);
   el2.innerHTML = `<h3>Compara\xE7\xE3o com a FJP${anoRef != null ? `, ${anoRef}` : ""}</h3>` + itens.map((item) => {
-    const faixaTxt = item.faixa ? `faixa de 95% da reconstru\xE7\xE3o: ${formatar(item.faixa.inf, 1)} a ${formatar(item.faixa.sup, 1)}${item.dentro != null ? ` \xB7 o valor sem Cad\xDAnico cai ${item.dentro ? "dentro" : "fora"} da faixa` : ""}` : "";
-    const subcomponentes = (item.fjp_subcomponentes ?? []).map((s4) => `<div class="fjp-sub">${rotulo(s4.nome)}: ${formatar(s4.valor, 0)}</div>`).join("");
+    const faixaTxt = item.faixa ? `faixa de 95%: ${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : "sem faixa de 95%";
+    const dentro = item.dentro == null ? "" : ` \xB7 o valor da FJP sem Cad\xDAnico cai ${item.dentro ? "dentro" : "fora"} da faixa`;
+    const obs = item.cadUnico > 0 && item.fjp_publicado != null && ["total", "habitacao_precaria"].includes(item.indicador) ? `<div class="fjp-sub fjp-obs">A FJP publica ${formatar(item.fjp_publicado, 0)}, dos quais ${formatar(item.cadUnico, 0)} s\xE3o improvisados do Cad\xDAnico, que a PNADc n\xE3o capta.</div>` : "";
+    const fonte = item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : "";
     return `<div class="fjp-linha">
         <h4>${NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador)}</h4>
         <div class="fjp-colunas">
-          <div class="fjp-col"><div class="k">FJP (publicado)</div>
-            <div class="v ${item.fjp_publicado == null ? "a-preencher" : ""}" data-num="${item.fjp_publicado ?? ""}">${item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)}</div>
-            ${subcomponentes}
-            ${item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : ""}
+          <div class="fjp-col"><div class="k">FJP compar\xE1vel (sem Cad\xDAnico)</div>
+            <div class="v ${item.semCadUnico == null ? "a-preencher" : ""}" data-num="${item.semCadUnico ?? ""}">${item.semCadUnico == null ? "a preencher" : num(item.semCadUnico)}</div>
           </div>
-          <div class="fjp-col"><div class="k">Parte do Cad\xDAnico</div>
-            <div class="v" data-num="${item.cadUnico}">${formatar(item.cadUnico, 0)}</div>
+          <div class="fjp-col"><div class="k">Reconstru\xE7\xE3o do moradinha na PNADc</div>
+            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${num(item.reconstrucao_pnadc)}</div>
+            <div class="fjp-sub">${faixaTxt}${dentro}</div>
           </div>
-          <div class="fjp-col"><div class="k">FJP sem Cad\xDAnico</div>
-            <div class="v" data-num="${item.semCadUnico ?? ""}">${formatar(item.semCadUnico, 0)}</div>
-            <div class="fjp-sub">${faixaTxt}</div>
+          <div class="fjp-col"><div class="k">Total do mapa</div>
+            <div class="v" data-num="${item.mapa ?? ""}">${num(item.mapa)}</div>
           </div>
         </div>
+        ${obs}
         <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
+        ${fonte}
       </div>`;
   }).join("");
 }
@@ -105927,7 +106162,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "7b627489f73beba238c8a6de216e22a7f0c85767");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "0fa4cb6a3d5d0b49de40fbdf18abcba455f978be");
   renderizarInterna($7("met-interna"), modelo);
 }
 
@@ -105961,6 +106196,7 @@ async function preencherCabecalho() {
   }
 }
 preencherCabecalho();
+instalarAjudas();
 iniciarExplorador().catch((erro) => {
   console.error("Falha ao iniciar o explorador:", erro);
 });

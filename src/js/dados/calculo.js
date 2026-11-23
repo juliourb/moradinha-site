@@ -71,7 +71,9 @@ export function totalDoMapa(totais, componente, periodo) {
       soma += linha.total;
       if (linha.ep == null) semEp = true;
       else epQuad += linha.ep * linha.ep;
-      for (const m of linha.marcas ?? []) marcas.add(m);
+      // "total frágil" é o CV do total de UM componente; o total somado não tem CV no
+      // pacote, então a marca não é herdada (F6.4 1c).
+      for (const m of linha.marcas ?? []) if (m !== "total_fragil") marcas.add(m);
     }
     return { total: soma, ep: semEp ? null : Math.sqrt(epQuad), regime: "misto", marcas: [...marcas] };
   }

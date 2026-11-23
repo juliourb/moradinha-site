@@ -14,6 +14,7 @@ import { formatar, formatarPercentual } from "./util/formato.js";
 import { prepararNavegacaoResultados } from "./estado/pergunta.js";
 import { criarMiniMapa } from "./mapa/index.js";
 import { renderizarPainelDetalhe, renderizarCurvaConcentracao } from "./graficos/deficit.js";
+import { ligarDica, marcarGrafico, htmlDica, instalarAjudas, criarAjuda } from "./ui/ajuda.js";
 
 const NOME_INDICADOR = {
   total: "Total", habitacao_precaria: "Habitação precária", coabitacao: "Coabitação",
@@ -35,15 +36,40 @@ function primeiraMinuscula(texto) {
   return texto ? texto[0].toLowerCase() + texto.slice(1) : texto;
 }
 
-function sparkline(serie) {
+/**
+ * Mini-série do cartão (SPEC F6.4 1a): eixo mínimo — valor mínimo e máximo na
+ * vertical, primeiro e último ano na horizontal — e caixa de valor ao passar o
+ * mouse (período, valor e faixa de 95% quando o pacote tem).
+ */
+function sparkline(c) {
+  const serie = c.serie;
   const ok = serie.filter((v) => v != null);
-  if (!ok.length) return "";
-  const W = 120;
-  const H = 32;
-  const x = d3.scalePoint().domain(serie.map((_v, i) => i)).range([4, W - 4]);
-  const y = d3.scaleLinear().domain([0, d3.max(ok) * 1.15 || 1]).range([H - 4, 4]);
+  if (!ok.length) return null;
+  const W = 170;
+  const H = 62;
+  const m = { l: 38, r: 8, t: 6, b: 16 };
+  const lo = d3.min(ok);
+  const hi = d3.max(ok);
+  const x = d3.scalePoint().domain(serie.map((_v, i) => i)).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([lo === hi ? 0 : lo, hi]).range([H - m.b, m.t]);
   const linha = d3.line().defined((v) => v != null).x((_v, i) => x(i)).y((v) => y(v));
-  return `<svg class="spark" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Série de anos"><path d="${linha(serie)}" fill="none" stroke="${css("--accent")}" stroke-width="1.6"/></svg>`;
+  const svg = d3.create("svg").attr("class", "spark").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", `Série de ${c.rotulo}, ${c.anos[0]} a ${c.anos.at(-1)}`);
+  svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css("--accent")).attr("stroke-width", 1.6);
+  const rot = (txt, px, py, anchor) => svg.append("text").attr("x", px).attr("y", py).attr("text-anchor", anchor).attr("font-size", 9).attr("fill", css("--muted")).text(txt);
+  rot(formatar(hi, 0), m.l - 4, m.t + 3, "end");
+  rot(formatar(lo, 0), m.l - 4, H - m.b + 1, "end");
+  rot(c.anos[0], m.l, H - 3, "start");
+  rot(c.anos.at(-1), W - m.r, H - 3, "end");
+  const pts = serie.map((v, i) => ({ v, i, ano: c.anos[i], faixa: c.faixas?.[i] ?? null })).filter((d) => d.v != null);
+  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d) => x(d.i)).attr("cy", (d) => y(d.v)).attr("r", 3.2).attr("fill", css("--accent"));
+  svg.append("g").selectAll("rect").data(pts).join("rect")
+    .attr("x", (d) => x(d.i) - 9).attr("width", 18).attr("y", 0).attr("height", H).attr("fill", "transparent");
+  ligarDica(svg.selectAll("rect"), (d) =>
+    htmlDica({ titulo: d.ano, valor: `${formatar(d.v, 0)} domicílios`, faixa: d.faixa ? `${formatar(d.faixa[0], 0)} a ${formatar(d.faixa[1], 0)}` : null, base: d.faixa ? null : "sem faixa de 95% para este indicador" })
+  );
+  marcarGrafico(svg.node(), "mini-serie");
+  void bolas;
+  return svg.node();
 }
 
 function renderizarMensagem(el, manifesto, totais) {
@@ -65,59 +91,64 @@ function renderizarMensagem(el, manifesto, totais) {
 
 function renderizarCartoes(el, manifesto, totais) {
   const cartoes = dadosCartoesBI(manifesto, totais);
-  el.innerHTML = cartoes
-    .map(
-      (c) => `<button type="button" class="cartao-bi" data-componente="${c.componente}">
-        <span class="k">${c.rotulo}</span>
+  el.innerHTML = "";
+  for (const c of cartoes) {
+    const card = document.createElement("article");
+    card.className = "cartao-bi";
+    card.dataset.componente = c.componente;
+    card.innerHTML = `<header><span class="k">${c.rotulo}</span></header>
+      <button type="button" class="cartao-corpo">
         <span class="v" data-num="${c.absolutoAno ?? ""}">${formatar(c.absolutoAno, 0)}</span>
         <span class="r" data-num="${c.relativoAno ?? ""}">${formatarPercentual(c.relativoAno, 2)}</span>
-        ${sparkline(c.serie)}
+        <span class="spark-slot"></span>
         <span class="pills">${(c.marcas ?? []).map((m) => `<span class="pill ${classeMarca(m)}">${rotuloMarca(m)}</span>`).join("")}</span>
-      </button>`
-    )
-    .join("");
-  el.querySelectorAll(".cartao-bi").forEach((b) => {
-    b.onclick = () => {
-      const componente = b.dataset.componente;
+      </button>`;
+    card.querySelector("header").appendChild(
+      criarAjuda("Evolução do total do indicador por ano. O eixo vertical vai do menor ao maior valor da série; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
+    );
+    const svg = sparkline(c);
+    if (svg) card.querySelector(".spark-slot").appendChild(svg);
+    card.onclick = (e) => {
+      if (e.target.closest(".ajuda")) return;
       const ano = periodoRecenteAno(manifesto);
-      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente, periodo: ano.id });
+      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente: c.componente, periodo: ano.id });
       window.location.href = "resultados.html";
     };
-  });
+    el.appendChild(card);
+  }
 }
 
 function renderizarFjp(el, referenciaFjp) {
   const itens = fjpTresValores(referenciaFjp);
   const anoRef = itens[0]?.ano_ref;
+  const num = (v) => (v == null ? "—" : formatar(v, 0));
   el.innerHTML = `<h3>Comparação com a FJP${anoRef != null ? `, ${anoRef}` : ""}</h3>` + itens
     .map((item) => {
-      const faixaTxt = item.faixa
-        ? `faixa de 95% da reconstrução: ${formatar(item.faixa.inf, 1)} a ${formatar(item.faixa.sup, 1)}${
-            item.dentro != null ? ` · o valor sem CadÚnico cai ${item.dentro ? "dentro" : "fora"} da faixa` : ""
-          }`
+      const faixaTxt = item.faixa ? `faixa de 95%: ${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : "sem faixa de 95%";
+      const dentro = item.dentro == null ? "" : ` · o valor da FJP sem CadÚnico cai ${item.dentro ? "dentro" : "fora"} da faixa`;
+      const obs = item.cadUnico > 0 && item.fjp_publicado != null && ["total", "habitacao_precaria"].includes(item.indicador)
+        ? `<div class="fjp-sub fjp-obs">A FJP publica ${formatar(item.fjp_publicado, 0)}, dos quais ${formatar(item.cadUnico, 0)} são improvisados do CadÚnico, que a PNADc não capta.</div>`
         : "";
-      const subcomponentes = (item.fjp_subcomponentes ?? [])
-        .map((s) => `<div class="fjp-sub">${rotulo(s.nome)}: ${formatar(s.valor, 0)}</div>`)
-        .join("");
+      const fonte = item.fjp_publicado != null
+        ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` · <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>`
+        : "";
       return `<div class="fjp-linha">
         <h4>${NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador)}</h4>
         <div class="fjp-colunas">
-          <div class="fjp-col"><div class="k">FJP (publicado)</div>
-            <div class="v ${item.fjp_publicado == null ? "a-preencher" : ""}" data-num="${item.fjp_publicado ?? ""}">${
-              item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)
-            }</div>
-            ${subcomponentes}
-            ${item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` · <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : ""}
+          <div class="fjp-col"><div class="k">FJP comparável (sem CadÚnico)</div>
+            <div class="v ${item.semCadUnico == null ? "a-preencher" : ""}" data-num="${item.semCadUnico ?? ""}">${item.semCadUnico == null ? "a preencher" : num(item.semCadUnico)}</div>
           </div>
-          <div class="fjp-col"><div class="k">Parte do CadÚnico</div>
-            <div class="v" data-num="${item.cadUnico}">${formatar(item.cadUnico, 0)}</div>
+          <div class="fjp-col"><div class="k">Reconstrução do moradinha na PNADc</div>
+            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${num(item.reconstrucao_pnadc)}</div>
+            <div class="fjp-sub">${faixaTxt}${dentro}</div>
           </div>
-          <div class="fjp-col"><div class="k">FJP sem CadÚnico</div>
-            <div class="v" data-num="${item.semCadUnico ?? ""}">${formatar(item.semCadUnico, 0)}</div>
-            <div class="fjp-sub">${faixaTxt}</div>
+          <div class="fjp-col"><div class="k">Total do mapa</div>
+            <div class="v" data-num="${item.mapa ?? ""}">${num(item.mapa)}</div>
           </div>
         </div>
+        ${obs}
         <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
+        ${fonte}
       </div>`;
     })
     .join("");

@@ -81,7 +81,9 @@ export function dadosCartoesBI(manifesto, totais) {
   return ["total", ...COMPONENTES_BASE].map((componente) => {
     const tAno = totalDoMapa(totais, componente, ano.id);
     const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
-    const serie = anosTipo.map((p) => totalDoMapa(totais, componente, p.id)?.total ?? null);
+    const rowsAno = anosTipo.map((p) => totalDoMapa(totais, componente, p.id));
+    const serie = rowsAno.map((t) => t?.total ?? null);
+    const faixas = rowsAno.map((t) => (componente !== "total" && t?.ep != null ? [t.total - 1.96 * t.ep, t.total + 1.96 * t.ep] : null));
     return {
       componente,
       rotulo: CLAB[componente],
@@ -91,6 +93,7 @@ export function dadosCartoesBI(manifesto, totais) {
       relativoMedia: tMedia && domMedia ? (100 * tMedia.total) / domMedia : null,
       marcas: tAno?.marcas ?? [],
       serie,
+      faixas,
       anos: anosTipo.map((p) => p.rotulo),
       periodoAno: ano.id,
       periodoMedia: media?.id ?? null,

@@ -7,6 +7,7 @@ import { iniciarExplorador } from "./explorador.js";
 import { iniciarVisaoGeral } from "./visaoGeral.js";
 import { iniciarConfiabilidade } from "./confiabilidade.js";
 import { iniciarMetodologia } from "./metodologia.js";
+import { instalarAjudas } from "./ui/ajuda.js";
 
 /** Troca `dominio`/`edicao` na URL atual e recarrega — o seletor do cabeçalho (SPEC_F5). */
 function navegarPara(dominioId, edicaoId) {
@@ -48,6 +49,7 @@ async function preencherCabecalho() {
 }
 
 preencherCabecalho();
+instalarAjudas();
 iniciarExplorador().catch((erro) => {
   // eslint-disable-next-line no-console
   console.error("Falha ao iniciar o explorador:", erro);

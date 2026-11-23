@@ -5,6 +5,7 @@ import * as d3 from "d3";
 import { formatar, rotuloCurto } from "../util/formato.js";
 import { valorHex, incertezaHex, domiciliosTotal } from "../dados/calculo.js";
 import { valorMedidaQualidade, TIPO_MEDIDA } from "../dados/qualidade.js";
+import { ligarDica, marcarGrafico, htmlDica } from "../ui/ajuda.js";
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
@@ -37,7 +38,9 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
       .attr("width", x.bandwidth())
       .attr("y", (d) => y(d[1]))
       .attr("height", (d) => y(0) - y(d[1]))
-      .attr("fill", css("--accent"));
+      .attr("fill", css("--accent"))
+      .call((sel) => ligarDica(sel, (d) => htmlDica({ titulo: String(d[0]), valor: `${formatar(d[1], 0)} hexágonos`, base: `de ${formatar(d3.sum(dados, (e) => e[1]), 0)} hexágonos` })));
+    marcarGrafico(svg.node(), "histograma-qualidade");
     svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d) => x(d[0]) + x.bandwidth() / 2).attr("y", H - 10).attr("text-anchor", "middle").text((d) => d[0]);
     box.replaceChildren(svg.node());
     return;
@@ -73,7 +76,17 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
     .on("click", (e, b) => {
       e.stopPropagation();
       aoClicarBarra([[b.x0, b === ultimoBin ? null : b.x1]]);
-    });
+    })
+    .call((sel) =>
+      ligarDica(sel, (b) =>
+        htmlDica({
+          titulo: b === ultimoBin ? `${formatar(b.x0, 2)} ou mais (p99 ou mais)` : `${formatar(b.x0, 2)} a ${formatar(b.x1, 2)}`,
+          valor: `${formatar(b.length, 0)} hexágonos`,
+          base: `de ${formatar(vs.length, 0)} hexágonos`,
+        })
+      )
+    );
+  marcarGrafico(svg.node(), "histograma-qualidade");
   svg.on("click", () => aoClicarBarra([]));
   svg
     .append("g")
@@ -126,7 +139,13 @@ export function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
     .attr("fill", css("--accent"))
     .attr("opacity", 0.6)
     .style("cursor", "pointer")
-    .on("click", (_e, d) => aoSelecionar(d.l.h3));
+    .on("click", (_e, d) => aoSelecionar(d.l.h3))
+    .call((sel) =>
+      ligarDica(sel, (d) =>
+        htmlDica({ titulo: `${d.l.municipioNome ?? "Hexágono"} · ${d.l.h3.slice(-8)}`, valor: `déficit ${formatar(d.x, 0)}`, base: `incerteza (máx − mín) ÷ valor: ${formatar(d.y, 2)} · ${formatar(pontos.length, 0)} hexágonos no gráfico` })
+      )
+    );
+  marcarGrafico(svg.node(), "dispersao");
   svg.append("text").attr("class", "quadrante-contagem").attr("x", W - m.r - 4).attr("y", m.t + 12).attr("text-anchor", "end").text(`${noQuadrante} no quadrante`);
   box.replaceChildren(svg.node());
 }
@@ -134,6 +153,7 @@ export function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
 export function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const categorias = ["ok", "ressalva", "sigilo", "sem_dado"];
+  const NOME_CAT = { ok: "sem ressalva", ressalva: "com ressalva", sigilo: "em sigilo", sem_dado: "sem dado" };
   const cores = { ok: css("--ok"), ressalva: css("--warn"), sigilo: css("--muted"), sem_dado: css("--line") };
   const dados = manifesto.periodos.map((p) => {
     const somas = { ok: 0, ressalva: 0, sigilo: 0, sem_dado: 0 };
@@ -174,11 +194,12 @@ export function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
         .attr("y", y(acum + d.fracoes[i]))
         .attr("height", Math.max(0, altura))
         .attr("fill", cores[cat])
-        .append("title")
-        .text(`${cat}: ${formatar(d.fracoes[i] * 100, 1)}%`);
+        .datum({ lab: d.lab, cat, fracao: d.fracoes[i] })
+        .call((sel) => ligarDica(sel, (e) => htmlDica({ titulo: e.lab, valor: `${NOME_CAT[e.cat]}: ${formatar(e.fracao * 100, 1)}%`, base: "% dos domicílios dos hexágonos" })));
       acum += d.fracoes[i];
     });
   }
+  marcarGrafico(svg.node(), "composicao");
   box.replaceChildren(svg.node());
 }
 
@@ -187,7 +208,7 @@ export function renderizarEstoque(box, manifesto, linhasArr) {
   const st = manifesto.periodos.map((p) => {
     const vs = linhasArr.map((l) => l.qualidade[p.id]?.gEstoque).filter((v) => v != null).sort(d3.ascending);
     const q = (f) => d3.quantileSorted(vs, f);
-    return { id: p.id, lab: p.rotulo, critico: p.marcas?.includes("fonte_estoque_diferente"), q10: q(0.1), q25: q(0.25), q50: q(0.5), q75: q(0.75), q90: q(0.9) };
+    return { id: p.id, lab: p.rotulo, n: vs.length, critico: p.marcas?.includes("fonte_estoque_diferente"), q10: q(0.1), q25: q(0.25), q50: q(0.5), q75: q(0.75), q90: q(0.9) };
   });
   const W = Math.max(260, box.clientWidth || 300);
   const H = 122;
@@ -202,5 +223,11 @@ export function renderizarEstoque(box, manifesto, linhasArr) {
   const g = svg.append("g").selectAll("g").data(st).join("g");
   g.filter((s) => s.q10 != null).append("line").attr("x1", (s) => x(s.id) + x.bandwidth() / 2).attr("x2", (s) => x(s.id) + x.bandwidth() / 2).attr("y1", (s) => y(s.q10)).attr("y2", (s) => y(s.q90)).attr("stroke", col);
   g.filter((s) => s.q25 != null).append("rect").attr("x", (s) => x(s.id)).attr("width", x.bandwidth()).attr("y", (s) => y(s.q75)).attr("height", (s) => y(s.q25) - y(s.q75)).attr("fill", css("--surface")).attr("stroke", col).attr("rx", 3);
+  ligarDica(g, (s) =>
+    s.q50 == null
+      ? htmlDica({ titulo: s.lab, valor: "sem dado" })
+      : htmlDica({ titulo: s.lab, valor: `mediana ${formatar(s.q50, 2)} × o estoque de 2022`, base: `p25–p75: ${formatar(s.q25, 2)} a ${formatar(s.q75, 2)} · ${formatar(s.n, 0)} hexágonos` })
+  );
+  marcarGrafico(svg.node(), "estoque");
   box.replaceChildren(svg.node());
 }
