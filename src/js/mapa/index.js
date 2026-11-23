@@ -257,7 +257,15 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     return [...rgb(rampa[Math.min(idx, rampa.length - 1)]), alfa];
   }
 
+  // Acréscimo C: hexágonos fora do quadrante escolhido no gráfico Déficit ×
+  // incerteza ficam apagados (null = sem filtro).
+  let filtroH3 = null;
   function corHex(l, periodo, estado, obterValor, tipoMedida, contexto) {
+    const cor = corHexBase(l, periodo, estado, obterValor, tipoMedida, contexto);
+    if (filtroH3 && !filtroH3.has(l.h3)) cor[3] = Math.min(cor[3], alfasPara(estado).apagado);
+    return cor;
+  }
+  function corHexBase(l, periodo, estado, obterValor, tipoMedida, contexto) {
     const v = obterValor(l, periodo);
     const qualidade = estado.tema === "qualidade";
     if (l.dom[periodo] == null && !qualidade) return [...rgb(css("--muted")), 110];
@@ -342,7 +350,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         updateTriggers: {
           getFillColor: [
             periodo, estado.tema, estado.medida, estado.componente, estado.medida_qualidade,
-            JSON.stringify(estado.faixa_hist), tipoMedida, estado.relativo_modo, estado.opacidade, faixaEscala.join(","),
+            JSON.stringify(estado.faixa_hist), tipoMedida, estado.relativo_modo, estado.opacidade, faixaEscala.join(","), filtroH3 ? filtroH3.size + ":" + JSON.stringify(estado.quadrante) : "",
           ],
         },
         extruded: false,
@@ -682,7 +690,8 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     definirModoBase(modo);
   }
 
-  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
+  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null) {
+    filtroH3 = filtro;
     computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
     instancias.a.overlay.setProps({ layers: camadasPara(estado.periodo, estado, obterValor, "a", tipoMedida) });
 

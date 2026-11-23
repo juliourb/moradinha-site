@@ -13057,10 +13057,12 @@ function estadoInicial(manifesto) {
     periodo: periodoPadrao,
     selecionado: null,
     faixa_hist: [],
+    quadrante: null,
     camadas,
     ...salvo,
     // Acréscimo B: o mapa de base abre sempre claro (não persiste).
     mapa_base: "claro",
+    quadrante: null,
     comparar: null
   };
 }
@@ -13074,7 +13076,7 @@ function lerLocalStorage() {
 }
 function salvarLocalStorage(estado) {
   try {
-    const { selecionado, faixa_hist, comparar, mapa_base, mapa_base_cinza, ...persistido } = estado;
+    const { selecionado, faixa_hist, comparar, mapa_base, mapa_base_cinza, quadrante, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
   }
@@ -13740,6 +13742,56 @@ function medidaConstante(linhasArr, periodo, medidaId, componente, apMap) {
     }
   }
   return visto;
+}
+var NOME_QUADRANTE = Object.freeze({
+  aa: "muito d\xE9ficit e muita incerteza",
+  ab: "muito d\xE9ficit e pouca incerteza",
+  ba: "pouco d\xE9ficit e muita incerteza",
+  bb: "pouco d\xE9ficit e pouca incerteza"
+});
+var CORTE_CV_PROTOCOLO = 30;
+function assimetria(vs9) {
+  const n3 = vs9.length;
+  if (n3 < 3) return 0;
+  const media = vs9.reduce((a5, b10) => a5 + b10, 0) / n3;
+  let m22 = 0;
+  let m32 = 0;
+  for (const v4 of vs9) {
+    const d3 = v4 - media;
+    m22 += d3 * d3;
+    m32 += d3 * d3 * d3;
+  }
+  m22 /= n3;
+  m32 /= n3;
+  return m22 > 0 ? m32 / m22 ** 1.5 : 0;
+}
+function mediana(vs9) {
+  const s4 = [...vs9].sort((a5, b10) => a5 - b10);
+  const n3 = s4.length;
+  if (!n3) return null;
+  return n3 % 2 ? s4[(n3 - 1) / 2] : (s4[n3 / 2 - 1] + s4[n3 / 2]) / 2;
+}
+function dadosDeficitIncerteza(linhasArr, deficitDe, incertezaDe, medidaEhCv) {
+  const comDeficit = [];
+  for (const l3 of linhasArr) {
+    const x5 = deficitDe(l3);
+    if (x5 != null && x5 >= 1) comDeficit.push({ l: l3, x: x5, y: incertezaDe(l3) });
+  }
+  const corteX = mediana(comDeficit.map((d3) => d3.x));
+  const pontos = comDeficit.filter((d3) => d3.y != null && Number.isFinite(d3.y));
+  if (!pontos.length) return null;
+  const corteY = medidaEhCv ? CORTE_CV_PROTOCOLO : mediana(pontos.map((d3) => d3.y));
+  const quadrantes = { aa: { n: 0, deficit: 0 }, ab: { n: 0, deficit: 0 }, ba: { n: 0, deficit: 0 }, bb: { n: 0, deficit: 0 } };
+  let soma = 0;
+  for (const d3 of pontos) {
+    d3.quadrante = (d3.x > corteX ? "a" : "b") + (d3.y > corteY ? "a" : "b");
+    quadrantes[d3.quadrante].n += 1;
+    quadrantes[d3.quadrante].deficit += d3.x;
+    soma += d3.x;
+  }
+  for (const q4 of Object.values(quadrantes)) q4.parteDeficit = soma > 0 ? q4.deficit / soma : 0;
+  const log4 = assimetria(pontos.map((d3) => d3.x)) > 1 && Math.min(...pontos.map((d3) => d3.x)) >= 1;
+  return { pontos, corteX, corteY, tipoCorteY: medidaEhCv ? "cv" : "mediana", quadrantes, log: log4, somaDeficit: soma };
 }
 
 // node_modules/maplibre-gl/dist/maplibre-gl.mjs
@@ -40370,13 +40422,13 @@ var dist_default = new ProbeLog({ id: "@probe.gl/log" });
 var VERSION2 = true ? "4.5.5" : "latest";
 var version = VERSION2[0] >= "0" && VERSION2[0] <= "9" ? `v${VERSION2}` : "";
 function createLog() {
-  const log3 = new ProbeLog({ id: "loaders.gl" });
+  const log4 = new ProbeLog({ id: "loaders.gl" });
   globalThis.loaders ||= {};
-  globalThis.loaders.log = log3;
+  globalThis.loaders.log = log4;
   globalThis.loaders.version = version;
   globalThis.probe ||= {};
-  globalThis.probe.loaders = log3;
-  return log3;
+  globalThis.probe.loaders = log4;
+  return log4;
 }
 var log = createLog();
 
@@ -42976,50 +43028,50 @@ var LOG_LEVEL_MINOR_UPDATE = 2;
 var LOG_LEVEL_UPDATE_DETAIL = 3;
 var LOG_LEVEL_INFO = 4;
 var LOG_LEVEL_DRAW = 2;
-var getLoggers = (log3) => ({
+var getLoggers = (log4) => ({
   /* Layer events */
   "layer.changeFlag": (layer, key, flags) => {
-    log3.log(LOG_LEVEL_UPDATE_DETAIL, `${layer.id} ${key}: `, flags[key])();
+    log4.log(LOG_LEVEL_UPDATE_DETAIL, `${layer.id} ${key}: `, flags[key])();
   },
   "layer.initialize": (layer) => {
-    log3.log(LOG_LEVEL_MAJOR_UPDATE, `Initializing ${layer}`)();
+    log4.log(LOG_LEVEL_MAJOR_UPDATE, `Initializing ${layer}`)();
   },
   "layer.update": (layer, needsUpdate) => {
     if (needsUpdate) {
       const flags = layer.getChangeFlags();
-      log3.log(LOG_LEVEL_MINOR_UPDATE, `Updating ${layer} because: ${Object.keys(flags).filter((key) => flags[key]).join(", ")}`)();
+      log4.log(LOG_LEVEL_MINOR_UPDATE, `Updating ${layer} because: ${Object.keys(flags).filter((key) => flags[key]).join(", ")}`)();
     } else {
-      log3.log(LOG_LEVEL_INFO, `${layer} does not need update`)();
+      log4.log(LOG_LEVEL_INFO, `${layer} does not need update`)();
     }
   },
   "layer.matched": (layer, changed) => {
     if (changed) {
-      log3.log(LOG_LEVEL_INFO, `Matched ${layer}, state transfered`)();
+      log4.log(LOG_LEVEL_INFO, `Matched ${layer}, state transfered`)();
     }
   },
   "layer.finalize": (layer) => {
-    log3.log(LOG_LEVEL_MAJOR_UPDATE, `Finalizing ${layer}`)();
+    log4.log(LOG_LEVEL_MAJOR_UPDATE, `Finalizing ${layer}`)();
   },
   /* CompositeLayer events */
   "compositeLayer.renderLayers": (layer, updated, subLayers) => {
     if (updated) {
-      log3.log(LOG_LEVEL_MINOR_UPDATE, `Composite layer rendered new subLayers ${layer}`, subLayers)();
+      log4.log(LOG_LEVEL_MINOR_UPDATE, `Composite layer rendered new subLayers ${layer}`, subLayers)();
     } else {
-      log3.log(LOG_LEVEL_INFO, `Composite layer reused subLayers ${layer}`, subLayers)();
+      log4.log(LOG_LEVEL_INFO, `Composite layer reused subLayers ${layer}`, subLayers)();
     }
   },
   /* LayerManager events */
   "layerManager.setLayers": (layerManager, updated, layers) => {
     if (updated) {
-      log3.log(LOG_LEVEL_MINOR_UPDATE, `Updating ${layers.length} deck layers`)();
+      log4.log(LOG_LEVEL_MINOR_UPDATE, `Updating ${layers.length} deck layers`)();
     }
   },
   "layerManager.activateViewport": (layerManager, viewport) => {
-    log3.log(LOG_LEVEL_UPDATE_DETAIL, "Viewport changed", viewport)();
+    log4.log(LOG_LEVEL_UPDATE_DETAIL, "Viewport changed", viewport)();
   },
   /* AttributeManager events */
   "attributeManager.invalidate": (attributeManager, trigger, attributeNames) => {
-    log3.log(LOG_LEVEL_MAJOR_UPDATE, attributeNames ? `invalidated attributes ${attributeNames} (${trigger}) for ${attributeManager.id}` : `invalidated all attributes for ${attributeManager.id}`)();
+    log4.log(LOG_LEVEL_MAJOR_UPDATE, attributeNames ? `invalidated attributes ${attributeNames} (${trigger}) for ${attributeManager.id}` : `invalidated all attributes for ${attributeManager.id}`)();
   },
   "attributeManager.updateStart": (attributeManager) => {
     logState.attributeUpdateMessages.length = 0;
@@ -43027,11 +43079,11 @@ var getLoggers = (log3) => ({
   },
   "attributeManager.updateEnd": (attributeManager, numInstances) => {
     const timeMs = Math.round(Date.now() - logState.attributeManagerUpdateStart);
-    log3.groupCollapsed(LOG_LEVEL_MINOR_UPDATE, `Updated attributes for ${numInstances} instances in ${attributeManager.id} in ${timeMs}ms`)();
+    log4.groupCollapsed(LOG_LEVEL_MINOR_UPDATE, `Updated attributes for ${numInstances} instances in ${attributeManager.id} in ${timeMs}ms`)();
     for (const updateMessage of logState.attributeUpdateMessages) {
-      log3.log(LOG_LEVEL_UPDATE_DETAIL, updateMessage)();
+      log4.log(LOG_LEVEL_UPDATE_DETAIL, updateMessage)();
     }
-    log3.groupEnd(LOG_LEVEL_MINOR_UPDATE)();
+    log4.groupEnd(LOG_LEVEL_MINOR_UPDATE)();
   },
   /* Attribute events */
   "attribute.updateStart": (attribute) => {
@@ -43053,7 +43105,7 @@ var getLoggers = (log3) => ({
       const { totalCount, visibleCount, compositeCount, pickableCount } = status;
       const primitiveCount = totalCount - compositeCount;
       const hiddenCount = primitiveCount - visibleCount;
-      log3.log(LOG_LEVEL_DRAW, `RENDER #${deckRenderer.renderCount}   ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason}   (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`)();
+      log4.log(LOG_LEVEL_DRAW, `RENDER #${deckRenderer.renderCount}   ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason}   (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`)();
       if (stats) {
         stats.get("Redraw Layers").add(visibleCount);
       }
@@ -43340,13 +43392,13 @@ function initializeShaderModule(module) {
   }
   module.defaultUniforms = { ...module.defaultUniforms, ...defaultProps17 };
 }
-function checkShaderModuleDeprecations(shaderModule, shaderSource, log3) {
+function checkShaderModuleDeprecations(shaderModule, shaderSource, log4) {
   shaderModule.deprecations?.forEach((def) => {
     if (def.regex?.test(shaderSource)) {
       if (def.deprecated) {
-        log3.deprecated(def.old, def.new)();
+        log4.deprecated(def.old, def.new)();
       } else {
-        log3.removed(def.old, def.new)();
+        log4.removed(def.old, def.new)();
       }
     }
   });
@@ -43627,7 +43679,7 @@ function assembleShaderWGSL(platformInfo, options) {
     // defines = {},
     hookFunctions = [],
     inject: inject2 = {},
-    log: log3
+    log: log4
   } = options;
   assert4(typeof source3 === "string", "shader source must be a string");
   const coreSource = source3;
@@ -43657,8 +43709,8 @@ function assembleShaderWGSL(platformInfo, options) {
   }
   const modulesToInject = modules;
   for (const module of modulesToInject) {
-    if (log3) {
-      checkShaderModuleDeprecations(module, coreSource, log3);
+    if (log4) {
+      checkShaderModuleDeprecations(module, coreSource, log4);
     }
     const moduleSource = getShaderModuleSource(module, "wgsl");
     assembledSource += moduleSource;
@@ -43684,7 +43736,7 @@ function assembleShaderWGSL(platformInfo, options) {
   return assembledSource;
 }
 function assembleShaderGLSL(platformInfo, options) {
-  const { id: id3, source: source3, stage, language = "glsl", modules, defines: defines2 = {}, hookFunctions = [], inject: inject2 = {}, prologue = true, log: log3 } = options;
+  const { id: id3, source: source3, stage, language = "glsl", modules, defines: defines2 = {}, hookFunctions = [], inject: inject2 = {}, prologue = true, log: log4 } = options;
   assert4(typeof source3 === "string", "shader source must be a string");
   const sourceVersion = language === "glsl" ? getShaderInfo(source3).version : -1;
   const targetVersion = platformInfo.shaderLanguageVersion;
@@ -43742,8 +43794,8 @@ ${getApplicationDefines(allDefines)}
     }
   }
   for (const module of modules) {
-    if (log3) {
-      checkShaderModuleDeprecations(module, coreSource, log3);
+    if (log4) {
+      checkShaderModuleDeprecations(module, coreSource, log4);
     }
     const moduleSource = getShaderModuleSource(module, stage);
     assembledSource += moduleSource;
@@ -45430,14 +45482,14 @@ var TextureView = class _TextureView extends Resource {
 function formatCompilerLog(shaderLog, source3, options) {
   let formattedLog = "";
   const lines = source3.split(/\r?\n/);
-  const log3 = shaderLog.slice().sort((a5, b10) => a5.lineNum - b10.lineNum);
+  const log4 = shaderLog.slice().sort((a5, b10) => a5.lineNum - b10.lineNum);
   switch (options?.showSourceCode || "no") {
     case "all":
       let currentMessage = 0;
       for (let lineNum = 1; lineNum <= lines.length; lineNum++) {
         formattedLog += getNumberedLine(lines[lineNum - 1], lineNum, options);
-        while (log3.length > currentMessage && log3[currentMessage].lineNum === lineNum) {
-          const message2 = log3[currentMessage++];
+        while (log4.length > currentMessage && log4[currentMessage].lineNum === lineNum) {
+          const message2 = log4[currentMessage++];
           formattedLog += formatCompilerMessage(message2, lines, message2.lineNum, {
             ...options,
             inlineSource: false
@@ -99065,9 +99117,6 @@ function quantileSorted(values, p4, valueof = number) {
   var n3, i3 = (n3 - 1) * p4, i0 = Math.floor(i3), value0 = +valueof(values[i0], i0, values), value1 = +valueof(values[i0 + 1], i0 + 1, values);
   return value0 + (value1 - value0) * (i3 - i0);
 }
-function median(values, valueof) {
-  return quantile(values, 0.5, valueof);
-}
 function range(start2, stop, step) {
   start2 = +start2, stop = +stop, step = (n3 = arguments.length) < 2 ? (stop = start2, start2 = 0, 1) : n3 < 3 ? 1 : +step;
   var i3 = -1, n3 = Math.max(0, Math.ceil((stop - start2) / step)) | 0, range2 = new Array(n3);
@@ -102368,6 +102417,128 @@ function linear2() {
   initRange.apply(scale5, arguments);
   return linearish(scale5);
 }
+function nice2(domain, interval) {
+  domain = domain.slice();
+  var i0 = 0, i1 = domain.length - 1, x0 = domain[i0], x1 = domain[i1], t4;
+  if (x1 < x0) {
+    t4 = i0, i0 = i1, i1 = t4;
+    t4 = x0, x0 = x1, x1 = t4;
+  }
+  domain[i0] = interval.floor(x0);
+  domain[i1] = interval.ceil(x1);
+  return domain;
+}
+function transformLog(x5) {
+  return Math.log(x5);
+}
+function transformExp(x5) {
+  return Math.exp(x5);
+}
+function transformLogn(x5) {
+  return -Math.log(-x5);
+}
+function transformExpn(x5) {
+  return -Math.exp(-x5);
+}
+function pow10(x5) {
+  return isFinite(x5) ? +("1e" + x5) : x5 < 0 ? 0 : x5;
+}
+function powp(base) {
+  return base === 10 ? pow10 : base === Math.E ? Math.exp : (x5) => Math.pow(base, x5);
+}
+function logp(base) {
+  return base === Math.E ? Math.log : base === 10 && Math.log10 || base === 2 && Math.log2 || (base = Math.log(base), (x5) => Math.log(x5) / base);
+}
+function reflect(f4) {
+  return (x5, k5) => -f4(-x5, k5);
+}
+function loggish(transform2) {
+  const scale5 = transform2(transformLog, transformExp);
+  const domain = scale5.domain;
+  let base = 10;
+  let logs;
+  let pows;
+  function rescale() {
+    logs = logp(base), pows = powp(base);
+    if (domain()[0] < 0) {
+      logs = reflect(logs), pows = reflect(pows);
+      transform2(transformLogn, transformExpn);
+    } else {
+      transform2(transformLog, transformExp);
+    }
+    return scale5;
+  }
+  scale5.base = function(_4) {
+    return arguments.length ? (base = +_4, rescale()) : base;
+  };
+  scale5.domain = function(_4) {
+    return arguments.length ? (domain(_4), rescale()) : domain();
+  };
+  scale5.ticks = (count3) => {
+    const d3 = domain();
+    let u3 = d3[0];
+    let v4 = d3[d3.length - 1];
+    const r3 = v4 < u3;
+    if (r3) [u3, v4] = [v4, u3];
+    let i3 = logs(u3);
+    let j4 = logs(v4);
+    let k5;
+    let t4;
+    const n3 = count3 == null ? 10 : +count3;
+    let z4 = [];
+    if (!(base % 1) && j4 - i3 < n3) {
+      i3 = Math.floor(i3), j4 = Math.ceil(j4);
+      if (u3 > 0) for (; i3 <= j4; ++i3) {
+        for (k5 = 1; k5 < base; ++k5) {
+          t4 = i3 < 0 ? k5 / pows(-i3) : k5 * pows(i3);
+          if (t4 < u3) continue;
+          if (t4 > v4) break;
+          z4.push(t4);
+        }
+      }
+      else for (; i3 <= j4; ++i3) {
+        for (k5 = base - 1; k5 >= 1; --k5) {
+          t4 = i3 > 0 ? k5 / pows(-i3) : k5 * pows(i3);
+          if (t4 < u3) continue;
+          if (t4 > v4) break;
+          z4.push(t4);
+        }
+      }
+      if (z4.length * 2 < n3) z4 = ticks(u3, v4, n3);
+    } else {
+      z4 = ticks(i3, j4, Math.min(j4 - i3, n3)).map(pows);
+    }
+    return r3 ? z4.reverse() : z4;
+  };
+  scale5.tickFormat = (count3, specifier) => {
+    if (count3 == null) count3 = 10;
+    if (specifier == null) specifier = base === 10 ? "s" : ",";
+    if (typeof specifier !== "function") {
+      if (!(base % 1) && (specifier = formatSpecifier(specifier)).precision == null) specifier.trim = true;
+      specifier = format(specifier);
+    }
+    if (count3 === Infinity) return specifier;
+    const k5 = Math.max(1, base * count3 / scale5.ticks().length);
+    return (d3) => {
+      let i3 = d3 / pows(Math.round(logs(d3)));
+      if (i3 * base < base - 0.5) i3 *= base;
+      return i3 <= k5 ? specifier(d3) : "";
+    };
+  };
+  scale5.nice = () => {
+    return domain(nice2(domain(), {
+      floor: (x5) => pows(Math.floor(logs(x5))),
+      ceil: (x5) => pows(Math.ceil(logs(x5)))
+    }));
+  };
+  return scale5;
+}
+function log3() {
+  const scale5 = loggish(transformer$2()).domain([1, 10]);
+  scale5.copy = () => copy$1(scale5, log3()).base(scale5.base());
+  initRange.apply(scale5, arguments);
+  return scale5;
+}
 
 // node_modules/d3-shape/dist/d3-shape.mjs
 function constant4(x5) {
@@ -103595,7 +103766,13 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     if (idx == null || !rampa.length) return [...rgb3(css("--line")), 70];
     return [...rgb3(rampa[Math.min(idx, rampa.length - 1)]), alfa];
   }
+  let filtroH3 = null;
   function corHex(l3, periodo, estado, obterValor, tipoMedida, contexto) {
+    const cor = corHexBase(l3, periodo, estado, obterValor, tipoMedida, contexto);
+    if (filtroH3 && !filtroH3.has(l3.h3)) cor[3] = Math.min(cor[3], alfasPara(estado).apagado);
+    return cor;
+  }
+  function corHexBase(l3, periodo, estado, obterValor, tipoMedida, contexto) {
     const v4 = obterValor(l3, periodo);
     const qualidade = estado.tema === "qualidade";
     if (l3.dom[periodo] == null && !qualidade) return [...rgb3(css("--muted")), 110];
@@ -103681,7 +103858,8 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
             tipoMedida,
             estado.relativo_modo,
             estado.opacidade,
-            faixaEscala.join(",")
+            faixaEscala.join(","),
+            filtroH3 ? filtroH3.size + ":" + JSON.stringify(estado.quadrante) : ""
           ]
         },
         extruded: false,
@@ -103989,7 +104167,8 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     elementos.mapboxEl?.classList.toggle("cinza", modo === "cinza");
     definirModoBase(modo);
   }
-  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
+  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null) {
+    filtroH3 = filtro;
     computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
     instancias.a.overlay.setProps({ layers: camadasPara(estado.periodo, estado, obterValor, "a", tipoMedida) });
     const ligada = !!estado.comparar;
@@ -104917,33 +105096,88 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
   svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text("p99 ou mais \u2192");
   box.replaceChildren(svg.node());
 }
-function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
+function quadranteAtivo(estado) {
+  const q4 = estado.quadrante;
+  if (!q4 || q4.componente !== estado.componente || q4.periodo !== estado.periodo || q4.medida_qualidade !== estado.medida_qualidade) return null;
+  return q4.id;
+}
+function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar, aoClicarQuadrante) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
-  const pontos = linhasArr.map((l3) => ({ l: l3, x: valorHex(l3, estado.componente, estado.periodo, "absoluto"), y: incertezaHex(l3, estado.componente, estado.periodo) })).filter((d3) => d3.x != null && d3.x > 0 && d3.y != null);
-  if (!pontos.length) {
+  const ehCv = estado.medida_qualidade === "cv_ap";
+  const dados = dadosDeficitIncerteza(
+    linhasArr,
+    (l3) => valorHex(l3, estado.componente, estado.periodo, "absoluto"),
+    (l3) => ehCv ? valorMedidaQualidade(l3, estado.periodo, "cv_ap", estado.componente, apMap) : incertezaHex(l3, estado.componente, estado.periodo),
+    ehCv
+  );
+  if (!dados) {
     box.innerHTML = `<p class="empty">Sem faixa para esta combina\xE7\xE3o (total ou precariedade provis\xF3ria n\xE3o t\xEAm incerteza).</p>`;
     return;
   }
-  const medX = median(pontos, (d3) => d3.x);
-  const medY = median(pontos, (d3) => d3.y);
-  const noQuadrante = pontos.filter((d3) => d3.x > medX && d3.y > medY).length;
+  const { pontos, corteX, corteY, quadrantes, log: log4 } = dados;
+  const nomeY = ehCv ? "CV da AP (%)" : "incerteza";
+  const decY = ehCv ? 0 : 2;
+  const qAtivo = quadranteAtivo(estado);
+  const halo = (sel) => sel.attr("stroke", css4("--surface")).attr("stroke-width", 3).attr("paint-order", "stroke").attr("stroke-linejoin", "round");
   const W4 = Math.max(260, box.clientWidth || 300);
-  const H4 = 134;
-  const m4 = { l: 40, r: 8, t: 8, b: 22 };
-  const x5 = linear2().domain(extent(pontos, (d3) => d3.x)).nice().range([m4.l, W4 - m4.r]);
-  const y5 = linear2().domain(extent(pontos, (d3) => d3.y)).nice().range([H4 - m4.b, m4.t]);
-  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Dispers\xE3o d\xE9ficit por incerteza");
-  svg.append("rect").attr("x", x5(medX)).attr("y", m4.t).attr("width", Math.max(0, W4 - m4.r - x5(medX))).attr("height", Math.max(0, y5(medY) - m4.t)).attr("fill", css4("--warn-soft")).attr("opacity", 0.5);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 1)));
-  svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.6).attr("fill", css4("--accent")).attr("opacity", 0.6).style("cursor", "pointer").on("click", (_e4, d3) => aoSelecionar(d3.l.h3)).call(
-    (sel) => ligarDica(
-      sel,
-      (d3) => htmlDica({ titulo: `${d3.l.municipioNome ?? "Hex\xE1gono"} \xB7 ${d3.l.h3.slice(-8)}`, valor: `d\xE9ficit ${formatar(d3.x, 0)}`, base: `incerteza (m\xE1x \u2212 m\xEDn) \xF7 valor: ${formatar(d3.y, 2)} \xB7 ${formatar(pontos.length, 0)} hex\xE1gonos no gr\xE1fico` })
-    )
-  );
+  const H4 = 176;
+  const [y0, y1] = extent([...pontos.map((d3) => d3.y), corteY]);
+  const folgaY = (y1 - y0 || Math.abs(y1) || 1) * 0.12;
+  const dominioY = [y0 >= 0 ? Math.max(0, y0 - folgaY) : y0 - folgaY, y1 + folgaY];
+  const quaseConstante = Math.abs(corteY) > 0 && (y1 - y0) / Math.abs(corteY) < 0.01;
+  const passoY = tickStep(...dominioY, 4);
+  const casasY = quaseConstante ? decY : Math.max(0, Math.min(3, -Math.floor(Math.log10(passoY))));
+  const marcasY = quaseConstante ? [corteY] : ticks(...dominioY, 4);
+  const larguraRotulo = Math.max(...marcasY.map((v4) => formatar(v4, casasY).length + (quaseConstante ? 2 : 0)), 3);
+  const m4 = { l: Math.max(36, 10 + 6 * larguraRotulo), r: 10, t: 14, b: 32 };
+  const [x0, x1] = extent(pontos, (d3) => d3.x);
+  const x5 = (log4 ? log3().domain([Math.max(1, x0), Math.max(x1, x0 * 10)]) : linear2().domain([0, x1])).nice().range([m4.l, W4 - m4.r]);
+  const y5 = linear2().domain(dominioY).range([H4 - m4.b, m4.t]);
+  const cx2 = Math.max(m4.l, Math.min(W4 - m4.r, x5(corteX)));
+  const cy2 = Math.max(m4.t, Math.min(H4 - m4.b, y5(corteY)));
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `D\xE9ficit por ${nomeY}, com quatro quadrantes${log4 ? "; eixo do d\xE9ficit em escala log" : ""}`);
+  const rects = [
+    { id: "aa", x: cx2, y: m4.t, w: W4 - m4.r - cx2, h: cy2 - m4.t },
+    { id: "ba", x: m4.l, y: m4.t, w: cx2 - m4.l, h: cy2 - m4.t },
+    { id: "ab", x: cx2, y: cy2, w: W4 - m4.r - cx2, h: H4 - m4.b - cy2 },
+    { id: "bb", x: m4.l, y: cy2, w: cx2 - m4.l, h: H4 - m4.b - cy2 }
+  ];
+  svg.append("g").attr("class", "quadrantes").selectAll("rect").data(rects).join("rect").attr("class", (r3) => `quadrante q-${r3.id}`).attr("data-quadrante", (r3) => r3.id).attr("x", (r3) => r3.x).attr("y", (r3) => r3.y).attr("width", (r3) => Math.max(0, r3.w)).attr("height", (r3) => Math.max(0, r3.h)).attr("fill", (r3) => r3.id === "aa" ? css4("--warn-soft") : "transparent").attr("opacity", (r3) => r3.id === "aa" ? 0.75 : 1).attr("stroke", (r3) => qAtivo === r3.id ? css4("--accent") : r3.id === "aa" ? css4("--warn") : "none").attr("stroke-width", (r3) => qAtivo === r3.id ? 2 : 1).attr("aria-current", (r3) => qAtivo === r3.id ? "true" : null).style("cursor", "pointer").on("click", (e67, r3) => {
+    e67.stopPropagation();
+    aoClicarQuadrante?.(qAtivo === r3.id ? null : r3.id);
+  }).call((sel) => ligarDica(sel, (r3) => htmlDica({
+    titulo: NOME_QUADRANTE[r3.id][0].toUpperCase() + NOME_QUADRANTE[r3.id].slice(1),
+    valor: `${formatar(quadrantes[r3.id].n, 0)} hex\xE1gonos \xB7 ${formatar(100 * quadrantes[r3.id].parteDeficit, 1)}% do d\xE9ficit`,
+    base: qAtivo === r3.id ? "clique para tirar o filtro do mapa" : "clique para mostrar s\xF3 estes hex\xE1gonos no mapa"
+  })));
+  const potencia10 = (v4) => Math.abs(Math.log10(v4) - Math.round(Math.log10(v4))) < 1e-9;
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(4).tickFormat((v4) => log4 && !potencia10(v4) ? "" : formatar(v4, 0)));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).tickValues(marcasY).tickFormat((v4) => (quaseConstante ? "\u2248 " : "") + formatar(v4, casasY)));
+  svg.append("text").attr("class", "rotulo-eixo").attr("x", W4 - m4.r).attr("y", H4 - 3).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text(`d\xE9ficit do hex\xE1gono (domic\xEDlios${log4 ? ", escala log" : ""})`);
+  svg.append("text").attr("class", "rotulo-eixo").attr("x", 2).attr("y", 9).attr("font-size", 9).attr("fill", css4("--muted")).text(nomeY);
+  const linhaCor = css4("--ink");
+  svg.append("line").attr("class", "corte corte-x").attr("x1", cx2).attr("x2", cx2).attr("y1", m4.t).attr("y2", H4 - m4.b).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
+  svg.append("line").attr("class", "corte corte-y").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", cy2).attr("y2", cy2).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
+  svg.append("text").attr("class", "rotulo-corte corte-x").attr("x", cx2).attr("y", m4.t - 3).attr("text-anchor", cx2 > W4 / 2 ? "end" : "start").attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(`mediana do d\xE9ficit: ${formatar(corteX, 1)}`);
+  svg.append("text").attr("class", "rotulo-corte corte-y").attr("x", (m4.l + cx2) / 2).attr("y", cy2 - 3).attr("text-anchor", "middle").attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(ehCv ? `limiar do protocolo: CV de ${CORTE_CV_PROTOCOLO}%` : `mediana da incerteza: ${formatar(corteY, 2)}`);
+  const gp2 = svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.4).attr("fill", css4("--accent")).attr("opacity", (d3) => qAtivo && d3.quadrante !== qAtivo ? 0.15 : 0.6).style("cursor", "pointer").on("click", (e67, d3) => {
+    e67.stopPropagation();
+    aoSelecionar(d3.l.h3);
+  });
+  ligarDica(gp2, (d3) => htmlDica({
+    titulo: `Hex\xE1gono ${d3.l.h3.slice(-8)}${d3.l.municipioNome ? ` \xB7 ${d3.l.municipioNome}` : ""}`,
+    valor: `d\xE9ficit ${formatar(d3.x, 1)} \xB7 ${nomeY} ${formatar(d3.y, decY)}`,
+    base: `quadrante: ${NOME_QUADRANTE[d3.quadrante]}`
+  }));
+  const cantos = { aa: [W4 - m4.r - 3, m4.t + 10, "end"], ba: [m4.l + 3, m4.t + 10, "start"], ab: [W4 - m4.r - 3, H4 - m4.b - 14, "end"], bb: [m4.l + 3, H4 - m4.b - 14, "start"] };
+  for (const [id3, [tx2, ty2, anc]] of Object.entries(cantos)) {
+    const q4 = quadrantes[id3];
+    svg.append("text").attr("class", `quadrante-contagem q-${id3}`).attr("x", tx2).attr("y", ty2).attr("text-anchor", anc).attr("font-size", 9).attr("font-weight", id3 === "aa" ? 700 : 400).attr("fill", id3 === "aa" ? css4("--ink") : css4("--muted")).style("pointer-events", "none").call(halo).text(`${formatar(q4.n, 0)} hex. \xB7 ${formatar(100 * q4.parteDeficit, 0)}% do d\xE9ficit`);
+  }
+  if (quaseConstante) {
+    svg.append("text").attr("class", "nota-constante").attr("x", m4.l + 3).attr("y", Math.min(cy2 + 12, H4 - m4.b - 26)).attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(`${nomeY} quase n\xE3o varia entre hex\xE1gonos`);
+  }
   marcarGrafico(svg.node(), "dispersao");
-  svg.append("text").attr("class", "quadrante-contagem").attr("x", W4 - m4.r - 4).attr("y", m4.t + 12).attr("text-anchor", "end").text(`${noQuadrante} no quadrante`);
   box.replaceChildren(svg.node());
 }
 function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
@@ -105107,14 +105341,35 @@ async function iniciarExplorador() {
       renderizarCaixas($4("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($4("f1-qhist"), estado, linhasArr, ap2, (faixa) => loja.definir({ faixa_hist: faixa }));
-      renderizarDispersao($4("f1-disp"), estado, linhasArr, (h32) => loja.definir({ selecionado: h32 }));
+      renderizarDispersao($4("f1-disp"), estado, linhasArr, ap2, (h32) => loja.definir({ selecionado: h32 }), (id3) => {
+        const e67 = loja.obter();
+        loja.definir({ quadrante: id3 ? { id: id3, componente: e67.componente, periodo: e67.periodo, medida_qualidade: e67.medida_qualidade } : null });
+      });
       renderizarComposicao($4("f1-comp"), manifesto, linhasArr, ap2, estado);
       renderizarEstoque($4("f1-estoque"), manifesto, linhasArr);
     }
   }
+  function filtroQuadrante(estado) {
+    const q4 = estado.tema === "qualidade" ? quadranteAtivo(estado) : null;
+    if (!q4) return null;
+    const ehCv = estado.medida_qualidade === "cv_ap";
+    const dados2 = dadosDeficitIncerteza(
+      linhasArr,
+      (l3) => valorHex(l3, estado.componente, estado.periodo, "absoluto"),
+      (l3) => ehCv ? valorMedidaQualidade(l3, estado.periodo, "cv_ap", estado.componente, ap2) : incertezaHex(l3, estado.componente, estado.periodo),
+      ehCv
+    );
+    return dados2 ? new Set(dados2.pontos.filter((d3) => d3.quadrante === q4).map((d3) => d3.l.h3)) : null;
+  }
   function renderizarRecorteAtivo(estado) {
     const el2 = $4("f1-recorte-ativo");
     const faixa = estado.faixa_hist?.[0];
+    const q4 = estado.tema === "qualidade" ? quadranteAtivo(estado) : null;
+    if (q4) {
+      el2.textContent = `Filtro ativo: hex\xE1gonos com ${NOME_QUADRANTE[q4]} (gr\xE1fico D\xE9ficit \xD7 incerteza). Clique de novo no quadrante ou em "Limpar" para remover.`;
+      el2.removeAttribute("hidden");
+      return;
+    }
     if (!faixa) {
       el2.setAttribute("hidden", "");
       return;
@@ -105142,7 +105397,7 @@ async function iniciarExplorador() {
     renderizarAvisoMapa(estado);
     renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
-    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
+    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo, filtroQuadrante(estado));
     mapa.renderizarCamadasUI(
       estado,
       (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }),
@@ -105155,7 +105410,7 @@ async function iniciarExplorador() {
     salvarLocalStorage(estado);
   }
   $4("f1-hist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
-  $4("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
+  $4("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [], quadrante: null });
   const dock = $4("f1-dock");
   const dockToggle = $4("f1-dock-toggle");
   const corpoDeficit = $4("f1-dock-body-deficit");
@@ -106533,7 +106788,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "ab97ee3553bb9fd8aa4b2553e9f81e5aa892782e");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "7fc5432fc6a346a2f38163ce40b8072a0d317dc8");
   renderizarInterna($7("met-interna"), modelo);
 }
 

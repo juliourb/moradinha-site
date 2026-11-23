@@ -89,3 +89,73 @@ test.describe("B: mapa de base claro por padrão nos dois temas", () => {
     await expect(page.locator("#f1-mapa-claro")).toBeChecked();
   });
 });
+
+async function abrirDispersao(page, componente = "onus") {
+  await abrirResultados(page);
+  await page.locator('#f1-seg-tema button[data-v="qualidade"]').click();
+  await page.locator(`#f1-seg-comp button[data-v="${componente}"]`).click();
+  await page.waitForTimeout(500);
+  const svg = page.locator('#f1-disp svg');
+  await svg.scrollIntoViewIfNeeded();
+  return svg;
+}
+
+test.describe("C: Déficit × incerteza com quadrantes", () => {
+  test("linhas de corte rotuladas, quatro quadrantes com nº e parte do déficit, destaque", async ({ page }) => {
+    const svg = await abrirDispersao(page);
+    await expect(svg.locator("line.corte-x")).toHaveCount(1);
+    await expect(svg.locator("line.corte-y")).toHaveCount(1);
+    await expect(svg.locator("text.rotulo-corte.corte-x")).toHaveText(/mediana do déficit/);
+    await expect(svg.locator("text.rotulo-corte.corte-y")).toHaveText(/mediana da incerteza|CV de 30%/);
+    const textos = await svg.locator("text.quadrante-contagem").allTextContents();
+    expect(textos).toHaveLength(4);
+    const nPontos = await svg.locator("circle").count();
+    const soma = textos.reduce((a, t) => a + Number(t.match(/^([\d.]+) hex/)[1].replace(/\./g, "")), 0);
+    expect(soma).toBe(nPontos);
+    // destaque do quadrante "muito déficit e muita incerteza"
+    await expect(svg.locator("text.quadrante-contagem.q-aa")).toHaveAttribute("font-weight", "700");
+    await expect(svg.locator("rect.quadrante.q-aa")).not.toHaveAttribute("fill", "transparent");
+    // eixo do déficit declara a escala log quando ela é usada
+    const rotulo = await svg.locator("text.rotulo-eixo").first().textContent();
+    expect(rotulo).toMatch(/déficit do hexágono/);
+  });
+
+  test("CV da AP: corte no limiar do protocolo (30%)", async ({ page }) => {
+    const svg = await abrirDispersao(page);
+    await page.selectOption("#f1-sel-medida-qualidade", "cv_ap");
+    await page.waitForTimeout(400);
+    await expect(page.locator("#f1-disp svg text.rotulo-corte.corte-y")).toHaveText(/CV de 30%/);
+    void svg;
+  });
+
+  test("dica do ponto com hexágono, déficit, incerteza e quadrante", async ({ page }) => {
+    const svg = await abrirDispersao(page);
+    await svg.locator("circle").first().hover({ force: true });
+    const caixa = page.locator(".dica-flutuante");
+    await expect(caixa).toBeVisible();
+    await expect(caixa).toContainText("Hexágono");
+    await expect(caixa).toContainText("déficit");
+    await expect(caixa).toContainText("incerteza");
+    await expect(caixa).toContainText("quadrante:");
+  });
+
+  test("clicar num quadrante filtra o mapa; clicar de novo limpa", async ({ page }) => {
+    const svg = await abrirDispersao(page);
+    const q = svg.locator("rect.quadrante.q-aa");
+    const box = await q.boundingBox();
+    await page.mouse.click(box.x + box.width - 6, box.y + box.height / 2);
+    await page.waitForTimeout(300);
+    let estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.quadrante?.id).toBe("aa");
+    await expect(page.locator("#f1-recorte-ativo")).toBeVisible();
+    await expect(page.locator("#f1-recorte-ativo")).toContainText("muito déficit e muita incerteza");
+    await expect(page.locator('#f1-disp rect.quadrante[aria-current="true"]')).toHaveCount(1);
+    const q2 = page.locator("#f1-disp rect.quadrante.q-aa");
+    const box2 = await q2.boundingBox();
+    await page.mouse.click(box2.x + box2.width - 6, box2.y + box2.height / 2);
+    await page.waitForTimeout(300);
+    estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.quadrante).toBeNull();
+    await expect(page.locator("#f1-recorte-ativo")).toBeHidden();
+  });
+});

@@ -40,10 +40,12 @@ export function estadoInicial(manifesto) {
     periodo: periodoPadrao,
     selecionado: null,
     faixa_hist: [],
+    quadrante: null,
     camadas,
     ...salvo,
     // Acréscimo B: o mapa de base abre sempre claro (não persiste).
     mapa_base: "claro",
+    quadrante: null,
     comparar: null,
   };
 }
@@ -62,7 +64,7 @@ export function salvarLocalStorage(estado) {
   try {
     // comparar (cortina) nunca persiste: N6 pede que ela comece desligada em
     // toda carga/recarga da página.
-    const { selecionado, faixa_hist, comparar, mapa_base, mapa_base_cinza, ...persistido } = estado;
+    const { selecionado, faixa_hist, comparar, mapa_base, mapa_base_cinza, quadrante, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
     // localStorage indisponível (modo privado, quota, etc.): segue sem persistir.

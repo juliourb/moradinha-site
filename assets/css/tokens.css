@@ -505,6 +505,7 @@ table.ponte th, table.ponte td { text-align: left; padding: 6px 8px; border-bott
 .dica-flutuante[hidden], .ajuda-pop[hidden] { display: none; }
 .dica-flutuante b { font-weight: 700; }
 .dica-flutuante .d-sub { color: var(--muted); display: block; }
+.dica-flutuante b + .d-v { display: block; }
 .dica-alvo { cursor: default; }
 
 .aviso-mapa { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); z-index: 6; background: var(--surface); border: 1px solid var(--warn); border-radius: 8px; padding: 6px 10px; font-size: 12px; display: flex; gap: 8px; align-items: center; max-width: 90%; }

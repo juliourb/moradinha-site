@@ -3,15 +3,15 @@
 import { criarLoja } from "./estado/loja.js";
 import { estadoInicial, salvarLocalStorage } from "./estado/pergunta.js";
 import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
-import { valorHex } from "./dados/calculo.js";
+import { valorHex, incertezaHex } from "./dados/calculo.js";
 import { componenteMaior } from "./dados/visaoGeral.js";
-import { valorMedidaQualidade, medidaConstante, TIPO_MEDIDA } from "./dados/qualidade.js";
+import { valorMedidaQualidade, medidaConstante, TIPO_MEDIDA, dadosDeficitIncerteza, NOME_QUADRANTE } from "./dados/qualidade.js";
 import { criarMapa } from "./mapa/index.js";
 import { ligarPergunta } from "./ui/pergunta.js";
 import { renderizarResposta } from "./ui/resposta.js";
 import { renderizarHexagono } from "./ui/hexagono.js";
 import { renderizarHistograma, renderizarRanking, renderizarSerie, renderizarCaixas } from "./graficos/deficit.js";
-import { renderizarHistogramaQualidade, renderizarDispersao, renderizarComposicao, renderizarEstoque } from "./graficos/qualidade.js";
+import { renderizarHistogramaQualidade, renderizarDispersao, renderizarComposicao, renderizarEstoque, quadranteAtivo } from "./graficos/qualidade.js";
 
 const NOME_MEDIDA_QUALIDADE = {
   incerteza: "Incerteza", qualidade_dado: "Qualidade do dado", ressalva_ap: "Ressalva da AP",
@@ -97,15 +97,38 @@ export async function iniciarExplorador() {
       renderizarCaixas($("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($("f1-qhist"), estado, linhasArr, ap, (faixa) => loja.definir({ faixa_hist: faixa }));
-      renderizarDispersao($("f1-disp"), estado, linhasArr, (h3) => loja.definir({ selecionado: h3 }));
+      renderizarDispersao($("f1-disp"), estado, linhasArr, ap, (h3) => loja.definir({ selecionado: h3 }), (id) => {
+        const e = loja.obter();
+        loja.definir({ quadrante: id ? { id, componente: e.componente, periodo: e.periodo, medida_qualidade: e.medida_qualidade } : null });
+      });
       renderizarComposicao($("f1-comp"), manifesto, linhasArr, ap, estado);
       renderizarEstoque($("f1-estoque"), manifesto, linhasArr);
     }
   }
 
+  /** Hexágonos do quadrante ativo do gráfico Déficit × incerteza (acréscimo C), ou null. */
+  function filtroQuadrante(estado) {
+    const q = estado.tema === "qualidade" ? quadranteAtivo(estado) : null;
+    if (!q) return null;
+    const ehCv = estado.medida_qualidade === "cv_ap";
+    const dados = dadosDeficitIncerteza(
+      linhasArr,
+      (l) => valorHex(l, estado.componente, estado.periodo, "absoluto"),
+      (l) => (ehCv ? valorMedidaQualidade(l, estado.periodo, "cv_ap", estado.componente, ap) : incertezaHex(l, estado.componente, estado.periodo)),
+      ehCv
+    );
+    return dados ? new Set(dados.pontos.filter((d) => d.quadrante === q).map((d) => d.l.h3)) : null;
+  }
+
   function renderizarRecorteAtivo(estado) {
     const el = $("f1-recorte-ativo");
     const faixa = estado.faixa_hist?.[0];
+    const q = estado.tema === "qualidade" ? quadranteAtivo(estado) : null;
+    if (q) {
+      el.textContent = `Filtro ativo: hexágonos com ${NOME_QUADRANTE[q]} (gráfico Déficit × incerteza). Clique de novo no quadrante ou em "Limpar" para remover.`;
+      el.removeAttribute("hidden");
+      return;
+    }
     if (!faixa) {
       el.setAttribute("hidden", "");
       return;
@@ -139,7 +162,7 @@ export async function iniciarExplorador() {
     renderizarAvisoMapa(estado);
     renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
-    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
+    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo, filtroQuadrante(estado));
     mapa.renderizarCamadasUI(
       estado,
       (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }),
@@ -153,7 +176,7 @@ export async function iniciarExplorador() {
   }
 
   $("f1-hist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
-  $("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
+  $("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [], quadrante: null });
 
   // Carrossel e dock
   const dock = $("f1-dock");
