@@ -354,7 +354,7 @@ svg .axis path, svg .axis line { stroke: var(--line); }
 .dock.collapsed .dock-body { display: none !important; }
 .dcard { flex: 1 1 0; min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; display: flex; flex-direction: column; }
 .dcard header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-.dcard h3 { font-family: var(--body); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.dcard h3 { font-family: var(--body); font-size: 12px; font-weight: 700; margin: 0; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
 .dcard .body { flex: 1; }
 .dcard.min { flex: 0 0 auto; max-width: 170px; }
 .dcard.min .body { display: none; }
@@ -609,3 +609,11 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 /* Acréscimo F2: cartão estreito da correlação, para não apertar os outros. */
 .dcard[data-k="corr"] { flex: 0 0 210px; }
 @media (max-width: 1100px) { .dcard[data-k="corr"] { flex-basis: 180px; } }
+
+/* Varredura F6.5: abaixo de 1200 px, o dock quebra em duas linhas em vez de espremer os cartões. */
+@media (min-width: 981px) and (max-width: 1199.98px) {
+  .dock-body { flex-wrap: wrap; }
+  .dcard { flex: 1 1 220px; }
+  .dcard[data-k="rank"] { flex-basis: 280px; }
+  .dcard[data-k="corr"] { flex: 1 1 210px; }
+}

@@ -30,3 +30,13 @@ export function formatarPercentual(valor, decimais = 1) {
   if (valor == null || Number.isNaN(valor)) return SEM_DADO;
   return `${formatar(valor, decimais)} %`;
 }
+
+/**
+ * Altura do rótulo de período no eixo horizontal (varredura F6.5): quando o
+ * passo entre colunas é estreito (< 44 px), os rótulos alternam em duas linhas
+ * para "M22–24" e "M23–25" não se encostarem.
+ */
+export function yRotuloPeriodo(indice, passo, yBase) {
+  if (passo >= 44) return yBase;
+  return indice % 2 ? yBase + 5 : yBase - 6;
+}

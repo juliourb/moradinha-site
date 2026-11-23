@@ -13523,6 +13523,10 @@ function formatarPercentual(valor, decimais = 1) {
   if (valor == null || Number.isNaN(valor)) return SEM_DADO;
   return `${formatar(valor, decimais)} %`;
 }
+function yRotuloPeriodo(indice, passo, yBase) {
+  if (passo >= 44) return yBase;
+  return indice % 2 ? yBase + 5 : yBase - 6;
+}
 
 // src/js/dados/visaoGeral.js
 function parteCadUnico(item, todosItens) {
@@ -99129,6 +99133,9 @@ function quantileSorted(values, p4, valueof = number) {
   var n3, i3 = (n3 - 1) * p4, i0 = Math.floor(i3), value0 = +valueof(values[i0], i0, values), value1 = +valueof(values[i0 + 1], i0 + 1, values);
   return value0 + (value1 - value0) * (i3 - i0);
 }
+function median(values, valueof) {
+  return quantile(values, 0.5, valueof);
+}
 function range(start2, stop, step) {
   start2 = +start2, stop = +stop, step = (n3 = arguments.length) < 2 ? (stop = start2, start2 = 0, 1) : n3 < 3 ? 1 : +step;
   var i3 = -1, n3 = Math.max(0, Math.ceil((stop - start2) / step)) | 0, range2 = new Array(n3);
@@ -105202,7 +105209,7 @@ function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o dos hex\xE1gonos por per\xEDodo, eixo cortado no p99");
   svg.append("text").attr("x", W4 - m4.r).attr("y", 9).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("eixo cortado no p99");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(5).tickFormat((v4) => formatar(v4, isRel ? 1 : 1)));
-  svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", H4 - 8).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab)).append("title").text((s4) => s4.lab);
+  svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", (_s3, i3) => yRotuloPeriodo(i3, x5.step(), H4 - 8)).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab)).append("title").text((s4) => s4.lab);
   const g5 = svg.append("g").selectAll("g").data(st3).join("g").style("cursor", "pointer").on("click", (_e4, s4) => aoClicarPeriodo(s4.id));
   const cx2 = (s4) => x5(s4.id) + x5.bandwidth() / 2;
   const col = (s4) => s4.critico ? css3("--crit") : s4.media ? css3("--accent") : css3("--ink");
@@ -105256,7 +105263,7 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
   const tipo = TIPO_MEDIDA[estado.medida_qualidade];
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 104;
-  const m4 = { l: 34, r: 8, t: 6, b: 28 };
+  const m4 = { l: 38, r: 8, t: 6, b: 28 };
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o da medida de qualidade");
   if (tipo === "categorica") {
     const contagem = rollup(
@@ -105281,14 +105288,20 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
   }
   const minimo = min4(vs9);
   const p99 = quantile(vs9.slice().sort(ascending), 0.99) ?? max4(vs9);
-  const x5 = linear2().domain([minimo, p99]).nice().range([m4.l, W4 - m4.r]);
-  const bins = bin().domain(x5.domain()).thresholds(20)(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
+  const constante = Math.abs(median(vs9)) > 0 && (max4(vs9) - minimo) / Math.abs(median(vs9)) < 0.01;
+  const folga = constante ? Math.abs(median(vs9)) * 0.05 : 0;
+  const x5 = (constante ? linear2().domain([minimo - folga, max4(vs9) + folga]) : linear2().domain([minimo, p99]).nice()).range([m4.l, W4 - m4.r]);
+  const bins = bin().domain(x5.domain()).thresholds(constante ? [] : 20)(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
   const faixaAtual = estado.faixa_hist?.[0] ?? null;
   const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(5).tickFormat((v4) => formatar(v4, 2)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
+  const passoX = tickStep(...x5.domain(), 4);
+  const casasX = Math.max(2, Math.min(4, -Math.floor(Math.log10(passoX))));
+  const marcasX = x5.ticks(4);
+  const repetem = constante || new Set(marcasX.map((v4) => formatar(v4, casasX))).size < marcasX.length;
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).tickValues(repetem ? [median(vs9)] : marcasX).tickFormat((v4) => repetem ? `\u2248 ${formatar(v4, 2)} (quase n\xE3o varia)` : formatar(v4, casasX)));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
   svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
     e67.stopPropagation();
     aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
@@ -105305,7 +105318,7 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
   marcarGrafico(svg.node(), "histograma-qualidade");
   svg.on("click", () => aoClicarBarra([]));
   svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css4("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
-  svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text("p99 ou mais \u2192");
+  svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text(constante ? "" : "p99 ou mais \u2192");
   box.replaceChildren(svg.node());
 }
 function quadranteAtivo(estado) {
@@ -105366,12 +105379,11 @@ function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar, aoClic
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(4).tickFormat((v4) => log4 && !potencia10(v4) ? "" : formatar(v4, 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).tickValues(marcasY).tickFormat((v4) => (quaseConstante ? "\u2248 " : "") + formatar(v4, casasY)));
   svg.append("text").attr("class", "rotulo-eixo").attr("x", W4 - m4.r).attr("y", H4 - 3).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text(`d\xE9ficit do hex\xE1gono (domic\xEDlios${log4 ? ", escala log" : ""})`);
-  svg.append("text").attr("class", "rotulo-eixo").attr("x", 2).attr("y", 9).attr("font-size", 9).attr("fill", css4("--muted")).text(nomeY);
   const linhaCor = css4("--ink");
   svg.append("line").attr("class", "corte corte-x").attr("x1", cx2).attr("x2", cx2).attr("y1", m4.t).attr("y2", H4 - m4.b).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
   svg.append("line").attr("class", "corte corte-y").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", cy2).attr("y2", cy2).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
   svg.append("text").attr("class", "rotulo-corte corte-x").attr("x", cx2).attr("y", m4.t - 3).attr("text-anchor", cx2 > W4 / 2 ? "end" : "start").attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(`mediana do d\xE9ficit: ${formatar(corteX, 1)}`);
-  svg.append("text").attr("class", "rotulo-corte corte-y").attr("x", (m4.l + cx2) / 2).attr("y", cy2 - 3).attr("text-anchor", "middle").attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(ehCv ? `limiar do protocolo: CV de ${CORTE_CV_PROTOCOLO}%` : `mediana da incerteza: ${formatar(corteY, 2)}`);
+  svg.append("text").attr("class", "rotulo-corte corte-y").attr("x", m4.l + 3).attr("y", cy2 - 3).attr("text-anchor", "start").attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(ehCv ? `limiar do protocolo: CV de ${CORTE_CV_PROTOCOLO}%` : `mediana da incerteza: ${formatar(corteY, 2)}`);
   const gp2 = svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.4).attr("fill", css4("--accent")).attr("opacity", (d3) => qAtivo && d3.quadrante !== qAtivo ? 0.15 : 0.6).style("cursor", "pointer").on("click", (e67, d3) => {
     e67.stopPropagation();
     aoSelecionar(d3.l.h3);
@@ -105381,13 +105393,15 @@ function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar, aoClic
     valor: `d\xE9ficit ${formatar(d3.x, 1)} \xB7 ${nomeY} ${formatar(d3.y, decY)}`,
     base: `quadrante: ${NOME_QUADRANTE[d3.quadrante]}`
   }));
-  const cantos = { aa: [W4 - m4.r - 3, m4.t + 10, "end"], ba: [m4.l + 3, m4.t + 10, "start"], ab: [W4 - m4.r - 3, H4 - m4.b - 14, "end"], bb: [m4.l + 3, H4 - m4.b - 14, "start"] };
-  for (const [id3, [tx2, ty2, anc]] of Object.entries(cantos)) {
+  const cantos = { ba: [m4.l + 3, m4.t + 10], aa: [cx2 + 4, m4.t + 10], bb: [m4.l + 3, H4 - m4.b - 14], ab: [cx2 + 4, H4 - m4.b - 14] };
+  for (const [id3, [tx2, ty2]] of Object.entries(cantos)) {
     const q4 = quadrantes[id3];
-    svg.append("text").attr("class", `quadrante-contagem q-${id3}`).attr("x", tx2).attr("y", ty2).attr("text-anchor", anc).attr("font-size", 9).attr("font-weight", id3 === "aa" ? 700 : 400).attr("fill", id3 === "aa" ? css4("--ink") : css4("--muted")).style("pointer-events", "none").call(halo).text(`${formatar(q4.n, 0)} hex. \xB7 ${formatar(100 * q4.parteDeficit, 0)}% do d\xE9ficit`);
+    const t4 = svg.append("text").attr("class", `quadrante-contagem q-${id3}`).attr("x", tx2).attr("y", ty2).attr("font-size", 9).attr("font-weight", id3 === "aa" ? 700 : 400).style("fill", id3 === "aa" ? css4("--ink") : css4("--muted")).style("pointer-events", "none").call(halo);
+    t4.append("tspan").text(`${formatar(q4.n, 0)} hex.`);
+    t4.append("tspan").attr("x", tx2).attr("dy", 10).text(`${formatar(100 * q4.parteDeficit, 0)}% do d\xE9ficit`);
   }
   if (quaseConstante) {
-    svg.append("text").attr("class", "nota-constante").attr("x", m4.l + 3).attr("y", Math.min(cy2 + 12, H4 - m4.b - 26)).attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text(`${nomeY} quase n\xE3o varia entre hex\xE1gonos`);
+    svg.append("text").attr("class", "nota-constante").attr("x", m4.l + 3).attr("y", Math.min(cy2 + 12, H4 - m4.b - 30)).attr("font-size", 8.5).attr("fill", css4("--muted")).call(halo).text("quase n\xE3o varia");
   }
   marcarGrafico(svg.node(), "dispersao");
   box.replaceChildren(svg.node());
@@ -105423,7 +105437,7 @@ function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
   const x5 = band().domain(dados.map((d3) => d3.id)).range([m4.l, W4 - m4.r]).padding(0.3);
   const y5 = linear2().domain([0, 1]).range([H4 - m4.b, m4.t]);
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Composi\xE7\xE3o da qualidade por per\xEDodo");
-  svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d3) => x5(d3.id) + x5.bandwidth() / 2).attr("y", H4 - 8).attr("text-anchor", "middle").text((d3) => rotuloCurto(d3.lab));
+  svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d3) => x5(d3.id) + x5.bandwidth() / 2).attr("y", (_d3, i3) => yRotuloPeriodo(i3, x5.step(), H4 - 8)).attr("text-anchor", "middle").text((d3) => rotuloCurto(d3.lab));
   for (const d3 of dados) {
     let acum = 0;
     categorias.forEach((cat, i3) => {
@@ -105450,7 +105464,7 @@ function renderizarEstoque(box, manifesto, linhasArr) {
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Estoque dividido por 2022, por per\xEDodo");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
   svg.append("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", y5(1)).attr("y2", y5(1)).attr("stroke", css4("--line")).attr("stroke-dasharray", "2,3");
-  svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", H4 - 8).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab));
+  svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", (_s3, i3) => yRotuloPeriodo(i3, x5.step(), H4 - 8)).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab));
   const col = (s4) => s4.critico ? css4("--crit") : css4("--ink");
   const g5 = svg.append("g").selectAll("g").data(st3).join("g");
   g5.filter((s4) => s4.q10 != null).append("line").attr("x1", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("x2", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
@@ -107022,7 +107036,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "d5cc1dffc694cc0b96d6e15f68bbf38bca786884");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "d31f34dc7572abcd535e2b7038c9f8c6873dfecd");
   renderizarInterna($7("met-interna"), modelo);
 }
 

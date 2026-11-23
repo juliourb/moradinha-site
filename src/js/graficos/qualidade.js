@@ -2,7 +2,7 @@
 // dispersão déficit × incerteza, composição ponderada por domicílios,
 // estoque ÷ 2022 por período.
 import * as d3 from "d3";
-import { formatar, rotuloCurto } from "../util/formato.js";
+import { formatar, rotuloCurto, yRotuloPeriodo } from "../util/formato.js";
 import { valorHex, incertezaHex, domiciliosTotal } from "../dados/calculo.js";
 import { valorMedidaQualidade, TIPO_MEDIDA, dadosDeficitIncerteza, NOME_QUADRANTE, CORTE_CV_PROTOCOLO } from "../dados/qualidade.js";
 import { ligarDica, marcarGrafico, htmlDica } from "../ui/ajuda.js";
@@ -16,7 +16,7 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
   const tipo = TIPO_MEDIDA[estado.medida_qualidade];
   const W = Math.max(260, box.clientWidth || 300);
   const H = 104;
-  const m = { l: 34, r: 8, t: 6, b: 28 };
+  const m = { l: 38, r: 8, t: 6, b: 28 };
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribuição da medida de qualidade");
 
   if (tipo === "categorica") {
@@ -53,15 +53,26 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
   }
   const minimo = d3.min(vs);
   const p99 = d3.quantile(vs.slice().sort(d3.ascending), 0.99) ?? d3.max(vs);
-  const x = d3.scaleLinear().domain([minimo, p99]).nice().range([m.l, W - m.r]);
+  // Varredura F6.5: medida quase constante (variação < 1% do valor) — uma barra só
+  // com todos os hexágonos (antes, as 20 faixas saíam vazias e o gráfico ficava em branco).
+  const constante = Math.abs(d3.median(vs)) > 0 && (d3.max(vs) - minimo) / Math.abs(d3.median(vs)) < 0.01;
+  const folga = constante ? Math.abs(d3.median(vs)) * 0.05 : 0;
+  const x = (constante ? d3.scaleLinear().domain([minimo - folga, d3.max(vs) + folga]) : d3.scaleLinear().domain([minimo, p99]).nice()).range([m.l, W - m.r]);
   // N2: eixo cortado no p99; os valores acima entram na última barra ("p99 ou mais").
-  const bins = d3.bin().domain(x.domain()).thresholds(20)(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
+  const bins = d3.bin().domain(x.domain()).thresholds(constante ? [] : 20)(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
   const faixaAtual = estado.faixa_hist?.[0] ?? null;
   const faixaSelecionada = (b) => !faixaAtual || (b.x0 < (faixaAtual[1] ?? Infinity) && b.x1 > faixaAtual[0]);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat((v) => formatar(v, 2)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
+  // Varredura F6.5: casas decimais pelo passo das marcas; se ainda assim os rótulos
+  // se repetem (medida quase constante), um rótulo só, "≈ valor".
+  const passoX = d3.tickStep(...x.domain(), 4);
+  const casasX = Math.max(2, Math.min(4, -Math.floor(Math.log10(passoX))));
+  const marcasX = x.ticks(4);
+  const repetem = constante || new Set(marcasX.map((v) => formatar(v, casasX))).size < marcasX.length;
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).tickValues(repetem ? [d3.median(vs)] : marcasX).tickFormat((v) => (repetem ? `≈ ${formatar(v, 2)} (quase não varia)` : formatar(v, casasX))));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => formatar(v, 0)));
   svg
     .append("g")
     .selectAll("rect")
@@ -102,7 +113,7 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
     .attr("stroke-width", 2)
     .attr("opacity", (b) => (faixaSelecionada(b) ? 1 : 0.35))
     .style("pointer-events", "none");
-  svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("p99 ou mais →");
+  svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text(constante ? "" : "p99 ou mais →");
   box.replaceChildren(svg.node());
 }
 
@@ -195,7 +206,7 @@ export function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar,
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(marcasY).tickFormat((v) => (quaseConstante ? "≈ " : "") + formatar(v, casasY)));
   svg.append("text").attr("class", "rotulo-eixo").attr("x", W - m.r).attr("y", H - 3).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted"))
     .text(`déficit do hexágono (domicílios${log ? ", escala log" : ""})`);
-  svg.append("text").attr("class", "rotulo-eixo").attr("x", 2).attr("y", 9).attr("font-size", 9).attr("fill", css("--muted")).text(nomeY);
+  // O eixo vertical é nomeado pelo rótulo da linha de corte horizontal (sem título solto no canto).
 
   // Linhas de corte, rotuladas.
   const linhaCor = css("--ink");
@@ -203,7 +214,7 @@ export function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar,
   svg.append("line").attr("class", "corte corte-y").attr("x1", m.l).attr("x2", W - m.r).attr("y1", cy).attr("y2", cy).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
   svg.append("text").attr("class", "rotulo-corte corte-x").attr("x", cx).attr("y", m.t - 3).attr("text-anchor", cx > W / 2 ? "end" : "start").attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
     .text(`mediana do déficit: ${formatar(corteX, 1)}`);
-  svg.append("text").attr("class", "rotulo-corte corte-y").attr("x", (m.l + cx) / 2).attr("y", cy - 3).attr("text-anchor", "middle").attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
+  svg.append("text").attr("class", "rotulo-corte corte-y").attr("x", m.l + 3).attr("y", cy - 3).attr("text-anchor", "start").attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
     .text(ehCv ? `limiar do protocolo: CV de ${CORTE_CV_PROTOCOLO}%` : `mediana da incerteza: ${formatar(corteY, 2)}`);
 
   const gp = svg.append("g").selectAll("circle").data(pontos).join("circle")
@@ -222,17 +233,20 @@ export function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar,
   }));
 
   // Nº de hexágonos e parte do déficit em cada quadrante.
-  const cantos = { aa: [W - m.r - 3, m.t + 10, "end"], ba: [m.l + 3, m.t + 10, "start"], ab: [W - m.r - 3, H - m.b - 14, "end"], bb: [m.l + 3, H - m.b - 14, "start"] };
-  for (const [id, [tx, ty, anc]] of Object.entries(cantos)) {
+  // Cada contagem fica dentro do seu quadrante, em duas linhas, a partir do canto
+  // junto ao eixo (esquerda) ou junto à linha de corte (direita): nunca cruza o corte.
+  const cantos = { ba: [m.l + 3, m.t + 10], aa: [cx + 4, m.t + 10], bb: [m.l + 3, H - m.b - 14], ab: [cx + 4, H - m.b - 14] };
+  for (const [id, [tx, ty]] of Object.entries(cantos)) {
     const q = quadrantes[id];
-    svg.append("text").attr("class", `quadrante-contagem q-${id}`).attr("x", tx).attr("y", ty).attr("text-anchor", anc)
-      .attr("font-size", 9).attr("font-weight", id === "aa" ? 700 : 400).attr("fill", id === "aa" ? css("--ink") : css("--muted"))
-      .style("pointer-events", "none").call(halo)
-      .text(`${formatar(q.n, 0)} hex. · ${formatar(100 * q.parteDeficit, 0)}% do déficit`);
+    const t = svg.append("text").attr("class", `quadrante-contagem q-${id}`).attr("x", tx).attr("y", ty)
+      .attr("font-size", 9).attr("font-weight", id === "aa" ? 700 : 400).style("fill", id === "aa" ? css("--ink") : css("--muted"))
+      .style("pointer-events", "none").call(halo);
+    t.append("tspan").text(`${formatar(q.n, 0)} hex.`);
+    t.append("tspan").attr("x", tx).attr("dy", 10).text(`${formatar(100 * q.parteDeficit, 0)}% do déficit`);
   }
   if (quaseConstante) {
-    svg.append("text").attr("class", "nota-constante").attr("x", m.l + 3).attr("y", Math.min(cy + 12, H - m.b - 26)).attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
-      .text(`${nomeY} quase não varia entre hexágonos`);
+    svg.append("text").attr("class", "nota-constante").attr("x", m.l + 3).attr("y", Math.min(cy + 12, H - m.b - 30)).attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
+      .text("quase não varia");
   }
   marcarGrafico(svg.node(), "dispersao");
   box.replaceChildren(svg.node());
@@ -270,7 +284,7 @@ export function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
   const x = d3.scaleBand().domain(dados.map((d) => d.id)).range([m.l, W - m.r]).padding(0.3);
   const y = d3.scaleLinear().domain([0, 1]).range([H - m.b, m.t]);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Composição da qualidade por período");
-  svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d) => x(d.id) + x.bandwidth() / 2).attr("y", H - 8).attr("text-anchor", "middle").text((d) => rotuloCurto(d.lab));
+  svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d) => x(d.id) + x.bandwidth() / 2).attr("y", (_d, i) => yRotuloPeriodo(i, x.step(), H - 8)).attr("text-anchor", "middle").text((d) => rotuloCurto(d.lab));
   for (const d of dados) {
     let acum = 0;
     categorias.forEach((cat, i) => {
@@ -306,7 +320,7 @@ export function renderizarEstoque(box, manifesto, linhasArr) {
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Estoque dividido por 2022, por período");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
   svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(1)).attr("y2", y(1)).attr("stroke", css("--line")).attr("stroke-dasharray", "2,3");
-  svg.append("g").selectAll("text").data(st).join("text").attr("x", (s) => x(s.id) + x.bandwidth() / 2).attr("y", H - 8).attr("text-anchor", "middle").text((s) => rotuloCurto(s.lab));
+  svg.append("g").selectAll("text").data(st).join("text").attr("x", (s) => x(s.id) + x.bandwidth() / 2).attr("y", (_s, i) => yRotuloPeriodo(i, x.step(), H - 8)).attr("text-anchor", "middle").text((s) => rotuloCurto(s.lab));
   const col = (s) => (s.critico ? css("--crit") : css("--ink"));
   const g = svg.append("g").selectAll("g").data(st).join("g");
   g.filter((s) => s.q10 != null).append("line").attr("x1", (s) => x(s.id) + x.bandwidth() / 2).attr("x2", (s) => x(s.id) + x.bandwidth() / 2).attr("y1", (s) => y(s.q10)).attr("y2", (s) => y(s.q90)).attr("stroke", col);

@@ -1,7 +1,7 @@
 // Gráficos do conjunto "Déficit" (SPEC_F1 §6): histograma, ranking, série,
 // distribuição por período.
 import * as d3 from "d3";
-import { formatar, rotuloCurto } from "../util/formato.js";
+import { formatar, rotuloCurto, yRotuloPeriodo } from "../util/formato.js";
 import { valorHex, brutoHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
 import { classeHex } from "../dados/escalaCor.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
@@ -452,7 +452,7 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
     .data(st)
     .join("text")
     .attr("x", (s) => x(s.id) + x.bandwidth() / 2)
-    .attr("y", H - 8)
+    .attr("y", (_s, i) => yRotuloPeriodo(i, x.step(), H - 8))
     .attr("text-anchor", "middle")
     .text((s) => rotuloCurto(s.lab))
     .append("title")
