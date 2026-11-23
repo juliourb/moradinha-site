@@ -1,7 +1,7 @@
 ::: {.sintese}
-O território é coberto por hexágonos H3 de resolução 8.
+O território vira hexágonos de cerca de 0,7 km², e cada setor censitário é repartido entre os hexágonos que toca, na proporção dos seus domicílios.
 :::
 
 ::: {.explicacao}
-Cada setor censitário é cortado pelos hexágonos que ele toca, e cada corte, o "pedaço", recebe a sua parte dos domicílios do setor pela grade estatística do IBGE. É o pedaço que leva cada fonte até o hexágono. [@brodsky2018h3; @ibge_grade2022]
+Os hexágonos são do sistema H3, na resolução 8. Cada setor censitário é cortado pelos hexágonos que ele toca, e cada corte, o "pedaço", recebe a sua parte dos domicílios do setor pela grade estatística do IBGE. É o pedaço que leva cada fonte até o hexágono. [@brodsky2018h3]
 :::

@@ -68,7 +68,7 @@ JENKS, G. F. The data model concept in statistical mapping. **International Year
 :::
 
 ::: {#ref-lou2013ga2m .ref-item}
-LOU, Y.; CARUANA, R.; GEHRKE, J.; HOOKER, G. Accurate intelligible models with pairwise interactions. In: ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 19., 2013. **Anais** […]. p. 623–631. [doi:10.1145/2487575.2487579](https://doi.org/10.1145/2487575.2487579). *(DOI conferido em uma só listagem secundária)*
+LOU, Y.; CARUANA, R.; GEHRKE, J.; HOOKER, G. Accurate intelligible models with pairwise interactions. In: ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 19., 2013. **Anais** […]. p. 623–631. [doi:10.1145/2487575.2487579](https://doi.org/10.1145/2487575.2487579).
 :::
 
 ::: {#ref-nori2019interpretml .ref-item}

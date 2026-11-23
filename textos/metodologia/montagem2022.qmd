@@ -1,7 +1,7 @@
 ::: {.sintese}
-A taxa de cada pedaço sai da soma das contribuições do modelo pelas proporções do setor, uma conta exata.
+O mapa de 2022 nasce em três passos: a chance de déficit vira número de domicílios; esse número é alinhado ao que a amostra mediu em cada área de ponderação; e a soma é ajustada ao total da região.
 :::
 
 ::: {.explicacao}
-Um fator por área de ponderação alinha o resultado à estimativa da amostra naquela área. Na coabitação e no ônus, o total é ajustado ao da PNADc; a precariedade de 2022 vem da amostra do Censo. A faixa de incerteza vem de 200 réplicas da PNADc. O ajuste ao total é uma conta de fechamento e não mede a qualidade do modelo. [@ibge_censo2022]
+Primeiro, o modelo dá a chance de déficit dos domicílios de cada pedaço, e chance × domicílios = domicílios em déficit previstos. Depois, as previsões de cada área de ponderação são somadas e comparadas com o que a amostra do Censo mediu ali. Na área 002, por exemplo, a amostra mediu 221 domicílios em coabitação e o modelo previu 201, então cada pedaço da área é multiplicado por 1,1: o modelo decide onde fica o déficit dentro da área, e a amostra decide quanto. Por fim, na coabitação e no ônus, todos os hexágonos são multiplicados por um mesmo número para que a soma bata com o total da PNADc (no ônus de 2022, 1,12); na precariedade de 2022, o total é o da própria amostra do Censo. Esse último ajuste só fecha a conta e não diz se o modelo é bom: quem diz isso é o teste do Treino. A faixa de incerteza vem de refazer a conta com as 200 réplicas da PNADc. [@ibge_censo2022]
 :::

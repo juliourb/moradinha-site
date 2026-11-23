@@ -1,7 +1,7 @@
 ::: {.sintese}
-Antes do mapa, é preciso saber quais domicílios estão em déficit.
+Antes de mapear, é preciso saber quem está em déficit. A regra da FJP responde isso em duas pesquisas, e cada uma tem um papel.
 :::
 
 ::: {.explicacao}
-A regra da FJP é aplicada a cada domicílio de duas pesquisas, com papéis diferentes. Na amostra do Censo 2022 (os domicílios que responderam ao questionário completo), a regra marca quem está em déficit: essas marcas são o gabarito com que o modelo aprende e é testado. Na PNADc de cada ano, a regra dá quantos domicílios estão em déficit na região inteira: é o total que o mapa respeita. Cada domicílio entra em um só componente, nesta ordem: habitação precária, coabitação, ônus. O ônus só é avaliado em domicílios urbanos, alugados e com renda de até 3 salários mínimos. [@fjp2023deficit]
+A FJP considera em déficit o domicílio precário, a família que divide a casa com outra (coabitação) e quem gasta parte excessiva da renda com aluguel (ônus). O moradinha aplica essa regra domicílio por domicílio. Na amostra do Censo 2022, ela diz quais domicílios entrevistados estão em déficit e em que área de ponderação eles ficam: essas respostas são o gabarito com que o modelo aprende e é testado. Na PNADc, ela diz quantos domicílios estão em déficit na região inteira, ano a ano: esse total é o número que o mapa precisa respeitar. Cada domicílio conta em um só componente, nesta ordem: precariedade, coabitação, ônus. O ônus só vale para domicílios urbanos, alugados e com renda de até 3 salários mínimos. [@fjp2023deficit]
 :::

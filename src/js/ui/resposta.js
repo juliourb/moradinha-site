@@ -43,7 +43,7 @@ export function renderizarResposta(elementos, estado, manifesto, totais, aoClica
     } else {
       faixa =
         estado.componente === "total"
-          ? "o total não tem faixa: as faixas dos componentes não podem ser somadas"
+          ? "O total não tem faixa: as faixas dos componentes não podem ser somadas."
           : "sem faixa (provisória)";
     }
 
@@ -62,7 +62,6 @@ export function renderizarResposta(elementos, estado, manifesto, totais, aoClica
     elementos.range.innerHTML = faixa;
 
     const pills = (t.marcas ?? []).map((m) => pill(classeMarca(m), rotuloMarca(m)));
-    if (estado.componente === "total") pills.push(pill("info", "O total não tem faixa: as faixas dos componentes não podem ser somadas"));
     elementos.pills.innerHTML = pills.join("");
   }
 

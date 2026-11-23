@@ -62,20 +62,17 @@ export function marcasHex(linha, componente, periodo) {
 export function totalDoMapa(totais, componente, periodo) {
   if (componente === "total") {
     let soma = 0;
-    let epQuad = 0;
-    let semEp = false;
     const marcas = new Set();
     for (const c of COMPONENTES_BASE) {
       const linha = linhaNoMapa(totais, c, periodo);
       if (!linha) return null;
       soma += linha.total;
-      if (linha.ep == null) semEp = true;
-      else epQuad += linha.ep * linha.ep;
       // "total frágil" é o CV do total de UM componente; o total somado não tem CV no
       // pacote, então a marca não é herdada (F6.4 1c).
       for (const m of linha.marcas ?? []) if (m !== "total_fragil") marcas.add(m);
     }
-    return { total: soma, ep: semEp ? null : Math.sqrt(epQuad), regime: "misto", marcas: [...marcas] };
+    // O total nunca tem faixa: as faixas dos componentes não podem ser somadas (F6.5 0).
+    return { total: soma, ep: null, regime: "misto", marcas: [...marcas] };
   }
   const linha = linhaNoMapa(totais, componente, periodo);
   if (!linha) return null;

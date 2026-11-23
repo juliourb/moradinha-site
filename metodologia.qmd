@@ -1,6 +1,7 @@
 ---
 title: ""
 suppress-bibliography: true
+link-citations: true
 ---
 
 {{< include textos/_cabecalho.qmd >}}
