@@ -1,5 +1,7 @@
 // Barra de "pergunta": liga os controles segmentados e seletores ao estado.
-import { textoPergunta, MEDIDAS_QUALIDADE } from "../estado/pergunta.js";
+import { textoPergunta, MEDIDAS_QUALIDADE, PREFIXO_COMPARAR_COMPONENTE } from "../estado/pergunta.js";
+
+const NOME_COMPONENTE_CORTINA = { total: "Total", coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
 import { criarAjuda } from "./ajuda.js";
 
 /**
@@ -56,8 +58,13 @@ const NOME_MEDIDA_QUALIDADE = {
 /** @param {(id:string)=>boolean} medidaConstante devolve true quando a medida é constante no período corrente */
 export function ligarPergunta(elementos, manifesto, loja, medidaConstante) {
   elementos.selPeriodo.innerHTML = manifesto.periodos.map((p) => `<option value="${p.id}">${p.rotulo}</option>`).join("");
+  // Acréscimo F: "comparar com" oferece outro período OU outro componente (mesmo período).
   elementos.selComparar.innerHTML =
-    `<option value="">sem comparação</option>` + manifesto.periodos.map((p) => `<option value="${p.id}">${p.rotulo}</option>`).join("");
+    `<option value="">sem comparação</option>` +
+    `<optgroup label="Outro período">${manifesto.periodos.map((p) => `<option value="${p.id}">${p.rotulo}</option>`).join("")}</optgroup>` +
+    `<optgroup label="Outro componente, mesmo período">${Object.entries(NOME_COMPONENTE_CORTINA)
+      .map(([id, nome]) => `<option value="${PREFIXO_COMPARAR_COMPONENTE}${id}">${nome}</option>`)
+      .join("")}</optgroup>`;
   const seletorMedida = montarSeletorMedida(elementos.selMedidaQualidade, (id) => loja.definir({ medida_qualidade: id }));
 
   elementos.segTema.querySelectorAll("button").forEach((b) => {
@@ -67,7 +74,11 @@ export function ligarPergunta(elementos, manifesto, loja, medidaConstante) {
     b.onclick = () => loja.definir({ medida: b.dataset.v, faixa_hist: [] });
   });
   elementos.segComponente.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ componente: b.dataset.v, faixa_hist: [] });
+    b.onclick = () => {
+      const componente = b.dataset.v;
+      const comparar = loja.obter().comparar === PREFIXO_COMPARAR_COMPONENTE + componente ? null : loja.obter().comparar;
+      loja.definir({ componente, comparar, faixa_hist: [] });
+    };
   });
   elementos.selPeriodo.onchange = () => {
     const periodo = elementos.selPeriodo.value;
@@ -84,6 +95,10 @@ export function ligarPergunta(elementos, manifesto, loja, medidaConstante) {
     elementos.segComponente.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === estado.componente)));
     elementos.selPeriodo.value = estado.periodo;
     elementos.selComparar.value = estado.comparar ?? "";
+    // O componente/período atual não aparece como alvo da cortina.
+    elementos.selComparar.querySelectorAll("option").forEach((op) => {
+      op.disabled = !!op.value && (op.value === estado.periodo || op.value === PREFIXO_COMPARAR_COMPONENTE + estado.componente);
+    });
 
     const qualidade = estado.tema === "qualidade";
     elementos.ctlMedida.hidden = qualidade;

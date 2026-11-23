@@ -1,7 +1,7 @@
 // Composição do explorador da aba Resultados (SPEC_F1). Carrega o pacote,
 // cria o estado e liga mapa, resposta, painel do hexágono e gráficos.
 import { criarLoja } from "./estado/loja.js";
-import { estadoInicial, salvarLocalStorage } from "./estado/pergunta.js";
+import { estadoInicial, salvarLocalStorage, alvoComparacao } from "./estado/pergunta.js";
 import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
 import { valorHex, incertezaHex } from "./dados/calculo.js";
 import { componenteMaior } from "./dados/visaoGeral.js";
@@ -157,12 +157,26 @@ export async function iniciarExplorador() {
     btn.onclick = () => loja.definir({ componente: alvo, faixa_hist: [] });
   }
 
+  /** Acréscimo F: lado direito da cortina — outro período ou outro componente no mesmo período. */
+  function ladoCortina(estado) {
+    const alvo = alvoComparacao(estado);
+    if (!alvo) return null;
+    const rot = (id) => manifesto.periodos.find((p) => p.id === id)?.rotulo ?? id;
+    if (alvo.tipo === "periodo") return { periodo: alvo.periodo, estado, obterValor: obterValorMapa(estado).fn, rotulo: rot(alvo.periodo) };
+    const estadoB = { ...estado, componente: alvo.componente };
+    return {
+      periodo: estado.periodo, estado: estadoB, obterValor: obterValorMapa(estadoB).fn,
+      rotulo: `${CLAB[alvo.componente]} · ${rot(estado.periodo)}`,
+      rotuloA: `${CLAB[estado.componente]} · ${rot(estado.periodo)}`,
+    };
+  }
+
   function renderTudo(estado) {
     sincronizarPergunta(estado);
     renderizarAvisoMapa(estado);
     renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
-    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo, filtroQuadrante(estado));
+    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo, filtroQuadrante(estado), ladoCortina(estado));
     mapa.renderizarCamadasUI(
       estado,
       (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }),

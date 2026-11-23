@@ -13088,6 +13088,16 @@ function prepararNavegacaoResultados(parcial) {
   } catch {
   }
 }
+var PREFIXO_COMPARAR_COMPONENTE = "c:";
+function alvoComparacao(estado) {
+  const c3 = estado?.comparar;
+  if (!c3) return null;
+  if (c3.startsWith(PREFIXO_COMPARAR_COMPONENTE)) {
+    const componente = c3.slice(PREFIXO_COMPARAR_COMPONENTE.length);
+    return componente && componente !== estado.componente ? { tipo: "componente", componente, periodo: estado.periodo } : null;
+  }
+  return c3 !== estado.periodo ? { tipo: "periodo", periodo: c3, componente: estado.componente } : null;
+}
 function rotuloPeriodo(periodoId, manifesto, preposicao = true) {
   const p4 = manifesto.periodos.find((x5) => x5.id === periodoId);
   if (!p4) return "";
@@ -13103,7 +13113,9 @@ function textoPergunta(estado, manifesto) {
   }
   const medidaTxt = estado.medida === "abs" || estado.medida === "absoluto" ? "absoluto" : "relativo";
   let texto = `Onde est\xE1 o d\xE9ficit ${medidaTxt}${comp} ${per}?`;
-  if (estado.comparar) texto += ` Comparado com ${rotuloPeriodo(estado.comparar, manifesto, false)}.`;
+  const alvo = alvoComparacao(estado);
+  if (alvo?.tipo === "periodo") texto += ` Comparado com ${rotuloPeriodo(alvo.periodo, manifesto, false)}.`;
+  if (alvo?.tipo === "componente") texto += ` Comparado com ${alvo.componente === "total" ? "o total" : NOME_COMPONENTE[alvo.componente]}, no mesmo per\xEDodo.`;
   return texto;
 }
 
@@ -103712,17 +103724,18 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     novo: "--crit",
     existente: "--ok"
   };
-  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado) {
+  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado, obterValorB = obterValor) {
     if (tipoMedida === "categorica" || estado?.tema === "deficit") {
       if (estado?.tema !== "deficit") faixaEscala = [];
       return;
     }
     const vs9 = [];
     for (const l3 of linhasArr) {
-      for (const p4 of [periodo, periodoComparar]) {
-        if (!p4) continue;
-        const v4 = obterValor(l3, p4);
-        if (v4 != null && v4 > 0) vs9.push(v4);
+      const v4 = obterValor(l3, periodo);
+      if (v4 != null && v4 > 0) vs9.push(v4);
+      if (periodoComparar) {
+        const vb2 = obterValorB(l3, periodoComparar);
+        if (vb2 != null && vb2 > 0) vs9.push(vb2);
       }
     }
     vs9.sort(ascending);
@@ -103838,9 +103851,10 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
       elementos.tooltip.innerHTML = html;
     };
   }
-  function camadasPara(periodo, estado, obterValor, lado, tipoMedida) {
+  function camadasPara(periodo, estado, obterValor, lado, tipoMedida, estadoEscala = estado) {
     const L4 = [];
-    const contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
+    let contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
+    if (contexto && estadoEscala !== estado && contexto.tipo !== "vezes_taxa") contexto = contextoCorDeficit(estadoEscala, estadoEscala.periodo);
     L4.push(
       new h3_hexagon_layer_default({
         id: "hex-" + lado,
@@ -104167,20 +104181,19 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     elementos.mapboxEl?.classList.toggle("cinza", modo === "cinza");
     definirModoBase(modo);
   }
-  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null) {
+  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null, ladoB = null) {
     filtroH3 = filtro;
-    computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
+    computarEscala(estado.periodo, ladoB?.periodo ?? null, obterValor, tipoMedida, estado, ladoB?.obterValor ?? obterValor);
     instancias.a.overlay.setProps({ layers: camadasPara(estado.periodo, estado, obterValor, "a", tipoMedida) });
-    const ligada = !!estado.comparar;
+    const ligada = !!ladoB;
     elementos.deckB.style.display = ligada ? "block" : "none";
     elementos.divider.style.display = ligada ? "block" : "none";
     elementos.labB.style.display = ligada ? "block" : "none";
     const perA = manifesto.periodos.find((p4) => p4.id === estado.periodo);
-    elementos.labA.textContent = perA?.rotulo ?? "";
+    elementos.labA.textContent = ladoB?.rotuloA ?? perA?.rotulo ?? "";
     if (ligada) {
-      instancias.b.overlay.setProps({ layers: camadasPara(estado.comparar, estado, obterValor, "b", tipoMedida) });
-      const perB = manifesto.periodos.find((p4) => p4.id === estado.comparar);
-      elementos.labB.textContent = perB?.rotulo ?? "";
+      instancias.b.overlay.setProps({ layers: camadasPara(ladoB.periodo, ladoB.estado, ladoB.obterValor, "b", tipoMedida, estado) });
+      elementos.labB.textContent = ladoB.rotulo;
       elementos.deckB.style.clipPath = `inset(0 0 0 ${clipPercentual}%)`;
       elementos.divider.style.left = clipPercentual + "%";
     }
@@ -104439,6 +104452,7 @@ function attr(v4) {
 }
 
 // src/js/ui/pergunta.js
+var NOME_COMPONENTE_CORTINA = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 var AJUDA_MEDIDA_QUALIDADE = Object.freeze({
   incerteza: "O que mede: quanto a estimativa do hex\xE1gono pode variar. Como se calcula: a largura da faixa de 95% (m\xE1ximo menos m\xEDnimo) dividida pelo valor estimado. Quando desconfiar: acima de 0,7 a faixa j\xE1 \xE9 quase do tamanho do valor; acima de 1, \xE9 maior que ele.",
   qualidade_dado: "O que mede: se o hex\xE1gono tem dado completo. Como se calcula: marca do pacote que separa estimativa plena, parte em sigilo do IBGE (Instituto Brasileiro de Geografia e Estat\xEDstica) e sem dado. Quando desconfiar: com sigilo ou sem dado, o n\xFAmero do hex\xE1gono \xE9 parcial ou n\xE3o existe.",
@@ -104477,7 +104491,7 @@ var NOME_MEDIDA_QUALIDADE = {
 };
 function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
   elementos.selPeriodo.innerHTML = manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
-  elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option>` + manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
+  elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option><optgroup label="Outro per\xEDodo">${manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("")}</optgroup><optgroup label="Outro componente, mesmo per\xEDodo">${Object.entries(NOME_COMPONENTE_CORTINA).map(([id3, nome]) => `<option value="${PREFIXO_COMPARAR_COMPONENTE}${id3}">${nome}</option>`).join("")}</optgroup>`;
   const seletorMedida = montarSeletorMedida(elementos.selMedidaQualidade, (id3) => loja.definir({ medida_qualidade: id3 }));
   elementos.segTema.querySelectorAll("button").forEach((b10) => {
     b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
@@ -104486,7 +104500,11 @@ function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
     b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: [] });
   });
   elementos.segComponente.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: [] });
+    b10.onclick = () => {
+      const componente = b10.dataset.v;
+      const comparar = loja.obter().comparar === PREFIXO_COMPARAR_COMPONENTE + componente ? null : loja.obter().comparar;
+      loja.definir({ componente, comparar, faixa_hist: [] });
+    };
   });
   elementos.selPeriodo.onchange = () => {
     const periodo = elementos.selPeriodo.value;
@@ -104502,6 +104520,9 @@ function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
     elementos.segComponente.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.componente)));
     elementos.selPeriodo.value = estado.periodo;
     elementos.selComparar.value = estado.comparar ?? "";
+    elementos.selComparar.querySelectorAll("option").forEach((op2) => {
+      op2.disabled = !!op2.value && (op2.value === estado.periodo || op2.value === PREFIXO_COMPARAR_COMPONENTE + estado.componente);
+    });
     const qualidade = estado.tema === "qualidade";
     elementos.ctlMedida.hidden = qualidade;
     elementos.ctlMedidaQualidade.hidden = !qualidade;
@@ -104623,14 +104644,22 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
     } else {
       faixa = estado.componente === "total" ? "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas." : "sem faixa (provis\xF3ria)";
     }
-    if (estado.comparar) {
-      const m4 = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
+    const alvo = alvoComparacao(estado);
+    if (alvo?.tipo === "componente") {
+      const tb2 = totalDoMapa(totais, alvo.componente, estado.periodo);
+      if (tb2) {
+        const nomeB = CLAB2[alvo.componente];
+        faixa += `<br>na cortina, ${nomeB}: ${formatar(isRel && dom ? tb2.total * k5 : tb2.total, isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}`;
+      }
+    }
+    if (alvo?.tipo === "periodo") {
+      const m4 = mudanca(totais, estado.componente, alvo.periodo, estado.periodo);
       if (m4) {
         const dlt = m4.delta * (isRel && dom ? k5 : 1);
         let z4 = "";
         if (m4.z != null) z4 = ` \xB7 z = ${formatar(m4.z, 2)} (${m4.z < 1.96 ? "dentro do ru\xEDdo" : "mudan\xE7a afirm\xE1vel"})`;
         const rotulo2 = m4.calculado ? " (calculado no site)" : "";
-        faixa += `<br>contra ${manifesto.periodos.find((p4) => p4.id === estado.comparar)?.rotulo}: ${dlt >= 0 ? "+" : "\u2212"}${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}${z4}${rotulo2}`;
+        faixa += `<br>contra ${manifesto.periodos.find((p4) => p4.id === alvo.periodo)?.rotulo}: ${dlt >= 0 ? "+" : "\u2212"}${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}${z4}${rotulo2}`;
       }
     }
     elementos.range.innerHTML = faixa;
@@ -105484,12 +105513,26 @@ async function iniciarExplorador() {
     btn.textContent = `Ver ${CLAB4[alvo]}`;
     btn.onclick = () => loja.definir({ componente: alvo, faixa_hist: [] });
   }
+  function ladoCortina(estado) {
+    const alvo = alvoComparacao(estado);
+    if (!alvo) return null;
+    const rot = (id3) => manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3;
+    if (alvo.tipo === "periodo") return { periodo: alvo.periodo, estado, obterValor: obterValorMapa(estado).fn, rotulo: rot(alvo.periodo) };
+    const estadoB = { ...estado, componente: alvo.componente };
+    return {
+      periodo: estado.periodo,
+      estado: estadoB,
+      obterValor: obterValorMapa(estadoB).fn,
+      rotulo: `${CLAB4[alvo.componente]} \xB7 ${rot(estado.periodo)}`,
+      rotuloA: `${CLAB4[estado.componente]} \xB7 ${rot(estado.periodo)}`
+    };
+  }
   function renderTudo(estado) {
     sincronizarPergunta(estado);
     renderizarAvisoMapa(estado);
     renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
-    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo, filtroQuadrante(estado));
+    mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo, filtroQuadrante(estado), ladoCortina(estado));
     mapa.renderizarCamadasUI(
       estado,
       (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }),
@@ -106887,7 +106930,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "1026f77ecc1d8aa882e4b8d0c5f3d709293b7097");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "55a59e284e702839c3556c925748f54e7a8b5672");
   renderizarInterna($7("met-interna"), modelo);
 }
 

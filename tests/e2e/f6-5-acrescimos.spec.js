@@ -224,3 +224,38 @@ test.describe("E: rastreio da execução recolhido com resumo de uma linha", () 
     await expect(page.locator("#met-rastreio-arquivos")).toBeVisible();
   });
 });
+
+test.describe("F1: cortina comparando componentes no mesmo período", () => {
+  test("Coabitação × Ônus em 2025: dois lados rotulados, pergunta e resposta falam da comparação", async ({ page }) => {
+    await abrirResultados(page, 1920, 1080);
+    await page.locator('#f1-seg-comp button[data-v="coabitacao"]').click();
+    await page.selectOption("#f1-sel-per", "2025");
+    // as duas famílias de opção existem
+    await expect(page.locator('#f1-sel-cmp optgroup[label="Outro período"] option')).not.toHaveCount(0);
+    await expect(page.locator('#f1-sel-cmp optgroup[label="Outro componente, mesmo período"] option')).toHaveCount(4);
+    await expect(page.locator('#f1-sel-cmp option[value="c:coabitacao"]')).toBeDisabled();
+    await page.selectOption("#f1-sel-cmp", "c:onus");
+    await page.waitForTimeout(600);
+    await expect(page.locator("#f1-deckB")).toBeVisible();
+    await expect(page.locator("#f1-labA")).toHaveText("Coabitação · 2025");
+    await expect(page.locator("#f1-labB")).toHaveText("Ônus · 2025");
+    await expect(page.locator("#f1-question")).toContainText("Comparado com ônus, no mesmo período");
+    await expect(page.locator("#f1-ans-range")).toContainText("na cortina, Ônus");
+    // trocar o componente para o mesmo da cortina desliga a cortina
+    await page.locator('#f1-seg-comp button[data-v="onus"]').click();
+    await page.waitForTimeout(300);
+    const estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.comparar).toBeNull();
+    await expect(page.locator("#f1-deckB")).toBeHidden();
+  });
+
+  test("comparação por período continua igual", async ({ page }) => {
+    await abrirResultados(page, 1920, 1080);
+    await page.selectOption("#f1-sel-per", "2025");
+    await page.selectOption("#f1-sel-cmp", "2022");
+    await page.waitForTimeout(500);
+    await expect(page.locator("#f1-labA")).toHaveText("2025");
+    await expect(page.locator("#f1-labB")).toHaveText("2022");
+    await expect(page.locator("#f1-ans-range")).toContainText("contra 2022");
+  });
+});

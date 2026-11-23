@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, beforeEach } from "vitest";
-import { estadoInicial, textoPergunta, salvarLocalStorage } from "../../src/js/estado/pergunta.js";
+import { estadoInicial, textoPergunta, salvarLocalStorage, alvoComparacao } from "../../src/js/estado/pergunta.js";
 
 const MANIFESTO = {
   periodos: [
@@ -53,5 +53,20 @@ describe("estado/pergunta.js", () => {
   it("pergunta do tema qualidade", () => {
     const estado = { ...estadoInicial(MANIFESTO), tema: "qualidade", componente: "coabitacao" };
     expect(textoPergunta(estado, MANIFESTO)).toBe("Quão confiável é a estimativa de coabitação em 2025?");
+  });
+});
+
+describe("acréscimo F: cortina por período ou por componente", () => {
+  it("alvoComparacao distingue período e componente; ignora o próprio", () => {
+    const base = { ...estadoInicial(MANIFESTO), componente: "coabitacao" };
+    expect(alvoComparacao({ ...base, comparar: null })).toBeNull();
+    expect(alvoComparacao({ ...base, comparar: "c:onus" })).toEqual({ tipo: "componente", componente: "onus", periodo: base.periodo });
+    expect(alvoComparacao({ ...base, comparar: "c:coabitacao" })).toBeNull();
+    const outro = MANIFESTO.periodos.find((p) => p.id !== base.periodo).id;
+    expect(alvoComparacao({ ...base, comparar: outro })).toEqual({ tipo: "periodo", periodo: outro, componente: "coabitacao" });
+  });
+  it("a pergunta menciona o componente da cortina", () => {
+    const e = { ...estadoInicial(MANIFESTO), tema: "deficit", componente: "coabitacao", comparar: "c:onus" };
+    expect(textoPergunta(e, MANIFESTO)).toMatch(/Comparado com ônus, no mesmo período\./i);
   });
 });

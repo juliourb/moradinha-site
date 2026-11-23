@@ -2,6 +2,7 @@
 import { formatar, formatarPercentual } from "../util/formato.js";
 import { rotuloMarca, classeMarca } from "../util/marcas.js";
 import { totalDoMapa, domiciliosTotal, mudanca, COMPONENTES_BASE } from "../dados/calculo.js";
+import { alvoComparacao } from "../estado/pergunta.js";
 
 const CLAB = { total: "Total", coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
 
@@ -47,14 +48,22 @@ export function renderizarResposta(elementos, estado, manifesto, totais, aoClica
           : "sem faixa (provisória)";
     }
 
-    if (estado.comparar) {
-      const m = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
+    const alvo = alvoComparacao(estado);
+    if (alvo?.tipo === "componente") {
+      const tb = totalDoMapa(totais, alvo.componente, estado.periodo);
+      if (tb) {
+        const nomeB = CLAB[alvo.componente];
+        faixa += `<br>na cortina, ${nomeB}: ${formatar(isRel && dom ? tb.total * k : tb.total, isRel ? 2 : 0)}${isRel ? " %" : " domicílios"}`;
+      }
+    }
+    if (alvo?.tipo === "periodo") {
+      const m = mudanca(totais, estado.componente, alvo.periodo, estado.periodo);
       if (m) {
         const dlt = m.delta * (isRel && dom ? k : 1);
         let z = "";
         if (m.z != null) z = ` · z = ${formatar(m.z, 2)} (${m.z < 1.96 ? "dentro do ruído" : "mudança afirmável"})`;
         const rotulo = m.calculado ? " (calculado no site)" : "";
-        faixa += `<br>contra ${manifesto.periodos.find((p) => p.id === estado.comparar)?.rotulo}: ${
+        faixa += `<br>contra ${manifesto.periodos.find((p) => p.id === alvo.periodo)?.rotulo}: ${
           dlt >= 0 ? "+" : "−"
         }${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domicílios"}${z}${rotulo}`;
       }

@@ -195,7 +195,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     novo: "--crit", existente: "--ok",
   };
 
-  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado) {
+  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado, obterValorB = obterValor) {
     if (tipoMedida === "categorica" || estado?.tema === "deficit") {
       // Déficit: escala vem de escalasAbsolutas/escalasRelativas (calculadas
       // uma vez por componente, SPEC_F6 C4). Qualidade/categórica seguem abaixo.
@@ -204,10 +204,11 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     }
     const vs = [];
     for (const l of linhasArr) {
-      for (const p of [periodo, periodoComparar]) {
-        if (!p) continue;
-        const v = obterValor(l, p);
-        if (v != null && v > 0) vs.push(v);
+      const v = obterValor(l, periodo);
+      if (v != null && v > 0) vs.push(v);
+      if (periodoComparar) {
+        const vb = obterValorB(l, periodoComparar);
+        if (vb != null && vb > 0) vs.push(vb);
       }
     }
     vs.sort(ascending);
@@ -338,9 +339,12 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     };
   }
 
-  function camadasPara(periodo, estado, obterValor, lado, tipoMedida) {
+  function camadasPara(periodo, estado, obterValor, lado, tipoMedida, estadoEscala = estado) {
     const L = [];
-    const contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
+    // Acréscimo F: na cortina entre componentes, o lado B usa as quebras do lado A
+    // (mesma régua de cores dos dois lados); "vezes a taxa" segue a taxa de cada componente.
+    let contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
+    if (contexto && estadoEscala !== estado && contexto.tipo !== "vezes_taxa") contexto = contextoCorDeficit(estadoEscala, estadoEscala.periodo);
     L.push(
       new H3HexagonLayer({
         id: "hex-" + lado,
@@ -690,21 +694,24 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     definirModoBase(modo);
   }
 
-  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null) {
+  /**
+   * @param ladoB acréscimo F: {periodo, estado, obterValor, rotulo} do lado direito
+   *   da cortina (outro período ou outro componente), ou null sem cortina.
+   */
+  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null, ladoB = null) {
     filtroH3 = filtro;
-    computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
+    computarEscala(estado.periodo, ladoB?.periodo ?? null, obterValor, tipoMedida, estado, ladoB?.obterValor ?? obterValor);
     instancias.a.overlay.setProps({ layers: camadasPara(estado.periodo, estado, obterValor, "a", tipoMedida) });
 
-    const ligada = !!estado.comparar;
+    const ligada = !!ladoB;
     elementos.deckB.style.display = ligada ? "block" : "none";
     elementos.divider.style.display = ligada ? "block" : "none";
     elementos.labB.style.display = ligada ? "block" : "none";
     const perA = manifesto.periodos.find((p) => p.id === estado.periodo);
-    elementos.labA.textContent = perA?.rotulo ?? "";
+    elementos.labA.textContent = ladoB?.rotuloA ?? perA?.rotulo ?? "";
     if (ligada) {
-      instancias.b.overlay.setProps({ layers: camadasPara(estado.comparar, estado, obterValor, "b", tipoMedida) });
-      const perB = manifesto.periodos.find((p) => p.id === estado.comparar);
-      elementos.labB.textContent = perB?.rotulo ?? "";
+      instancias.b.overlay.setProps({ layers: camadasPara(ladoB.periodo, ladoB.estado, ladoB.obterValor, "b", tipoMedida, estado) });
+      elementos.labB.textContent = ladoB.rotulo;
       elementos.deckB.style.clipPath = `inset(0 0 0 ${clipPercentual}%)`;
       elementos.divider.style.left = clipPercentual + "%";
     }
