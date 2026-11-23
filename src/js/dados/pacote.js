@@ -41,15 +41,18 @@ function conexao() {
 }
 
 /**
- * Escolhe o domínio do catálogo: `?dominio=<conjunto_id>` na URL, se existir e
- * for conhecido (útil para conferir um pacote específico, ex. nos testes);
- * senão a edição padrão do primeiro domínio (SPEC_F5 trará o seletor de
- * verdade, com vários domínios públicos).
+ * Escolhe o domínio e a edição do catálogo: `?dominio=<conjunto_id>` e
+ * `?edicao=<edicao>` na URL, se existirem e forem conhecidos (usado pelo
+ * seletor do cabeçalho — SPEC_F5 — e por quem quiser abrir uma edição
+ * específica, como os testes); sem parâmetros, usa o primeiro domínio do
+ * catálogo e a edição marcada `padrao` (sempre a real e pública).
  */
 export function escolherDominioEEdicao(catalogo) {
-  const pedido = new URLSearchParams(window.location.search).get("dominio");
-  const dominio = catalogo.dominios.find((d) => d.conjunto_id === pedido) ?? catalogo.dominios[0];
-  const edicao = dominio.edicoes.find((e) => e.padrao) ?? dominio.edicoes[0];
+  const params = new URLSearchParams(window.location.search);
+  const pedidoDominio = params.get("dominio");
+  const pedidoEdicao = params.get("edicao");
+  const dominio = catalogo.dominios.find((d) => d.conjunto_id === pedidoDominio) ?? catalogo.dominios[0];
+  const edicao = dominio.edicoes.find((e) => e.edicao === pedidoEdicao) ?? dominio.edicoes.find((e) => e.padrao) ?? dominio.edicoes[0];
   return { dominio, edicao };
 }
 
@@ -84,6 +87,13 @@ export async function carregarBinario(origem, arquivo) {
   return resposta.arrayBuffer();
 }
 
+/** Texto cru de um arquivo do próprio site (não do pacote) — usado para `grupos_pipeline.yml` (SPEC_F6 B4). */
+export async function carregarTexto(caminho) {
+  const resposta = await fetch(caminho);
+  if (!resposta.ok) throw new Error(`${caminho}: HTTP ${resposta.status}`);
+  return resposta.text();
+}
+
 export function dividirCodigos(campo) {
   return campo ? String(campo).split(";").filter(Boolean) : [];
 }
@@ -101,9 +111,12 @@ export function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }
       h3: a.h3,
       municipioCod: a.municipio_cod,
       municipioNome: a.municipio_nome,
-      nMunicipios: a.n_municipios,
+      // n_municipios/n_aps são BIGINT no Parquet (DuckDB devolve BigInt); convertidos
+      // aqui para Number — são contagens pequenas e o resto do código faz aritmética
+      // comum (ex.: "- 1" na dica do hexágono), que quebra ao misturar BigInt e Number.
+      nMunicipios: Number(a.n_municipios),
       apCod: a.ap_cod,
-      nAps: a.n_aps,
+      nAps: Number(a.n_aps),
       fcuFracao: a.fcu_fracao,
       recortes: dividirCodigos(a.recortes),
       dom: {},
@@ -124,7 +137,7 @@ export function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }
     l.qualidade[q.periodo] = {
       fracaoImputada: q.fracao_imputada ?? null,
       fracaoSigilo: q.fracao_sigilo ?? null,
-      nSetores: q.n_setores,
+      nSetores: q.n_setores == null ? null : Number(q.n_setores),
       fonteEstoque: q.fonte_estoque,
       gEstoque: q.g_estoque ?? null,
       hexNovo: q.hex_novo,
@@ -191,11 +204,16 @@ export async function carregarPacoteCompleto(origem) {
 
   const { linhas, ap } = montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows });
 
-  const [contornosAp, contornosMunicipios, contornosFcu] = await Promise.all([
-    carregarJSON(origem, "contornos/ap.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/municipios.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/fcu.geojson").catch(() => null),
+  // Só busca um arquivo opcional se o manifesto o declarar (manifesto.arquivos):
+  // pedir um arquivo que não existe no pacote loga erro 404 no console do
+  // navegador mesmo com o fetch tratado, e isso quebraria o F2-5 (sem erro no console).
+  const temArquivo = (nome) => nome in (manifesto.arquivos ?? {});
+  const [contornosAp, contornosMunicipios, contornosFcu, contornosRecortes] = await Promise.all([
+    temArquivo("contornos/ap.geojson") ? carregarJSON(origem, "contornos/ap.geojson").catch(() => null) : null,
+    temArquivo("contornos/municipios.geojson") ? carregarJSON(origem, "contornos/municipios.geojson").catch(() => null) : null,
+    temArquivo("contornos/fcu.geojson") ? carregarJSON(origem, "contornos/fcu.geojson").catch(() => null) : null,
+    temArquivo("contornos/recortes.geojson") ? carregarJSON(origem, "contornos/recortes.geojson").catch(() => null) : null,
   ]);
 
-  return { manifesto, totais, qualidade, linhas, ap, contornosAp, contornosMunicipios, contornosFcu };
+  return { manifesto, totais, qualidade, linhas, ap, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes };
 }

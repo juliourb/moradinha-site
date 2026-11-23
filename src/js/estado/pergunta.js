@@ -25,7 +25,7 @@ export const MEDIDAS_QUALIDADE = [
 export function estadoInicial(manifesto) {
   const periodos = manifesto?.periodos ?? [];
   const periodoPadrao = periodos[3]?.id ?? periodos[periodos.length - 1]?.id ?? null;
-  const camadas = { ap: true, fcu: false };
+  const camadas = { ap: true, fcu: false, municipios: false };
   for (const recorte of manifesto?.recortes ?? []) camadas[recorte.id] = false;
 
   const salvo = lerLocalStorage();
@@ -34,13 +34,16 @@ export function estadoInicial(manifesto) {
     medida_qualidade: "incerteza",
     conjunto_graficos: 0,
     medida: "absoluto",
+    relativo_modo: "quebras",
+    opacidade: 0.8,
+    mapa_base_cinza: false,
     componente: "total",
     periodo: periodoPadrao,
-    comparar: null,
     selecionado: null,
-    faixa_hist: null,
+    faixa_hist: [],
     camadas,
     ...salvo,
+    comparar: null,
   };
 }
 
@@ -56,7 +59,9 @@ function lerLocalStorage() {
 /** @param {object} estado */
 export function salvarLocalStorage(estado) {
   try {
-    const { selecionado, faixa_hist, ...persistido } = estado;
+    // comparar (cortina) nunca persiste: N6 pede que ela comece desligada em
+    // toda carga/recarga da página.
+    const { selecionado, faixa_hist, comparar, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
     // localStorage indisponível (modo privado, quota, etc.): segue sem persistir.

@@ -1,5 +1,7 @@
-## Exportação
+::: {.sintese}
+O site recebe só números agregados, validados e com a impressão digital de cada arquivo.
+:::
 
-<span class="pill warn">rascunho</span>
-
-Monta o pacote de publicação: só os números do contrato, com manifesto, hashes e sem microdado.
+::: {.explicacao}
+O pacote público não leva microdado, e a estimativa direta por área só aparece em áreas com pelo menos 30 domicílios na amostra. Cada arquivo tem a sua impressão digital (hash) no manifesto, o pacote é validado antes de sair, e a edição citada é o commit exato do código que o gerou.
+:::

@@ -1,6 +1,7 @@
-## Treino
+::: {.sintese}
+Um modelo aditivo (EBM) aprende onde a chance de déficit é maior. Ele só é usado onde erra menos que a repartição simples: na coabitação e no ônus, sim; na precariedade, não.
+:::
 
-<span class="pill warn">rascunho</span>
-
-Treina um EBM (Explainable Boosting Machine) por componente, validado fora da dobra por área de
-ponderação [@nori2019interpretml].
+::: {.explicacao}
+O EBM (Explainable Boosting Machine) aprende, por componente, quanto cada característica do domicílio que existe ao mesmo tempo na amostra e no universo do Censo (espécie, moradores, água, banheiros, esgoto e lixo) aumenta ou diminui a chance de déficit. O ônus usa também cinco variáveis do território. O teste deixa cada área de ponderação de fora do treino e compara o modelo com a repartição mais simples, a mesma taxa para todos. A coabitação e o ônus venceram essa repartição; a precariedade não, e por isso usa a taxa única: a estimativa de cada área de ponderação é repartida entre os seus hexágonos na proporção dos domicílios de cada um. [@nori2019interpretml; @lou2013ga2m; @roberts2017blockcv]
+:::

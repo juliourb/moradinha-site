@@ -12,12 +12,12 @@ const ROTULO_MEDIDA_QUALIDADE = {
 };
 const NOME_MEDIDA_QUALIDADE = {
   incerteza: "Incerteza",
-  qualidade_dado: "Qualidade do dado",
-  ressalva_ap: "Ressalva da AP",
-  cv_ap: "Precisão da amostra (CV)",
-  imputacao: "Parte imputada",
-  estoque: "Mudança do estoque",
-  hex_novo: "Hexágono novo",
+  qualidade_dado: "Dado",
+  ressalva_ap: "Ressalva AP",
+  cv_ap: "CV da AP",
+  imputacao: "Imputada",
+  estoque: "Estoque",
+  hex_novo: "Novo",
 };
 
 /** @param {(id:string)=>boolean} medidaConstante devolve true quando a medida é constante no período corrente */
@@ -25,24 +25,24 @@ export function ligarPergunta(elementos, manifesto, loja, medidaConstante) {
   elementos.selPeriodo.innerHTML = manifesto.periodos.map((p) => `<option value="${p.id}">${p.rotulo}</option>`).join("");
   elementos.selComparar.innerHTML =
     `<option value="">sem comparação</option>` + manifesto.periodos.map((p) => `<option value="${p.id}">${p.rotulo}</option>`).join("");
-  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id) => `<option value="${id}">${NOME_MEDIDA_QUALIDADE[id]}</option>`).join("");
+  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id) => `<option value="${id}" title="${ROTULO_MEDIDA_QUALIDADE[id]}">${NOME_MEDIDA_QUALIDADE[id]}</option>`).join("");
 
   elementos.segTema.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ tema: b.dataset.v, conjunto_graficos: b.dataset.v === "qualidade" ? 1 : 0, faixa_hist: null });
+    b.onclick = () => loja.definir({ tema: b.dataset.v, conjunto_graficos: b.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
   });
   elementos.segMedida.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ medida: b.dataset.v, faixa_hist: null });
+    b.onclick = () => loja.definir({ medida: b.dataset.v, faixa_hist: [] });
   });
   elementos.segComponente.querySelectorAll("button").forEach((b) => {
-    b.onclick = () => loja.definir({ componente: b.dataset.v, faixa_hist: null });
+    b.onclick = () => loja.definir({ componente: b.dataset.v, faixa_hist: [] });
   });
   elementos.selPeriodo.onchange = () => {
     const periodo = elementos.selPeriodo.value;
-    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: null });
+    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: [] });
   };
   elementos.selComparar.onchange = () => {
     const comparar = elementos.selComparar.value || null;
-    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: null });
+    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: [] });
   };
   elementos.selMedidaQualidade.onchange = () => loja.definir({ medida_qualidade: elementos.selMedidaQualidade.value });
 
@@ -57,12 +57,14 @@ export function ligarPergunta(elementos, manifesto, loja, medidaConstante) {
     const qualidade = estado.tema === "qualidade";
     elementos.ctlMedida.hidden = qualidade;
     elementos.ctlMedidaQualidade.hidden = !qualidade;
-    elementos.explicacaoMedidaQualidade.textContent = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    const expl = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    elementos.explicacaoMedidaQualidade.textContent = expl;
+    elementos.selMedidaQualidade.title = expl;
 
     elementos.selMedidaQualidade.querySelectorAll("option").forEach((op) => {
       const constante = medidaConstante ? medidaConstante(op.value) : false;
       op.disabled = constante;
-      op.title = constante ? "igual em todos os hexágonos neste período" : "";
+      op.title = constante ? "igual em todos os hexágonos neste período" : ROTULO_MEDIDA_QUALIDADE[op.value] ?? "";
     });
 
     elementos.question.textContent = textoPergunta(estado, manifesto);

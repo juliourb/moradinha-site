@@ -48,7 +48,7 @@ test.describe("F1-7: tempo até mapa-pronto", () => {
       const context = await browser.newContext();
       const page = await context.newPage();
       const t0 = Date.now();
-      await page.goto("/resultados.html");
+      await page.goto("/resultados.html?edicao=ficticio");
       await aguardarMapaPronto(page);
       tempos.push(Date.now() - t0);
       await context.close();
@@ -65,7 +65,7 @@ test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
     // Viewport largo: "comparar com (cortina)" fica sempre na barra (sem
     // precisar abrir o menu "Mais" — isso tem teste próprio, F1-5).
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
 
     const pergunta1 = await page.locator("#f1-question").textContent();
@@ -106,7 +106,7 @@ test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
     expect(labelAntes).toBeTruthy();
 
     // Minimizar um gráfico faz o mapa crescer (classe "min" aplicada)
-    await page.locator('[data-k="hist"] .iconbtn').click();
+    await page.locator('[data-k="hist"] .iconbtn[aria-label="Minimizar distribuição"]').click();
     await expect(page.locator('[data-k="hist"]')).toHaveClass(/min/);
 
     // Minimizar o dock inteiro
@@ -127,10 +127,10 @@ test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
   });
 });
 
-test.describe("F1-5: menu 'Mais' abaixo de 1600px", () => {
+test.describe("F1-5: menu 'Mais' abaixo de 1100px", () => {
   test("abre por clique e por teclado (Escape fecha); comparar funciona de dentro do menu", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/resultados.html");
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
 
     await expect(page.locator("#f1-mais-btn")).toBeVisible();
@@ -148,9 +148,9 @@ test.describe("F1-5: menu 'Mais' abaixo de 1600px", () => {
     await expect(page.locator("#f1-mais-btn")).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("acima de 1600px o menu some e o controle fica sempre visível na barra", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto("/resultados.html");
+  test("a partir de 1100px o menu some e o controle fica sempre visível na barra", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await expect(page.locator("#f1-mais-btn")).toBeHidden();
     await expect(page.locator("#f1-sel-cmp")).toBeVisible();
@@ -163,7 +163,7 @@ test.describe("F1-16: mapa de base sem chave de API", () => {
     page.on("request", (req) => {
       if (/tiles\.openfreemap\.org/.test(req.url())) urls.push(req.url());
     });
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await page.waitForTimeout(1000);
     expect(urls.length).toBeGreaterThan(0);
@@ -176,7 +176,7 @@ test.describe("F1-16: mapa de base sem chave de API", () => {
 test.describe("F1-10: mapa de base indisponível", () => {
   test("rota bloqueada -> aviso aparece e o resto funciona", async ({ page }) => {
     await page.route("https://tiles.openfreemap.org/**", (route) => route.abort());
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await expect(page.locator("#f1-basefail")).toBeVisible({ timeout: 10000 });
     // o resto do explorador segue funcionando mesmo sem mapa de base
     await expect(page.locator("#f1-ans-big")).not.toHaveText("");
@@ -187,7 +187,7 @@ test.describe("F1-9: capturas claro/escuro", () => {
   for (const tema of ["light", "dark"]) {
     test(`tema ${tema}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: tema });
-      await page.goto("/resultados.html");
+      await page.goto("/resultados.html?edicao=ficticio");
       await aguardarMapaPronto(page);
       await page.waitForTimeout(500);
       await page.screenshot({ path: join(PASTA_RELATORIO, `resultados-${tema}.png`), fullPage: true });
@@ -197,7 +197,7 @@ test.describe("F1-9: capturas claro/escuro", () => {
 
 test.describe("F1-8: axe-core e teclado", () => {
   test("sem violação serious/critical", async ({ page }) => {
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     const resultado = await new AxeBuilder({ page }).analyze();
     const graves = resultado.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
@@ -205,7 +205,7 @@ test.describe("F1-8: axe-core e teclado", () => {
   });
 
   test("controles operáveis por teclado (Tab/Enter/setas)", async ({ page }) => {
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await page.locator('#f1-seg-tema button[data-v="deficit"]').focus();
     await page.keyboard.press("Tab");
@@ -222,7 +222,7 @@ test.describe("F1-5 (critério v1.3): cabeçalho+pergunta+mapa visíveis; dock e
   ]) {
     test(`${w}x${h}`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: h });
-      await page.goto("/resultados.html");
+      await page.goto("/resultados.html?edicao=ficticio");
       await aguardarMapaPronto(page);
       const medidas = await page.evaluate(() => {
         const mapbox = document.getElementById("f1-mapbox").getBoundingClientRect();
@@ -246,7 +246,7 @@ test.describe("F1-5 (critério v1.3): cabeçalho+pergunta+mapa visíveis; dock e
 
   test("gráficos abertos por padrão em 1440x900 (não minimizados)", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await expect(page.locator(".dcard.min")).toHaveCount(0);
   });
@@ -265,7 +265,7 @@ test.describe("F1-1: número grande da resposta lido do DOM bate com o pacote", 
     const amostra = combos.slice(0, 12);
     expect(amostra.length).toBe(12);
 
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
 
     for (const { medida, comp, per } of amostra) {
@@ -297,7 +297,7 @@ test.describe("F1-17 (DOM): hexágono com n_aps > 1 mostra o aviso", () => {
     expect(linhas.length).toBe(1);
     const h3DeBorda = linhas[0].h3;
 
-    await page.goto("/resultados.html");
+    await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await page.evaluate((h3) => window.__moradinhaSelecionarHex(h3), h3DeBorda);
     await expect(page.locator("#f1-detail")).toContainText(/cruza/i);

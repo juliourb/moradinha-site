@@ -438,12 +438,12 @@ var require_earcut = __commonJS({
       return polygonArea === 0 && trianglesArea === 0 ? 0 : Math.abs((trianglesArea - polygonArea) / polygonArea);
     };
     function signedArea(data, start2, end, dim) {
-      var sum = 0;
+      var sum2 = 0;
       for (var i3 = start2, j4 = end - dim; i3 < end; i3 += dim) {
-        sum += (data[j4] - data[i3]) * (data[i3 + 1] + data[j4 + 1]);
+        sum2 += (data[j4] - data[i3]) * (data[i3 + 1] + data[j4 + 1]);
         j4 = i3;
       }
-      return sum;
+      return sum2;
     }
     earcut3.flatten = function(data) {
       var dim = data[0][0].length, result = { vertices: [], holes: [], dimensions: dim }, holeIndex = 0;
@@ -516,7 +516,7 @@ function __await(v4) {
 }
 function __asyncGenerator(thisArg, _arguments, generator) {
   if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-  var g4 = generator.apply(thisArg, _arguments || []), i3, q4 = [];
+  var g5 = generator.apply(thisArg, _arguments || []), i3, q4 = [];
   return i3 = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i3[Symbol.asyncIterator] = function() {
     return this;
   }, i3;
@@ -526,7 +526,7 @@ function __asyncGenerator(thisArg, _arguments, generator) {
     };
   }
   function verb(n3, f4) {
-    if (g4[n3]) {
+    if (g5[n3]) {
       i3[n3] = function(v4) {
         return new Promise(function(a5, b10) {
           q4.push([n3, v4, a5, b10]) > 1 || resume(n3, v4);
@@ -537,7 +537,7 @@ function __asyncGenerator(thisArg, _arguments, generator) {
   }
   function resume(n3, v4) {
     try {
-      step(g4[n3](v4));
+      step(g5[n3](v4));
     } catch (e67) {
       settle(q4[0][3], e67);
     }
@@ -5664,11 +5664,11 @@ function popcnt_bit_range(data, lhs, rhs) {
     return 0;
   }
   if (rhs - lhs < 8) {
-    let sum = 0;
+    let sum2 = 0;
     for (const bit of new BitIterator(data, lhs, rhs - lhs, data, getBit)) {
-      sum += bit;
+      sum2 += bit;
     }
-    return sum;
+    return sum2;
   }
   const rhsInside = rhs >> 3 << 3;
   const lhsInside = lhs + (lhs % 8 === 0 ? 0 : 8 - lhs % 8);
@@ -6626,22 +6626,22 @@ var MemoizedVector = class _MemoizedVector extends Vector {
     const get3 = this.get;
     const set7 = this.set;
     const slice3 = this.slice;
-    const cache = new Array(this.length);
+    const cache2 = new Array(this.length);
     Object.defineProperty(this, "get", {
       value(index) {
-        const cachedValue = cache[index];
+        const cachedValue = cache2[index];
         if (cachedValue !== void 0) {
           return cachedValue;
         }
         const value2 = get3.call(this, index);
-        cache[index] = value2;
+        cache2[index] = value2;
         return value2;
       }
     });
     Object.defineProperty(this, "set", {
       value(index, value2) {
         set7.call(this, index, value2);
-        cache[index] = value2;
+        cache2[index] = value2;
       }
     });
     Object.defineProperty(this, "slice", {
@@ -7918,25 +7918,25 @@ var BaseInt64 = class {
     ]);
     let product = L4[3] * R4[3];
     this.buffer[0] = product & 65535;
-    let sum = product >>> 16;
+    let sum2 = product >>> 16;
     product = L4[2] * R4[3];
-    sum += product;
+    sum2 += product;
     product = L4[3] * R4[2] >>> 0;
-    sum += product;
-    this.buffer[0] += sum << 16;
-    this.buffer[1] = sum >>> 0 < product ? carryBit16 : 0;
-    this.buffer[1] += sum >>> 16;
+    sum2 += product;
+    this.buffer[0] += sum2 << 16;
+    this.buffer[1] = sum2 >>> 0 < product ? carryBit16 : 0;
+    this.buffer[1] += sum2 >>> 16;
     this.buffer[1] += L4[1] * R4[3] + L4[2] * R4[2] + L4[3] * R4[1];
     this.buffer[1] += L4[0] * R4[3] + L4[1] * R4[2] + L4[2] * R4[1] + L4[3] * R4[0] << 16;
     return this;
   }
   _plus(other) {
-    const sum = this.buffer[0] + other.buffer[0] >>> 0;
+    const sum2 = this.buffer[0] + other.buffer[0] >>> 0;
     this.buffer[1] += other.buffer[1];
-    if (sum < this.buffer[0] >>> 0) {
+    if (sum2 < this.buffer[0] >>> 0) {
       ++this.buffer[1];
     }
-    this.buffer[0] = sum;
+    this.buffer[0] = sum2;
   }
   lessThan(other) {
     return this.buffer[1] < other.buffer[1] || this.buffer[1] === other.buffer[1] && this.buffer[0] < other.buffer[0];
@@ -8102,14 +8102,14 @@ var Int128 = class _Int128 {
     const R32 = new Uint642(new Uint32Array([other.buffer[0], 0]));
     let product = Uint642.multiply(L32, R32);
     this.buffer[0] = product.low();
-    const sum = new Uint642(new Uint32Array([product.high(), 0]));
+    const sum2 = new Uint642(new Uint32Array([product.high(), 0]));
     product = Uint642.multiply(L22, R32);
-    sum.plus(product);
+    sum2.plus(product);
     product = Uint642.multiply(L32, R22);
-    sum.plus(product);
-    this.buffer[1] = sum.low();
-    this.buffer[3] = sum.lessThan(product) ? 1 : 0;
-    this.buffer[2] = sum.high();
+    sum2.plus(product);
+    this.buffer[1] = sum2.low();
+    this.buffer[3] = sum2.lessThan(product) ? 1 : 0;
+    this.buffer[2] = sum2.high();
     const high = new Uint642(new Uint32Array(this.buffer.buffer, this.buffer.byteOffset + 8, 2));
     high.plus(Uint642.multiply(L1, R32)).plus(Uint642.multiply(L22, R22)).plus(Uint642.multiply(L32, R1));
     this.buffer[3] += Uint642.multiply(L0, R32).plus(Uint642.multiply(L1, R22)).plus(Uint642.multiply(L22, R1)).plus(Uint642.multiply(L32, R0)).low();
@@ -9988,7 +9988,7 @@ function buffersFromJSON(xs2, buffers = []) {
   return buffers;
 }
 function nullCountFromJSON(validity) {
-  return (validity || []).reduce((sum, val) => sum + +(val === 0), 0);
+  return (validity || []).reduce((sum2, val) => sum2 + +(val === 0), 0);
 }
 function fieldFromJSON(_field, dictionaries) {
   let id3;
@@ -12847,9 +12847,11 @@ function conexao() {
   return conexaoPromessa;
 }
 function escolherDominioEEdicao(catalogo) {
-  const pedido = new URLSearchParams(window.location.search).get("dominio");
-  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedido) ?? catalogo.dominios[0];
-  const edicao = dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
+  const params = new URLSearchParams(window.location.search);
+  const pedidoDominio = params.get("dominio");
+  const pedidoEdicao = params.get("edicao");
+  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedidoDominio) ?? catalogo.dominios[0];
+  const edicao = dominio.edicoes.find((e67) => e67.edicao === pedidoEdicao) ?? dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
   return { dominio, edicao };
 }
 async function consultar(sql) {
@@ -12873,6 +12875,11 @@ async function carregarBinario(origem, arquivo) {
   if (!resposta.ok) throw new Error(`${arquivo}: HTTP ${resposta.status}`);
   return resposta.arrayBuffer();
 }
+async function carregarTexto(caminho) {
+  const resposta = await fetch(caminho);
+  if (!resposta.ok) throw new Error(`${caminho}: HTTP ${resposta.status}`);
+  return resposta.text();
+}
 function dividirCodigos(campo) {
   return campo ? String(campo).split(";").filter(Boolean) : [];
 }
@@ -12883,9 +12890,12 @@ function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }) {
       h3: a5.h3,
       municipioCod: a5.municipio_cod,
       municipioNome: a5.municipio_nome,
-      nMunicipios: a5.n_municipios,
+      // n_municipios/n_aps são BIGINT no Parquet (DuckDB devolve BigInt); convertidos
+      // aqui para Number — são contagens pequenas e o resto do código faz aritmética
+      // comum (ex.: "- 1" na dica do hexágono), que quebra ao misturar BigInt e Number.
+      nMunicipios: Number(a5.n_municipios),
       apCod: a5.ap_cod,
-      nAps: a5.n_aps,
+      nAps: Number(a5.n_aps),
       fcuFracao: a5.fcu_fracao,
       recortes: dividirCodigos(a5.recortes),
       dom: {},
@@ -12906,7 +12916,7 @@ function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }) {
     l3.qualidade[q4.periodo] = {
       fracaoImputada: q4.fracao_imputada ?? null,
       fracaoSigilo: q4.fracao_sigilo ?? null,
-      nSetores: q4.n_setores,
+      nSetores: q4.n_setores == null ? null : Number(q4.n_setores),
       fonteEstoque: q4.fonte_estoque,
       gEstoque: q4.g_estoque ?? null,
       hexNovo: q4.hex_novo,
@@ -12962,12 +12972,30 @@ async function carregarPacoteCompleto(origem) {
     consultar(`SELECT * FROM read_parquet('${urlParquet(origem, "ap.parquet")}')`)
   ]);
   const { linhas, ap: ap2 } = montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows });
-  const [contornosAp, contornosMunicipios, contornosFcu] = await Promise.all([
-    carregarJSON(origem, "contornos/ap.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/municipios.geojson").catch(() => null),
-    carregarJSON(origem, "contornos/fcu.geojson").catch(() => null)
+  const temArquivo = (nome) => nome in (manifesto.arquivos ?? {});
+  const [contornosAp, contornosMunicipios, contornosFcu, contornosRecortes] = await Promise.all([
+    temArquivo("contornos/ap.geojson") ? carregarJSON(origem, "contornos/ap.geojson").catch(() => null) : null,
+    temArquivo("contornos/municipios.geojson") ? carregarJSON(origem, "contornos/municipios.geojson").catch(() => null) : null,
+    temArquivo("contornos/fcu.geojson") ? carregarJSON(origem, "contornos/fcu.geojson").catch(() => null) : null,
+    temArquivo("contornos/recortes.geojson") ? carregarJSON(origem, "contornos/recortes.geojson").catch(() => null) : null
   ]);
-  return { manifesto, totais, qualidade, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu };
+  return { manifesto, totais, qualidade, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes };
+}
+
+// src/js/dados/catalogo.js
+function dominiosPublicos(catalogo) {
+  return catalogo.dominios.filter((d3) => !d3.teste_apenas);
+}
+function edicoesPublicas(dominio) {
+  return dominio.edicoes.filter((e67) => !e67.teste_apenas);
+}
+function opcoesDominio(catalogo, dominioAtual) {
+  const base = dominiosPublicos(catalogo);
+  return base.some((d3) => d3.conjunto_id === dominioAtual.conjunto_id) ? base : [...base, dominioAtual];
+}
+function opcoesEdicao(dominio, edicaoAtual) {
+  const base = edicoesPublicas(dominio);
+  return base.some((e67) => e67.edicao === edicaoAtual.edicao) ? base : [...base, edicaoAtual];
 }
 
 // src/js/estado/loja.js
@@ -13015,7 +13043,7 @@ var MEDIDAS_QUALIDADE = [
 function estadoInicial(manifesto) {
   const periodos = manifesto?.periodos ?? [];
   const periodoPadrao = periodos[3]?.id ?? periodos[periodos.length - 1]?.id ?? null;
-  const camadas = { ap: true, fcu: false };
+  const camadas = { ap: true, fcu: false, municipios: false };
   for (const recorte of manifesto?.recortes ?? []) camadas[recorte.id] = false;
   const salvo = lerLocalStorage();
   return {
@@ -13023,13 +13051,16 @@ function estadoInicial(manifesto) {
     medida_qualidade: "incerteza",
     conjunto_graficos: 0,
     medida: "absoluto",
+    relativo_modo: "quebras",
+    opacidade: 0.8,
+    mapa_base_cinza: false,
     componente: "total",
     periodo: periodoPadrao,
-    comparar: null,
     selecionado: null,
-    faixa_hist: null,
+    faixa_hist: [],
     camadas,
-    ...salvo
+    ...salvo,
+    comparar: null
   };
 }
 function lerLocalStorage() {
@@ -13042,7 +13073,7 @@ function lerLocalStorage() {
 }
 function salvarLocalStorage(estado) {
   try {
-    const { selecionado, faixa_hist, ...persistido } = estado;
+    const { selecionado, faixa_hist, comparar, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
   }
@@ -13111,21 +13142,25 @@ function incertezaHex(linha, componente, periodo) {
   if (!r3 || r3.absoluto == null || r3.minimo == null || r3.maximo == null || r3.absoluto === 0) return null;
   return (r3.maximo - r3.minimo) / r3.absoluto;
 }
+function marcasHex(linha, componente, periodo) {
+  if (componente === "total") {
+    const s4 = /* @__PURE__ */ new Set();
+    for (const c3 of COMPONENTES_BASE) for (const m4 of linha.hex[periodo]?.[c3]?.marcas ?? []) s4.add(m4);
+    return [...s4];
+  }
+  return linha.hex[periodo]?.[componente]?.marcas ?? [];
+}
 function totalDoMapa(totais, componente, periodo) {
   if (componente === "total") {
     let soma = 0;
-    let epQuad = 0;
-    let semEp = false;
     const marcas = /* @__PURE__ */ new Set();
     for (const c3 of COMPONENTES_BASE) {
       const linha2 = linhaNoMapa(totais, c3, periodo);
       if (!linha2) return null;
       soma += linha2.total;
-      if (linha2.ep == null) semEp = true;
-      else epQuad += linha2.ep * linha2.ep;
-      for (const m4 of linha2.marcas ?? []) marcas.add(m4);
+      for (const m4 of linha2.marcas ?? []) if (m4 !== "total_fragil") marcas.add(m4);
     }
-    return { total: soma, ep: semEp ? null : Math.sqrt(epQuad), regime: "misto", marcas: [...marcas] };
+    return { total: soma, ep: null, regime: "misto", marcas: [...marcas] };
   }
   const linha = linhaNoMapa(totais, componente, periodo);
   if (!linha) return null;
@@ -13147,6 +13182,505 @@ function mudanca(totais, componente, periodoDe, periodoPara) {
   const delta = para.total - de4.total;
   const z4 = de4.ep != null && para.ep != null ? Math.abs(delta) / Math.sqrt(de4.ep ** 2 + para.ep ** 2) : null;
   return { delta, z: z4, marcas: [], calculado: true };
+}
+
+// src/js/util/marcas.js
+var MARCAS = Object.freeze({
+  total_fragil: "Total fr\xE1gil (CV acima de 15%)",
+  mudanca_no_ruido: "Mudan\xE7a dentro do ru\xEDdo",
+  fonte_estoque_diferente: "Estoque por fonte diferente dos demais anos (Open Buildings); n\xE3o comparar por hex\xE1gono",
+  media_inclui_fonte_diferente: "M\xE9dia inclui ano com estoque por fonte diferente",
+  precariedade_provisoria_sem_faixa: "Precariedade provis\xF3ria, sem faixa",
+  ap_ressalva: "AP com ressalva (CV acima de 30% ou direta zero)",
+  parcial_sigilo: "Parte em sigilo do Censo",
+  sem_dado: "Sem dado (sigilo total)"
+});
+function rotuloMarca(codigo) {
+  if (!(codigo in MARCAS)) {
+    throw new Error(`marca desconhecida (fora do vocabul\xE1rio fechado): "${codigo}"`);
+  }
+  return MARCAS[codigo];
+}
+function classeMarca(codigo) {
+  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
+  if (codigo === "fonte_estoque_diferente") return "crit";
+  return "info";
+}
+var ROTULOS_FONTE_ESTOQUE = Object.freeze({
+  censo: "Censo 2022",
+  open_buildings: "Open Buildings",
+  mapbiomas: "MapBiomas",
+  mista: "M\xE9dia de anos com fontes de estoque diferentes"
+});
+function rotuloFonteEstoque(valor) {
+  if (valor == null) return "\u2014";
+  return ROTULOS_FONTE_ESTOQUE[valor] ?? valor;
+}
+var PRIORIDADE_MARCAS = Object.freeze([
+  "total_fragil",
+  "fonte_estoque_diferente",
+  "ap_ressalva",
+  "mudanca_no_ruido",
+  "media_inclui_fonte_diferente",
+  "precariedade_provisoria_sem_faixa",
+  "parcial_sigilo",
+  "sem_dado"
+]);
+
+// node_modules/simple-statistics/dist/simple-statistics.mjs
+function makeMatrix(columns, rows) {
+  const matrix = [];
+  for (let i3 = 0; i3 < columns; i3++) {
+    const column = [];
+    for (let j4 = 0; j4 < rows; j4++) {
+      column.push(0);
+    }
+    matrix.push(column);
+  }
+  return matrix;
+}
+function numericSort(x5) {
+  return x5.slice().sort(function(a5, b10) {
+    return a5 - b10;
+  });
+}
+function uniqueCountSorted(x5) {
+  let uniqueValueCount = 0;
+  let lastSeenValue;
+  for (let i3 = 0; i3 < x5.length; i3++) {
+    if (i3 === 0 || x5[i3] !== lastSeenValue) {
+      lastSeenValue = x5[i3];
+      uniqueValueCount++;
+    }
+  }
+  return uniqueValueCount;
+}
+function ssq(j4, i3, sums, sumsOfSquares) {
+  let sji;
+  if (j4 > 0) {
+    const muji = (sums[i3] - sums[j4 - 1]) / (i3 - j4 + 1);
+    sji = sumsOfSquares[i3] - sumsOfSquares[j4 - 1] - (i3 - j4 + 1) * muji * muji;
+  } else {
+    sji = sumsOfSquares[i3] - sums[i3] * sums[i3] / (i3 + 1);
+  }
+  if (sji < 0) {
+    return 0;
+  }
+  return sji;
+}
+function fillMatrixColumn(iMin, iMax, cluster, matrix, backtrackMatrix, sums, sumsOfSquares) {
+  if (iMin > iMax) {
+    return;
+  }
+  const i3 = Math.floor((iMin + iMax) / 2);
+  matrix[cluster][i3] = matrix[cluster - 1][i3 - 1];
+  backtrackMatrix[cluster][i3] = i3;
+  let jlow = cluster;
+  if (iMin > cluster) {
+    jlow = Math.max(jlow, backtrackMatrix[cluster][iMin - 1] || 0);
+  }
+  jlow = Math.max(jlow, backtrackMatrix[cluster - 1][i3] || 0);
+  let jhigh = i3 - 1;
+  if (iMax < matrix[0].length - 1) {
+    jhigh = Math.min(jhigh, backtrackMatrix[cluster][iMax + 1] || 0);
+  }
+  let sji;
+  let sjlowi;
+  let ssqjlow;
+  let ssqj;
+  for (let j4 = jhigh; j4 >= jlow; --j4) {
+    sji = ssq(j4, i3, sums, sumsOfSquares);
+    if (sji + matrix[cluster - 1][jlow - 1] >= matrix[cluster][i3]) {
+      break;
+    }
+    sjlowi = ssq(jlow, i3, sums, sumsOfSquares);
+    ssqjlow = sjlowi + matrix[cluster - 1][jlow - 1];
+    if (ssqjlow < matrix[cluster][i3]) {
+      matrix[cluster][i3] = ssqjlow;
+      backtrackMatrix[cluster][i3] = jlow;
+    }
+    jlow++;
+    ssqj = sji + matrix[cluster - 1][j4 - 1];
+    if (ssqj < matrix[cluster][i3]) {
+      matrix[cluster][i3] = ssqj;
+      backtrackMatrix[cluster][i3] = j4;
+    }
+  }
+  fillMatrixColumn(
+    iMin,
+    i3 - 1,
+    cluster,
+    matrix,
+    backtrackMatrix,
+    sums,
+    sumsOfSquares
+  );
+  fillMatrixColumn(
+    i3 + 1,
+    iMax,
+    cluster,
+    matrix,
+    backtrackMatrix,
+    sums,
+    sumsOfSquares
+  );
+}
+function fillMatrices(data, matrix, backtrackMatrix) {
+  const nValues = matrix[0].length;
+  const shift = data[Math.floor(nValues / 2)];
+  const sums = [];
+  const sumsOfSquares = [];
+  for (let i3 = 0, shiftedValue; i3 < nValues; ++i3) {
+    shiftedValue = data[i3] - shift;
+    if (i3 === 0) {
+      sums.push(shiftedValue);
+      sumsOfSquares.push(shiftedValue * shiftedValue);
+    } else {
+      sums.push(sums[i3 - 1] + shiftedValue);
+      sumsOfSquares.push(
+        sumsOfSquares[i3 - 1] + shiftedValue * shiftedValue
+      );
+    }
+    matrix[0][i3] = ssq(0, i3, sums, sumsOfSquares);
+    backtrackMatrix[0][i3] = 0;
+  }
+  let iMin;
+  for (let cluster = 1; cluster < matrix.length; ++cluster) {
+    if (cluster < matrix.length - 1) {
+      iMin = cluster;
+    } else {
+      iMin = nValues - 1;
+    }
+    fillMatrixColumn(
+      iMin,
+      nValues - 1,
+      cluster,
+      matrix,
+      backtrackMatrix,
+      sums,
+      sumsOfSquares
+    );
+  }
+}
+function ckmeans(x5, nClusters) {
+  if (nClusters > x5.length) {
+    throw new Error(
+      "cannot generate more classes than there are data values"
+    );
+  }
+  const sorted = numericSort(x5);
+  const uniqueCount = uniqueCountSorted(sorted);
+  if (uniqueCount === 1) {
+    return [sorted];
+  }
+  const matrix = makeMatrix(nClusters, sorted.length);
+  const backtrackMatrix = makeMatrix(nClusters, sorted.length);
+  fillMatrices(sorted, matrix, backtrackMatrix);
+  const clusters = [];
+  let clusterRight = backtrackMatrix[0].length - 1;
+  for (let cluster = backtrackMatrix.length - 1; cluster >= 0; cluster--) {
+    const clusterLeft = backtrackMatrix[cluster][clusterRight];
+    clusters[cluster] = sorted.slice(clusterLeft, clusterRight + 1);
+    if (cluster > 0) {
+      clusterRight = clusterLeft - 1;
+    }
+  }
+  return clusters;
+}
+var g2 = 607 / 128;
+var LOGSQRT2PI = Math.log(Math.sqrt(2 * Math.PI));
+var SQRT_2PI$1 = Math.sqrt(2 * Math.PI);
+function cumulativeDistribution(z4) {
+  let sum2 = z4;
+  let tmp2 = z4;
+  for (let i3 = 1; i3 < 30; i3++) {
+    tmp2 *= z4 * z4 / (2 * i3 + 1);
+    sum2 += tmp2;
+  }
+  return Math.round((0.5 + sum2 / SQRT_2PI$1 * Math.exp(-z4 * z4 / 2)) * 1e4) / 1e4;
+}
+var standardNormalTable = [];
+for (let z4 = 0; z4 <= 3.09; z4 += 0.01) {
+  standardNormalTable.push(cumulativeDistribution(z4));
+}
+var TWO_OVER_SQRT_PI = 2 / Math.sqrt(Math.PI);
+var SQRT_2PI = Math.sqrt(2 * Math.PI);
+
+// src/js/dados/escalaCor.js
+var COMPONENTES_MAPA = ["total", ...COMPONENTES_BASE];
+var SERIE_ARREDONDAMENTO = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5];
+function arredondarParaSerie(valor) {
+  if (!(valor > 0)) return 0;
+  const expCentral = Math.floor(Math.log10(valor));
+  let melhor = null;
+  let menorDist = Infinity;
+  for (let n3 = Math.max(-1, expCentral - 1); n3 <= expCentral + 1; n3++) {
+    for (const base of SERIE_ARREDONDAMENTO) {
+      const candidato = base * 10 ** n3;
+      const dist4 = Math.abs(candidato - valor);
+      if (dist4 < menorDist) {
+        menorDist = dist4;
+        melhor = candidato;
+      }
+    }
+  }
+  return melhor;
+}
+function classeHex(domicilios, deficitAbsoluto) {
+  if (domicilios == null) return "sem_dado";
+  if (domicilios < 1) return "hachura";
+  if (deficitAbsoluto == null) return "sem_dado";
+  if (deficitAbsoluto < 1) return "menos_de_1";
+  return "normal";
+}
+function quebrasJenks(valores) {
+  const vs9 = [...valores].filter((v4) => v4 != null && v4 >= 1).sort((a5, b10) => a5 - b10);
+  if (!vs9.length) return [];
+  const distintos = new Set(vs9).size;
+  const k5 = Math.min(6, distintos);
+  if (k5 <= 1) return [arredondarParaSerie(vs9[vs9.length - 1])];
+  const clusters = ckmeans(vs9, k5);
+  const brutas = clusters.map((c3) => c3[c3.length - 1]);
+  return [...new Set(brutas.map(arredondarParaSerie))].sort((a5, b10) => a5 - b10);
+}
+function calcularEscalasAbsolutas(linhasArr, manifesto, componentes = COMPONENTES_MAPA) {
+  const escalas = /* @__PURE__ */ new Map();
+  for (const componente of componentes) {
+    const valores = [];
+    for (const linha of linhasArr) {
+      for (const p4 of manifesto.periodos) {
+        const dom = linha.dom[p4.id];
+        const v4 = brutoHex(linha, componente, p4.id);
+        if (classeHex(dom, v4) === "normal") valores.push(v4);
+      }
+    }
+    escalas.set(componente, quebrasJenks(valores));
+  }
+  return escalas;
+}
+function calcularEscalasRelativas(linhasArr, manifesto, componentes = COMPONENTES_MAPA) {
+  const escalas = /* @__PURE__ */ new Map();
+  for (const componente of componentes) {
+    const valores = [];
+    for (const linha of linhasArr) {
+      for (const p4 of manifesto.periodos) {
+        const dom = linha.dom[p4.id];
+        const v4 = brutoHex(linha, componente, p4.id);
+        if (classeHex(dom, v4) === "normal") valores.push(100 * v4 / dom);
+      }
+    }
+    escalas.set(componente, quebrasJenks(valores));
+  }
+  return escalas;
+}
+function taxaDominio(totais, componente, periodoId) {
+  const t4 = totalDoMapa(totais, componente, periodoId);
+  const dom = domiciliosTotal(totais, periodoId);
+  if (t4 == null || dom == null || dom === 0) return null;
+  return 100 * t4.total / dom;
+}
+var CORTES_VEZES_TAXA = [0.5, 0.8, 1.25, 1.5, 2];
+function indiceClasse(valor, quebras) {
+  if (!quebras.length) return 0;
+  let i3 = 0;
+  while (i3 < quebras.length - 1 && valor > quebras[i3]) i3++;
+  return i3;
+}
+function indiceClasseVezesTaxa(vezes) {
+  let i3 = 0;
+  while (i3 < CORTES_VEZES_TAXA.length && vezes >= CORTES_VEZES_TAXA[i3]) i3++;
+  return i3;
+}
+
+// src/js/util/formato.js
+var SEM_DADO = "\u2014";
+function formatar(valor, decimais = 0) {
+  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
+  return valor.toLocaleString("pt-BR", {
+    minimumFractionDigits: decimais,
+    maximumFractionDigits: decimais
+  });
+}
+function rotuloCurto(rotulo2) {
+  return rotulo2.replace(/^Média (\d{2})(\d{2})–/, "M$2\u2013");
+}
+function formatarPercentual(valor, decimais = 1) {
+  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
+  return `${formatar(valor, decimais)} %`;
+}
+
+// src/js/dados/visaoGeral.js
+function parteCadUnico(item, todosItens) {
+  const origem = item.indicador === "total" ? todosItens.find((i3) => i3.indicador === "habitacao_precaria") : item;
+  const sub5 = origem?.fjp_subcomponentes?.find((s4) => s4.nome === "improvisados");
+  return sub5?.valor ?? 0;
+}
+function faixaReconstrucao(reconstrucaoPnadc, reconstrucaoEp) {
+  if (reconstrucaoPnadc == null || reconstrucaoEp == null) return null;
+  return {
+    inf: Math.max(0, reconstrucaoPnadc - 1.96 * reconstrucaoEp),
+    sup: reconstrucaoPnadc + 1.96 * reconstrucaoEp
+  };
+}
+function fjpTresValores(referenciaFjp) {
+  return referenciaFjp.map((item) => {
+    const cadUnico = parteCadUnico(item, referenciaFjp);
+    const semCadUnico = item.fjp_publicado == null ? null : item.fjp_publicado - cadUnico;
+    const faixa = faixaReconstrucao(item.reconstrucao_pnadc, item.reconstrucao_ep);
+    const dentro = semCadUnico != null && faixa != null ? semCadUnico >= faixa.inf && semCadUnico <= faixa.sup : null;
+    return { ...item, cadUnico, semCadUnico, faixa, dentro };
+  });
+}
+var NOME_COMPONENTE2 = { total: "total", coabitacao: "coabita\xE7\xE3o", onus: "\xF4nus", precariedade: "precariedade" };
+var CLAB = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function periodoRecenteAno(manifesto) {
+  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano") ?? manifesto.periodos.at(-1);
+}
+function periodoRecenteMedia(manifesto) {
+  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "media") ?? null;
+}
+function componenteMaior(totais, periodoId) {
+  let maior = null;
+  for (const c3 of COMPONENTES_BASE) {
+    const t4 = totalDoMapa(totais, c3, periodoId);
+    if (t4 && (!maior || t4.total > maior.total)) maior = { componente: c3, total: t4.total };
+  }
+  return maior?.componente ?? null;
+}
+function marcaMaisImportante(totais, periodoId) {
+  for (const codigo of PRIORIDADE_MARCAS) {
+    for (const c3 of COMPONENTES_BASE) {
+      const t4 = totalDoMapa(totais, c3, periodoId);
+      if (t4?.marcas?.includes(codigo)) {
+        return { componente: c3, codigo };
+      }
+    }
+  }
+  return null;
+}
+function dadosCartoesBI(manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const anosTipo = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const dom = domiciliosTotal(totais, ano.id);
+  const domMedia = media ? domiciliosTotal(totais, media.id) : null;
+  return ["total", ...COMPONENTES_BASE].map((componente) => {
+    const tAno = totalDoMapa(totais, componente, ano.id);
+    const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
+    const rowsAno = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id));
+    const serie = rowsAno.map((t4) => t4?.total ?? null);
+    const faixas = rowsAno.map((t4) => componente !== "total" && t4?.ep != null ? [t4.total - 1.96 * t4.ep, t4.total + 1.96 * t4.ep] : null);
+    return {
+      componente,
+      rotulo: CLAB[componente],
+      absolutoAno: tAno?.total ?? null,
+      relativoAno: tAno && dom ? 100 * tAno.total / dom : null,
+      absolutoMedia: tMedia?.total ?? null,
+      relativoMedia: tMedia && domMedia ? 100 * tMedia.total / domMedia : null,
+      marcas: tAno?.marcas ?? [],
+      serie,
+      faixas,
+      anos: anosTipo.map((p4) => p4.rotulo),
+      periodoAno: ano.id,
+      periodoMedia: media?.id ?? null
+    };
+  });
+}
+function marcasDoDominio(totais) {
+  const vistas = /* @__PURE__ */ new Map();
+  const registrar = (codigo, componente) => {
+    if (!vistas.has(codigo)) vistas.set(codigo, /* @__PURE__ */ new Set());
+    vistas.get(codigo).add(componente);
+  };
+  for (const t4 of totais.totais) for (const m4 of t4.marcas ?? []) registrar(m4, t4.componente);
+  for (const mu2 of totais.mudancas ?? []) for (const m4 of mu2.marcas ?? []) registrar(m4, mu2.componente);
+  return [...vistas.entries()].map(([codigo, componentes]) => ({ codigo, componentes: [...componentes] }));
+}
+function linhasParaCitar(manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const data = manifesto.data_execucao.slice(0, 10).split("-").reverse().join("/");
+  const linhas = [];
+  for (const periodo of [ano, media].filter(Boolean)) {
+    for (const componente of ["total", ...COMPONENTES_BASE]) {
+      const t4 = totalDoMapa(totais, componente, periodo.id);
+      if (!t4) continue;
+      const rotulo2 = componente === "total" ? "D\xE9ficit total" : `D\xE9ficit de ${NOME_COMPONENTE2[componente]}`;
+      linhas.push({
+        componente,
+        periodo: periodo.id,
+        periodoRotulo: periodo.rotulo,
+        total: t4.total,
+        ep: t4.ep,
+        texto: `${rotulo2}, ${manifesto.nome}, ${periodo.rotulo}: ${Math.round(t4.total).toLocaleString("pt-BR")} domic\xEDlios (moradinha, edi\xE7\xE3o ${manifesto.edicao}, ${data}).`
+      });
+    }
+  }
+  return linhas;
+}
+function curvaConcentracao(linhasArr, componente, periodo) {
+  const valores = [];
+  for (const l3 of linhasArr) {
+    const dom = l3.dom[periodo];
+    if (dom == null || dom < 1) continue;
+    const v4 = brutoHex(l3, componente, periodo);
+    if (v4 == null) continue;
+    valores.push(v4);
+  }
+  valores.sort((a5, b10) => b10 - a5);
+  const n3 = valores.length;
+  const totalDeficit = valores.reduce((s4, v4) => s4 + v4, 0);
+  const pontos = [];
+  let acumulado = 0;
+  for (let i3 = 0; i3 < n3; i3++) {
+    acumulado += valores[i3];
+    pontos.push({ pctHex: 100 * (i3 + 1) / n3, pctDeficitAcumulado: totalDeficit > 0 ? 100 * acumulado / totalDeficit : 0 });
+  }
+  const idxMeio = pontos.findIndex((p4) => p4.pctDeficitAcumulado >= 50);
+  const nHexMeio = idxMeio === -1 ? n3 : idxMeio + 1;
+  const pctHexMeio = idxMeio === -1 ? 100 : pontos[idxMeio].pctHex;
+  return { pontos, n: n3, nHexMeio, pctHexMeio };
+}
+function maiorRelativo(linhasArr, componente, periodo) {
+  let melhor = null;
+  for (const l3 of linhasArr) {
+    const dom = l3.dom[periodo];
+    if (dom == null || dom < 1) continue;
+    const v4 = brutoHex(l3, componente, periodo);
+    if (v4 == null) continue;
+    const relativo = 100 * v4 / dom;
+    if (melhor == null || relativo > melhor) melhor = relativo;
+  }
+  return melhor;
+}
+function fraseRessalvaRelativo(linhasArr, totais, componente, periodo) {
+  const conc = curvaConcentracao(linhasArr, componente, periodo);
+  const maiorRel = maiorRelativo(linhasArr, componente, periodo);
+  const taxa = taxaDominio(totais, componente, periodo);
+  const vezes = taxa && maiorRel != null ? maiorRel / taxa : null;
+  const frase1 = `${formatar(conc.nHexMeio, 0)} hex\xE1gonos (${formatar(conc.pctHexMeio, 0)}% dos que t\xEAm domic\xEDlio) somam metade do d\xE9ficit absoluto.`;
+  if (vezes == null) return frase1;
+  const frase2 = vezes >= 2 ? `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio.` : `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio: a concentra\xE7\xE3o do mapa absoluto acompanha, em boa parte, onde est\xE3o os domic\xEDlios.`;
+  return `${frase1} ${frase2}`;
+}
+function mudancasAnuaisForaDoRuido(manifesto, totais) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const resultado = [];
+  for (let i3 = 0; i3 < anos.length - 1; i3++) {
+    for (const componente of ["total", ...COMPONENTES_BASE]) {
+      const m4 = mudanca(totais, componente, anos[i3].id, anos[i3 + 1].id);
+      if (m4?.z != null && m4.z > 1.96) {
+        resultado.push({ componente, de: anos[i3], para: anos[i3 + 1], z: m4.z });
+      }
+    }
+  }
+  return resultado;
+}
+function fraseRuidoAnual(manifesto, totais) {
+  const passam = mudancasAnuaisForaDoRuido(manifesto, totais);
+  if (!passam.length) return "Nenhuma mudan\xE7a de um ano para o outro passa do ru\xEDdo da amostra.";
+  const nomes = passam.map((p4) => `${NOME_COMPONENTE2[p4.componente]} de ${p4.de.rotulo} para ${p4.para.rotulo}`);
+  return `Passa(m) do ru\xEDdo da amostra: ${nomes.join("; ")}.`;
 }
 
 // src/js/dados/qualidade.js
@@ -13346,10 +13880,10 @@ function h2() {
   }
   return m2 || false;
 }
-var g2 = typeof Float32Array < `u` ? Float32Array : Array;
+var g3 = typeof Float32Array < `u` ? Float32Array : Array;
 function _2() {
-  var e67 = new g2(4);
-  return g2 != Float32Array && (e67[1] = 0, e67[2] = 0), e67[0] = 1, e67[3] = 1, e67;
+  var e67 = new g3(4);
+  return g3 != Float32Array && (e67[1] = 0, e67[2] = 0), e67[0] = 1, e67[3] = 1, e67;
 }
 function v2(e67, t4) {
   var n3 = t4[0], r3 = t4[1], i3 = t4[2], a5 = t4[3], o3 = n3 * a5 - i3 * r3;
@@ -13363,8 +13897,8 @@ function b2(e67, t4, n3) {
   return e67[0] = r3 * c3 + a5 * s4, e67[1] = i3 * c3 + o3 * s4, e67[2] = r3 * -s4 + a5 * c3, e67[3] = i3 * -s4 + o3 * c3, e67;
 }
 function x2() {
-  var e67 = new g2(9);
-  return g2 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[5] = 0, e67[6] = 0, e67[7] = 0), e67[0] = 1, e67[4] = 1, e67[8] = 1, e67;
+  var e67 = new g3(9);
+  return g3 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[5] = 0, e67[6] = 0, e67[7] = 0), e67[0] = 1, e67[4] = 1, e67[8] = 1, e67;
 }
 function S2(e67) {
   var t4 = e67[0], n3 = e67[1], r3 = e67[2], i3 = e67[3], a5 = e67[4], o3 = e67[5], s4 = e67[6], c3 = e67[7], l3 = e67[8];
@@ -13375,15 +13909,15 @@ function C(e67, t4) {
   return e67[0] = r3, e67[1] = n3, e67[2] = 0, e67[3] = -n3, e67[4] = r3, e67[5] = 0, e67[6] = 0, e67[7] = 0, e67[8] = 1, e67;
 }
 function w2(e67, t4) {
-  var n3 = t4[0], r3 = t4[1], i3 = t4[2], a5 = t4[3], o3 = n3 + n3, s4 = r3 + r3, c3 = i3 + i3, l3 = n3 * o3, u3 = r3 * o3, d3 = r3 * s4, f4 = i3 * o3, p4 = i3 * s4, m4 = i3 * c3, h4 = a5 * o3, g4 = a5 * s4, _4 = a5 * c3;
-  return e67[0] = 1 - d3 - m4, e67[3] = u3 - _4, e67[6] = f4 + g4, e67[1] = u3 + _4, e67[4] = 1 - l3 - m4, e67[7] = p4 - h4, e67[2] = f4 - g4, e67[5] = p4 + h4, e67[8] = 1 - l3 - d3, e67;
+  var n3 = t4[0], r3 = t4[1], i3 = t4[2], a5 = t4[3], o3 = n3 + n3, s4 = r3 + r3, c3 = i3 + i3, l3 = n3 * o3, u3 = r3 * o3, d3 = r3 * s4, f4 = i3 * o3, p4 = i3 * s4, m4 = i3 * c3, h4 = a5 * o3, g5 = a5 * s4, _4 = a5 * c3;
+  return e67[0] = 1 - d3 - m4, e67[3] = u3 - _4, e67[6] = f4 + g5, e67[1] = u3 + _4, e67[4] = 1 - l3 - m4, e67[7] = p4 - h4, e67[2] = f4 - g5, e67[5] = p4 + h4, e67[8] = 1 - l3 - d3, e67;
 }
 function T() {
-  var e67 = new g2(16);
-  return g2 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[4] = 0, e67[6] = 0, e67[7] = 0, e67[8] = 0, e67[9] = 0, e67[11] = 0, e67[12] = 0, e67[13] = 0, e67[14] = 0), e67[0] = 1, e67[5] = 1, e67[10] = 1, e67[15] = 1, e67;
+  var e67 = new g3(16);
+  return g3 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[4] = 0, e67[6] = 0, e67[7] = 0, e67[8] = 0, e67[9] = 0, e67[11] = 0, e67[12] = 0, e67[13] = 0, e67[14] = 0), e67[0] = 1, e67[5] = 1, e67[10] = 1, e67[15] = 1, e67;
 }
 function E2(e67) {
-  var t4 = new g2(16);
+  var t4 = new g3(16);
   return t4[0] = e67[0], t4[1] = e67[1], t4[2] = e67[2], t4[3] = e67[3], t4[4] = e67[4], t4[5] = e67[5], t4[6] = e67[6], t4[7] = e67[7], t4[8] = e67[8], t4[9] = e67[9], t4[10] = e67[10], t4[11] = e67[11], t4[12] = e67[12], t4[13] = e67[13], t4[14] = e67[14], t4[15] = e67[15], t4;
 }
 function D2(e67, t4) {
@@ -13393,16 +13927,16 @@ function O2(e67) {
   return e67[0] = 1, e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[4] = 0, e67[5] = 1, e67[6] = 0, e67[7] = 0, e67[8] = 0, e67[9] = 0, e67[10] = 1, e67[11] = 0, e67[12] = 0, e67[13] = 0, e67[14] = 0, e67[15] = 1, e67;
 }
 function k2(e67, t4) {
-  var n3 = t4[0], r3 = t4[1], i3 = t4[2], a5 = t4[3], o3 = t4[4], s4 = t4[5], c3 = t4[6], l3 = t4[7], u3 = t4[8], d3 = t4[9], f4 = t4[10], p4 = t4[11], m4 = t4[12], h4 = t4[13], g4 = t4[14], _4 = t4[15], v4 = n3 * s4 - r3 * o3, y5 = n3 * c3 - i3 * o3, b10 = n3 * l3 - a5 * o3, x5 = r3 * c3 - i3 * s4, S4 = r3 * l3 - a5 * s4, C4 = i3 * l3 - a5 * c3, w4 = u3 * h4 - d3 * m4, T3 = u3 * g4 - f4 * m4, E5 = u3 * _4 - p4 * m4, D5 = d3 * g4 - f4 * h4, O4 = d3 * _4 - p4 * h4, k5 = f4 * _4 - p4 * g4, A5 = v4 * k5 - y5 * O4 + b10 * D5 + x5 * E5 - S4 * T3 + C4 * w4;
-  return A5 ? (A5 = 1 / A5, e67[0] = (s4 * k5 - c3 * O4 + l3 * D5) * A5, e67[1] = (i3 * O4 - r3 * k5 - a5 * D5) * A5, e67[2] = (h4 * C4 - g4 * S4 + _4 * x5) * A5, e67[3] = (f4 * S4 - d3 * C4 - p4 * x5) * A5, e67[4] = (c3 * E5 - o3 * k5 - l3 * T3) * A5, e67[5] = (n3 * k5 - i3 * E5 + a5 * T3) * A5, e67[6] = (g4 * b10 - m4 * C4 - _4 * y5) * A5, e67[7] = (u3 * C4 - f4 * b10 + p4 * y5) * A5, e67[8] = (o3 * O4 - s4 * E5 + l3 * w4) * A5, e67[9] = (r3 * E5 - n3 * O4 - a5 * w4) * A5, e67[10] = (m4 * S4 - h4 * b10 + _4 * v4) * A5, e67[11] = (d3 * b10 - u3 * S4 - p4 * v4) * A5, e67[12] = (s4 * T3 - o3 * D5 - c3 * w4) * A5, e67[13] = (n3 * D5 - r3 * T3 + i3 * w4) * A5, e67[14] = (h4 * y5 - m4 * x5 - g4 * v4) * A5, e67[15] = (u3 * x5 - d3 * y5 + f4 * v4) * A5, e67) : null;
+  var n3 = t4[0], r3 = t4[1], i3 = t4[2], a5 = t4[3], o3 = t4[4], s4 = t4[5], c3 = t4[6], l3 = t4[7], u3 = t4[8], d3 = t4[9], f4 = t4[10], p4 = t4[11], m4 = t4[12], h4 = t4[13], g5 = t4[14], _4 = t4[15], v4 = n3 * s4 - r3 * o3, y5 = n3 * c3 - i3 * o3, b10 = n3 * l3 - a5 * o3, x5 = r3 * c3 - i3 * s4, S4 = r3 * l3 - a5 * s4, C4 = i3 * l3 - a5 * c3, w4 = u3 * h4 - d3 * m4, T3 = u3 * g5 - f4 * m4, E5 = u3 * _4 - p4 * m4, D5 = d3 * g5 - f4 * h4, O4 = d3 * _4 - p4 * h4, k5 = f4 * _4 - p4 * g5, A5 = v4 * k5 - y5 * O4 + b10 * D5 + x5 * E5 - S4 * T3 + C4 * w4;
+  return A5 ? (A5 = 1 / A5, e67[0] = (s4 * k5 - c3 * O4 + l3 * D5) * A5, e67[1] = (i3 * O4 - r3 * k5 - a5 * D5) * A5, e67[2] = (h4 * C4 - g5 * S4 + _4 * x5) * A5, e67[3] = (f4 * S4 - d3 * C4 - p4 * x5) * A5, e67[4] = (c3 * E5 - o3 * k5 - l3 * T3) * A5, e67[5] = (n3 * k5 - i3 * E5 + a5 * T3) * A5, e67[6] = (g5 * b10 - m4 * C4 - _4 * y5) * A5, e67[7] = (u3 * C4 - f4 * b10 + p4 * y5) * A5, e67[8] = (o3 * O4 - s4 * E5 + l3 * w4) * A5, e67[9] = (r3 * E5 - n3 * O4 - a5 * w4) * A5, e67[10] = (m4 * S4 - h4 * b10 + _4 * v4) * A5, e67[11] = (d3 * b10 - u3 * S4 - p4 * v4) * A5, e67[12] = (s4 * T3 - o3 * D5 - c3 * w4) * A5, e67[13] = (n3 * D5 - r3 * T3 + i3 * w4) * A5, e67[14] = (h4 * y5 - m4 * x5 - g5 * v4) * A5, e67[15] = (u3 * x5 - d3 * y5 + f4 * v4) * A5, e67) : null;
 }
 function A2(e67, t4, n3) {
-  var r3 = t4[0], i3 = t4[1], a5 = t4[2], o3 = t4[3], s4 = t4[4], c3 = t4[5], l3 = t4[6], u3 = t4[7], d3 = t4[8], f4 = t4[9], p4 = t4[10], m4 = t4[11], h4 = t4[12], g4 = t4[13], _4 = t4[14], v4 = t4[15], y5 = n3[0], b10 = n3[1], x5 = n3[2], S4 = n3[3];
-  return e67[0] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[1] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g4, e67[2] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[3] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, y5 = n3[4], b10 = n3[5], x5 = n3[6], S4 = n3[7], e67[4] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[5] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g4, e67[6] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[7] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, y5 = n3[8], b10 = n3[9], x5 = n3[10], S4 = n3[11], e67[8] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[9] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g4, e67[10] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[11] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, y5 = n3[12], b10 = n3[13], x5 = n3[14], S4 = n3[15], e67[12] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[13] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g4, e67[14] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[15] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, e67;
+  var r3 = t4[0], i3 = t4[1], a5 = t4[2], o3 = t4[3], s4 = t4[4], c3 = t4[5], l3 = t4[6], u3 = t4[7], d3 = t4[8], f4 = t4[9], p4 = t4[10], m4 = t4[11], h4 = t4[12], g5 = t4[13], _4 = t4[14], v4 = t4[15], y5 = n3[0], b10 = n3[1], x5 = n3[2], S4 = n3[3];
+  return e67[0] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[1] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g5, e67[2] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[3] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, y5 = n3[4], b10 = n3[5], x5 = n3[6], S4 = n3[7], e67[4] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[5] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g5, e67[6] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[7] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, y5 = n3[8], b10 = n3[9], x5 = n3[10], S4 = n3[11], e67[8] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[9] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g5, e67[10] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[11] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, y5 = n3[12], b10 = n3[13], x5 = n3[14], S4 = n3[15], e67[12] = y5 * r3 + b10 * s4 + x5 * d3 + S4 * h4, e67[13] = y5 * i3 + b10 * c3 + x5 * f4 + S4 * g5, e67[14] = y5 * a5 + b10 * l3 + x5 * p4 + S4 * _4, e67[15] = y5 * o3 + b10 * u3 + x5 * m4 + S4 * v4, e67;
 }
 function j2(e67, t4, n3) {
-  var r3 = n3[0], i3 = n3[1], a5 = n3[2], o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4;
-  return t4 === e67 ? (e67[12] = t4[0] * r3 + t4[4] * i3 + t4[8] * a5 + t4[12], e67[13] = t4[1] * r3 + t4[5] * i3 + t4[9] * a5 + t4[13], e67[14] = t4[2] * r3 + t4[6] * i3 + t4[10] * a5 + t4[14], e67[15] = t4[3] * r3 + t4[7] * i3 + t4[11] * a5 + t4[15]) : (o3 = t4[0], s4 = t4[1], c3 = t4[2], l3 = t4[3], u3 = t4[4], d3 = t4[5], f4 = t4[6], p4 = t4[7], m4 = t4[8], h4 = t4[9], g4 = t4[10], _4 = t4[11], e67[0] = o3, e67[1] = s4, e67[2] = c3, e67[3] = l3, e67[4] = u3, e67[5] = d3, e67[6] = f4, e67[7] = p4, e67[8] = m4, e67[9] = h4, e67[10] = g4, e67[11] = _4, e67[12] = o3 * r3 + u3 * i3 + m4 * a5 + t4[12], e67[13] = s4 * r3 + d3 * i3 + h4 * a5 + t4[13], e67[14] = c3 * r3 + f4 * i3 + g4 * a5 + t4[14], e67[15] = l3 * r3 + p4 * i3 + _4 * a5 + t4[15]), e67;
+  var r3 = n3[0], i3 = n3[1], a5 = n3[2], o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4;
+  return t4 === e67 ? (e67[12] = t4[0] * r3 + t4[4] * i3 + t4[8] * a5 + t4[12], e67[13] = t4[1] * r3 + t4[5] * i3 + t4[9] * a5 + t4[13], e67[14] = t4[2] * r3 + t4[6] * i3 + t4[10] * a5 + t4[14], e67[15] = t4[3] * r3 + t4[7] * i3 + t4[11] * a5 + t4[15]) : (o3 = t4[0], s4 = t4[1], c3 = t4[2], l3 = t4[3], u3 = t4[4], d3 = t4[5], f4 = t4[6], p4 = t4[7], m4 = t4[8], h4 = t4[9], g5 = t4[10], _4 = t4[11], e67[0] = o3, e67[1] = s4, e67[2] = c3, e67[3] = l3, e67[4] = u3, e67[5] = d3, e67[6] = f4, e67[7] = p4, e67[8] = m4, e67[9] = h4, e67[10] = g5, e67[11] = _4, e67[12] = o3 * r3 + u3 * i3 + m4 * a5 + t4[12], e67[13] = s4 * r3 + d3 * i3 + h4 * a5 + t4[13], e67[14] = c3 * r3 + f4 * i3 + g5 * a5 + t4[14], e67[15] = l3 * r3 + p4 * i3 + _4 * a5 + t4[15]), e67;
 }
 function ee2(e67, t4, n3) {
   var r3 = n3[0], i3 = n3[1], a5 = n3[2];
@@ -13441,15 +13975,15 @@ function le2(e67, t4) {
   return e67[0] === t4[0] && e67[1] === t4[1] && e67[2] === t4[2] && e67[3] === t4[3] && e67[4] === t4[4] && e67[5] === t4[5] && e67[6] === t4[6] && e67[7] === t4[7] && e67[8] === t4[8] && e67[9] === t4[9] && e67[10] === t4[10] && e67[11] === t4[11] && e67[12] === t4[12] && e67[13] === t4[13] && e67[14] === t4[14] && e67[15] === t4[15];
 }
 function ue(e67, t4) {
-  var n3 = e67[0], r3 = e67[1], i3 = e67[2], a5 = e67[3], o3 = e67[4], s4 = e67[5], c3 = e67[6], l3 = e67[7], u3 = e67[8], d3 = e67[9], f4 = e67[10], p4 = e67[11], m4 = e67[12], h4 = e67[13], g4 = e67[14], _4 = e67[15], v4 = t4[0], y5 = t4[1], b10 = t4[2], x5 = t4[3], S4 = t4[4], C4 = t4[5], w4 = t4[6], T3 = t4[7], E5 = t4[8], D5 = t4[9], O4 = t4[10], k5 = t4[11], A5 = t4[12], j4 = t4[13], ee4 = t4[14], te4 = t4[15];
-  return Math.abs(n3 - v4) <= 1e-6 * Math.max(1, Math.abs(n3), Math.abs(v4)) && Math.abs(r3 - y5) <= 1e-6 * Math.max(1, Math.abs(r3), Math.abs(y5)) && Math.abs(i3 - b10) <= 1e-6 * Math.max(1, Math.abs(i3), Math.abs(b10)) && Math.abs(a5 - x5) <= 1e-6 * Math.max(1, Math.abs(a5), Math.abs(x5)) && Math.abs(o3 - S4) <= 1e-6 * Math.max(1, Math.abs(o3), Math.abs(S4)) && Math.abs(s4 - C4) <= 1e-6 * Math.max(1, Math.abs(s4), Math.abs(C4)) && Math.abs(c3 - w4) <= 1e-6 * Math.max(1, Math.abs(c3), Math.abs(w4)) && Math.abs(l3 - T3) <= 1e-6 * Math.max(1, Math.abs(l3), Math.abs(T3)) && Math.abs(u3 - E5) <= 1e-6 * Math.max(1, Math.abs(u3), Math.abs(E5)) && Math.abs(d3 - D5) <= 1e-6 * Math.max(1, Math.abs(d3), Math.abs(D5)) && Math.abs(f4 - O4) <= 1e-6 * Math.max(1, Math.abs(f4), Math.abs(O4)) && Math.abs(p4 - k5) <= 1e-6 * Math.max(1, Math.abs(p4), Math.abs(k5)) && Math.abs(m4 - A5) <= 1e-6 * Math.max(1, Math.abs(m4), Math.abs(A5)) && Math.abs(h4 - j4) <= 1e-6 * Math.max(1, Math.abs(h4), Math.abs(j4)) && Math.abs(g4 - ee4) <= 1e-6 * Math.max(1, Math.abs(g4), Math.abs(ee4)) && Math.abs(_4 - te4) <= 1e-6 * Math.max(1, Math.abs(_4), Math.abs(te4));
+  var n3 = e67[0], r3 = e67[1], i3 = e67[2], a5 = e67[3], o3 = e67[4], s4 = e67[5], c3 = e67[6], l3 = e67[7], u3 = e67[8], d3 = e67[9], f4 = e67[10], p4 = e67[11], m4 = e67[12], h4 = e67[13], g5 = e67[14], _4 = e67[15], v4 = t4[0], y5 = t4[1], b10 = t4[2], x5 = t4[3], S4 = t4[4], C4 = t4[5], w4 = t4[6], T3 = t4[7], E5 = t4[8], D5 = t4[9], O4 = t4[10], k5 = t4[11], A5 = t4[12], j4 = t4[13], ee4 = t4[14], te4 = t4[15];
+  return Math.abs(n3 - v4) <= 1e-6 * Math.max(1, Math.abs(n3), Math.abs(v4)) && Math.abs(r3 - y5) <= 1e-6 * Math.max(1, Math.abs(r3), Math.abs(y5)) && Math.abs(i3 - b10) <= 1e-6 * Math.max(1, Math.abs(i3), Math.abs(b10)) && Math.abs(a5 - x5) <= 1e-6 * Math.max(1, Math.abs(a5), Math.abs(x5)) && Math.abs(o3 - S4) <= 1e-6 * Math.max(1, Math.abs(o3), Math.abs(S4)) && Math.abs(s4 - C4) <= 1e-6 * Math.max(1, Math.abs(s4), Math.abs(C4)) && Math.abs(c3 - w4) <= 1e-6 * Math.max(1, Math.abs(c3), Math.abs(w4)) && Math.abs(l3 - T3) <= 1e-6 * Math.max(1, Math.abs(l3), Math.abs(T3)) && Math.abs(u3 - E5) <= 1e-6 * Math.max(1, Math.abs(u3), Math.abs(E5)) && Math.abs(d3 - D5) <= 1e-6 * Math.max(1, Math.abs(d3), Math.abs(D5)) && Math.abs(f4 - O4) <= 1e-6 * Math.max(1, Math.abs(f4), Math.abs(O4)) && Math.abs(p4 - k5) <= 1e-6 * Math.max(1, Math.abs(p4), Math.abs(k5)) && Math.abs(m4 - A5) <= 1e-6 * Math.max(1, Math.abs(m4), Math.abs(A5)) && Math.abs(h4 - j4) <= 1e-6 * Math.max(1, Math.abs(h4), Math.abs(j4)) && Math.abs(g5 - ee4) <= 1e-6 * Math.max(1, Math.abs(g5), Math.abs(ee4)) && Math.abs(_4 - te4) <= 1e-6 * Math.max(1, Math.abs(_4), Math.abs(te4));
 }
 function de2() {
-  var e67 = new g2(3);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67;
+  var e67 = new g3(3);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67;
 }
 function fe(e67) {
-  var t4 = new g2(3);
+  var t4 = new g3(3);
   return t4[0] = e67[0], t4[1] = e67[1], t4[2] = e67[2], t4;
 }
 function pe2(e67) {
@@ -13457,7 +13991,7 @@ function pe2(e67) {
   return Math.sqrt(t4 * t4 + n3 * n3 + r3 * r3);
 }
 function me(e67, t4, n3) {
-  var r3 = new g2(3);
+  var r3 = new g3(3);
   return r3[0] = e67, r3[1] = t4, r3[2] = n3, r3;
 }
 function he(e67, t4, n3) {
@@ -13532,8 +14066,8 @@ var Me = pe2;
   };
 })();
 function Ne() {
-  var e67 = new g2(4);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0, e67[3] = 0), e67;
+  var e67 = new g3(4);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0, e67[3] = 0), e67;
 }
 function Pe(e67, t4, n3, r3, i3) {
   return e67[0] = t4, e67[1] = n3, e67[2] = r3, e67[3] = i3, e67;
@@ -13562,8 +14096,8 @@ var ze = Fe;
   };
 })();
 function Be2() {
-  var e67 = new g2(4);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67[3] = 1, e67;
+  var e67 = new g3(4);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67[3] = 1, e67;
 }
 function Ve(e67) {
   return e67[0] = 0, e67[1] = 0, e67[2] = 0, e67[3] = 1, e67;
@@ -13578,8 +14112,8 @@ function Ue(e67, t4, n3) {
   return e67[0] = r3 * u3 + o3 * s4 + i3 * l3 - a5 * c3, e67[1] = i3 * u3 + o3 * c3 + a5 * s4 - r3 * l3, e67[2] = a5 * u3 + o3 * l3 + r3 * c3 - i3 * s4, e67[3] = o3 * u3 - r3 * s4 - i3 * c3 - a5 * l3, e67;
 }
 function We(e67, t4, n3, r3) {
-  var i3 = t4[0], a5 = t4[1], o3 = t4[2], s4 = t4[3], c3 = n3[0], l3 = n3[1], u3 = n3[2], d3 = n3[3], f4, p4 = i3 * c3 + a5 * l3 + o3 * u3 + s4 * d3, m4, h4, g4;
-  return p4 < 0 && (p4 = -p4, c3 = -c3, l3 = -l3, u3 = -u3, d3 = -d3), 1 - p4 > 1e-6 ? (f4 = Math.acos(p4), m4 = Math.sin(f4), h4 = Math.sin((1 - r3) * f4) / m4, g4 = Math.sin(r3 * f4) / m4) : (h4 = 1 - r3, g4 = r3), e67[0] = h4 * i3 + g4 * c3, e67[1] = h4 * a5 + g4 * l3, e67[2] = h4 * o3 + g4 * u3, e67[3] = h4 * s4 + g4 * d3, e67;
+  var i3 = t4[0], a5 = t4[1], o3 = t4[2], s4 = t4[3], c3 = n3[0], l3 = n3[1], u3 = n3[2], d3 = n3[3], f4, p4 = i3 * c3 + a5 * l3 + o3 * u3 + s4 * d3, m4, h4, g5;
+  return p4 < 0 && (p4 = -p4, c3 = -c3, l3 = -l3, u3 = -u3, d3 = -d3), 1 - p4 > 1e-6 ? (f4 = Math.acos(p4), m4 = Math.sin(f4), h4 = Math.sin((1 - r3) * f4) / m4, g5 = Math.sin(r3 * f4) / m4) : (h4 = 1 - r3, g5 = r3), e67[0] = h4 * i3 + g5 * c3, e67[1] = h4 * a5 + g5 * l3, e67[2] = h4 * o3 + g5 * u3, e67[3] = h4 * s4 + g5 * d3, e67;
 }
 function Ge(e67, t4) {
   var n3 = t4[0] + t4[4] + t4[8], r3;
@@ -13640,11 +14174,11 @@ var Je = Le;
   };
 })();
 function Ye2() {
-  var e67 = new g2(2);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0), e67;
+  var e67 = new g3(2);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0), e67;
 }
 function Xe2(e67, t4) {
-  var n3 = new g2(2);
+  var n3 = new g3(2);
   return n3[0] = e67, n3[1] = t4, n3;
 }
 function N(e67, t4, n3) {
@@ -14639,8 +15173,8 @@ var G2 = class e4 {
           let e67 = c3 - i4;
           c3 > i4 && e67 > 180 ? e67 -= 360 : c3 < i4 && i4 - c3 > 180 && (e67 += 360), f4 = i4 + r3 * e67;
         } else isNaN(i4) ? isNaN(c3) ? f4 = NaN : (f4 = c3, (o3 === 1 || o3 === 0) && (p4 = l3)) : (f4 = i4, (u3 === 1 || u3 === 0) && (p4 = a5));
-        let [m4, h4, g4, _4] = qr([f4, p4 ?? ri(a5, l3, r3), ri(o3, u3, r3), ri(s4, d3, r3)]);
-        return new e4(m4, h4, g4, _4, false);
+        let [m4, h4, g5, _4] = qr([f4, p4 ?? ri(a5, l3, r3), ri(o3, u3, r3), ri(s4, d3, r3)]);
+        return new e4(m4, h4, g5, _4, false);
       }
       case `lab`: {
         let [i4, a5, o3, s4] = Ur(ii(t4.lab, n3.lab, r3));
@@ -18770,13 +19304,13 @@ var ju = class extends du {
   _refreshViews() {
     this.uint8 = new Uint8Array(this.arrayBuffer), this.int16 = new Int16Array(this.arrayBuffer), this.uint16 = new Uint16Array(this.arrayBuffer), this.uint32 = new Uint32Array(this.arrayBuffer), this.float32 = new Float32Array(this.arrayBuffer);
   }
-  emplaceBack(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4) {
+  emplaceBack(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4) {
     let v4 = this.length;
-    return this.resize(v4 + 1), this.emplace(v4, e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4);
+    return this.resize(v4 + 1), this.emplace(v4, e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4);
   }
-  emplace(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4) {
+  emplace(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4) {
     let y5 = e67 * 26, b10 = e67 * 13, x5 = e67 * 52;
-    return this.int16[y5 + 0] = t4, this.int16[y5 + 1] = n3, this.uint16[y5 + 2] = r3, this.uint16[y5 + 3] = i3, this.uint32[b10 + 2] = a5, this.uint32[b10 + 3] = o3, this.uint32[b10 + 4] = s4, this.uint16[y5 + 10] = c3, this.uint16[y5 + 11] = l3, this.uint16[y5 + 12] = u3, this.float32[b10 + 7] = d3, this.float32[b10 + 8] = f4, this.uint8[x5 + 36] = p4, this.uint8[x5 + 37] = m4, this.uint8[x5 + 38] = h4, this.uint32[b10 + 10] = g4, this.int16[y5 + 22] = _4, this.float32[b10 + 12] = v4, e67;
+    return this.int16[y5 + 0] = t4, this.int16[y5 + 1] = n3, this.uint16[y5 + 2] = r3, this.uint16[y5 + 3] = i3, this.uint32[b10 + 2] = a5, this.uint32[b10 + 3] = o3, this.uint32[b10 + 4] = s4, this.uint16[y5 + 10] = c3, this.uint16[y5 + 11] = l3, this.uint16[y5 + 12] = u3, this.float32[b10 + 7] = d3, this.float32[b10 + 8] = f4, this.uint8[x5 + 36] = p4, this.uint8[x5 + 37] = m4, this.uint8[x5 + 38] = h4, this.uint32[b10 + 10] = g5, this.int16[y5 + 22] = _4, this.float32[b10 + 12] = v4, e67;
   }
 };
 ju.prototype.bytesPerElement = 52, K2(`StructArrayLayout2i2ui3ul3ui2f3ub1ul1i1f52`, ju);
@@ -18784,13 +19318,13 @@ var Mu = class extends du {
   _refreshViews() {
     this.uint8 = new Uint8Array(this.arrayBuffer), this.int16 = new Int16Array(this.arrayBuffer), this.uint16 = new Uint16Array(this.arrayBuffer), this.uint32 = new Uint32Array(this.arrayBuffer), this.float32 = new Float32Array(this.arrayBuffer);
   }
-  emplaceBack(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4, y5, b10, x5, S4, C4, w4, T3, E5, D5, O4) {
+  emplaceBack(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4, y5, b10, x5, S4, C4, w4, T3, E5, D5, O4) {
     let k5 = this.length;
-    return this.resize(k5 + 1), this.emplace(k5, e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4, y5, b10, x5, S4, C4, w4, T3, E5, D5, O4);
+    return this.resize(k5 + 1), this.emplace(k5, e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4, y5, b10, x5, S4, C4, w4, T3, E5, D5, O4);
   }
-  emplace(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4, y5, b10, x5, S4, C4, w4, T3, E5, D5, O4, k5) {
+  emplace(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4, y5, b10, x5, S4, C4, w4, T3, E5, D5, O4, k5) {
     let A5 = e67 * 34, j4 = e67 * 17;
-    return this.int16[A5 + 0] = t4, this.int16[A5 + 1] = n3, this.int16[A5 + 2] = r3, this.int16[A5 + 3] = i3, this.int16[A5 + 4] = a5, this.int16[A5 + 5] = o3, this.int16[A5 + 6] = s4, this.int16[A5 + 7] = c3, this.uint16[A5 + 8] = l3, this.uint16[A5 + 9] = u3, this.uint16[A5 + 10] = d3, this.uint16[A5 + 11] = f4, this.uint16[A5 + 12] = p4, this.uint16[A5 + 13] = m4, this.uint16[A5 + 14] = h4, this.uint16[A5 + 15] = g4, this.uint16[A5 + 16] = _4, this.uint16[A5 + 17] = v4, this.uint16[A5 + 18] = y5, this.uint16[A5 + 19] = b10, this.uint16[A5 + 20] = x5, this.uint16[A5 + 21] = S4, this.uint16[A5 + 22] = C4, this.uint32[j4 + 12] = w4, this.float32[j4 + 13] = T3, this.float32[j4 + 14] = E5, this.uint16[A5 + 30] = D5, this.uint16[A5 + 31] = O4, this.float32[j4 + 16] = k5, e67;
+    return this.int16[A5 + 0] = t4, this.int16[A5 + 1] = n3, this.int16[A5 + 2] = r3, this.int16[A5 + 3] = i3, this.int16[A5 + 4] = a5, this.int16[A5 + 5] = o3, this.int16[A5 + 6] = s4, this.int16[A5 + 7] = c3, this.uint16[A5 + 8] = l3, this.uint16[A5 + 9] = u3, this.uint16[A5 + 10] = d3, this.uint16[A5 + 11] = f4, this.uint16[A5 + 12] = p4, this.uint16[A5 + 13] = m4, this.uint16[A5 + 14] = h4, this.uint16[A5 + 15] = g5, this.uint16[A5 + 16] = _4, this.uint16[A5 + 17] = v4, this.uint16[A5 + 18] = y5, this.uint16[A5 + 19] = b10, this.uint16[A5 + 20] = x5, this.uint16[A5 + 21] = S4, this.uint16[A5 + 22] = C4, this.uint32[j4 + 12] = w4, this.float32[j4 + 13] = T3, this.float32[j4 + 14] = E5, this.uint16[A5 + 30] = D5, this.uint16[A5 + 31] = O4, this.float32[j4 + 16] = k5, e67;
   }
 };
 Mu.prototype.bytesPerElement = 68, K2(`StructArrayLayout8i15ui1ul2f2ui1f68`, Mu);
@@ -20452,14 +20986,14 @@ function Dp(e67) {
   return true;
 }
 function Op(e67, t4, n3, r3) {
-  let i3 = e67.prev, a5 = e67, o3 = e67.next, s4 = i3.x, c3 = a5.x, l3 = o3.x, u3 = i3.y, d3 = a5.y, f4 = o3.y, p4 = Math.min(s4, c3, l3), m4 = Math.min(u3, d3, f4), h4 = Math.max(s4, c3, l3), g4 = Math.max(u3, d3, f4), _4 = em(p4, m4, t4, n3, r3), v4 = em(h4, g4, t4, n3, r3), y5 = e67.prevZ;
+  let i3 = e67.prev, a5 = e67, o3 = e67.next, s4 = i3.x, c3 = a5.x, l3 = o3.x, u3 = i3.y, d3 = a5.y, f4 = o3.y, p4 = Math.min(s4, c3, l3), m4 = Math.min(u3, d3, f4), h4 = Math.max(s4, c3, l3), g5 = Math.max(u3, d3, f4), _4 = em(p4, m4, t4, n3, r3), v4 = em(h4, g5, t4, n3, r3), y5 = e67.prevZ;
   for (; y5 && y5.z >= _4; ) {
-    if (y5.x >= p4 && y5.x <= h4 && y5.y >= m4 && y5.y <= g4 && y5 !== o3 && (s4 !== y5.x || u3 !== y5.y) && nm(s4, u3, c3, d3, l3, f4, y5.x, y5.y) && im(y5.prev, y5, y5.next) >= 0) return false;
+    if (y5.x >= p4 && y5.x <= h4 && y5.y >= m4 && y5.y <= g5 && y5 !== o3 && (s4 !== y5.x || u3 !== y5.y) && nm(s4, u3, c3, d3, l3, f4, y5.x, y5.y) && im(y5.prev, y5, y5.next) >= 0) return false;
     y5 = y5.prevZ;
   }
   let b10 = e67.nextZ;
   for (; b10 && b10.z <= v4; ) {
-    if (b10.x >= p4 && b10.x <= h4 && b10.y >= m4 && b10.y <= g4 && b10 !== o3 && (s4 !== b10.x || u3 !== b10.y) && nm(s4, u3, c3, d3, l3, f4, b10.x, b10.y) && im(b10.prev, b10, b10.next) >= 0) return false;
+    if (b10.x >= p4 && b10.x <= h4 && b10.y >= m4 && b10.y <= g5 && b10 !== o3 && (s4 !== b10.x || u3 !== b10.y) && nm(s4, u3, c3, d3, l3, f4, b10.x, b10.y) && im(b10.prev, b10, b10.next) >= 0) return false;
     b10 = b10.nextZ;
   }
   return true;
@@ -20753,7 +21287,7 @@ var bm = class {
   _scanlineGenerateVertexRingForCellRow(e67, t4, n3) {
     let r3 = e67 * this._granularityCellSize, i3 = r3 + this._granularityCellSize, a5 = [];
     for (let e68 = 0; e68 < 3; e68++) {
-      let o3 = t4[e68 * 2], s4 = t4[e68 * 2 + 1], c3 = t4[(e68 + 1) * 2 % 6], l3 = t4[((e68 + 1) * 2 + 1) % 6], u3 = t4[(e68 + 2) * 2 % 6], d3 = t4[((e68 + 2) * 2 + 1) % 6], f4 = c3 - o3, p4 = l3 - s4, m4 = f4 === 0, h4 = p4 === 0, g4 = (r3 - s4) / p4, _4 = (i3 - s4) / p4, v4 = Math.min(g4, _4), y5 = Math.max(g4, _4);
+      let o3 = t4[e68 * 2], s4 = t4[e68 * 2 + 1], c3 = t4[(e68 + 1) * 2 % 6], l3 = t4[((e68 + 1) * 2 + 1) % 6], u3 = t4[(e68 + 2) * 2 % 6], d3 = t4[((e68 + 2) * 2 + 1) % 6], f4 = c3 - o3, p4 = l3 - s4, m4 = f4 === 0, h4 = p4 === 0, g5 = (r3 - s4) / p4, _4 = (i3 - s4) / p4, v4 = Math.min(g5, _4), y5 = Math.max(g5, _4);
       if (!h4 && (v4 >= 1 || y5 <= 0) || h4 && (s4 < r3 || s4 > i3)) {
         l3 >= r3 && l3 <= i3 && a5.push(n3[(e68 + 1) % 3]);
         continue;
@@ -20783,9 +21317,9 @@ var bm = class {
     }
   }
   _generateInterEdgeVertices(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3) {
-    let u3 = i3 - n3, d3 = a5 - r3, f4 = o3 - i3, p4 = (c3 - i3) / f4, m4 = (l3 - i3) / f4, h4 = Math.min(p4, m4), g4 = Math.max(p4, m4), _4 = r3 + d3 * h4, v4 = Math.floor(Math.min(_4, s4) / this._granularityCellSize) + 1, y5 = Math.ceil(Math.max(_4, s4) / this._granularityCellSize) - 1, b10 = s4 < _4, x5 = f4 === 0;
+    let u3 = i3 - n3, d3 = a5 - r3, f4 = o3 - i3, p4 = (c3 - i3) / f4, m4 = (l3 - i3) / f4, h4 = Math.min(p4, m4), g5 = Math.max(p4, m4), _4 = r3 + d3 * h4, v4 = Math.floor(Math.min(_4, s4) / this._granularityCellSize) + 1, y5 = Math.ceil(Math.max(_4, s4) / this._granularityCellSize) - 1, b10 = s4 < _4, x5 = f4 === 0;
     if (x5 && (o3 === c3 || o3 === l3)) return;
-    if (x5 || h4 >= 1 || g4 <= 0) {
+    if (x5 || h4 >= 1 || g5 <= 0) {
       let e68 = t4 - a5, r4 = n3 - o3, i4 = (c3 - o3) / r4, u4 = (l3 - o3) / r4, d4 = a5 + e68 * Math.min(i4, u4);
       v4 = Math.floor(Math.min(d4, s4) / this._granularityCellSize) + 1, y5 = Math.ceil(Math.max(d4, s4) / this._granularityCellSize) - 1, b10 = s4 < d4;
     }
@@ -20886,9 +21420,9 @@ function Sm(e67, t4, n3 = false) {
   for (let t5 = 0; t5 < s4; t5++) {
     let n4 = e67[t5], r4 = t5 < o3 - 1 ? e67[t5 + 1] : e67[0], s5 = n4.x, c3 = n4.y, l3 = r4.x, d3 = r4.y, f4 = s5 !== l3, p4 = c3 !== d3;
     if (!f4 && !p4) continue;
-    let m4 = l3 - s5, h4 = d3 - c3, g4 = Math.abs(m4), _4 = Math.abs(h4), v4 = s5, y5 = c3;
+    let m4 = l3 - s5, h4 = d3 - c3, g5 = Math.abs(m4), _4 = Math.abs(h4), v4 = s5, y5 = c3;
     for (; ; ) {
-      let e68 = m4 > 0 ? (Math.floor(v4 / i3) + 1) * i3 : (Math.ceil(v4 / i3) - 1) * i3, t6 = h4 > 0 ? (Math.floor(y5 / i3) + 1) * i3 : (Math.ceil(y5 / i3) - 1) * i3, n5 = Math.abs(v4 - e68), r5 = Math.abs(y5 - t6), o4 = Math.abs(v4 - l3), s6 = Math.abs(y5 - d3), c4 = f4 ? n5 / g4 : 1 / 0, b11 = p4 ? r5 / _4 : 1 / 0;
+      let e68 = m4 > 0 ? (Math.floor(v4 / i3) + 1) * i3 : (Math.ceil(v4 / i3) - 1) * i3, t6 = h4 > 0 ? (Math.floor(y5 / i3) + 1) * i3 : (Math.ceil(y5 / i3) - 1) * i3, n5 = Math.abs(v4 - e68), r5 = Math.abs(y5 - t6), o4 = Math.abs(v4 - l3), s6 = Math.abs(y5 - d3), c4 = f4 ? n5 / g5 : 1 / 0, b11 = p4 ? r5 / _4 : 1 / 0;
       if ((o4 <= n5 || !f4) && (s6 <= r5 || !p4)) break;
       if (c4 < b11 && f4 || !p4) {
         v4 = e68, y5 += h4 * c4;
@@ -20938,14 +21472,14 @@ function Dm(e67, t4, n3) {
   }
   let a5 = t4.length, o3 = r3, s4 = (o3 + 1) % a5;
   for (; ; ) {
-    let r4 = o3 - 1 >= 0 ? o3 - 1 : a5 - 1, i4 = (s4 + 1) % a5, c3 = e67[t4[r4] * 2], l3 = e67[t4[r4] * 2 + 1], u3 = e67[t4[i4] * 2], d3 = e67[t4[i4] * 2 + 1], f4 = e67[t4[o3] * 2], p4 = e67[t4[o3] * 2 + 1], m4 = e67[t4[s4] * 2], h4 = e67[t4[s4] * 2 + 1], g4 = false;
-    if (c3 < u3) g4 = true;
-    else if (c3 > u3) g4 = false;
+    let r4 = o3 - 1 >= 0 ? o3 - 1 : a5 - 1, i4 = (s4 + 1) % a5, c3 = e67[t4[r4] * 2], l3 = e67[t4[r4] * 2 + 1], u3 = e67[t4[i4] * 2], d3 = e67[t4[i4] * 2 + 1], f4 = e67[t4[o3] * 2], p4 = e67[t4[o3] * 2 + 1], m4 = e67[t4[s4] * 2], h4 = e67[t4[s4] * 2 + 1], g5 = false;
+    if (c3 < u3) g5 = true;
+    else if (c3 > u3) g5 = false;
     else {
       let e68 = h4 - p4, t5 = -(m4 - f4), n4 = p4 < h4 ? 1 : -1;
-      ((c3 - f4) * e68 + (l3 - p4) * t5) * n4 > ((u3 - f4) * e68 + (d3 - p4) * t5) * n4 && (g4 = true);
+      ((c3 - f4) * e68 + (l3 - p4) * t5) * n4 > ((u3 - f4) * e68 + (d3 - p4) * t5) * n4 && (g5 = true);
     }
-    if (g4) {
+    if (g5) {
       let e68 = t4[r4], i5 = t4[o3], c4 = t4[s4];
       e68 !== i5 && e68 !== c4 && i5 !== c4 && n3.push(c4, i5, e68), o3--, o3 < 0 && (o3 = a5 - 1);
     } else {
@@ -20982,9 +21516,9 @@ function Am(e67, t4, n3, r3, i3, a5) {
   for (let e68 = 0; e68 < r3.length / 2; e68++) o3.push(-1);
   let s4 = { count: 0 }, c3 = 0, l3 = e67.getOrCreateLatestSegment(t4, n3), u3 = l3.vertexLength;
   for (let d3 = 2; d3 < i3.length; d3 += 3) {
-    let f4 = i3[d3 - 2], p4 = i3[d3 - 1], m4 = i3[d3], h4 = o3[f4] < c3, g4 = o3[p4] < c3, _4 = o3[m4] < c3, v4 = +!!h4 + +!!g4 + +!!_4;
-    l3.vertexLength + v4 > yd.MAX_VERTEX_ARRAY_LENGTH && (l3 = e67.createNewSegment(t4, n3), c3 = s4.count, h4 = true, g4 = true, _4 = true, u3 = 0);
-    let y5 = km(o3, r3, a5, s4, f4, h4, l3), b10 = km(o3, r3, a5, s4, p4, g4, l3), x5 = km(o3, r3, a5, s4, m4, _4, l3);
+    let f4 = i3[d3 - 2], p4 = i3[d3 - 1], m4 = i3[d3], h4 = o3[f4] < c3, g5 = o3[p4] < c3, _4 = o3[m4] < c3, v4 = +!!h4 + +!!g5 + +!!_4;
+    l3.vertexLength + v4 > yd.MAX_VERTEX_ARRAY_LENGTH && (l3 = e67.createNewSegment(t4, n3), c3 = s4.count, h4 = true, g5 = true, _4 = true, u3 = 0);
+    let y5 = km(o3, r3, a5, s4, f4, h4, l3), b10 = km(o3, r3, a5, s4, p4, g5, l3), x5 = km(o3, r3, a5, s4, m4, _4, l3);
     n3.emplaceBack(u3 + y5 - c3, u3 + b10 - c3, u3 + x5 - c3), l3.primitiveLength++;
   }
 }
@@ -20993,8 +21527,8 @@ function jm(e67, t4, n3, r3, i3, a5) {
   for (let e68 = 0; e68 < r3.length / 2; e68++) o3.push(-1);
   let s4 = { count: 0 }, c3 = 0, l3 = e67.getOrCreateLatestSegment(t4, n3), u3 = l3.vertexLength;
   for (let d3 of i3) for (let i4 = 1; i4 < d3.length; i4 += 2) {
-    let f4 = d3[i4 - 1], p4 = d3[i4], m4 = o3[f4] < c3, h4 = o3[p4] < c3, g4 = +!!m4 + +!!h4;
-    l3.vertexLength + g4 > yd.MAX_VERTEX_ARRAY_LENGTH && (l3 = e67.createNewSegment(t4, n3), c3 = s4.count, m4 = true, h4 = true, u3 = 0);
+    let f4 = d3[i4 - 1], p4 = d3[i4], m4 = o3[f4] < c3, h4 = o3[p4] < c3, g5 = +!!m4 + +!!h4;
+    l3.vertexLength + g5 > yd.MAX_VERTEX_ARRAY_LENGTH && (l3 = e67.createNewSegment(t4, n3), c3 = s4.count, m4 = true, h4 = true, u3 = 0);
     let _4 = km(o3, r3, a5, s4, f4, m4, l3), v4 = km(o3, r3, a5, s4, p4, h4, l3);
     n3.emplaceBack(u3 + _4 - c3, u3 + v4 - c3), l3.primitiveLength++;
   }
@@ -21455,8 +21989,8 @@ function Mh(e67, t4, n3, r3, i3) {
     e67.push(n3.clone());
     return;
   }
-  let u3 = 0.2, d3 = Math.min(i3, s4 * u3, c3 * u3), f4 = n3.add(a5.mult(d3)), p4 = n3.add(o3.mult(d3)), m4 = Math.sqrt((1 + l3) / 2), h4 = n3.add(a5.add(o3)._unit()._mult(d3 / m4)), g4 = f4.sub(h4).angleWith(p4.sub(h4)), _4 = Math.max(2, Math.ceil(Math.abs(g4) / (Math.PI / 6) - 1e-6));
-  for (let t5 = 0; t5 <= _4; t5++) e67.push(f4.rotateAround(t5 / _4 * g4, h4));
+  let u3 = 0.2, d3 = Math.min(i3, s4 * u3, c3 * u3), f4 = n3.add(a5.mult(d3)), p4 = n3.add(o3.mult(d3)), m4 = Math.sqrt((1 + l3) / 2), h4 = n3.add(a5.add(o3)._unit()._mult(d3 / m4)), g5 = f4.sub(h4).angleWith(p4.sub(h4)), _4 = Math.max(2, Math.ceil(Math.abs(g5) / (Math.PI / 6) - 1e-6));
+  for (let t5 = 0; t5 <= _4; t5++) e67.push(f4.rotateAround(t5 / _4 * g5, h4));
 }
 var Nh = 8192;
 function Ph(e67, t4, n3, r3, i3, a5, o3, s4) {
@@ -21577,7 +22111,7 @@ function Gh(e67, t4) {
     let n3 = 0, r3 = t4[n3++], i3;
     for (; !i3 || r3.equals(i3); ) if (i3 = t4[n3++], !i3) return 1 / 0;
     for (; n3 < t4.length; n3++) {
-      let a5 = t4[n3], o3 = e67[0], s4 = i3.sub(r3), c3 = a5.sub(r3), l3 = o3.sub(r3), u3 = Wh(s4, s4), d3 = Wh(s4, c3), f4 = Wh(c3, c3), p4 = Wh(l3, s4), m4 = Wh(l3, c3), h4 = u3 * f4 - d3 * d3, g4 = (f4 * p4 - d3 * m4) / h4, _4 = (u3 * m4 - d3 * p4) / h4, v4 = 1 - g4 - _4, y5 = r3.z * v4 + i3.z * g4 + a5.z * _4;
+      let a5 = t4[n3], o3 = e67[0], s4 = i3.sub(r3), c3 = a5.sub(r3), l3 = o3.sub(r3), u3 = Wh(s4, s4), d3 = Wh(s4, c3), f4 = Wh(c3, c3), p4 = Wh(l3, s4), m4 = Wh(l3, c3), h4 = u3 * f4 - d3 * d3, g5 = (f4 * p4 - d3 * m4) / h4, _4 = (u3 * m4 - d3 * p4) / h4, v4 = 1 - g5 - _4, y5 = r3.z * v4 + i3.z * g5 + a5.z * _4;
       if (isFinite(y5)) return y5;
     }
     return 1 / 0;
@@ -21605,7 +22139,7 @@ function qh(e67, t4, n3, r3) {
   for (let t5 of e67) {
     let e68 = [], n4 = [];
     for (let i4 of t5) {
-      let t6 = i4.x, a6 = i4.y, h4 = r3[0] * t6 + r3[4] * a6 + r3[12], g4 = r3[1] * t6 + r3[5] * a6 + r3[13], _4 = r3[2] * t6 + r3[6] * a6 + r3[14], v4 = r3[3] * t6 + r3[7] * a6 + r3[15], y5 = h4 + o3, b10 = g4 + s4, x5 = _4 + c3, S4 = v4 + l3, C4 = h4 + d3, w4 = g4 + f4, T3 = _4 + p4, E5 = v4 + m4, D5 = new u(y5 / S4, b10 / S4);
+      let t6 = i4.x, a6 = i4.y, h4 = r3[0] * t6 + r3[4] * a6 + r3[12], g5 = r3[1] * t6 + r3[5] * a6 + r3[13], _4 = r3[2] * t6 + r3[6] * a6 + r3[14], v4 = r3[3] * t6 + r3[7] * a6 + r3[15], y5 = h4 + o3, b10 = g5 + s4, x5 = _4 + c3, S4 = v4 + l3, C4 = h4 + d3, w4 = g5 + f4, T3 = _4 + p4, E5 = v4 + m4, D5 = new u(y5 / S4, b10 / S4);
       D5.z = x5 / S4, e68.push(D5);
       let O4 = new u(C4 / E5, w4 / E5);
       O4.z = T3 / E5, n4.push(O4);
@@ -21726,14 +22260,14 @@ var ig = class {
     for (; d3 < u3 - 1 && e67[d3].equals(e67[d3 + 1]); ) d3++;
     if (u3 - d3 < (l3 ? 3 : 2)) return;
     n3 === `bevel` && (i3 = 1.05);
-    let f4 = this.overscaling <= 16 ? 15 * P2 / (512 * this.overscaling) : 0, p4 = this.segments.prepareSegment(u3 * 10, this.layoutVertexArray, this.indexArray), m4, h4, g4, _4, v4;
+    let f4 = this.overscaling <= 16 ? 15 * P2 / (512 * this.overscaling) : 0, p4 = this.segments.prepareSegment(u3 * 10, this.layoutVertexArray, this.indexArray), m4, h4, g5, _4, v4;
     this.e1 = this.e2 = -1, l3 && (m4 = e67[u3 - 2], v4 = e67[d3].sub(m4)._unit()._perp());
     for (let t5 = d3; t5 < u3; t5++) {
-      if (g4 = t5 === u3 - 1 ? l3 ? e67[d3 + 1] : void 0 : e67[t5 + 1], g4 && e67[t5].equals(g4)) continue;
-      v4 && (_4 = v4), m4 && (h4 = m4), m4 = e67[t5], v4 = g4 ? g4.sub(m4)._unit()._perp() : _4, _4 ||= v4;
+      if (g5 = t5 === u3 - 1 ? l3 ? e67[d3 + 1] : void 0 : e67[t5 + 1], g5 && e67[t5].equals(g5)) continue;
+      v4 && (_4 = v4), m4 && (h4 = m4), m4 = e67[t5], v4 = g5 ? g5.sub(m4)._unit()._perp() : _4, _4 ||= v4;
       let o4 = _4.add(v4);
       (o4.x !== 0 || o4.y !== 0) && o4._unit();
-      let s5 = _4.x * v4.x + _4.y * v4.y, c4 = o4.x * v4.x + o4.y * v4.y, y5 = c4 === 0 ? 1 / 0 : 1 / c4, b10 = 2 * Math.sqrt(2 - 2 * c4), x5 = c4 < tg && h4 && g4, S4 = _4.x * v4.y - _4.y * v4.x > 0, C4 = o4.mult(Math.min(y5, 2)), w4 = F2((y5 - 3) / 5, 0, 1);
+      let s5 = _4.x * v4.x + _4.y * v4.y, c4 = o4.x * v4.x + o4.y * v4.y, y5 = c4 === 0 ? 1 / 0 : 1 / c4, b10 = 2 * Math.sqrt(2 - 2 * c4), x5 = c4 < tg && h4 && g5, S4 = _4.x * v4.y - _4.y * v4.x > 0, C4 = o4.mult(Math.min(y5, 2)), w4 = F2((y5 - 3) / 5, 0, 1);
       if (x5 && t5 > d3) {
         let e68 = m4.dist(h4);
         if (e68 > 2 * f4) {
@@ -21741,7 +22275,7 @@ var ig = class {
           this.updateDistance(h4, t6), this.addCurrentVertex(t6, _4, 0, 0, p4), h4 = t6;
         }
       }
-      let T3 = h4 && g4, E5 = T3 ? n3 : l3 ? `butt` : r3;
+      let T3 = h4 && g5, E5 = T3 ? n3 : l3 ? `butt` : r3;
       if (T3 && E5 === `round` && (y5 < a5 ? E5 = `miter` : y5 <= 2 && (E5 = `fakeround`)), E5 === `miter` && y5 > i3 && (E5 = `bevel`), E5 === `bevel` && (y5 > 2 && (E5 = `flipbevel`), y5 < i3 && (E5 = `miter`)), h4 && this.updateDistance(h4, m4), E5 === `miter`) o4._mult(y5), this.addCurrentVertex(m4, o4, 0, 0, p4, false, C4);
       else if (E5 === `flipbevel`) {
         if (y5 > 100) o4 = v4.mult(-1);
@@ -21764,16 +22298,16 @@ var ig = class {
             this.addHalfVertex(m4, r4.x, r4.y, S4 ? -C4.x : C4.x, S4 ? -C4.y : C4.y, false, S4, p4);
           }
         }
-        g4 && this.addCurrentVertex(m4, v4, -t6, -n4, p4, false, C4);
+        g5 && this.addCurrentVertex(m4, v4, -t6, -n4, p4, false, C4);
       } else if (E5 === `butt`) this.addCurrentVertex(m4, o4, 0, 0, p4, false, C4);
       else if (E5 === `square`) {
         let e68 = h4 ? 1 : -1;
         this.addCurrentVertex(m4, o4, e68, e68, p4, false, C4);
-      } else E5 === `round` && (h4 && (this.addCurrentVertex(m4, _4, 0, 0, p4, false, C4, w4), this.addCurrentVertex(m4, _4, 1, 1, p4, true, C4, w4)), g4 && (this.addCurrentVertex(m4, v4, -1, -1, p4, true, C4, w4), this.addCurrentVertex(m4, v4, 0, 0, p4, false, C4, w4)));
+      } else E5 === `round` && (h4 && (this.addCurrentVertex(m4, _4, 0, 0, p4, false, C4, w4), this.addCurrentVertex(m4, _4, 1, 1, p4, true, C4, w4)), g5 && (this.addCurrentVertex(m4, v4, -1, -1, p4, true, C4, w4), this.addCurrentVertex(m4, v4, 0, 0, p4, false, C4, w4)));
       if (x5 && t5 < u3 - 1) {
-        let e68 = m4.dist(g4);
+        let e68 = m4.dist(g5);
         if (e68 > 2 * f4) {
-          let t6 = m4.add(g4.sub(m4)._mult(f4 / e68)._round());
+          let t6 = m4.add(g5.sub(m4)._mult(f4 / e68)._round());
           this.updateDistance(m4, t6), this.addCurrentVertex(t6, v4, 0, 0, p4), m4 = t6;
         }
       }
@@ -22333,18 +22867,18 @@ function O_() {
         }
       }), { map: r4, reverseMap: i4 };
     }
-    var h4, g4, _4;
+    var h4, g5, _4;
     function v4() {
       if (!h4) {
         var e68 = m4(p4.pairs, true), t5 = e68.map, n4 = e68.reverseMap;
-        h4 = t5, g4 = n4, _4 = m4(p4.canonical, false).map;
+        h4 = t5, g5 = n4, _4 = m4(p4.canonical, false).map;
       }
     }
     function y5(e68) {
       return v4(), h4.get(e68) || null;
     }
     function b10(e68) {
-      return v4(), g4.get(e68) || null;
+      return v4(), g5.get(e68) || null;
     }
     function x5(e68) {
       return v4(), _4.get(e68) || null;
@@ -22357,16 +22891,16 @@ function O_() {
         var n5 = r4[e69];
         r4[e69] = t6, u4.set(n5, u4.get(n5) - 1), n5 & o3 && u4.set(o3, u4.get(o3) - 1), u4.set(t6, (u4.get(t6) || 0) + 1), t6 & o3 && u4.set(o3, (u4.get(o3) || 0) + 1);
       }
-      for (var p5 = new Uint8Array(e68.length), m5 = /* @__PURE__ */ new Map(), h5 = [], g5 = null, _5 = 0; _5 < e68.length; _5++) g5 || h5.push(g5 = { start: _5, end: e68.length - 1, level: t5 === `rtl` ? 1 : t5 === `ltr` ? 0 : rn2(_5, false) }), r4[_5] & k5 && (g5.end = _5, g5 = null);
+      for (var p5 = new Uint8Array(e68.length), m5 = /* @__PURE__ */ new Map(), h5 = [], g6 = null, _5 = 0; _5 < e68.length; _5++) g6 || h5.push(g6 = { start: _5, end: e68.length - 1, level: t5 === `rtl` ? 1 : t5 === `ltr` ? 0 : rn2(_5, false) }), r4[_5] & k5 && (g6.end = _5, g6 = null);
       for (var v5 = oe4 | ae4 | ie4 | re5 | i3 | de4 | se4 | k5, fe4 = function(e69) {
         return e69 + (e69 & 1 ? 1 : 2);
       }, pe5 = function(e69) {
         return e69 + (e69 & 1 ? 2 : 1);
       }, me4 = 0; me4 < h5.length; me4++) {
-        g5 = h5[me4];
-        var he4 = [{ _level: g5.level, _override: 0, _isolate: 0 }], ge4 = void 0, M5 = 0, _e5 = 0, ve3 = 0;
+        g6 = h5[me4];
+        var he4 = [{ _level: g6.level, _override: 0, _isolate: 0 }], ge4 = void 0, M5 = 0, _e5 = 0, ve3 = 0;
         u4.clear();
-        for (var ye4 = g5.start; ye4 <= g5.end; ye4++) {
+        for (var ye4 = g6.start; ye4 <= g6.end; ye4++) {
           var be3 = r4[ye4];
           if (ge4 = he4[he4.length - 1], u4.set(be3, (u4.get(be3) || 0) + 1), be3 & o3 && u4.set(o3, (u4.get(o3) || 0) + 1), be3 & v5) {
             if (be3 & (oe4 | ae4)) {
@@ -22389,10 +22923,10 @@ function O_() {
                 we3 != null && (m5.set(we3, ye4), m5.set(ye4, we3)), he4.pop(), ve3--;
               }
               ge4 = he4[he4.length - 1], p5[ye4] = ge4._level, ge4._override && f5(ye4, ge4._override);
-            } else be3 & se4 ? (M5 === 0 && (_e5 > 0 ? _e5-- : !ge4._isolate && he4.length > 1 && (he4.pop(), ge4 = he4[he4.length - 1])), p5[ye4] = ge4._level) : be3 & k5 && (p5[ye4] = g5.level);
+            } else be3 & se4 ? (M5 === 0 && (_e5 > 0 ? _e5-- : !ge4._isolate && he4.length > 1 && (he4.pop(), ge4 = he4[he4.length - 1])), p5[ye4] = ge4._level) : be3 & k5 && (p5[ye4] = g6.level);
           } else p5[ye4] = ge4._level, ge4._override && be3 !== ee4 && f5(ye4, ge4._override);
         }
-        for (var Te3 = [], Ee3 = null, De3 = g5.start; De3 <= g5.end; De3++) {
+        for (var Te3 = [], Ee3 = null, De3 = g6.start; De3 <= g6.end; De3++) {
           var Oe3 = r4[De3];
           if (!(Oe3 & s4)) {
             var ke3 = p5[De3], Ae3 = Oe3 & i3, je3 = Oe3 === de4;
@@ -22407,13 +22941,13 @@ function O_() {
               break;
             }
             for (var Re3 = [], ze3 = 0; ze3 < Fe3.length; ze3++) for (var Be4 = Fe3[ze3], Ve3 = Be4._start; Ve3 <= Be4._end; Ve3++) Re3.push(Ve3);
-            for (var He4 = p5[Re3[0]], Ue3 = g5.level, We3 = Re3[0] - 1; We3 >= 0; We3--) if (!(r4[We3] & s4)) {
+            for (var He4 = p5[Re3[0]], Ue3 = g6.level, We3 = Re3[0] - 1; We3 >= 0; We3--) if (!(r4[We3] & s4)) {
               Ue3 = p5[We3];
               break;
             }
-            var Ge3 = Re3[Re3.length - 1], Ke3 = p5[Ge3], qe4 = g5.level;
+            var Ge3 = Re3[Re3.length - 1], Ke3 = p5[Ge3], qe4 = g6.level;
             if (!(r4[Ge3] & i3)) {
-              for (var Je3 = Ge3 + 1; Je3 <= g5.end; Je3++) if (!(r4[Je3] & s4)) {
+              for (var Je3 = Ge3 + 1; Je3 <= g6.end; Je3++) if (!(r4[Je3] & s4)) {
                 qe4 = p5[Je3];
                 break;
               }
@@ -22544,9 +23078,9 @@ function O_() {
             }
           }
         }
-        for (var $t2 = g5.start; $t2 <= g5.end; $t2++) {
+        for (var $t2 = g6.start; $t2 <= g6.end; $t2++) {
           var en2 = p5[$t2], tn2 = r4[$t2];
-          if (en2 & 1 ? tn2 & (S4 | w4 | D5) && p5[$t2]++ : tn2 & C4 ? p5[$t2]++ : tn2 & (D5 | w4) && (p5[$t2] += 2), tn2 & s4 && (p5[$t2] = $t2 === 0 ? g5.level : p5[$t2 - 1]), $t2 === g5.end || d3(e68[$t2]) & (A5 | k5)) for (var nn2 = $t2; nn2 >= 0 && d3(e68[nn2]) & c3; nn2--) p5[nn2] = g5.level;
+          if (en2 & 1 ? tn2 & (S4 | w4 | D5) && p5[$t2]++ : tn2 & C4 ? p5[$t2]++ : tn2 & (D5 | w4) && (p5[$t2] += 2), tn2 & s4 && (p5[$t2] = $t2 === 0 ? g6.level : p5[$t2 - 1]), $t2 === g6.end || d3(e68[$t2]) & (A5 | k5)) for (var nn2 = $t2; nn2 >= 0 && d3(e68[nn2]) & c3; nn2--) p5[nn2] = g6.level;
         }
       }
       return { levels: p5, paragraphs: h5 };
@@ -22606,8 +23140,8 @@ function O_() {
             var h5 = l4[m5];
             h5 > f5 && (f5 = h5), h5 < p5 && (p5 = h5 | 1);
           }
-          for (var g5 = f5; g5 >= p5; g5--) for (var _5 = 0; _5 < l4.length; _5++) if (l4[_5] >= g5) {
-            for (var v5 = _5; _5 + 1 < l4.length && l4[_5 + 1] >= g5; ) _5++;
+          for (var g6 = f5; g6 >= p5; g6--) for (var _5 = 0; _5 < l4.length; _5++) if (l4[_5] >= g6) {
+            for (var v5 = _5; _5 + 1 < l4.length && l4[_5 + 1] >= g6; ) _5++;
             _5 > v5 && a6.push([v5 + o4, _5 + o4]);
           }
         }
@@ -22992,7 +23526,7 @@ function pv(e67, t4, n3) {
   return dv(a5.map((e68) => r3[e68]), t4, a5.map((e68) => n3[i3[e68]] ?? 0));
 }
 function mv(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4) {
-  let h4 = D_.fromFeature(e67, i3, d3 === 2, t4), g4 = h4.determineLineBreaks(l3, a5, t4, r3, p4), _4 = g_(h4.text) ? uv(h4, g4) : ov(h4, g4), v4 = [], y5 = { positionedLines: v4, text: h4.toString(), top: u3[1], bottom: u3[1], left: u3[0], right: u3[0], writingMode: d3, iconsInText: false, verticalizable: false };
+  let h4 = D_.fromFeature(e67, i3, d3 === 2, t4), g5 = h4.determineLineBreaks(l3, a5, t4, r3, p4), _4 = g_(h4.text) ? uv(h4, g5) : ov(h4, g5), v4 = [], y5 = { positionedLines: v4, text: h4.toString(), top: u3[1], bottom: u3[1], left: u3[0], right: u3[0], writingMode: d3, iconsInText: false, verticalizable: false };
   return Ov(y5, t4, n3, r3, _4, o3, s4, c3, d3, l3, f4, m4), !av(v4) && y5;
 }
 function hv(e67) {
@@ -23095,7 +23629,7 @@ function Dv(e67, t4) {
   return Tv(n3, a5, i3) && (e67.text = n3.join(``), e67.cachedGraphemes = n3), a5;
 }
 function Ov(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3) {
-  let f4 = 0, p4 = 0, m4 = 0, h4 = 0, g4 = s4 === `right` ? 1 : s4 === `left` ? 0 : 0.5, _4 = 24 / d3, v4 = 0;
+  let f4 = 0, p4 = 0, m4 = 0, h4 = 0, g5 = s4 === `right` ? 1 : s4 === `left` ? 0 : 0.5, _4 = 24 / d3, v4 = 0;
   for (let o4 of i3) {
     o4.trim();
     let i4 = o4.getMaxScale(), s5 = { positionedGlyphs: [], lineOffset: 0 };
@@ -23107,18 +23641,18 @@ function Ov(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3) {
     }
     let b11 = gv(r3, o4, _4), x5 = c3 === 2 && !u3 ? Dv(o4, t4) : null, S4 = o4.graphemes();
     for (let a6 = 0; a6 < S4.length; a6++) {
-      let s6 = o4.getSection(a6), m5 = S4[a6], h5 = m5.codePointAt(0), g5 = x5 ? x5[a6] : yv(c3, u3, h5), v5 = `fontStack` in s6 && s_(m5) && !t4[s6.fontStack]?.default?.[m5] ? [...m5] : [m5];
+      let s6 = o4.getSection(a6), m5 = S4[a6], h5 = m5.codePointAt(0), g6 = x5 ? x5[a6] : yv(c3, u3, h5), v5 = `fontStack` in s6 && s_(m5) && !t4[s6.fontStack]?.default?.[m5] ? [...m5] : [m5];
       for (let c4 of v5) {
-        let u4 = { glyph: c4.codePointAt(0), grapheme: c4, imageName: null, x: f4, y: p4 + -17, vertical: g5, scale: 1, fontStack: ``, sectionIndex: o4.getSectionIndex(a6), metrics: null, rect: null }, m6;
+        let u4 = { glyph: c4.codePointAt(0), grapheme: c4, imageName: null, x: f4, y: p4 + -17, vertical: g6, scale: 1, fontStack: ``, sectionIndex: o4.getSectionIndex(a6), metrics: null, rect: null }, m6;
         if (`fontStack` in s6) {
-          if (m6 = kv(s6, c4, g5, b11, t4, n3), !m6) continue;
+          if (m6 = kv(s6, c4, g6, b11, t4, n3), !m6) continue;
           u4.fontStack = s6.fontStack;
         } else {
-          if (e67.iconsInText = true, s6.scale *= _4, m6 = Av(s6, g5, i4, b11, r3), !m6) continue;
+          if (e67.iconsInText = true, s6.scale *= _4, m6 = Av(s6, g6, i4, b11, r3), !m6) continue;
           y6 = Math.max(y6, m6.imageOffset), u4.imageName = s6.imageName;
         }
         let { rect: h6, metrics: v6, baselineOffset: x6 } = m6;
-        if (u4.y += x6, u4.scale = s6.scale, u4.metrics = v6, u4.rect = h6, d4.push(u4), !g5) f4 += v6.advance * s6.scale + l3;
+        if (u4.y += x6, u4.scale = s6.scale, u4.metrics = v6, u4.rect = h6, d4.push(u4), !g6) f4 += v6.advance * s6.scale + l3;
         else {
           e67.verticalizable = true;
           let t5 = `imageName` in s6 ? v6.advance : 24;
@@ -23128,7 +23662,7 @@ function Ov(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3) {
     }
     if (d4.length !== 0) {
       let e68 = f4 - l3;
-      m4 = Math.max(e68, m4), jv(d4, 0, d4.length - 1, g4);
+      m4 = Math.max(e68, m4), jv(d4, 0, d4.length - 1, g5);
     }
     f4 = 0;
     let C4 = (i4 - 1) * 24;
@@ -23137,7 +23671,7 @@ function Ov(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3) {
     p4 += w4, h4 = Math.max(w4, h4), ++v4;
   }
   let { horizontalAlign: y5, verticalAlign: b10 } = hv(o3);
-  Mv(e67.positionedLines, g4, y5, b10, m4, h4, a5, p4, i3.length), e67.top += -b10 * p4, e67.bottom = e67.top + p4, e67.left += -y5 * m4, e67.right = e67.left + m4;
+  Mv(e67.positionedLines, g5, y5, b10, m4, h4, a5, p4, i3.length), e67.top += -b10 * p4, e67.bottom = e67.top + p4, e67.left += -y5 * m4, e67.right = e67.left + m4;
 }
 function kv(e67, t4, n3, r3, i3, a5) {
   let o3 = n3 && i3[e67.fontStack]?.vertical?.[t4] ? `vertical` : `default`, s4 = a5[e67.fontStack]?.[o3]?.[t4], c3 = i3[e67.fontStack]?.[o3]?.[t4], l3 = vv(s4, c3);
@@ -23303,7 +23837,7 @@ function Zv(e67, t4, n3, r3, i3, a5, o3, s4, c3) {
     let o4 = e67[t5], s5 = e67[t5 + 1], m4 = o4.dist(s5), h4 = s5.angleTo(o4);
     for (; f4 + n3 < d3 + m4; ) {
       f4 += n3;
-      let g4 = (f4 - d3) / m4, _4 = Ai.number(o4.x, s5.x, g4), v4 = Ai.number(o4.y, s5.y, g4);
+      let g5 = (f4 - d3) / m4, _4 = Ai.number(o4.x, s5.x, g5), v4 = Ai.number(o4.y, s5.y, g5);
       if (_4 >= 0 && _4 < c3 && v4 >= 0 && v4 < c3 && f4 - l3 >= 0 && f4 + l3 <= u3) {
         let n4 = new Wv(_4, v4, h4, t5);
         n4._round(), (!r3 || Gv(e67, n4, a5, r3, i3)) && p4.push(n4);
@@ -23325,13 +23859,13 @@ function Qv(e67, t4, n3, r3, i3) {
   return a5;
 }
 function $v(e67, t4, n3, r3) {
-  let i3 = [], a5 = e67.image, o3 = a5.pixelRatio, s4 = a5.paddedRect.w - 2, c3 = a5.paddedRect.h - 2, l3 = { x1: e67.left, y1: e67.top, x2: e67.right, y2: e67.bottom }, d3 = a5.stretchX || [[0, s4]], f4 = a5.stretchY || [[0, c3]], p4 = (e68, t5) => e68 + t5[1] - t5[0], m4 = d3.reduce(p4, 0), h4 = f4.reduce(p4, 0), g4 = s4 - m4, _4 = c3 - h4, v4 = 0, y5 = m4, b10 = 0, x5 = h4, S4 = 0, C4 = g4, w4 = 0, T3 = _4;
+  let i3 = [], a5 = e67.image, o3 = a5.pixelRatio, s4 = a5.paddedRect.w - 2, c3 = a5.paddedRect.h - 2, l3 = { x1: e67.left, y1: e67.top, x2: e67.right, y2: e67.bottom }, d3 = a5.stretchX || [[0, s4]], f4 = a5.stretchY || [[0, c3]], p4 = (e68, t5) => e68 + t5[1] - t5[0], m4 = d3.reduce(p4, 0), h4 = f4.reduce(p4, 0), g5 = s4 - m4, _4 = c3 - h4, v4 = 0, y5 = m4, b10 = 0, x5 = h4, S4 = 0, C4 = g5, w4 = 0, T3 = _4;
   if (a5.content && r3) {
     let t5 = a5.content, n4 = t5[2] - t5[0], r4 = t5[3] - t5[1];
     (a5.textFitWidth || a5.textFitHeight) && (l3 = Pv(e67)), v4 = ey(d3, 0, t5[0]), b10 = ey(f4, 0, t5[1]), y5 = ey(d3, t5[0], t5[2]), x5 = ey(f4, t5[1], t5[3]), S4 = t5[0] - v4, w4 = t5[1] - b10, C4 = n4 - y5, T3 = r4 - x5;
   }
   let E5 = l3.x1, D5 = l3.y1, O4 = l3.x2 - E5, k5 = l3.y2 - D5, A5 = (e68, r4, i4, s5) => {
-    let c4 = ny(e68.stretch - v4, y5, O4, E5), l4 = ry(e68.fixed - S4, C4, e68.stretch, m4), d4 = ny(r4.stretch - b10, x5, k5, D5), f5 = ry(r4.fixed - w4, T3, r4.stretch, h4), p5 = ny(i4.stretch - v4, y5, O4, E5), g5 = ry(i4.fixed - S4, C4, i4.stretch, m4), _5 = ny(s5.stretch - b10, x5, k5, D5), A6 = ry(s5.fixed - w4, T3, s5.stretch, h4), j4 = new u(c4, d4), ee4 = new u(p5, d4), te4 = new u(p5, _5), ne4 = new u(c4, _5), re5 = new u(l4 / o3, f5 / o3), ie4 = new u(g5 / o3, A6 / o3), ae4 = t4 * Math.PI / 180;
+    let c4 = ny(e68.stretch - v4, y5, O4, E5), l4 = ry(e68.fixed - S4, C4, e68.stretch, m4), d4 = ny(r4.stretch - b10, x5, k5, D5), f5 = ry(r4.fixed - w4, T3, r4.stretch, h4), p5 = ny(i4.stretch - v4, y5, O4, E5), g6 = ry(i4.fixed - S4, C4, i4.stretch, m4), _5 = ny(s5.stretch - b10, x5, k5, D5), A6 = ry(s5.fixed - w4, T3, s5.stretch, h4), j4 = new u(c4, d4), ee4 = new u(p5, d4), te4 = new u(p5, _5), ne4 = new u(c4, _5), re5 = new u(l4 / o3, f5 / o3), ie4 = new u(g6 / o3, A6 / o3), ae4 = t4 * Math.PI / 180;
     if (ae4) {
       let e69 = Math.sin(ae4), t5 = Math.cos(ae4), n4 = [t5, -e69, e69, t5];
       j4._matMult(n4), ee4._matMult(n4), ne4._matMult(n4), te4._matMult(n4);
@@ -23341,7 +23875,7 @@ function $v(e67, t4, n3, r3) {
   };
   if (!r3 || !a5.stretchX && !a5.stretchY) i3.push(A5({ fixed: 0, stretch: -1 }, { fixed: 0, stretch: -1 }, { fixed: 0, stretch: s4 + 1 }, { fixed: 0, stretch: c3 + 1 }));
   else {
-    let e68 = ty(d3, g4, m4), t5 = ty(f4, _4, h4);
+    let e68 = ty(d3, g5, m4), t5 = ty(f4, _4, h4);
     for (let n4 = 0; n4 < e68.length - 1; n4++) {
       let r4 = e68[n4], a6 = e68[n4 + 1];
       for (let e69 = 0; e69 < t5.length - 1; e69++) {
@@ -23375,7 +23909,7 @@ function iy(e67, t4, n3, r3, i3, a5, o3, s4) {
   let c3 = r3.layout.get(`text-rotate`).evaluate(a5, {}) * Math.PI / 180, l3 = [];
   for (let e68 of t4.positionedLines) for (let r4 of e68.positionedGlyphs) {
     if (!r4.rect) continue;
-    let a6 = r4.rect || {}, d3 = 4, f4 = true, p4 = 1, m4 = 0, h4 = (i3 || s4) && r4.vertical, g4 = r4.metrics.advance * r4.scale / 2;
+    let a6 = r4.rect || {}, d3 = 4, f4 = true, p4 = 1, m4 = 0, h4 = (i3 || s4) && r4.vertical, g5 = r4.metrics.advance * r4.scale / 2;
     if (s4 && t4.verticalizable) {
       let t5 = (r4.scale - 1) * 24, n4 = (24 - r4.metrics.width * r4.scale) / 2;
       m4 = e68.lineOffset / 2 - (r4.imageName ? -n4 : t5);
@@ -23384,11 +23918,11 @@ function iy(e67, t4, n3, r3, i3, a5, o3, s4) {
       let e69 = o3[r4.imageName];
       f4 = e69.sdf, p4 = e69.pixelRatio, d3 = 1 / p4;
     }
-    let _4 = i3 ? [r4.x + g4, r4.y] : [0, 0], v4 = i3 ? [0, 0] : [r4.x + g4 + n3[0], r4.y + n3[1] - m4], y5 = [0, 0];
+    let _4 = i3 ? [r4.x + g5, r4.y] : [0, 0], v4 = i3 ? [0, 0] : [r4.x + g5 + n3[0], r4.y + n3[1] - m4], y5 = [0, 0];
     h4 && (y5 = v4, v4 = [0, 0]);
-    let b10 = r4.metrics.isDoubleResolution ? 2 : 1, x5 = (r4.metrics.left - d3) * r4.scale - g4 + v4[0], S4 = (-r4.metrics.top - d3) * r4.scale + v4[1], C4 = x5 + a6.w / b10 * r4.scale / p4, w4 = S4 + a6.h / b10 * r4.scale / p4, T3 = new u(x5, S4), E5 = new u(C4, S4), D5 = new u(x5, w4), O4 = new u(C4, w4);
+    let b10 = r4.metrics.isDoubleResolution ? 2 : 1, x5 = (r4.metrics.left - d3) * r4.scale - g5 + v4[0], S4 = (-r4.metrics.top - d3) * r4.scale + v4[1], C4 = x5 + a6.w / b10 * r4.scale / p4, w4 = S4 + a6.h / b10 * r4.scale / p4, T3 = new u(x5, S4), E5 = new u(C4, S4), D5 = new u(x5, w4), O4 = new u(C4, w4);
     if (h4) {
-      let e69 = new u(-g4, g4 - -17), t5 = -Math.PI / 2, n4 = 12 - g4, i4 = r4.imageName ? n4 : 0, a7 = new u(22 - n4, -i4), o4 = new u(...y5);
+      let e69 = new u(-g5, g5 - -17), t5 = -Math.PI / 2, n4 = 12 - g5, i4 = r4.imageName ? n4 : 0, a7 = new u(22 - n4, -i4), o4 = new u(...y5);
       T3._rotateAround(t5, e69)._add(a7)._add(o4), E5._rotateAround(t5, e69)._add(a7)._add(o4), D5._rotateAround(t5, e69)._add(a7)._add(o4), O4._rotateAround(t5, e69)._add(a7)._add(o4);
     }
     if (c3) {
@@ -23595,13 +24129,13 @@ function gy(e67) {
   for (let t5 of e67.bucket.features) {
     let i4 = r3.get(`text-font`).evaluate(t5, {}, e67.canonical).join(`,`), u3 = l3.evaluate(t5, {}, e67.canonical), d3 = a5.layoutTextSize.evaluate(t5, {}, e67.canonical), f4 = a5.layoutIconSize.evaluate(t5, {}, e67.canonical), p4 = { horizontal: {}, vertical: void 0 }, m4 = t5.text, h4 = [0, 0];
     if (m4) {
-      let a6 = m4.toString(), l4 = r3.get(`text-letter-spacing`).evaluate(t5, {}, e67.canonical) * 24, f5 = d_(a6) ? l4 : 0, g5 = r3.get(`text-anchor`).evaluate(t5, {}, e67.canonical), _5 = hy(n3, t5, e67.canonical);
+      let a6 = m4.toString(), l4 = r3.get(`text-letter-spacing`).evaluate(t5, {}, e67.canonical) * 24, f5 = d_(a6) ? l4 : 0, g6 = r3.get(`text-anchor`).evaluate(t5, {}, e67.canonical), _5 = hy(n3, t5, e67.canonical);
       if (!_5) {
         let n4 = r3.get(`text-radial-offset`).evaluate(t5, {}, e67.canonical);
-        h4 = n4 ? my(g5, [n4 * 24, py]) : r3.get(`text-offset`).evaluate(t5, {}, e67.canonical).map((e68) => e68 * 24);
+        h4 = n4 ? my(g6, [n4 * 24, py]) : r3.get(`text-offset`).evaluate(t5, {}, e67.canonical).map((e68) => e68 * 24);
       }
       let v5 = s4 ? `center` : r3.get(`text-justify`).evaluate(t5, {}, e67.canonical), y5 = r3.get(`symbol-placement`) === `point` ? r3.get(`text-max-width`).evaluate(t5, {}, e67.canonical) * 24 : 1 / 0, b10 = () => {
-        e67.bucket.allowVerticalPlacement && u_(a6) && (p4.vertical = mv(m4, e67.glyphMap, e67.glyphPositions, e67.imagePositions, i4, y5, o3, g5, `left`, f5, h4, 2, true, d3, u3));
+        e67.bucket.allowVerticalPlacement && u_(a6) && (p4.vertical = mv(m4, e67.glyphMap, e67.glyphPositions, e67.imagePositions, i4, y5, o3, g6, `left`, f5, h4, 2, true, d3, u3));
       };
       if (!s4 && _5) {
         let t6 = /* @__PURE__ */ new Set();
@@ -23617,18 +24151,18 @@ function gy(e67) {
         }
         b10();
       } else {
-        v5 === `auto` && (v5 = _y(g5));
-        let t6 = mv(m4, e67.glyphMap, e67.glyphPositions, e67.imagePositions, i4, y5, o3, g5, v5, f5, h4, 1, false, d3, u3);
-        t6 && (p4.horizontal[v5] = t6), b10(), u_(a6) && s4 && c3 && (p4.vertical = mv(m4, e67.glyphMap, e67.glyphPositions, e67.imagePositions, i4, y5, o3, g5, v5, f5, h4, 2, false, d3, u3));
+        v5 === `auto` && (v5 = _y(g6));
+        let t6 = mv(m4, e67.glyphMap, e67.glyphPositions, e67.imagePositions, i4, y5, o3, g6, v5, f5, h4, 1, false, d3, u3);
+        t6 && (p4.horizontal[v5] = t6), b10(), u_(a6) && s4 && c3 && (p4.vertical = mv(m4, e67.glyphMap, e67.glyphPositions, e67.imagePositions, i4, y5, o3, g6, v5, f5, h4, 2, false, d3, u3));
       }
     }
-    let g4, _4 = false;
+    let g5, _4 = false;
     if (t5.icon?.name) {
       let n4 = e67.imageMap[t5.icon.name];
-      n4 && (g4 = Nv(e67.imagePositions[t5.icon.name], r3.get(`icon-offset`).evaluate(t5, {}, e67.canonical), r3.get(`icon-anchor`).evaluate(t5, {}, e67.canonical)), _4 = !!n4.sdf, e67.bucket.sdfIcons === void 0 ? e67.bucket.sdfIcons = _4 : e67.bucket.sdfIcons !== _4 && L2(`Style sheet warning: Cannot mix SDF and non-SDF icons in one buffer`), n4.pixelRatio === e67.bucket.pixelRatio ? r3.get(`icon-rotate`).constantOr(1) !== 0 && (e67.bucket.iconsNeedLinear = true) : e67.bucket.iconsNeedLinear = true);
+      n4 && (g5 = Nv(e67.imagePositions[t5.icon.name], r3.get(`icon-offset`).evaluate(t5, {}, e67.canonical), r3.get(`icon-anchor`).evaluate(t5, {}, e67.canonical)), _4 = !!n4.sdf, e67.bucket.sdfIcons === void 0 ? e67.bucket.sdfIcons = _4 : e67.bucket.sdfIcons !== _4 && L2(`Style sheet warning: Cannot mix SDF and non-SDF icons in one buffer`), n4.pixelRatio === e67.bucket.pixelRatio ? r3.get(`icon-rotate`).constantOr(1) !== 0 && (e67.bucket.iconsNeedLinear = true) : e67.bucket.iconsNeedLinear = true);
     }
     let v4 = xy(p4.horizontal) || p4.vertical;
-    e67.bucket.iconsInText ||= v4 ? v4.iconsInText : false, (v4 || g4) && vy(e67.bucket, t5, p4, g4, e67.imageMap, a5, d3, f4, h4, _4, e67.canonical, e67.subdivisionGranularity, e67.hasPromoteId);
+    e67.bucket.iconsInText ||= v4 ? v4.iconsInText : false, (v4 || g5) && vy(e67.bucket, t5, p4, g5, e67.imageMap, a5, d3, f4, h4, _4, e67.canonical, e67.subdivisionGranularity, e67.hasPromoteId);
   }
   e67.showCollisionBoxes && e67.bucket.generateCollisionDebugBuffers();
 }
@@ -23648,21 +24182,21 @@ function _y(e67) {
 function vy(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4) {
   let p4 = a5.textMaxSize.evaluate(t4, {});
   p4 === void 0 && (p4 = o3);
-  let m4 = e67.layers[0].layout, h4 = m4.get(`icon-offset`).evaluate(t4, {}, u3), g4 = xy(n3.horizontal), _4 = o3 / 24, v4 = e67.tilePixelRatio * _4, y5 = e67.tilePixelRatio * p4 / 24, b10 = e67.tilePixelRatio * s4, x5 = e67.tilePixelRatio * m4.get(`symbol-spacing`), S4 = m4.get(`text-padding`) * e67.tilePixelRatio, C4 = Uy(m4, t4, u3, e67.tilePixelRatio), w4 = m4.get(`text-max-angle`) / 180 * Math.PI, T3 = m4.get(`text-rotation-alignment`) !== `viewport` && m4.get(`symbol-placement`) !== `point`, E5 = m4.get(`icon-rotation-alignment`).constantOr(`viewport`) === `map` && m4.get(`symbol-placement`) !== `point`, D5 = m4.get(`symbol-placement`), O4 = x5 / 2, k5 = m4.get(`icon-text-fit`), A5;
-  r3 && k5 !== `none` && (e67.allowVerticalPlacement && n3.vertical && (A5 = Fv(r3, n3.vertical, k5, m4.get(`icon-text-fit-padding`), h4, _4)), g4 && (r3 = Fv(r3, g4, k5, m4.get(`icon-text-fit-padding`), h4, _4)));
+  let m4 = e67.layers[0].layout, h4 = m4.get(`icon-offset`).evaluate(t4, {}, u3), g5 = xy(n3.horizontal), _4 = o3 / 24, v4 = e67.tilePixelRatio * _4, y5 = e67.tilePixelRatio * p4 / 24, b10 = e67.tilePixelRatio * s4, x5 = e67.tilePixelRatio * m4.get(`symbol-spacing`), S4 = m4.get(`text-padding`) * e67.tilePixelRatio, C4 = Uy(m4, t4, u3, e67.tilePixelRatio), w4 = m4.get(`text-max-angle`) / 180 * Math.PI, T3 = m4.get(`text-rotation-alignment`) !== `viewport` && m4.get(`symbol-placement`) !== `point`, E5 = m4.get(`icon-rotation-alignment`).constantOr(`viewport`) === `map` && m4.get(`symbol-placement`) !== `point`, D5 = m4.get(`symbol-placement`), O4 = x5 / 2, k5 = m4.get(`icon-text-fit`), A5;
+  r3 && k5 !== `none` && (e67.allowVerticalPlacement && n3.vertical && (A5 = Fv(r3, n3.vertical, k5, m4.get(`icon-text-fit-padding`), h4, _4)), g5 && (r3 = Fv(r3, g5, k5, m4.get(`icon-text-fit-padding`), h4, _4)));
   let j4 = u3 ? d3.line.getGranularityForZoomLevel(u3.z) : 1, ee4 = (s5, d4) => {
     sf(d4) || Sy(e67, d4, s5, n3, r3, i3, A5, e67.layers[0], e67.collisionBoxArray, t4.index, t4.sourceLayerIndex, e67.index, v4, [S4, S4, S4, S4], T3, c3, b10, C4, E5, h4, t4, a5, l3, u3, o3, f4);
   };
   if (D5 === `line`) for (let i4 of Qv(t4.geometry, 0, 0, P2, P2)) {
-    let t5 = Sm(i4, j4), a6 = Xv(t5, x5, w4, n3.vertical || g4, r3, 24, y5, e67.overscaling, P2);
+    let t5 = Sm(i4, j4), a6 = Xv(t5, x5, w4, n3.vertical || g5, r3, 24, y5, e67.overscaling, P2);
     for (let n4 of a6) {
-      let r4 = g4;
+      let r4 = g5;
       r4 && Cy(e67, r4.text, O4, n4) || ee4(t5, n4);
     }
   }
   else if (D5 === `line-center`) {
     for (let e68 of t4.geometry) if (e68.length > 1) {
-      let t5 = Sm(e68, j4), i4 = Yv(t5, w4, n3.vertical || g4, r3, 24, y5);
+      let t5 = Sm(e68, j4), i4 = Yv(t5, w4, n3.vertical || g5, r3, 24, y5);
       i4 && ee4(t5, i4);
     }
   } else if (t4.type === `Polygon`) for (let e68 of Fi(t4.geometry, 0)) {
@@ -23684,26 +24218,26 @@ function yy(e67, t4) {
   return [n3, e67.length];
 }
 function by(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4) {
-  let g4 = iy(t4, n3, s4, i3, a5, o3, r3, e67.allowVerticalPlacement), _4 = e67.textSizeData, v4 = null;
-  _4.kind === `source` ? (v4 = [128 * i3.layout.get(`text-size`).evaluate(o3, {})], v4[0] > 32640 && L2(`${e67.layerIds[0]}: Value for "text-size" is >= 255. Reduce your "text-size".`)) : _4.kind === `composite` && (v4 = [128 * m4.compositeTextSizes[0].evaluate(o3, {}, h4), 128 * m4.compositeTextSizes[1].evaluate(o3, {}, h4)], (v4[0] > 32640 || v4[1] > 32640) && L2(`${e67.layerIds[0]}: Value for "text-size" is >= 255. Reduce your "text-size".`)), e67.addSymbols(e67.text, g4, v4, s4, a5, o3, u3, t4, l3.lineStartIndex, l3.lineLength, p4, h4, c3);
+  let g5 = iy(t4, n3, s4, i3, a5, o3, r3, e67.allowVerticalPlacement), _4 = e67.textSizeData, v4 = null;
+  _4.kind === `source` ? (v4 = [128 * i3.layout.get(`text-size`).evaluate(o3, {})], v4[0] > 32640 && L2(`${e67.layerIds[0]}: Value for "text-size" is >= 255. Reduce your "text-size".`)) : _4.kind === `composite` && (v4 = [128 * m4.compositeTextSizes[0].evaluate(o3, {}, h4), 128 * m4.compositeTextSizes[1].evaluate(o3, {}, h4)], (v4[0] > 32640 || v4[1] > 32640) && L2(`${e67.layerIds[0]}: Value for "text-size" is >= 255. Reduce your "text-size".`)), e67.addSymbols(e67.text, g5, v4, s4, a5, o3, u3, t4, l3.lineStartIndex, l3.lineLength, p4, h4, c3);
   for (let t5 of d3) f4[t5] = e67.text.placedSymbolArray.length - 1;
-  return g4.length * 4;
+  return g5.length * 4;
 }
 function xy(e67) {
   for (let t4 in e67) return e67[t4];
   return null;
 }
-function Sy(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4, y5, b10, x5, S4, C4, w4, T3) {
+function Sy(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4, y5, b10, x5, S4, C4, w4, T3) {
   let E5 = e67.addToLineVertexArray(t4, n3), D5 = s4.layout.get(`symbol-height-offset`).evaluate(b10, {}, C4);
   D5 > e67.maxHeightOffset && (e67.maxHeightOffset = D5);
   let O4, k5, A5, j4, ee4 = 0, te4 = 0, ne4 = 0, re5 = 0, ie4 = -1, ae4 = -1, oe4 = {}, se4 = (0, Td.default)(``);
   if (e67.allowVerticalPlacement && r3.vertical) {
     let e68 = s4.layout.get(`text-rotate`).evaluate(b10, {}, C4) + 90, n4 = r3.vertical;
-    A5 = new ay(c3, t4, l3, u3, d3, n4, f4, p4, m4, e68), o3 && (j4 = new ay(c3, t4, l3, u3, d3, o3, g4, _4, m4, e68));
+    A5 = new ay(c3, t4, l3, u3, d3, n4, f4, p4, m4, e68), o3 && (j4 = new ay(c3, t4, l3, u3, d3, o3, g5, _4, m4, e68));
   }
   if (i3) {
     let n4 = s4.layout.get(`icon-rotate`).evaluate(b10, {}), r4 = s4.layout.get(`icon-text-fit`) !== `none`, a6 = $v(i3, n4, S4, r4), f5 = o3 ? $v(o3, n4, S4, r4) : void 0;
-    k5 = new ay(c3, t4, l3, u3, d3, i3, g4, _4, false, n4), ee4 = a6.length * 4;
+    k5 = new ay(c3, t4, l3, u3, d3, i3, g5, _4, false, n4), ee4 = a6.length * 4;
     let p5 = e67.iconSizeData, m5 = null;
     p5.kind === `source` ? (m5 = [128 * s4.layout.get(`icon-size`).evaluate(b10, {})], m5[0] > 32640 && L2(`${e67.layerIds[0]}: Value for "icon-size" is >= 255. Reduce your "icon-size".`)) : p5.kind === `composite` && (m5 = [128 * x5.compositeIconSizes[0].evaluate(b10, {}, C4), 128 * x5.compositeIconSizes[1].evaluate(b10, {}, C4)], (m5[0] > 32640 || m5[1] > 32640) && L2(`${e67.layerIds[0]}: Value for "icon-size" is >= 255. Reduce your "icon-size".`)), e67.addSymbols(e67.icon, a6, m5, y5, v4, b10, 0, t4, E5.lineStartIndex, E5.lineLength, -1, C4, D5), ie4 = e67.icon.placedSymbolArray.length - 1, f5 && (te4 = f5.length * 4, e67.addSymbols(e67.icon, f5, m5, y5, v4, b10, 2, t4, E5.lineStartIndex, E5.lineLength, -1, C4, D5), ae4 = e67.icon.placedSymbolArray.length - 1);
   }
@@ -23809,7 +24343,7 @@ var My = class {
   populate(e67, t4, n3) {
     let r3 = this.layers[0], i3 = r3.layout, a5 = i3.get(`text-font`), o3 = i3.get(`text-field`), s4 = i3.get(`icon-image`), c3 = (o3.value.kind !== `constant` || o3.value.value instanceof ci && !o3.value.value.isEmpty() || o3.value.value.toString().length > 0) && (a5.value.kind !== `constant` || a5.value.value.length > 0), l3 = s4.value.kind !== `constant` || !!s4.value.value || Object.keys(s4.parameters).length > 0, u3 = i3.get(`symbol-sort-key`), d3 = i3.get(`symbol-placement`) === `point`;
     if (this.features = [], !c3 && !l3) return;
-    let f4 = t4.iconDependencies, p4 = t4.glyphDependencies, m4 = t4.availableImages, h4 = new Bl(this.zoom), g4 = i3.get(`text-keep-upright`);
+    let f4 = t4.iconDependencies, p4 = t4.glyphDependencies, m4 = t4.availableImages, h4 = new Bl(this.zoom), g5 = i3.get(`text-keep-upright`);
     for (let { feature: t5, id: o4, index: s5, sourceLayerIndex: _4 } of e67) {
       let e68 = r3._featureFilter.needGeometry, v4 = tf(t5, e68);
       if (!r3._featureFilter.filter(h4, v4, n3) || (e68 || (v4.geometry = ef(t5)), d3 && t5.type === 1 && Ny(v4.geometry))) continue;
@@ -23828,7 +24362,7 @@ var My = class {
       if (this.features.push(S4), b10 && (f4[b10.name] = true), y5) {
         let e69 = a5.evaluate(v4, {}, n3).join(`,`), t6 = i3.get(`text-rotation-alignment`) !== `viewport` && i3.get(`symbol-placement`) !== `point`;
         this.allowVerticalPlacement = this.writingModes?.includes(2);
-        let r4 = (t6 && g4 || this.allowVerticalPlacement) && u_(y5.toString());
+        let r4 = (t6 && g5 || this.allowVerticalPlacement) && u_(y5.toString());
         this.calculateGlyphDependencies(y5, p4, e69, r4);
         for (let e70 of y5.sections) e70.image && (f4[e70.image.name] = true);
       }
@@ -23870,12 +24404,12 @@ var My = class {
     return { lineStartIndex: n3, lineLength: this.lineVertexArray.length - n3 };
   }
   addSymbols(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4) {
-    let p4 = e67.indexArray, m4 = e67.layoutVertexArray, h4 = e67.segments.prepareSegment(4 * t4.length, m4, p4, this.canOverlap ? a5.sortKey : void 0), g4 = this.glyphOffsetArray.length, _4 = h4.vertexLength, v4 = this.allowVerticalPlacement && o3 === 2 ? Math.PI / 2 : 0, y5 = a5.text && a5.text.sections;
+    let p4 = e67.indexArray, m4 = e67.layoutVertexArray, h4 = e67.segments.prepareSegment(4 * t4.length, m4, p4, this.canOverlap ? a5.sortKey : void 0), g5 = this.glyphOffsetArray.length, _4 = h4.vertexLength, v4 = this.allowVerticalPlacement && o3 === 2 ? Math.PI / 2 : 0, y5 = a5.text && a5.text.sections;
     for (let r4 = 0; r4 < t4.length; r4++) {
-      let { tl: i4, tr: o4, bl: c4, br: l4, tex: u4, pixelOffsetTL: g5, pixelOffsetBR: _5, minFontScaleX: b10, minFontScaleY: x5, glyphOffset: S4, isSDF: C4, sectionIndex: w4 } = t4[r4], T3 = h4.vertexLength, E5 = S4[1];
-      Dy(m4, s4.x, s4.y, i4.x, E5 + i4.y, u4.x, u4.y, n3, C4, g5.x, g5.y, b10, x5, f4), Dy(m4, s4.x, s4.y, o4.x, E5 + o4.y, u4.x + u4.w, u4.y, n3, C4, _5.x, g5.y, b10, x5, f4), Dy(m4, s4.x, s4.y, c4.x, E5 + c4.y, u4.x, u4.y + u4.h, n3, C4, g5.x, _5.y, b10, x5, f4), Dy(m4, s4.x, s4.y, l4.x, E5 + l4.y, u4.x + u4.w, u4.y + u4.h, n3, C4, _5.x, _5.y, b10, x5, f4), Oy(e67.dynamicLayoutVertexArray, s4, v4), p4.emplaceBack(T3, T3 + 2, T3 + 1), p4.emplaceBack(T3 + 1, T3 + 2, T3 + 3), h4.vertexLength += 4, h4.primitiveLength += 2, this.glyphOffsetArray.emplaceBack(S4[0]), (r4 === t4.length - 1 || w4 !== t4[r4 + 1].sectionIndex) && e67.programConfigurations.populatePaintArrays(m4.length, a5, a5.index, { imagePositions: {}, canonical: d3, formattedSection: y5?.[w4] });
+      let { tl: i4, tr: o4, bl: c4, br: l4, tex: u4, pixelOffsetTL: g6, pixelOffsetBR: _5, minFontScaleX: b10, minFontScaleY: x5, glyphOffset: S4, isSDF: C4, sectionIndex: w4 } = t4[r4], T3 = h4.vertexLength, E5 = S4[1];
+      Dy(m4, s4.x, s4.y, i4.x, E5 + i4.y, u4.x, u4.y, n3, C4, g6.x, g6.y, b10, x5, f4), Dy(m4, s4.x, s4.y, o4.x, E5 + o4.y, u4.x + u4.w, u4.y, n3, C4, _5.x, g6.y, b10, x5, f4), Dy(m4, s4.x, s4.y, c4.x, E5 + c4.y, u4.x, u4.y + u4.h, n3, C4, g6.x, _5.y, b10, x5, f4), Dy(m4, s4.x, s4.y, l4.x, E5 + l4.y, u4.x + u4.w, u4.y + u4.h, n3, C4, _5.x, _5.y, b10, x5, f4), Oy(e67.dynamicLayoutVertexArray, s4, v4), p4.emplaceBack(T3, T3 + 2, T3 + 1), p4.emplaceBack(T3 + 1, T3 + 2, T3 + 3), h4.vertexLength += 4, h4.primitiveLength += 2, this.glyphOffsetArray.emplaceBack(S4[0]), (r4 === t4.length - 1 || w4 !== t4[r4 + 1].sectionIndex) && e67.programConfigurations.populatePaintArrays(m4.length, a5, a5.index, { imagePositions: {}, canonical: d3, formattedSection: y5?.[w4] });
     }
-    e67.placedSymbolArray.emplaceBack(s4.x, s4.y, g4, this.glyphOffsetArray.length - g4, _4, c3, l3, s4.segment, n3 ? n3[0] : 0, n3 ? n3[1] : 0, r3[0], r3[1], o3, 0, false, 0, u3, f4);
+    e67.placedSymbolArray.emplaceBack(s4.x, s4.y, g5, this.glyphOffsetArray.length - g5, _4, c3, l3, s4.segment, n3 ? n3[0] : 0, n3 ? n3[1] : 0, r3[0], r3[1], o3, 0, false, 0, u3, f4);
   }
   _addCollisionDebugVertex(e67, t4, n3, r3, i3, a5) {
     return t4.emplaceBack(0, 0), e67.emplaceBack(n3.x, n3.y, r3, i3, Math.round(a5.x), Math.round(a5.y));
@@ -24193,8 +24727,8 @@ async function nb(e67, t4) {
     if (!i3) throw Error(`Could not load sprite image for ${r3}: the response is empty`);
     let a5 = _n.getImageCanvasContext(i3), o3 = (await e67[r3]).data;
     for (let e68 in o3) {
-      let { width: t5, height: i4, x: s4, y: c3, sdf: l3, pixelRatio: u3, stretchX: d3, stretchY: f4, content: p4, textFitWidth: m4, textFitHeight: h4 } = o3[e68], g4 = { width: t5, height: i4, x: s4, y: c3, context: a5 };
-      n3[r3][e68] = { data: null, pixelRatio: u3, sdf: l3, stretchX: d3, stretchY: f4, content: p4, textFitWidth: m4, textFitHeight: h4, spriteData: g4 };
+      let { width: t5, height: i4, x: s4, y: c3, sdf: l3, pixelRatio: u3, stretchX: d3, stretchY: f4, content: p4, textFitWidth: m4, textFitHeight: h4 } = o3[e68], g5 = { width: t5, height: i4, x: s4, y: c3, context: a5 };
+      n3[r3][e68] = { data: null, pixelRatio: u3, sdf: l3, stretchX: d3, stretchY: f4, content: p4, textFitWidth: m4, textFitHeight: h4, spriteData: g5 };
     }
   }
   return n3;
@@ -24480,13 +25014,13 @@ var mb = class {
   draw(e67) {
     let { width: t4, actualBoundingBoxAscent: n3, actualBoundingBoxDescent: r3, actualBoundingBoxLeft: i3, actualBoundingBoxRight: a5 } = this.ctx.measureText(e67), o3 = Math.ceil(n3), s4 = Math.floor(-i3), c3 = Math.max(0, Math.min(this.maxGlyphDim, Math.ceil(a5) - s4)), l3 = Math.max(0, Math.min(this.maxGlyphDim, o3 + Math.ceil(r3))), u3 = c3 + 2 * this.buffer, d3 = l3 + 2 * this.buffer, f4 = u3 * d3, p4 = new Uint8ClampedArray(f4), m4 = { data: p4, width: u3, height: d3, glyphWidth: c3, glyphHeight: l3, glyphTop: o3, glyphLeft: s4, glyphAdvance: t4 };
     if (c3 === 0 || l3 === 0) return m4;
-    let { ctx: h4, buffer: g4, gridInner: _4, gridOuter: v4 } = this;
-    h4.clearRect(g4, g4, c3, l3), h4.fillText(e67, g4 - s4, g4 + o3);
-    let y5 = h4.getImageData(g4, g4, c3, l3);
+    let { ctx: h4, buffer: g5, gridInner: _4, gridOuter: v4 } = this;
+    h4.clearRect(g5, g5, c3, l3), h4.fillText(e67, g5 - s4, g5 + o3);
+    let y5 = h4.getImageData(g5, g5, c3, l3);
     v4.fill(fb, 0, f4), _4.fill(0, 0, f4);
     let b10 = 3;
     for (let e68 = 0; e68 < l3; e68++) {
-      let t5 = (e68 + g4) * u3 + g4;
+      let t5 = (e68 + g5) * u3 + g5;
       for (let e69 = 0; e69 < c3; e69++, b10 += 4, t5++) {
         let e70 = y5.data[b10];
         if (e70 === 0) continue;
@@ -24494,9 +25028,9 @@ var mb = class {
         v4[t5] = Math.max(0, n4), _4[t5] = Math.max(0, -n4);
       }
     }
-    hb(v4, 0, 0, u3, d3, u3, this.f, this.v, this.z, g4);
-    let x5 = Math.min(g4, 1);
-    hb(_4, g4 - x5, g4 - x5, c3 + 2 * x5, l3 + 2 * x5, u3, this.f, this.v, this.z);
+    hb(v4, 0, 0, u3, d3, u3, this.f, this.v, this.z, g5);
+    let x5 = Math.min(g5, 1);
+    hb(_4, g5 - x5, g5 - x5, c3 + 2 * x5, l3 + 2 * x5, u3, this.f, this.v, this.z);
     let S4 = 255 / this.radius, C4 = 255 * (1 - this.cutoff);
     for (let e68 = 0; e68 < f4; e68++) {
       let t5 = Math.sqrt(v4[e68]) - Math.sqrt(_4[e68]);
@@ -25796,12 +26330,12 @@ function jx(e67, t4) {
 function Mx(e67, t4) {
   let n3 = e67.granularity === void 0 ? 1 : Math.max(e67.granularity, 1), r3 = n3 + (e67.generateBorders ? 2 : 0), i3 = n3 + (e67.extendToNorthPole || e67.generateBorders ? 1 : 0) + (e67.extendToSouthPole || e67.generateBorders ? 1 : 0), a5 = r3 + 1, o3 = i3 + 1, s4 = e67.generateBorders ? -1 : 0, c3 = e67.generateBorders || e67.extendToNorthPole ? -1 : 0, l3 = n3 + +!!e67.generateBorders, u3 = n3 + (e67.generateBorders || e67.extendToSouthPole ? 1 : 0), d3 = a5 * o3, f4 = r3 * i3 * 6, p4 = a5 * o3 > 65536;
   if (p4 && t4 === `16bit`) throw Error(`Granularity is too large and meshes would not fit inside 16 bit vertex indices.`);
-  let m4 = p4 || t4 === `32bit`, h4 = new Int16Array(d3 * 2), g4 = 0;
+  let m4 = p4 || t4 === `32bit`, h4 = new Int16Array(d3 * 2), g5 = 0;
   for (let t5 = c3; t5 <= u3; t5++) for (let r4 = s4; r4 <= l3; r4++) {
     let i4 = r4 / n3 * P2;
     r4 === -1 && (i4 = -64), r4 === n3 + 1 && (i4 = 8256);
     let a6 = t5 / n3 * P2;
-    t5 === -1 && (a6 = e67.extendToNorthPole ? vm : -64), t5 === n3 + 1 && (a6 = e67.extendToSouthPole ? ym : 8256), h4[g4++] = i4, h4[g4++] = a6;
+    t5 === -1 && (a6 = e67.extendToNorthPole ? vm : -64), t5 === n3 + 1 && (a6 = e67.extendToSouthPole ? ym : 8256), h4[g5++] = i4, h4[g5++] = a6;
   }
   let _4 = m4 ? new Uint32Array(f4) : new Uint16Array(f4), v4 = 0;
   for (let e68 = 0; e68 < i3; e68++) for (let t5 = 0; t5 < r3; t5++) {
@@ -25909,7 +26443,7 @@ function Fx(e67) {
 }
 function Ix(e67, t4) {
   if (t4 === `flat` || Rx(e67)) return Cx;
-  let [n3, r3, i3, a5] = e67, o3 = n3.x - r3.x + i3.x - a5.x, s4 = n3.y - r3.y + i3.y - a5.y, c3 = [r3.x - i3.x, r3.y - i3.y, a5.x - i3.x, a5.y - i3.y], [l3, u3, d3, f4] = c3, p4 = y2(c3), m4 = (o3 * f4 - d3 * s4) / p4, h4 = (l3 * s4 - o3 * u3) / p4, g4 = [1, 1 + m4, 1 + m4 + h4, 1 + h4], _4 = Math.max(...g4) / Math.min(...g4), v4 = t4 === `perspective` ? 0 : Lx(_4);
+  let [n3, r3, i3, a5] = e67, o3 = n3.x - r3.x + i3.x - a5.x, s4 = n3.y - r3.y + i3.y - a5.y, c3 = [r3.x - i3.x, r3.y - i3.y, a5.x - i3.x, a5.y - i3.y], [l3, u3, d3, f4] = c3, p4 = y2(c3), m4 = (o3 * f4 - d3 * s4) / p4, h4 = (l3 * s4 - o3 * u3) / p4, g5 = [1, 1 + m4, 1 + m4 + h4, 1 + h4], _4 = Math.max(...g5) / Math.min(...g5), v4 = t4 === `perspective` ? 0 : Lx(_4);
   return !(_4 >= 1 && _4 <= 512) || v4 >= 1 ? Cx : [m4, h4, v4];
 }
 function Lx(e67) {
@@ -26317,12 +26851,12 @@ function ES(e67, t4, n3, r3) {
   n3[i3++] = a5 >>> 0 & 2047, n3[i3++] = a5 >>> 11 & 2047, n3[i3++] = (a5 >>> 22 | (o3 & 1) << 10) & 2047, n3[i3++] = o3 >>> 1 & 2047, n3[i3++] = o3 >>> 12 & 2047, n3[i3++] = (o3 >>> 23 | (s4 & 3) << 9) & 2047, n3[i3++] = s4 >>> 2 & 2047, n3[i3++] = s4 >>> 13 & 2047, n3[i3++] = (s4 >>> 24 | (c3 & 7) << 8) & 2047, n3[i3++] = c3 >>> 3 & 2047, n3[i3++] = c3 >>> 14 & 2047, n3[i3++] = (c3 >>> 25 | (l3 & 15) << 7) & 2047, n3[i3++] = l3 >>> 4 & 2047, n3[i3++] = l3 >>> 15 & 2047, n3[i3++] = (l3 >>> 26 | (u3 & 31) << 6) & 2047, n3[i3++] = u3 >>> 5 & 2047, n3[i3++] = u3 >>> 16 & 2047, n3[i3++] = (u3 >>> 27 | (d3 & 63) << 5) & 2047, n3[i3++] = d3 >>> 6 & 2047, n3[i3++] = d3 >>> 17 & 2047, n3[i3++] = (d3 >>> 28 | (f4 & 127) << 4) & 2047, n3[i3++] = f4 >>> 7 & 2047, n3[i3++] = f4 >>> 18 & 2047, n3[i3++] = (f4 >>> 29 | (p4 & 255) << 3) & 2047, n3[i3++] = p4 >>> 8 & 2047, n3[i3++] = p4 >>> 19 & 2047, n3[i3++] = (p4 >>> 30 | (m4 & 511) << 2) & 2047, n3[i3++] = m4 >>> 9 & 2047, n3[i3++] = m4 >>> 20 & 2047, n3[i3++] = (m4 >>> 31 | (h4 & 1023) << 1) & 2047, n3[i3++] = h4 >>> 10 & 2047, n3[i3] = h4 >>> 21 & 2047;
 }
 function DS(e67, t4, n3, r3) {
-  let i3 = r3, a5 = e67[t4] >>> 0, o3 = e67[t4 + 1] >>> 0, s4 = e67[t4 + 2] >>> 0, c3 = e67[t4 + 3] >>> 0, l3 = e67[t4 + 4] >>> 0, u3 = e67[t4 + 5] >>> 0, d3 = e67[t4 + 6] >>> 0, f4 = e67[t4 + 7] >>> 0, p4 = e67[t4 + 8] >>> 0, m4 = e67[t4 + 9] >>> 0, h4 = e67[t4 + 10] >>> 0, g4 = e67[t4 + 11] >>> 0;
-  n3[i3++] = a5 >>> 0 & 4095, n3[i3++] = a5 >>> 12 & 4095, n3[i3++] = (a5 >>> 24 | (o3 & 15) << 8) & 4095, n3[i3++] = o3 >>> 4 & 4095, n3[i3++] = o3 >>> 16 & 4095, n3[i3++] = (o3 >>> 28 | (s4 & 255) << 4) & 4095, n3[i3++] = s4 >>> 8 & 4095, n3[i3++] = s4 >>> 20 & 4095, n3[i3++] = c3 >>> 0 & 4095, n3[i3++] = c3 >>> 12 & 4095, n3[i3++] = (c3 >>> 24 | (l3 & 15) << 8) & 4095, n3[i3++] = l3 >>> 4 & 4095, n3[i3++] = l3 >>> 16 & 4095, n3[i3++] = (l3 >>> 28 | (u3 & 255) << 4) & 4095, n3[i3++] = u3 >>> 8 & 4095, n3[i3++] = u3 >>> 20 & 4095, n3[i3++] = d3 >>> 0 & 4095, n3[i3++] = d3 >>> 12 & 4095, n3[i3++] = (d3 >>> 24 | (f4 & 15) << 8) & 4095, n3[i3++] = f4 >>> 4 & 4095, n3[i3++] = f4 >>> 16 & 4095, n3[i3++] = (f4 >>> 28 | (p4 & 255) << 4) & 4095, n3[i3++] = p4 >>> 8 & 4095, n3[i3++] = p4 >>> 20 & 4095, n3[i3++] = m4 >>> 0 & 4095, n3[i3++] = m4 >>> 12 & 4095, n3[i3++] = (m4 >>> 24 | (h4 & 15) << 8) & 4095, n3[i3++] = h4 >>> 4 & 4095, n3[i3++] = h4 >>> 16 & 4095, n3[i3++] = (h4 >>> 28 | (g4 & 255) << 4) & 4095, n3[i3++] = g4 >>> 8 & 4095, n3[i3] = g4 >>> 20 & 4095;
+  let i3 = r3, a5 = e67[t4] >>> 0, o3 = e67[t4 + 1] >>> 0, s4 = e67[t4 + 2] >>> 0, c3 = e67[t4 + 3] >>> 0, l3 = e67[t4 + 4] >>> 0, u3 = e67[t4 + 5] >>> 0, d3 = e67[t4 + 6] >>> 0, f4 = e67[t4 + 7] >>> 0, p4 = e67[t4 + 8] >>> 0, m4 = e67[t4 + 9] >>> 0, h4 = e67[t4 + 10] >>> 0, g5 = e67[t4 + 11] >>> 0;
+  n3[i3++] = a5 >>> 0 & 4095, n3[i3++] = a5 >>> 12 & 4095, n3[i3++] = (a5 >>> 24 | (o3 & 15) << 8) & 4095, n3[i3++] = o3 >>> 4 & 4095, n3[i3++] = o3 >>> 16 & 4095, n3[i3++] = (o3 >>> 28 | (s4 & 255) << 4) & 4095, n3[i3++] = s4 >>> 8 & 4095, n3[i3++] = s4 >>> 20 & 4095, n3[i3++] = c3 >>> 0 & 4095, n3[i3++] = c3 >>> 12 & 4095, n3[i3++] = (c3 >>> 24 | (l3 & 15) << 8) & 4095, n3[i3++] = l3 >>> 4 & 4095, n3[i3++] = l3 >>> 16 & 4095, n3[i3++] = (l3 >>> 28 | (u3 & 255) << 4) & 4095, n3[i3++] = u3 >>> 8 & 4095, n3[i3++] = u3 >>> 20 & 4095, n3[i3++] = d3 >>> 0 & 4095, n3[i3++] = d3 >>> 12 & 4095, n3[i3++] = (d3 >>> 24 | (f4 & 15) << 8) & 4095, n3[i3++] = f4 >>> 4 & 4095, n3[i3++] = f4 >>> 16 & 4095, n3[i3++] = (f4 >>> 28 | (p4 & 255) << 4) & 4095, n3[i3++] = p4 >>> 8 & 4095, n3[i3++] = p4 >>> 20 & 4095, n3[i3++] = m4 >>> 0 & 4095, n3[i3++] = m4 >>> 12 & 4095, n3[i3++] = (m4 >>> 24 | (h4 & 15) << 8) & 4095, n3[i3++] = h4 >>> 4 & 4095, n3[i3++] = h4 >>> 16 & 4095, n3[i3++] = (h4 >>> 28 | (g5 & 255) << 4) & 4095, n3[i3++] = g5 >>> 8 & 4095, n3[i3] = g5 >>> 20 & 4095;
 }
 function OS(e67, t4, n3, r3) {
-  let i3 = r3, a5 = e67[t4] >>> 0, o3 = e67[t4 + 1] >>> 0, s4 = e67[t4 + 2] >>> 0, c3 = e67[t4 + 3] >>> 0, l3 = e67[t4 + 4] >>> 0, u3 = e67[t4 + 5] >>> 0, d3 = e67[t4 + 6] >>> 0, f4 = e67[t4 + 7] >>> 0, p4 = e67[t4 + 8] >>> 0, m4 = e67[t4 + 9] >>> 0, h4 = e67[t4 + 10] >>> 0, g4 = e67[t4 + 11] >>> 0, _4 = e67[t4 + 12] >>> 0, v4 = e67[t4 + 13] >>> 0, y5 = e67[t4 + 14] >>> 0, b10 = e67[t4 + 15] >>> 0;
-  n3[i3++] = a5 >>> 0 & 65535, n3[i3++] = a5 >>> 16 & 65535, n3[i3++] = o3 >>> 0 & 65535, n3[i3++] = o3 >>> 16 & 65535, n3[i3++] = s4 >>> 0 & 65535, n3[i3++] = s4 >>> 16 & 65535, n3[i3++] = c3 >>> 0 & 65535, n3[i3++] = c3 >>> 16 & 65535, n3[i3++] = l3 >>> 0 & 65535, n3[i3++] = l3 >>> 16 & 65535, n3[i3++] = u3 >>> 0 & 65535, n3[i3++] = u3 >>> 16 & 65535, n3[i3++] = d3 >>> 0 & 65535, n3[i3++] = d3 >>> 16 & 65535, n3[i3++] = f4 >>> 0 & 65535, n3[i3++] = f4 >>> 16 & 65535, n3[i3++] = p4 >>> 0 & 65535, n3[i3++] = p4 >>> 16 & 65535, n3[i3++] = m4 >>> 0 & 65535, n3[i3++] = m4 >>> 16 & 65535, n3[i3++] = h4 >>> 0 & 65535, n3[i3++] = h4 >>> 16 & 65535, n3[i3++] = g4 >>> 0 & 65535, n3[i3++] = g4 >>> 16 & 65535, n3[i3++] = _4 >>> 0 & 65535, n3[i3++] = _4 >>> 16 & 65535, n3[i3++] = v4 >>> 0 & 65535, n3[i3++] = v4 >>> 16 & 65535, n3[i3++] = y5 >>> 0 & 65535, n3[i3++] = y5 >>> 16 & 65535, n3[i3++] = b10 >>> 0 & 65535, n3[i3] = b10 >>> 16 & 65535;
+  let i3 = r3, a5 = e67[t4] >>> 0, o3 = e67[t4 + 1] >>> 0, s4 = e67[t4 + 2] >>> 0, c3 = e67[t4 + 3] >>> 0, l3 = e67[t4 + 4] >>> 0, u3 = e67[t4 + 5] >>> 0, d3 = e67[t4 + 6] >>> 0, f4 = e67[t4 + 7] >>> 0, p4 = e67[t4 + 8] >>> 0, m4 = e67[t4 + 9] >>> 0, h4 = e67[t4 + 10] >>> 0, g5 = e67[t4 + 11] >>> 0, _4 = e67[t4 + 12] >>> 0, v4 = e67[t4 + 13] >>> 0, y5 = e67[t4 + 14] >>> 0, b10 = e67[t4 + 15] >>> 0;
+  n3[i3++] = a5 >>> 0 & 65535, n3[i3++] = a5 >>> 16 & 65535, n3[i3++] = o3 >>> 0 & 65535, n3[i3++] = o3 >>> 16 & 65535, n3[i3++] = s4 >>> 0 & 65535, n3[i3++] = s4 >>> 16 & 65535, n3[i3++] = c3 >>> 0 & 65535, n3[i3++] = c3 >>> 16 & 65535, n3[i3++] = l3 >>> 0 & 65535, n3[i3++] = l3 >>> 16 & 65535, n3[i3++] = u3 >>> 0 & 65535, n3[i3++] = u3 >>> 16 & 65535, n3[i3++] = d3 >>> 0 & 65535, n3[i3++] = d3 >>> 16 & 65535, n3[i3++] = f4 >>> 0 & 65535, n3[i3++] = f4 >>> 16 & 65535, n3[i3++] = p4 >>> 0 & 65535, n3[i3++] = p4 >>> 16 & 65535, n3[i3++] = m4 >>> 0 & 65535, n3[i3++] = m4 >>> 16 & 65535, n3[i3++] = h4 >>> 0 & 65535, n3[i3++] = h4 >>> 16 & 65535, n3[i3++] = g5 >>> 0 & 65535, n3[i3++] = g5 >>> 16 & 65535, n3[i3++] = _4 >>> 0 & 65535, n3[i3++] = _4 >>> 16 & 65535, n3[i3++] = v4 >>> 0 & 65535, n3[i3++] = v4 >>> 16 & 65535, n3[i3++] = y5 >>> 0 & 65535, n3[i3++] = y5 >>> 16 & 65535, n3[i3++] = b10 >>> 0 & 65535, n3[i3] = b10 >>> 16 & 65535;
 }
 function kS(e67, t4, n3, r3) {
   let i3 = r3, a5 = t4;
@@ -26547,8 +27081,8 @@ function ZS(e67, t4, n3, r3, i3, a5) {
   if (s4 <= 0 || o3 + s4 > e67.length - 1) throw Error(`FastPFOR decode: invalid whereMeta=${s4} at pageStart=${o3} (expected > 0 and pageStart+whereMeta < encoded.length=${e67.length})`);
   let c3 = o3 + 1 | 0, l3 = o3 + s4 | 0, u3 = e67[l3] >>> 0, d3 = u3 + 3 >>> 2, f4 = l3 + 1, p4 = f4 + d3;
   if (p4 >= e67.length) throw Error(`FastPFOR decode: invalid byteSize=${u3} (metaInts=${d3}, pageStart=${o3}, packedEnd=${l3}, byteContainerStart=${f4}) causes bitmapPos=${p4} out of bounds (encoded.length=${e67.length})`);
-  let m4 = WS(e67, f4, u3, a5), h4 = u3, g4 = GS(e67, p4, a5);
-  return a5.dataPointers.fill(0), XS(e67, o3, c3, l3, t4, r3 | 0, i3 / 256 | 0, m4, h4, a5), g4;
+  let m4 = WS(e67, f4, u3, a5), h4 = u3, g5 = GS(e67, p4, a5);
+  return a5.dataPointers.fill(0), XS(e67, o3, c3, l3, t4, r3 | 0, i3 / 256 | 0, m4, h4, a5), g5;
 }
 function QS(e67, t4, n3, r3, i3, a5) {
   let o3 = r3 + pS(i3, 256), s4 = r3, c3 = n3;
@@ -27362,22 +27896,22 @@ var Xw;
   e67[e67.MORTON = 0] = `MORTON`, e67[e67.VEC_2 = 1] = `VEC_2`, e67[e67.VEC_3 = 2] = `VEC_3`;
 })(Xw ||= {});
 function Zw(e67) {
-  let t4 = Array(e67.numGeometries), n3 = 1, r3 = 1, i3 = 1, a5 = 0, o3 = 0, s4 = 0, c3 = e67.mortonSettings, l3 = e67.topologyVector, d3 = l3.geometryOffsets, f4 = l3.partOffsets, p4 = l3.ringOffsets, m4 = e67.vertexOffsets, h4 = !m4 || m4.length === 0, g4 = e67.containsPolygonGeometry(), _4 = e67.vertexBuffer;
+  let t4 = Array(e67.numGeometries), n3 = 1, r3 = 1, i3 = 1, a5 = 0, o3 = 0, s4 = 0, c3 = e67.mortonSettings, l3 = e67.topologyVector, d3 = l3.geometryOffsets, f4 = l3.partOffsets, p4 = l3.ringOffsets, m4 = e67.vertexOffsets, h4 = !m4 || m4.length === 0, g5 = e67.containsPolygonGeometry(), _4 = e67.vertexBuffer;
   for (let l4 = 0; l4 < e67.numGeometries; l4++) {
     let v4 = e67.geometryType(l4);
     switch (v4) {
       case Jw.POINT:
         {
-          let l5, g5;
-          if (h4) l5 = _4[o3++], g5 = _4[o3++];
+          let l5, g6;
+          if (h4) l5 = _4[o3++], g6 = _4[o3++];
           else if (e67.vertexBufferType === Xw.MORTON) {
             let e68 = _4[m4[s4++]], t5 = Kw(e68, c3.numBits, c3.coordinateShift);
-            l5 = t5.x, g5 = t5.y;
+            l5 = t5.x, g6 = t5.y;
           } else {
             let e68 = m4[s4++] * 2;
-            l5 = _4[e68], g5 = _4[e68 + 1];
+            l5 = _4[e68], g6 = _4[e68 + 1];
           }
-          t4[a5++] = [[new u(l5, g5)]], d3 && i3++, f4 && n3++, p4 && r3++;
+          t4[a5++] = [[new u(l5, g6)]], d3 && i3++, f4 && n3++, p4 && r3++;
         }
         break;
       case Jw.MULTIPOINT:
@@ -27398,7 +27932,7 @@ function Zw(e67) {
       case Jw.LINESTRING:
         {
           let l5;
-          g4 ? (l5 = p4[r3] - p4[r3 - 1], r3++) : l5 = f4[n3] - f4[n3 - 1], n3++;
+          g5 ? (l5 = p4[r3] - p4[r3 - 1], r3++) : l5 = f4[n3] - f4[n3 - 1], n3++;
           let u3;
           h4 ? (u3 = $w(_4, o3, l5, false), o3 += l5 * 2) : (u3 = Qw(e67.vertexBufferType, _4, m4, s4, l5, false, c3), s4 += l5), t4[a5++] = [u3], d3 && i3++;
         }
@@ -27407,15 +27941,15 @@ function Zw(e67) {
         {
           let l5 = f4[n3] - f4[n3 - 1];
           n3++;
-          let u3 = Array(l5 - 1), g5, v5 = p4[r3] - p4[r3 - 1];
+          let u3 = Array(l5 - 1), g6, v5 = p4[r3] - p4[r3 - 1];
           if (r3++, h4) {
-            g5 = $w(_4, o3, v5, true), o3 += v5 * 2;
+            g6 = $w(_4, o3, v5, true), o3 += v5 * 2;
             for (let e68 = 0; e68 < u3.length; e68++) v5 = p4[r3] - p4[r3 - 1], r3++, u3[e68] = $w(_4, o3, v5, true), o3 += v5 * 2;
           } else {
-            g5 = Qw(e67.vertexBufferType, _4, m4, s4, v5, true, c3), s4 += v5;
+            g6 = Qw(e67.vertexBufferType, _4, m4, s4, v5, true, c3), s4 += v5;
             for (let t5 = 0; t5 < u3.length; t5++) v5 = p4[r3] - p4[r3 - 1], r3++, u3[t5] = Qw(e67.vertexBufferType, _4, m4, s4, v5, true, c3), s4 += v5;
           }
-          t4[a5++] = [g5].concat(u3), d3 && i3++;
+          t4[a5++] = [g6].concat(u3), d3 && i3++;
         }
         break;
       case Jw.MULTILINESTRING:
@@ -27425,7 +27959,7 @@ function Zw(e67) {
           let u3 = Array(l5);
           for (let t5 = 0; t5 < l5; t5++) {
             let i4;
-            if (g4 ? (i4 = p4[r3] - p4[r3 - 1], r3++) : i4 = f4[n3] - f4[n3 - 1], n3++, h4) u3[t5] = $w(_4, o3, i4, false), o3 += i4 * 2;
+            if (g5 ? (i4 = p4[r3] - p4[r3 - 1], r3++) : i4 = f4[n3] - f4[n3 - 1], n3++, h4) u3[t5] = $w(_4, o3, i4, false), o3 += i4 * 2;
             else {
               let n4 = Qw(e67.vertexBufferType, _4, m4, s4, i4, false, c3);
               u3[t5] = n4, s4 += i4;
@@ -27705,8 +28239,8 @@ function mT(e67, t4, n3, r3, i3) {
         }
     }
   }
-  let g4, _4, v4;
-  return f4 ? (g4 = hT(d3, f4, 2), p4 && m4 ? (_4 = gT(d3, g4, p4, false), v4 = vT(d3, g4, _4, m4)) : p4 && (_4 = _T(d3, g4, p4))) : p4 && m4 ? (_4 = hT(d3, p4, 1), v4 = gT(d3, _4, m4, true)) : p4 && (_4 = hT(d3, p4, 0)), u3 && !_4 ? fT(d3, h4, u3, c3) : u3 ? fT(d3, h4, u3, c3, { geometryOffsets: g4, partOffsets: _4, ringOffsets: v4 }) : l3 === void 0 ? oT(d3, { geometryOffsets: g4, partOffsets: _4, ringOffsets: v4 }, s4, c3) : sT(d3, { geometryOffsets: g4, partOffsets: _4, ringOffsets: v4 }, s4, c3, l3);
+  let g5, _4, v4;
+  return f4 ? (g5 = hT(d3, f4, 2), p4 && m4 ? (_4 = gT(d3, g5, p4, false), v4 = vT(d3, g5, _4, m4)) : p4 && (_4 = _T(d3, g5, p4))) : p4 && m4 ? (_4 = hT(d3, p4, 1), v4 = gT(d3, _4, m4, true)) : p4 && (_4 = hT(d3, p4, 0)), u3 && !_4 ? fT(d3, h4, u3, c3) : u3 ? fT(d3, h4, u3, c3, { geometryOffsets: g5, partOffsets: _4, ringOffsets: v4 }) : l3 === void 0 ? oT(d3, { geometryOffsets: g5, partOffsets: _4, ringOffsets: v4 }, s4, c3) : sT(d3, { geometryOffsets: g5, partOffsets: _4, ringOffsets: v4 }, s4, c3, l3);
 }
 function hT(e67, t4, n3) {
   let r3 = new Uint32Array(e67.length + 1), i3 = 0;
@@ -28013,9 +28547,9 @@ function UT(e67, t4, n3, r3, i3) {
     let n4 = WT(o3, h4, t5, c3);
     p4[e68] = n4.value, h4 = n4.nextIndex;
   }
-  let g4 = 0;
-  for (let e68 = r3; e68 < f4; e68++) g4 += a5[e68];
-  let _4 = i3 + g4;
+  let g5 = 0;
+  for (let e68 = r3; e68 < f4; e68++) g5 += a5[e68];
+  let _4 = i3 + g5;
   if (h4 !== _4) throw Error(`Unused flattened map values remain after decode`);
   return { value: p4, nullabilityBuffer: d3, countsEnd: f4, valuesEnd: _4 };
 }
@@ -28476,10 +29010,10 @@ K2(`FeatureIndex`, class {
       f5.paint = EE(f5.paint, n4.paint, m4, i4, o3), f5.layout = EE(f5.layout, n4.layout, m4, i4, o3);
       let p5 = !d3 || d3(m4, n4, i4);
       if (!p5) continue;
-      let g4 = new Yx(m4, this.z, this.x, this.y, h4, l3);
-      g4.layer = f5;
+      let g5 = new Yx(m4, this.z, this.x, this.y, h4, l3);
+      g5.layer = f5;
       let _4 = e67[t5];
-      _4 === void 0 && (_4 = e67[t5] = []), _4.push({ featureIndex: r3, feature: g4, intersectionZ: p5 });
+      _4 === void 0 && (_4 = e67[t5] = []), _4.push({ featureIndex: r3, feature: g5, intersectionZ: p5 });
     }
   }
   lookupSymbolFeatures(e67, t4, n3, r3, i3, a5, o3, s4) {
@@ -28977,7 +29511,7 @@ function YE(e67, t4, n3, r3) {
 function XE(e67, t4) {
   let n3 = e67.getCameraFrustum(), r3 = e67.getClippingPlane();
   r3 && t4.maxContentElevation > 0 && ({ frustum: n3, plane: r3 } = YE(n3, r3, e67.cameraPosition, t4.maxContentElevation));
-  let i3 = e67.getCoveringTilesDetailsProvider(), a5 = i3.getCenter(e67), o3 = vh(e67, a5), s4 = e67.worldCoordinateHelper.worldFromLngLat(a5.lng, a5.lat, e67.elevation), c3 = qE(e67, t4.maxContentElevation), l3 = i3.allowVariableZoom(e67, t4), u3 = KE(e67, t4), d3 = t4.minzoom || 0, f4 = t4.maxzoom === void 0 ? e67.maxZoom : t4.maxzoom, p4 = Math.min(Math.max(0, u3), f4), m4 = 2 ** p4, h4 = [m4 * o3.x, m4 * o3.y, 0], g4 = [m4 * s4.x, m4 * s4.y, 0], _4 = Math.hypot(s4.x - o3.x, s4.y - o3.y), v4 = Math.abs(s4.z - o3.z), y5 = Math.hypot(_4, v4), b10 = (e68) => ({ zoom: 0, x: 0, y: 0, wrap: e68, fullyVisible: false }), x5 = [], S4 = [];
+  let i3 = e67.getCoveringTilesDetailsProvider(), a5 = i3.getCenter(e67), o3 = vh(e67, a5), s4 = e67.worldCoordinateHelper.worldFromLngLat(a5.lng, a5.lat, e67.elevation), c3 = qE(e67, t4.maxContentElevation), l3 = i3.allowVariableZoom(e67, t4), u3 = KE(e67, t4), d3 = t4.minzoom || 0, f4 = t4.maxzoom === void 0 ? e67.maxZoom : t4.maxzoom, p4 = Math.min(Math.max(0, u3), f4), m4 = 2 ** p4, h4 = [m4 * o3.x, m4 * o3.y, 0], g5 = [m4 * s4.x, m4 * s4.y, 0], _4 = Math.hypot(s4.x - o3.x, s4.y - o3.y), v4 = Math.abs(s4.z - o3.z), y5 = Math.hypot(_4, v4), b10 = (e68) => ({ zoom: 0, x: 0, y: 0, wrap: e68, fullyVisible: false }), x5 = [], S4 = [];
   if (e67.renderWorldCopies && e67.worldCoordinateHelper.wraps && i3.allowWorldCopies()) for (let e68 = 1; e68 <= 3; e68++) x5.push(b10(-e68)), x5.push(b10(e68));
   for (x5.push(b10(0)); x5.length > 0; ) {
     let a6 = x5.pop(), m5 = a6.x, _5 = a6.y, b11 = a6.fullyVisible, C4 = { x: m5, y: _5, z: a6.zoom }, w4 = i3.getTileBoundingVolume(C4, a6.wrap, c3, t4);
@@ -28992,7 +29526,7 @@ function XE(e67, t4) {
     if (a6.wrap = i3.getWrap(s4, C4, a6.wrap), a6.zoom >= D5) {
       if (a6.zoom < d3) continue;
       let e68 = p4 - a6.zoom, n4 = h4[0] - 0.5 - (m5 << e68), r4 = h4[1] - 0.5 - (_5 << e68), i4 = t4.reparseOverscaled ? Math.max(a6.zoom, E5) : a6.zoom;
-      S4.push({ tileID: new Xb(a6.zoom === f4 ? i4 : a6.zoom, a6.wrap, a6.zoom, m5, _5), distanceSq: tt([g4[0] - 0.5 - m5, g4[1] - 0.5 - _5]), tileDistanceToCamera: Math.sqrt(n4 * n4 + r4 * r4) });
+      S4.push({ tileID: new Xb(a6.zoom === f4 ? i4 : a6.zoom, a6.wrap, a6.zoom, m5, _5), distanceSq: tt([g5[0] - 0.5 - m5, g5[1] - 0.5 - _5]), tileDistanceToCamera: Math.sqrt(n4 * n4 + r4 * r4) });
     } else for (let e68 = 0; e68 < 4; e68++) {
       let t5 = (m5 << 1) + e68 % 2, n4 = (_5 << 1) + (e68 >> 1), r4 = a6.zoom + 1;
       x5.push({ zoom: r4, x: t5, y: n4, wrap: a6.wrap, fullyVisible: b11 });
@@ -29636,25 +30170,25 @@ function SD(e67, t4) {
   return e67.x >= -t4[0] && e67.x <= t4[0] && e67.y >= -t4[1] && e67.y <= t4[1];
 }
 function CD(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, d3, f4) {
-  let p4 = r3 ? e67.textSizeData : e67.iconSizeData, m4 = Vv(p4, n3.zoom), h4 = [256 / t4.width * 2 + 1, 256 / t4.height * 2 + 1], g4 = r3 ? e67.text.dynamicLayoutVertexArray : e67.icon.dynamicLayoutVertexArray;
-  g4.clear();
+  let p4 = r3 ? e67.textSizeData : e67.iconSizeData, m4 = Vv(p4, n3.zoom), h4 = [256 / t4.width * 2 + 1, 256 / t4.height * 2 + 1], g5 = r3 ? e67.text.dynamicLayoutVertexArray : e67.icon.dynamicLayoutVertexArray;
+  g5.clear();
   let _4 = e67.lineVertexArray, v4 = r3 ? e67.text.placedSymbolArray : e67.icon.placedSymbolArray, y5 = n3.width / n3.height, b10 = false;
   for (let t5 = 0; t5 < v4.length; t5++) {
     let r4 = v4.get(t5);
     if (r4.hidden || r4.writingMode === 2 && !b10) {
-      LD(r4.numGlyphs, g4);
+      LD(r4.numGlyphs, g5);
       continue;
     }
     b10 = false;
     let x5 = { getElevation: f4, pitchedLabelPlaneMatrix: i3, lineVertexArray: _4, pitchWithMap: o3, projectionCache: { projections: {}, offsets: {}, cachedAnchorPoint: void 0, anyProjectionOccluded: false }, transform: n3, tileAnchorPoint: new u(r4.anchorX, r4.anchorY), unwrappedTileID: l3, width: n3.width, height: n3.height, translation: d3 }, S4 = jD(r4.anchorX, r4.anchorY, x5);
     if (!SD(S4.point, h4)) {
-      LD(r4.numGlyphs, g4);
+      LD(r4.numGlyphs, g5);
       continue;
     }
-    let C4 = S4.signedDistanceFromCamera, w4 = xD(n3.cameraToCenterDistance, C4), T3 = Bv(p4, m4, r4), E5 = o3 ? T3 * n3.getPitchedTextCorrection(r4.anchorX, r4.anchorY, l3) / w4 : T3 * w4, D5 = ED({ projectionContext: x5, pitchedLabelPlaneMatrixInverse: a5, symbol: r4, fontSize: E5, flip: false, keepUpright: s4, glyphOffsetArray: e67.glyphOffsetArray, dynamicLayoutVertexArray: g4, aspectRatio: y5, rotateToLine: c3 });
-    b10 = D5.useVertical, (D5.notEnoughRoom || b10 || D5.needsFlipping && ED({ projectionContext: x5, pitchedLabelPlaneMatrixInverse: a5, symbol: r4, fontSize: E5, flip: true, keepUpright: s4, glyphOffsetArray: e67.glyphOffsetArray, dynamicLayoutVertexArray: g4, aspectRatio: y5, rotateToLine: c3 }).notEnoughRoom) && LD(r4.numGlyphs, g4);
+    let C4 = S4.signedDistanceFromCamera, w4 = xD(n3.cameraToCenterDistance, C4), T3 = Bv(p4, m4, r4), E5 = o3 ? T3 * n3.getPitchedTextCorrection(r4.anchorX, r4.anchorY, l3) / w4 : T3 * w4, D5 = ED({ projectionContext: x5, pitchedLabelPlaneMatrixInverse: a5, symbol: r4, fontSize: E5, flip: false, keepUpright: s4, glyphOffsetArray: e67.glyphOffsetArray, dynamicLayoutVertexArray: g5, aspectRatio: y5, rotateToLine: c3 });
+    b10 = D5.useVertical, (D5.notEnoughRoom || b10 || D5.needsFlipping && ED({ projectionContext: x5, pitchedLabelPlaneMatrixInverse: a5, symbol: r4, fontSize: E5, flip: true, keepUpright: s4, glyphOffsetArray: e67.glyphOffsetArray, dynamicLayoutVertexArray: g5, aspectRatio: y5, rotateToLine: c3 }).notEnoughRoom) && LD(r4.numGlyphs, g5);
   }
-  r3 ? e67.text.dynamicLayoutVertexBuffer.updateData(g4) : e67.icon.dynamicLayoutVertexBuffer.updateData(g4);
+  r3 ? e67.text.dynamicLayoutVertexBuffer.updateData(g5) : e67.icon.dynamicLayoutVertexBuffer.updateData(g5);
 }
 function wD(e67, t4, n3, r3, i3, a5, o3, s4) {
   let c3 = a5.glyphStartIndex + a5.numGlyphs, l3 = a5.lineStartIndex, u3 = a5.lineStartIndex + a5.lineLength, d3 = t4.getoffsetX(a5.glyphStartIndex), f4 = t4.getoffsetX(c3 - 1), p4 = FD(e67 * d3, n3, r3, i3, a5.segment, l3, u3, s4, o3);
@@ -29670,9 +30204,9 @@ function ED(e67) {
   if (r3.numGlyphs > 1) {
     let e68 = r3.glyphStartIndex + r3.numGlyphs, i4 = r3.lineStartIndex, c4 = r3.lineStartIndex + r3.lineLength, u3 = wD(f4, s4, p4, m4, a5, r3, d3, t4);
     if (!u3) return { notEnoughRoom: true };
-    let g4 = AD(u3.first.point.x, u3.first.point.y, t4, n3), _4 = AD(u3.last.point.x, u3.last.point.y, t4, n3);
+    let g5 = AD(u3.first.point.x, u3.first.point.y, t4, n3), _4 = AD(u3.last.point.x, u3.last.point.y, t4, n3);
     if (o3 && !a5) {
-      let e69 = TD(r3.writingMode, g4, _4, l3);
+      let e69 = TD(r3.writingMode, g5, _4, l3);
       if (e69) return e69;
     }
     h4 = [u3.first];
@@ -29743,15 +30277,15 @@ function FD(e67, t4, n3, r3, i3, a5, o3, s4, c3) {
   r3 && (u3 *= -1, d3 = Math.PI), u3 < 0 && (d3 += Math.PI);
   let f4 = u3 > 0 ? a5 + i3 : a5 + i3 + 1, p4;
   s4.projectionCache.cachedAnchorPoint ? p4 = s4.projectionCache.cachedAnchorPoint : (p4 = kD(s4.tileAnchorPoint.x, s4.tileAnchorPoint.y, s4).point, s4.projectionCache.cachedAnchorPoint = p4);
-  let m4 = p4, h4 = p4, g4, _4, v4 = 0, y5 = 0, b10 = Math.abs(l3), x5 = [], S4;
+  let m4 = p4, h4 = p4, g5, _4, v4 = 0, y5 = 0, b10 = Math.abs(l3), x5 = [], S4;
   for (; v4 + y5 <= b10; ) {
     if (f4 += u3, f4 < a5 || f4 >= o3) return null;
-    v4 += y5, h4 = m4, _4 = g4;
+    v4 += y5, h4 = m4, _4 = g5;
     let e68 = { absOffsetX: b10, direction: u3, distanceFromAnchor: v4, previousVertex: h4 };
     if (m4 = OD(f4, s4, e68), n3 === 0) x5.push(h4), S4 = m4.sub(h4);
     else {
       let t5, r4 = m4.sub(h4);
-      t5 = r4.mag() === 0 ? MD(OD(f4 + u3, s4, e68).sub(m4), n3, u3) : MD(r4, n3, u3), _4 ||= h4.add(t5), g4 = ND(f4, t5, m4, a5, o3, _4, n3, s4, e68), x5.push(_4), S4 = g4.sub(_4);
+      t5 = r4.mag() === 0 ? MD(OD(f4 + u3, s4, e68).sub(m4), n3, u3) : MD(r4, n3, u3), _4 ||= h4.add(t5), g5 = ND(f4, t5, m4, a5, o3, _4, n3, s4, e68), x5.push(_4), S4 = g5.sub(_4);
     }
     y5 = S4.mag();
   }
@@ -29786,16 +30320,16 @@ var VD = class {
     this.transform = e67, this.grid = t4, this.ignoredGrid = n3, this.pitchFactor = Math.cos(e67.pitch * Math.PI / 180) * e67.cameraToCenterDistance, this.screenRightBoundary = e67.width + 100, this.screenBottomBoundary = e67.height + 100, this.gridRightBoundary = e67.width + 200, this.gridBottomBoundary = e67.height + 200, this.perspectiveRatioCutoff = 0.6;
   }
   placeCollisionBox(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4 = 0, p4 = true) {
-    let m4 = e67.anchorPointX + s4[0], h4 = e67.anchorPointY + s4[1], g4 = this.projectAndGetPerspectiveRatio(m4, h4, i3, lD(l3, m4, h4, f4, p4), d3), _4 = n3 * g4.perspectiveRatio, v4;
+    let m4 = e67.anchorPointX + s4[0], h4 = e67.anchorPointY + s4[1], g5 = this.projectAndGetPerspectiveRatio(m4, h4, i3, lD(l3, m4, h4, f4, p4), d3), _4 = n3 * g5.perspectiveRatio, v4;
     if (!a5 && !o3) {
-      let t5 = g4.x + (u3 ? u3.x * _4 : 0), n4 = g4.y + (u3 ? u3.y * _4 : 0);
+      let t5 = g5.x + (u3 ? u3.x * _4 : 0), n4 = g5.y + (u3 ? u3.y * _4 : 0);
       v4 = { allPointsOccluded: false, box: [t5 + e67.x1 * _4, n4 + e67.y1 * _4, t5 + e67.x2 * _4, n4 + e67.y2 * _4] };
-    } else v4 = this._projectCollisionBox(e67, _4, r3, i3, a5, o3, s4, g4, l3, u3, d3, f4, p4);
-    let [y5, b10, x5, S4] = v4.box, C4 = a5 ? v4.allPointsOccluded : g4.isOccluded, w4 = C4;
-    return w4 ||= g4.perspectiveRatio < this.perspectiveRatioCutoff, w4 ||= !this.isInsideGrid(y5, b10, x5, S4), w4 || t4 !== `always` && this.grid.hitTest(y5, b10, x5, S4, t4, c3) ? { box: [y5, b10, x5, S4], placeable: false, offscreen: false, occluded: C4 } : { box: [y5, b10, x5, S4], placeable: true, offscreen: this.isOffscreen(y5, b10, x5, S4), occluded: C4 };
+    } else v4 = this._projectCollisionBox(e67, _4, r3, i3, a5, o3, s4, g5, l3, u3, d3, f4, p4);
+    let [y5, b10, x5, S4] = v4.box, C4 = a5 ? v4.allPointsOccluded : g5.isOccluded, w4 = C4;
+    return w4 ||= g5.perspectiveRatio < this.perspectiveRatioCutoff, w4 ||= !this.isInsideGrid(y5, b10, x5, S4), w4 || t4 !== `always` && this.grid.hitTest(y5, b10, x5, S4, t4, c3) ? { box: [y5, b10, x5, S4], placeable: false, offscreen: false, occluded: C4 } : { box: [y5, b10, x5, S4], placeable: true, offscreen: this.isOffscreen(y5, b10, x5, S4), occluded: C4 };
   }
   placeCollisionCircles(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, d3, f4, p4, m4) {
-    let h4 = [], g4 = new u(t4.anchorX, t4.anchorY), _4 = this.getPerspectiveRatio(g4.x, g4.y, a5, m4?.(g4.x, g4.y)), v4 = (c3 ? i3 * this.transform.getPitchedTextCorrection(t4.anchorX, t4.anchorY, a5) / _4 : i3 * _4) / 24, y5 = { projections: {}, offsets: {}, cachedAnchorPoint: void 0, anyProjectionOccluded: false }, b10 = t4.lineOffsetX * v4, x5 = t4.lineOffsetY * v4, S4 = { getElevation: m4, pitchedLabelPlaneMatrix: o3, lineVertexArray: n3, pitchWithMap: c3, projectionCache: y5, transform: this.transform, tileAnchorPoint: g4, unwrappedTileID: a5, width: this.transform.width, height: this.transform.height, translation: p4 }, C4 = wD(v4, r3, b10, x5, false, t4, false, S4), w4 = false, T3 = false, E5 = true;
+    let h4 = [], g5 = new u(t4.anchorX, t4.anchorY), _4 = this.getPerspectiveRatio(g5.x, g5.y, a5, m4?.(g5.x, g5.y)), v4 = (c3 ? i3 * this.transform.getPitchedTextCorrection(t4.anchorX, t4.anchorY, a5) / _4 : i3 * _4) / 24, y5 = { projections: {}, offsets: {}, cachedAnchorPoint: void 0, anyProjectionOccluded: false }, b10 = t4.lineOffsetX * v4, x5 = t4.lineOffsetY * v4, S4 = { getElevation: m4, pitchedLabelPlaneMatrix: o3, lineVertexArray: n3, pitchWithMap: c3, projectionCache: y5, transform: this.transform, tileAnchorPoint: g5, unwrappedTileID: a5, width: this.transform.width, height: this.transform.height, translation: p4 }, C4 = wD(v4, r3, b10, x5, false, t4, false, S4), w4 = false, T3 = false, E5 = true;
     if (C4) {
       let t5 = d3 * 0.5 * _4 + f4, n4 = new u(-100, -100), r4 = new u(this.screenRightBoundary, this.screenBottomBoundary), i4 = new cD(), a6 = C4.first, o4 = C4.last, p5 = [];
       for (let e68 = a6.path.length - 1; e68 >= 1; e68--) p5.push(a6.path[e68]);
@@ -29805,13 +30339,13 @@ var VD = class {
         let e68 = this.projectPathToScreenSpace(p5, S4);
         p5 = e68.some((e69) => e69.signedDistanceFromCamera <= 0) ? [] : e68.map((e69) => e69.point);
       }
-      let g5 = [];
+      let g6 = [];
       if (p5.length > 0) {
         let e68 = p5[0].clone(), t6 = p5[0].clone();
         for (let n5 = 1; n5 < p5.length; n5++) e68.x = Math.min(e68.x, p5[n5].x), e68.y = Math.min(e68.y, p5[n5].y), t6.x = Math.max(t6.x, p5[n5].x), t6.y = Math.max(t6.y, p5[n5].y);
-        g5 = e68.x >= n4.x && t6.x <= r4.x && e68.y >= n4.y && t6.y <= r4.y ? [p5] : t6.x < n4.x || e68.x > r4.x || t6.y < n4.y || e68.y > r4.y ? [] : Qv([p5], n4.x, n4.y, r4.x, r4.y);
+        g6 = e68.x >= n4.x && t6.x <= r4.x && e68.y >= n4.y && t6.y <= r4.y ? [p5] : t6.x < n4.x || e68.x > r4.x || t6.y < n4.y || e68.y > r4.y ? [] : Qv([p5], n4.x, n4.y, r4.x, r4.y);
       }
-      for (let n5 of g5) {
+      for (let n5 of g6) {
         i4.reset(n5, t5 * 0.25);
         let r5 = 0;
         r5 = i4.length <= 0.5 * t5 ? 1 : Math.ceil(i4.paddedLength / m5) + 1;
@@ -29877,22 +30411,22 @@ var VD = class {
     return j2(e67, e67, [-100, -100, 0]), e67;
   }
   _projectCollisionBox(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, d3, f4 = 0, p4 = true) {
-    let m4 = 1, h4 = 0, g4 = 0, _4 = 1, v4 = e67.anchorPointX + o3[0], y5 = e67.anchorPointY + o3[1];
+    let m4 = 1, h4 = 0, g5 = 0, _4 = 1, v4 = e67.anchorPointX + o3[0], y5 = e67.anchorPointY + o3[1];
     if (a5 && !i3) {
       let e68 = this.projectAndGetPerspectiveRatio(v4 + 1, y5, r3, lD(c3, v4 + 1, y5, f4, p4), d3), t5 = e68.x - s4.x, n4 = e68.y - s4.y, i4 = Math.atan(n4 / t5) + (t5 < 0 ? Math.PI : 0), a6 = Math.sin(i4), o4 = Math.cos(i4);
-      m4 = o4, h4 = a6, g4 = -a6, _4 = o4;
+      m4 = o4, h4 = a6, g5 = -a6, _4 = o4;
     } else if (!a5 && i3) {
       let e68 = vD(this.transform);
-      m4 = e68.vecEast[0], h4 = e68.vecEast[1], g4 = e68.vecSouth[0], _4 = e68.vecSouth[1];
+      m4 = e68.vecEast[0], h4 = e68.vecEast[1], g5 = e68.vecSouth[0], _4 = e68.vecSouth[1];
     }
     let b10 = s4.x, x5 = s4.y, S4 = t4;
     if (i3 && (b10 = v4, x5 = y5, S4 = 2 ** -(this.transform.zoom - n3.overscaledZ), S4 *= this.transform.getPitchedTextCorrection(v4, y5, r3), !l3)) {
       let e68 = F2(0.5 + 0.5 * (s4.signedDistanceFromCamera / this.transform.cameraToCenterDistance), 0, 4);
       S4 *= e68;
     }
-    l3 && (b10 += m4 * l3.x * S4 + g4 * l3.y * S4, x5 += h4 * l3.x * S4 + _4 * l3.y * S4);
+    l3 && (b10 += m4 * l3.x * S4 + g5 * l3.y * S4, x5 += h4 * l3.x * S4 + _4 * l3.y * S4);
     let C4 = e67.x1 * S4, w4 = e67.x2 * S4, T3 = (C4 + w4) / 2, E5 = e67.y1 * S4, D5 = e67.y2 * S4, O4 = (E5 + D5) / 2, k5 = [{ offsetX: C4, offsetY: E5 }, { offsetX: T3, offsetY: E5 }, { offsetX: w4, offsetY: E5 }, { offsetX: w4, offsetY: O4 }, { offsetX: w4, offsetY: D5 }, { offsetX: T3, offsetY: D5 }, { offsetX: C4, offsetY: D5 }, { offsetX: C4, offsetY: O4 }], A5 = [];
-    for (let { offsetX: e68, offsetY: t5 } of k5) A5.push(new u(b10 + m4 * e68 + g4 * t5, x5 + h4 * e68 + _4 * t5));
+    for (let { offsetX: e68, offsetY: t5 } of k5) A5.push(new u(b10 + m4 * e68 + g5 * t5, x5 + h4 * e68 + _4 * t5));
     let j4 = false;
     if (i3) {
       let e68 = A5.map((e69) => this.projectAndGetPerspectiveRatio(e69.x, e69.y, r3, lD(c3, e69.x, e69.y, f4, p4), d3));
@@ -29956,25 +30490,25 @@ var YD = class {
   getBucketParts(e67, t4, n3, r3) {
     let i3 = n3.getBucket(t4), a5 = n3.latestFeatureIndex;
     if (!i3 || !a5 || t4.id !== i3.layerIds[0]) return;
-    let o3 = n3.collisionBoxArray, s4 = i3.layers[0].layout, c3 = i3.layers[0].paint, l3 = 2 ** (this.transform.zoom - n3.tileID.overscaledZ), u3 = n3.tileSize / P2, d3 = n3.tileID.toUnwrapped(), f4 = s4.get(`text-rotation-alignment`) === `map`, p4 = nt(n3, 1, this.transform.zoom), m4 = lt(this.collisionIndex.transform, n3, c3.get(`text-translate`), c3.get(`text-translate-anchor`)), h4 = lt(this.collisionIndex.transform, n3, c3.get(`icon-translate`), c3.get(`icon-translate-anchor`)), g4 = gD(f4, this.transform, p4);
+    let o3 = n3.collisionBoxArray, s4 = i3.layers[0].layout, c3 = i3.layers[0].paint, l3 = 2 ** (this.transform.zoom - n3.tileID.overscaledZ), u3 = n3.tileSize / P2, d3 = n3.tileID.toUnwrapped(), f4 = s4.get(`text-rotation-alignment`) === `map`, p4 = nt(n3, 1, this.transform.zoom), m4 = lt(this.collisionIndex.transform, n3, c3.get(`text-translate`), c3.get(`text-translate-anchor`)), h4 = lt(this.collisionIndex.transform, n3, c3.get(`icon-translate`), c3.get(`icon-translate-anchor`)), g5 = gD(f4, this.transform, p4);
     this.retainedQueryData[i3.bucketInstanceId] = new GD(i3.bucketInstanceId, a5, i3.sourceLayerIndex, i3.index, n3.tileID);
-    let _4 = { bucket: i3, layout: s4, translationText: m4, translationIcon: h4, unwrappedTileID: d3, pitchedLabelPlaneMatrix: g4, scale: l3, textPixelRatio: u3, holdingForFade: n3.holdingForSymbolFade(), collisionBoxArray: o3, partiallyEvaluatedTextSize: Vv(i3.textSizeData, this.transform.zoom), collisionGroup: this.collisionGroups.get(i3.sourceID) };
+    let _4 = { bucket: i3, layout: s4, translationText: m4, translationIcon: h4, unwrappedTileID: d3, pitchedLabelPlaneMatrix: g5, scale: l3, textPixelRatio: u3, holdingForFade: n3.holdingForSymbolFade(), collisionBoxArray: o3, partiallyEvaluatedTextSize: Vv(i3.textSizeData, this.transform.zoom), collisionGroup: this.collisionGroups.get(i3.sourceID) };
     if (r3) for (let t5 of i3.sortKeyRanges) {
       let { sortKey: n4, symbolInstanceStart: r4, symbolInstanceEnd: i4 } = t5;
       e67.push({ sortKey: n4, symbolInstanceStart: r4, symbolInstanceEnd: i4, parameters: _4 });
     }
     else e67.push({ symbolInstanceStart: 0, symbolInstanceEnd: i3.symbolInstances.length, parameters: _4 });
   }
-  attemptAnchorPlacement(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4, y5, b10, x5) {
+  attemptAnchorPlacement(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4, y5, b10, x5) {
     let S4 = fy[e67.textAnchor], C4 = [e67.textOffset0, e67.textOffset1], w4 = qD(S4, n3, r3, C4, i3), T3 = this.collisionIndex.placeCollisionBox(t4, d3, s4, c3, l3, o3, a5, h4, u3.predicate, v4, w4, y5, b10, x5);
-    if ((!_4 || this.collisionIndex.placeCollisionBox(_4, d3, s4, c3, l3, o3, a5, g4, u3.predicate, v4, w4, y5, b10, x5).placeable) && T3.placeable) {
+    if ((!_4 || this.collisionIndex.placeCollisionBox(_4, d3, s4, c3, l3, o3, a5, g5, u3.predicate, v4, w4, y5, b10, x5).placeable) && T3.placeable) {
       let e68;
       if (this.prevPlacement?.variableOffsets[f4.crossTileID] && this.prevPlacement?.placements[f4.crossTileID]?.text && (e68 = this.prevPlacement.variableOffsets[f4.crossTileID].anchor), f4.crossTileID === 0) throw Error(`symbolInstance.crossTileID can't be 0`);
       return this.variableOffsets[f4.crossTileID] = { textOffset: C4, width: n3, height: r3, anchor: S4, textBoxScale: i3, prevAnchor: e68 }, this.markUsedJustification(p4, S4, f4, m4), p4.allowVerticalPlacement && (this.markUsedOrientation(p4, m4, f4), this.placedOrientations[f4.crossTileID] = m4), { shift: w4, placedGlyphBoxes: T3 };
     }
   }
   placeLayerBucketPart(e67, t4, n3) {
-    let { bucket: r3, layout: i3, translationText: a5, translationIcon: o3, unwrappedTileID: s4, pitchedLabelPlaneMatrix: c3, textPixelRatio: l3, holdingForFade: u3, collisionBoxArray: d3, partiallyEvaluatedTextSize: f4, collisionGroup: p4 } = e67.parameters, m4 = i3.get(`text-optional`), h4 = i3.get(`icon-optional`), g4 = Ty(i3, `text-overlap`, `text-allow-overlap`), _4 = g4 === `always`, v4 = Ty(i3, `icon-overlap`, `icon-allow-overlap`), y5 = v4 === `always`, b10 = i3.get(`text-rotation-alignment`) === `map`, x5 = i3.get(`text-pitch-alignment`) === `map`, S4 = i3.get(`icon-text-fit`) !== `none`, C4 = i3.get(`symbol-z-order`) === `viewport-y`, w4 = i3.get(`symbol-height-anchor`) === `ground`, T3 = _4 && (y5 || !r3.hasIconData() || h4), E5 = y5 && (_4 || !r3.hasTextData() || m4);
+    let { bucket: r3, layout: i3, translationText: a5, translationIcon: o3, unwrappedTileID: s4, pitchedLabelPlaneMatrix: c3, textPixelRatio: l3, holdingForFade: u3, collisionBoxArray: d3, partiallyEvaluatedTextSize: f4, collisionGroup: p4 } = e67.parameters, m4 = i3.get(`text-optional`), h4 = i3.get(`icon-optional`), g5 = Ty(i3, `text-overlap`, `text-allow-overlap`), _4 = g5 === `always`, v4 = Ty(i3, `icon-overlap`, `icon-allow-overlap`), y5 = v4 === `always`, b10 = i3.get(`text-rotation-alignment`) === `map`, x5 = i3.get(`text-pitch-alignment`) === `map`, S4 = i3.get(`icon-text-fit`) !== `none`, C4 = i3.get(`symbol-z-order`) === `viewport-y`, w4 = i3.get(`symbol-height-anchor`) === `ground`, T3 = _4 && (y5 || !r3.hasIconData() || h4), E5 = y5 && (_4 || !r3.hasTextData() || m4);
     !r3.collisionArrays && d3 && r3.deserializeCollisionBoxes(d3);
     let D5 = this.retainedQueryData[r3.bucketInstanceId].tileID, O4 = this._getTerrainElevationFunc(D5), k5 = this.transform.getFastPathSimpleProjectionMatrix(D5), A5 = (e68, d4, y6) => {
       if (t4[e68.crossTileID]) return;
@@ -30000,7 +30534,7 @@ var YD = class {
         }, c4 = e68.textAnchorOffsetStartIndex, u4 = e68.textAnchorOffsetEndIndex;
         if (u4 === c4) {
           let n4 = (t6, n5) => {
-            let i5 = this.collisionIndex.placeCollisionBox(t6, g4, l3, D5, s4, x5, b10, a5, p4.predicate, O4, void 0, k5, C5, w4);
+            let i5 = this.collisionIndex.placeCollisionBox(t6, g5, l3, D5, s4, x5, b10, a5, p4.predicate, O4, void 0, k5, C5, w4);
             return i5?.placeable && (this.markUsedOrientation(r3, n5, e68), this.placedOrientations[e68.crossTileID] = n5), i5;
           };
           i4(() => n4(ue3, 1), () => {
@@ -30009,7 +30543,7 @@ var YD = class {
           }), t5(ne4?.placeable);
         } else {
           let f5 = fy[this.prevPlacement?.variableOffsets[e68.crossTileID]?.anchor], m5 = (t6, i5, d5) => {
-            let m6 = t6.x2 - t6.x1, h6 = t6.y2 - t6.y1, _5 = e68.textBoxScale, y7 = S4 && v4 === `never` ? i5 : null, T4 = null, E6 = g4 === `never` ? 1 : 2, j5 = `never`;
+            let m6 = t6.x2 - t6.x1, h6 = t6.y2 - t6.y1, _5 = e68.textBoxScale, y7 = S4 && v4 === `never` ? i5 : null, T4 = null, E6 = g5 === `never` ? 1 : 2, j5 = `never`;
             f5 && E6++;
             for (let n4 = 0; n4 < E6; n4++) {
               for (let n5 = c4; n5 < u4; n5++) {
@@ -30018,7 +30552,7 @@ var YD = class {
                 let c5 = this.attemptAnchorPlacement(i6, t6, m6, h6, _5, b10, x5, l3, D5, s4, p4, j5, e68, r3, d5, a5, o3, y7, O4, k5, C5, w4);
                 if (c5 && (T4 = c5.placedGlyphBoxes, T4?.placeable)) return A6 = true, te4 = c5.shift, T4;
               }
-              f5 ? f5 = null : j5 = g4;
+              f5 ? f5 = null : j5 = g5;
             }
             return n3 && !T4 && (T4 = { box: this.collisionIndex.placeCollisionBox(ue3, `always`, l3, D5, s4, x5, b10, a5, p4.predicate, O4, void 0, k5, C5, w4).box, offscreen: false, placeable: false, occluded: false }), T4;
           };
@@ -30035,7 +30569,7 @@ var YD = class {
       }
       if (ie4 = ne4, A6 = ie4?.placeable, ee4 = ie4?.offscreen, e68.useRuntimeCollisionCircles && e68.centerJustifiedTextSymbolIndex >= 0) {
         let t5 = r3.text.placedSymbolArray.get(e68.centerJustifiedTextSymbolIndex), o4 = Bv(r3.textSizeData, f4, t5), l4 = i3.get(`text-padding`), u4 = e68.collisionCircleDiameter;
-        ae4 = this.collisionIndex.placeCollisionCircles(g4, t5, r3.lineVertexArray, r3.glyphOffsetArray, o4, s4, c3, n3, x5, p4.predicate, u4, l4, a5, O4), ae4.circles.length && ae4.collisionDetected && !n3 && L2(`Collisions detected, but collision boxes are not shown`), A6 = _4 || ae4.circles.length > 0 && !ae4.collisionDetected, ee4 &&= ae4.offscreen;
+        ae4 = this.collisionIndex.placeCollisionCircles(g5, t5, r3.lineVertexArray, r3.glyphOffsetArray, o4, s4, c3, n3, x5, p4.predicate, u4, l4, a5, O4), ae4.circles.length && ae4.collisionDetected && !n3 && L2(`Collisions detected, but collision boxes are not shown`), A6 = _4 || ae4.circles.length > 0 && !ae4.collisionDetected, ee4 &&= ae4.offscreen;
       }
       if (d4.iconFeatureIndex && (le4 = d4.iconFeatureIndex), d4.iconBox) {
         let e69 = (e70) => this.collisionIndex.placeCollisionBox(e70, v4, l3, D5, s4, x5, b10, o3, p4.predicate, O4, S4 && te4 ? te4 : void 0, k5, C5, w4);
@@ -30044,7 +30578,7 @@ var YD = class {
       let de4 = m4 || e68.numHorizontalGlyphVertices === 0 && e68.numVerticalGlyphVertices === 0, fe3 = h4 || e68.numIconVertices === 0;
       !de4 && !fe3 ? j4 = A6 = j4 && A6 : fe3 ? de4 || (j4 &&= A6) : A6 = j4 && A6;
       let pe4 = A6 && ie4.placeable, me3 = j4 && oe4.placeable;
-      if (pe4 && (re5 && re5.placeable && ce4 ? this.collisionIndex.insertCollisionBox(ie4.box, g4, i3.get(`text-ignore-placement`), r3.bucketInstanceId, ce4, p4.ID) : this.collisionIndex.insertCollisionBox(ie4.box, g4, i3.get(`text-ignore-placement`), r3.bucketInstanceId, se4, p4.ID)), me3 && this.collisionIndex.insertCollisionBox(oe4.box, v4, i3.get(`icon-ignore-placement`), r3.bucketInstanceId, le4, p4.ID), ae4 && A6 && this.collisionIndex.insertCollisionCircles(ae4.circles, g4, i3.get(`text-ignore-placement`), r3.bucketInstanceId, se4, p4.ID), n3 && this.storeCollisionData(r3.bucketInstanceId, y6, d4, ie4, oe4, ae4), e68.crossTileID === 0) throw Error(`symbolInstance.crossTileID can't be 0`);
+      if (pe4 && (re5 && re5.placeable && ce4 ? this.collisionIndex.insertCollisionBox(ie4.box, g5, i3.get(`text-ignore-placement`), r3.bucketInstanceId, ce4, p4.ID) : this.collisionIndex.insertCollisionBox(ie4.box, g5, i3.get(`text-ignore-placement`), r3.bucketInstanceId, se4, p4.ID)), me3 && this.collisionIndex.insertCollisionBox(oe4.box, v4, i3.get(`icon-ignore-placement`), r3.bucketInstanceId, le4, p4.ID), ae4 && A6 && this.collisionIndex.insertCollisionCircles(ae4.circles, g5, i3.get(`text-ignore-placement`), r3.bucketInstanceId, se4, p4.ID), n3 && this.storeCollisionData(r3.bucketInstanceId, y6, d4, ie4, oe4, ae4), e68.crossTileID === 0) throw Error(`symbolInstance.crossTileID can't be 0`);
       if (r3.bucketInstanceId === 0) throw Error(`bucket.bucketInstanceId can't be 0`);
       let he3 = (A6 || T3) && !ie4?.occluded, ge3 = (j4 || E5) && !oe4?.occluded;
       this.placements[e68.crossTileID] = new WD(he3, ge3, ee4 || r3.justReloaded), t4[e68.crossTileID] = true;
@@ -30130,7 +30664,7 @@ var YD = class {
     let h4 = (e68, t5, n4) => {
       for (let r4 = 0; r4 < t5 / 4; r4++) e68.opacityVertexArray.emplaceBack(n4);
       e68.hasVisibleVertices ||= n4 !== 0;
-    }, g4 = this.collisionBoxArrays.get(e67.bucketInstanceId);
+    }, g5 = this.collisionBoxArrays.get(e67.bucketInstanceId);
     for (let t5 = 0; t5 < e67.symbolInstances.length; t5++) {
       let r4 = e67.symbolInstances.get(t5), { numHorizontalGlyphVertices: i4, numVerticalGlyphVertices: a6, crossTileID: s5 } = r4, c4 = n3[t5], _4 = this.opacities[s5];
       c4 ? _4 = o3 : _4 || (_4 = m4, this.opacities[s5] = _4);
@@ -30159,7 +30693,7 @@ var YD = class {
           h4(e67.icon, r4.numVerticalIconVertices, i5), e67.icon.placedSymbolArray.get(r4.verticalPlacedIconSymbolIndex).hidden = _4.icon.isHidden();
         }
       }
-      let C4 = g4?.has(t5) ? g4.get(t5) : { text: null, icon: null };
+      let C4 = g5?.has(t5) ? g5.get(t5) : { text: null, icon: null };
       if (e67.hasIconCollisionBoxData() || e67.hasTextCollisionBoxData()) {
         let n4 = e67.collisionArrays[t5];
         if (n4) {
@@ -31689,10 +32223,10 @@ var UO = class {
   }
   recalculateZoomAndCenter(e67) {
     if (this.elevation - e67 === 0) return;
-    let t4 = this.pitch, n3 = this.bearing, { x: r3, y: i3, z: a5 } = yh(t4, n3), o3 = this.worldCoordinateHelper, s4 = o3.worldFromLngLat(this.center.lng, this.center.lat, this.elevation), c3 = 1 / o3.worldZFromAltitude(1, this.center), l3 = this.cameraToCenterDistance / this.worldSize, u3 = new sh(s4.x - r3 * l3, s4.y - i3 * l3, s4.z + a5 * l3), { distanceToCenter: d3, clampedElevation: f4 } = this._distanceToCenterFromAltElevationPitch(u3.z * c3, e67, t4), { centerMercator: p4, dMercator: m4 } = this._centerAlongView(u3, r3, i3, d3, c3), h4 = o3.lngLatFromWorld(p4.x, p4.y), g4 = jt(this.cameraToCenterDistance / m4 / this.tileSize);
+    let t4 = this.pitch, n3 = this.bearing, { x: r3, y: i3, z: a5 } = yh(t4, n3), o3 = this.worldCoordinateHelper, s4 = o3.worldFromLngLat(this.center.lng, this.center.lat, this.elevation), c3 = 1 / o3.worldZFromAltitude(1, this.center), l3 = this.cameraToCenterDistance / this.worldSize, u3 = new sh(s4.x - r3 * l3, s4.y - i3 * l3, s4.z + a5 * l3), { distanceToCenter: d3, clampedElevation: f4 } = this._distanceToCenterFromAltElevationPitch(u3.z * c3, e67, t4), { centerMercator: p4, dMercator: m4 } = this._centerAlongView(u3, r3, i3, d3, c3), h4 = o3.lngLatFromWorld(p4.x, p4.y), g5 = jt(this.cameraToCenterDistance / m4 / this.tileSize);
     this._cameraState.elevation = f4, this._cameraState.center = h4;
     let _4 = this._cameraState.zoom;
-    this.setZoom(g4), this._cameraState.zoom === _4 && (this._unmodified = false, this.constrainInternal(), this._calcMatrices());
+    this.setZoom(g5), this._cameraState.zoom === _4 && (this._unmodified = false, this.constrainInternal(), this._calcMatrices());
   }
   _centerAlongView(e67, t4, n3, r3, i3) {
     let a5 = r3 / i3, o3 = new sh(e67.x + t4 * a5, e67.y + n3 * a5), s4 = 1 / 0;
@@ -32008,12 +32542,12 @@ var QO = class e60 {
       if (t5 = F2(+t5, this._cameraState.minZoom, this._cameraState.maxZoom), !this.worldCoordinateHelper.wraps) return this._constrainToWorldSquare(e68, t5);
       let n3 = { center: new Q(e68.lng, e68.lat), zoom: t5 }, r3 = this._cameraState.lngRange;
       !this._cameraState.renderWorldCopies && r3 === null && (r3 = [-179.9999999999, 180 - 1e-10]);
-      let i3 = this._cameraState.tileSize * At(n3.zoom), a5 = 0, o3 = i3, s4 = 0, c3 = i3, l3 = 0, d3 = 0, { top: f4 = 0, bottom: p4 = 0, left: m4 = 0, right: h4 = 0 } = this._cameraState.edgeInsets, g4 = this._cameraState.width - m4 - h4, _4 = this._cameraState.height - f4 - p4;
+      let i3 = this._cameraState.tileSize * At(n3.zoom), a5 = 0, o3 = i3, s4 = 0, c3 = i3, l3 = 0, d3 = 0, { top: f4 = 0, bottom: p4 = 0, left: m4 = 0, right: h4 = 0 } = this._cameraState.edgeInsets, g5 = this._cameraState.width - m4 - h4, _4 = this._cameraState.height - f4 - p4;
       if (this._cameraState.latRange) {
         let e69 = this._cameraState.latRange;
         a5 = th(e69[1]) * i3, o3 = th(e69[0]) * i3, o3 - a5 < _4 && (l3 = _4 / (o3 - a5));
       }
-      r3 && (s4 = wt(eh(r3[0]) * i3, 0, i3), c3 = wt(eh(r3[1]) * i3, 0, i3), c3 < s4 && (c3 += i3), c3 - s4 < g4 && (d3 = g4 / (c3 - s4)));
+      r3 && (s4 = wt(eh(r3[0]) * i3, 0, i3), c3 = wt(eh(r3[1]) * i3, 0, i3), c3 < s4 && (c3 += i3), c3 - s4 < g5 && (d3 = g5 / (c3 - s4)));
       let { x: v4, y: y5 } = ph(i3, e68, this.worldCoordinateHelper), b10, x5, S4 = Math.max(d3 || 0, l3 || 0);
       if (S4) return n3.center = mh(i3, new u(d3 ? (c3 + s4) / 2 : v4, l3 ? (o3 + a5) / 2 : y5), this.worldCoordinateHelper).wrap(), n3.zoom += jt(S4), n3;
       if (this._cameraState.latRange) {
@@ -32023,7 +32557,7 @@ var QO = class e60 {
       if (r3) {
         let e69 = (s4 + c3) / 2, t6 = v4;
         this._cameraState.renderWorldCopies && (t6 = wt(v4, e69 - i3 / 2, e69 + i3 / 2));
-        let n4 = g4 / 2;
+        let n4 = g5 / 2;
         t6 - n4 < s4 && (b10 = s4 + n4), t6 + n4 > c3 && (b10 = c3 - n4);
       }
       return (b10 !== void 0 || x5 !== void 0) && (n3.center = mh(i3, new u(b10 ?? v4, x5 ?? y5), this.worldCoordinateHelper).wrap()), n3;
@@ -32209,10 +32743,10 @@ var QO = class e60 {
       let { x: r4, y: a6 } = ph(i3, e67, n3), o4 = F2(r4, 0, i3), s5 = F2(a6, 0, i3);
       return o4 !== r4 || s5 !== a6 ? { center: mh(i3, new u(o4, s5), n3), zoom: t4 } : { center: new Q(e67.lng, e67.lat), zoom: t4 };
     }
-    let a5 = this._projectMaxBounds(r3, this._cameraState.latRange), o3 = Math.max(a5.minX, 0) * i3, s4 = Math.min(a5.maxX, 1) * i3, c3 = Math.max(a5.minY, 0) * i3, l3 = Math.min(a5.maxY, 1) * i3, { width: d3, height: f4 } = this._cameraState, p4 = s4 - o3 < d3 ? d3 / (s4 - o3) : 0, m4 = l3 - c3 < f4 ? f4 / (l3 - c3) : 0, { x: h4, y: g4 } = ph(i3, e67, n3), _4 = Math.max(p4, m4);
-    if (_4) return { center: mh(i3, new u(p4 ? (s4 + o3) / 2 : h4, m4 ? (l3 + c3) / 2 : g4), n3), zoom: t4 + jt(_4) };
-    let v4 = F2(h4, o3 + d3 / 2, s4 - d3 / 2), y5 = F2(g4, c3 + f4 / 2, l3 - f4 / 2);
-    return v4 !== h4 || y5 !== g4 ? { center: mh(i3, new u(v4, y5), n3), zoom: t4 } : { center: new Q(e67.lng, e67.lat), zoom: t4 };
+    let a5 = this._projectMaxBounds(r3, this._cameraState.latRange), o3 = Math.max(a5.minX, 0) * i3, s4 = Math.min(a5.maxX, 1) * i3, c3 = Math.max(a5.minY, 0) * i3, l3 = Math.min(a5.maxY, 1) * i3, { width: d3, height: f4 } = this._cameraState, p4 = s4 - o3 < d3 ? d3 / (s4 - o3) : 0, m4 = l3 - c3 < f4 ? f4 / (l3 - c3) : 0, { x: h4, y: g5 } = ph(i3, e67, n3), _4 = Math.max(p4, m4);
+    if (_4) return { center: mh(i3, new u(p4 ? (s4 + o3) / 2 : h4, m4 ? (l3 + c3) / 2 : g5), n3), zoom: t4 + jt(_4) };
+    let v4 = F2(h4, o3 + d3 / 2, s4 - d3 / 2), y5 = F2(g5, c3 + f4 / 2, l3 - f4 / 2);
+    return v4 !== h4 || y5 !== g5 ? { center: mh(i3, new u(v4, y5), n3), zoom: t4 } : { center: new Q(e67.lng, e67.lat), zoom: t4 };
   }
   _projectMaxBounds(e67, t4) {
     let n3 = this._maxBoundsWorldBox;
@@ -32226,8 +32760,8 @@ var QO = class e60 {
   calculateCameraOptionsFromTo(e67, t4, n3, r3) {
     let i3 = this.worldCoordinateHelper, a5 = Q.convert(e67), o3 = Q.convert(n3), s4 = i3.worldFromLngLat(a5.lng, a5.lat, t4), c3 = i3.worldFromLngLat(o3.lng, o3.lat, r3), l3 = c3.x - s4.x, u3 = c3.y - s4.y, d3 = c3.z - s4.z, f4 = Math.hypot(l3, u3, d3);
     if (f4 === 0) throw Error(`Can't calculate camera options with same From and To`);
-    let p4 = Math.hypot(l3, u3), m4 = jt(this._cameraState.cameraToCenterDistance / f4 / this._cameraState.tileSize), h4 = Qt(Math.atan2(l3, -u3)), g4 = Qt(Math.acos(p4 / f4));
-    return g4 = d3 < 0 ? 90 - g4 : 90 + g4, { center: i3.lngLatFromWorld(c3.x, c3.y), elevation: r3, zoom: m4, pitch: g4, bearing: h4 };
+    let p4 = Math.hypot(l3, u3), m4 = jt(this._cameraState.cameraToCenterDistance / f4 / this._cameraState.tileSize), h4 = Qt(Math.atan2(l3, -u3)), g5 = Qt(Math.acos(p4 / f4));
+    return g5 = d3 < 0 ? 90 - g5 : 90 + g5, { center: i3.lngLatFromWorld(c3.x, c3.y), elevation: r3, zoom: m4, pitch: g5, bearing: h4 };
   }
   _calculateNearFarZ(e67, t4, n3) {
     let r3 = Math.min(this._cameraState.elevation, this._cameraState.minElevationForCurrentTile, this.getCameraAltitude() - 100), i3 = e67 - r3 * this._cameraState.pixelsPerMeter / Math.cos(t4), a5 = r3 < 0 ? i3 : e67, o3 = Math.PI / 2 + this._cameraState.pitchInRadians, s4 = Zt(BO(this._cameraState)) * (Math.abs(Math.cos(Zt(zO(this._cameraState)))) * this._cameraState.height + Math.abs(Math.sin(Zt(zO(this._cameraState)))) * this._cameraState.width) / this._cameraState.height * (0.5 + n3.y / this._cameraState.height), c3 = Math.sin(s4) * a5 / Math.sin(F2(Math.PI - o3 - s4, 0.01, Math.PI - 0.01)), l3 = this._getHorizon(), u3 = Math.atan(l3 / this._cameraState.cameraToCenterDistance), d3 = Zt(0.75), f4 = u3 > d3 ? 2 * u3 * (0.5 + n3.y / (l3 * 2)) : d3, p4 = Math.sin(f4) * a5 / Math.sin(F2(Math.PI - o3 - f4, 0.01, Math.PI - 0.01)), m4 = Math.min(c3, p4), h4 = (Math.cos(Math.PI / 2 - t4) * m4 + a5) * 1.01;
@@ -32240,8 +32774,8 @@ var QO = class e60 {
     u3 = /* @__PURE__ */ new Float64Array(16), oe2(u3, this._cameraState.fovInRadians, this._cameraState.width / this._cameraState.height, this._nearZ, this._farZ), this._invProjMatrix = /* @__PURE__ */ new Float64Array(16), pD(this._invProjMatrix, u3), u3[8] = -t4.x * 2 / this._cameraState.width, u3[9] = t4.y * 2 / this._cameraState.height, this._projectionMatrix = E2(u3), ee2(u3, u3, [1, -1, 1]), j2(u3, u3, [0, 0, -this._cameraState.cameraToCenterDistance]), re2(u3, u3, -this._cameraState.rollInRadians), te2(u3, u3, this._cameraState.pitchInRadians), re2(u3, u3, -this._cameraState.bearingInRadians), j2(u3, u3, [-i3, -a5, 0]), this._mercatorMatrix = ee2([], u3, [IO(this._cameraState), IO(this._cameraState), IO(this._cameraState)]), ee2(u3, u3, [1, 1, this._cameraState.pixelsPerMeter]), this._pixelMatrix = A2(/* @__PURE__ */ new Float64Array(16), this._cameraState.clipSpaceToPixelsMatrix, u3), j2(u3, u3, [0, 0, -this._cameraState.elevation]), this._viewProjMatrix = u3, this._invViewProjMatrix = k2([], u3);
     let d3 = [0, 0, -1, 1];
     Re(d3, d3, this._invViewProjMatrix), this._cameraPosition = [d3[0] / d3[3], d3[1] / d3[3], d3[2] / d3[3]], this._fogMatrix = /* @__PURE__ */ new Float64Array(16), oe2(this._fogMatrix, this._cameraState.fovInRadians, this._cameraState.width / this._cameraState.height, s4, this._farZ), this._fogMatrix[8] = -t4.x * 2 / this._cameraState.width, this._fogMatrix[9] = t4.y * 2 / this._cameraState.height, ee2(this._fogMatrix, this._fogMatrix, [1, -1, 1]), j2(this._fogMatrix, this._fogMatrix, [0, 0, -this._cameraState.cameraToCenterDistance]), re2(this._fogMatrix, this._fogMatrix, -this._cameraState.rollInRadians), te2(this._fogMatrix, this._fogMatrix, this._cameraState.pitchInRadians), re2(this._fogMatrix, this._fogMatrix, -this._cameraState.bearingInRadians), j2(this._fogMatrix, this._fogMatrix, [-i3, -a5, 0]), ee2(this._fogMatrix, this._fogMatrix, [1, 1, this._cameraState.pixelsPerMeter]), j2(this._fogMatrix, this._fogMatrix, [0, 0, -this._cameraState.elevation]), this._pixelMatrix3D = A2(/* @__PURE__ */ new Float64Array(16), this._cameraState.clipSpaceToPixelsMatrix, u3);
-    let f4 = this._cameraState.width % 2 / 2, p4 = this._cameraState.height % 2 / 2, m4 = Math.cos(this._cameraState.bearingInRadians), h4 = Math.sin(-this._cameraState.bearingInRadians), g4 = i3 - Math.round(i3) + m4 * f4 + h4 * p4, _4 = a5 - Math.round(a5) + m4 * p4 + h4 * f4, v4 = new Float64Array(u3);
-    if (j2(v4, v4, [g4 > 0.5 ? g4 - 1 : g4, _4 > 0.5 ? _4 - 1 : _4, 0]), this._alignedProjMatrix = v4, u3 = k2(/* @__PURE__ */ new Float64Array(16), this._pixelMatrix), !u3) throw Error(`failed to invert matrix`);
+    let f4 = this._cameraState.width % 2 / 2, p4 = this._cameraState.height % 2 / 2, m4 = Math.cos(this._cameraState.bearingInRadians), h4 = Math.sin(-this._cameraState.bearingInRadians), g5 = i3 - Math.round(i3) + m4 * f4 + h4 * p4, _4 = a5 - Math.round(a5) + m4 * p4 + h4 * f4, v4 = new Float64Array(u3);
+    if (j2(v4, v4, [g5 > 0.5 ? g5 - 1 : g5, _4 > 0.5 ? _4 - 1 : _4, 0]), this._alignedProjMatrix = v4, u3 = k2(/* @__PURE__ */ new Float64Array(16), this._pixelMatrix), !u3) throw Error(`failed to invert matrix`);
     this._pixelMatrixInverse = u3, this._clearMatrixCaches();
   }
   _clearMatrixCaches() {
@@ -32335,9 +32869,9 @@ function ik(e67) {
   } else e67.tr.setRoll(Ai.number(e67.startEulerAngles.roll, e67.endEulerAngles.roll, e67.k)), e67.tr.setPitch(Ai.number(e67.startEulerAngles.pitch, e67.endEulerAngles.pitch, e67.k)), e67.tr.setBearing(Ai.number(e67.startEulerAngles.bearing, e67.endEulerAngles.bearing, e67.k));
 }
 function ak(e67, t4, n3, r3, i3, a5) {
-  let o3 = a5.worldCoordinateHelper, s4 = ph(a5.worldSize, r3.getNorthWest(), o3), c3 = ph(a5.worldSize, r3.getNorthEast(), o3), l3 = ph(a5.worldSize, r3.getSouthEast(), o3), d3 = ph(a5.worldSize, r3.getSouthWest(), o3), [f4, p4] = o3.wraps ? [F2(r3.getSouth(), -85.051129, rn), F2(r3.getNorth(), -85.051129, rn)] : [r3.getSouth(), r3.getNorth()], { points: m4, bulge: h4 } = bh(o3, r3.getWest(), f4, r3.getEast(), p4), g4 = Zt(-i3), _4 = 1 / 0, v4 = 1 / 0, y5 = -1 / 0, b10 = -1 / 0;
+  let o3 = a5.worldCoordinateHelper, s4 = ph(a5.worldSize, r3.getNorthWest(), o3), c3 = ph(a5.worldSize, r3.getNorthEast(), o3), l3 = ph(a5.worldSize, r3.getSouthEast(), o3), d3 = ph(a5.worldSize, r3.getSouthWest(), o3), [f4, p4] = o3.wraps ? [F2(r3.getSouth(), -85.051129, rn), F2(r3.getNorth(), -85.051129, rn)] : [r3.getSouth(), r3.getNorth()], { points: m4, bulge: h4 } = bh(o3, r3.getWest(), f4, r3.getEast(), p4), g5 = Zt(-i3), _4 = 1 / 0, v4 = 1 / 0, y5 = -1 / 0, b10 = -1 / 0;
   for (let e68 of m4) {
-    let { x: t5, y: n4 } = e68.mult(a5.worldSize).rotate(g4);
+    let { x: t5, y: n4 } = e68.mult(a5.worldSize).rotate(g5);
     t5 < _4 && (_4 = t5), n4 < v4 && (v4 = n4), t5 > y5 && (y5 = t5), n4 > b10 && (b10 = n4);
   }
   let x5 = h4 * a5.worldSize, S4 = new u(y5 + x5, b10 + x5), C4 = new u(_4 - x5, v4 - x5), w4 = S4.sub(C4), T3 = a5.width - (n3.left + n3.right + t4.left + t4.right), E5 = a5.height - (n3.top + n3.bottom + t4.top + t4.bottom), D5 = T3 / w4.x, O4 = E5 / w4.y;
@@ -32345,7 +32879,7 @@ function ak(e67, t4, n3, r3, i3, a5) {
     rk();
     return;
   }
-  let k5 = Math.min(jt(a5.scale * Math.min(D5, O4)), e67.maxZoom), A5 = u.convert(e67.offset), j4 = new u((t4.left - t4.right) / 2, (t4.top - t4.bottom) / 2).rotate(Zt(i3)), ee4 = A5.add(j4).mult(a5.scale / At(k5)), te4 = h4 === 0 && s4.add(l3).equals(c3.add(d3)) ? s4.add(l3).div(2) : S4.add(C4).div(2).rotate(-g4);
+  let k5 = Math.min(jt(a5.scale * Math.min(D5, O4)), e67.maxZoom), A5 = u.convert(e67.offset), j4 = new u((t4.left - t4.right) / 2, (t4.top - t4.bottom) / 2).rotate(Zt(i3)), ee4 = A5.add(j4).mult(a5.scale / At(k5)), te4 = h4 === 0 && s4.add(l3).equals(c3.add(d3)) ? s4.add(l3).div(2) : S4.add(C4).div(2).rotate(-g5);
   return { center: mh(a5.worldSize, te4.sub(ee4), o3), zoom: k5, bearing: i3 };
 }
 var ok = class {
@@ -32372,12 +32906,12 @@ var ok = class {
   handleEaseTo(e67, t4) {
     let n3 = e67.zoom, r3 = e67.padding, i3 = { roll: e67.roll, pitch: e67.pitch, bearing: e67.bearing }, a5 = { roll: t4.roll === void 0 ? e67.roll : t4.roll, pitch: t4.pitch === void 0 ? e67.pitch : t4.pitch, bearing: t4.bearing === void 0 ? e67.bearing : t4.bearing }, o3 = t4.zoom !== void 0, s4 = !e67.isPaddingEqual(t4.padding), c3 = false, l3 = o3 ? +t4.zoom : e67.zoom, u3 = e67.centerPoint.add(t4.offsetAsPoint), d3 = e67.screenPointToLocation(u3), { center: f4, zoom: p4 } = e67.applyConstrain(Q.convert(t4.center || d3), l3 ?? n3);
     VO(e67, f4);
-    let m4 = e67.worldCoordinateHelper, h4 = ph(e67.worldSize, d3, m4), g4 = ph(e67.worldSize, f4, m4).sub(h4), _4 = At(p4 - n3);
+    let m4 = e67.worldCoordinateHelper, h4 = ph(e67.worldSize, d3, m4), g5 = ph(e67.worldSize, f4, m4).sub(h4), _4 = At(p4 - n3);
     c3 = p4 !== n3;
     let v4 = (o4) => {
       if (c3 && e67.setZoom(Ai.number(n3, p4, o4)), $t(i3, a5) || ik({ startEulerAngles: i3, endEulerAngles: a5, tr: e67, k: o4, useSlerp: i3.roll != a5.roll }), s4 && (e67.interpolatePadding(r3, t4.padding, o4), u3 = e67.centerPoint.add(t4.offsetAsPoint)), t4.around) e67.setLocationAtPoint(t4.around, t4.aroundPoint);
       else {
-        let t5 = At(e67.zoom - n3), r4 = (p4 > n3 ? Math.min(2, _4) : Math.max(0.5, _4)) ** (1 - o4), i4 = h4.add(g4.mult(o4 * r4)).mult(t5), a6 = mh(e67.worldSize, i4, m4);
+        let t5 = At(e67.zoom - n3), r4 = (p4 > n3 ? Math.min(2, _4) : Math.max(0.5, _4)) ** (1 - o4), i4 = h4.add(g5.mult(o4 * r4)).mult(t5), a6 = mh(e67.worldSize, i4, m4);
         e67.setLocationAtPoint(e67.renderWorldCopies && m4.wraps ? a6.wrap() : a6, u3);
       }
     }, y5 = this._transformAtAnimationEnd(e67, p4, a5, t4.padding);
@@ -32386,7 +32920,7 @@ var ok = class {
   handleFlyTo(e67, t4) {
     let n3 = t4.zoom !== void 0, r3 = e67.zoom, i3 = e67.applyConstrain(Q.convert(t4.center || t4.locationAtOffset), n3 ? +t4.zoom : r3), a5 = i3.center, o3 = i3.zoom;
     VO(e67, a5);
-    let s4 = e67.worldCoordinateHelper, c3 = e67.worldSize, l3 = ph(c3, t4.locationAtOffset, s4), u3 = ph(c3, a5, s4).sub(l3), d3 = u3.mag(), f4 = At(o3 - r3), p4 = t4.minZoom === void 0 ? e67.minZoom : +t4.minZoom, m4 = Math.max(p4, e67.minZoom), h4 = Math.min(m4, r3, o3), g4 = e67.applyConstrain(a5, h4).zoom, _4 = At(g4 - r3), v4 = (t5, n4, i4, d4) => {
+    let s4 = e67.worldCoordinateHelper, c3 = e67.worldSize, l3 = ph(c3, t4.locationAtOffset, s4), u3 = ph(c3, a5, s4).sub(l3), d3 = u3.mag(), f4 = At(o3 - r3), p4 = t4.minZoom === void 0 ? e67.minZoom : +t4.minZoom, m4 = Math.max(p4, e67.minZoom), h4 = Math.min(m4, r3, o3), g5 = e67.applyConstrain(a5, h4).zoom, _4 = At(g5 - r3), v4 = (t5, n4, i4, d4) => {
       e67.setZoom(t5 === 1 ? o3 : r3 + jt(n4));
       let f5 = t5 === 1 ? a5 : mh(c3, l3.add(u3.mult(i4)), s4);
       e67.setLocationAtPoint(e67.renderWorldCopies && s4.wraps ? f5.wrap() : f5, d4);
@@ -32579,16 +33113,16 @@ function wk(e67, t4) {
   if (c3 < 1e-9) return e67.screenPointToLocation(t4);
   let l3 = Math.atan2(c3, o3), u3 = Math.asin(1 / r3) * 0.9;
   if (l3 < u3) return e67.screenPointToLocation(t4);
-  let d3 = r3 * Math.sin(u3), f4 = Math.asin(F2(d3, -1, 1)) - u3, p4 = r3 * Math.cos(u3) / Math.sqrt(Math.max(1 - d3 * d3, 1e-12)) - 1, m4 = Ck - f4, h4 = l3 - u3, g4 = f4 + p4 * h4 * m4 / (m4 + p4 * h4), _4 = at();
+  let d3 = r3 * Math.sin(u3), f4 = Math.asin(F2(d3, -1, 1)) - u3, p4 = r3 * Math.cos(u3) / Math.sqrt(Math.max(1 - d3 * d3, 1e-12)) - 1, m4 = Ck - f4, h4 = l3 - u3, g5 = f4 + p4 * h4 * m4 / (m4 + p4 * h4), _4 = at();
   M2(_4, s4, 1 / c3);
   let v4 = at();
-  return M2(v4, i3, Math.cos(F2(g4, 0, Ck))), _e2(v4, v4, _4, Math.sin(F2(g4, 0, Ck))), be(v4, v4), bk(v4);
+  return M2(v4, i3, Math.cos(F2(g5, 0, Ck))), _e2(v4, v4, _4, Math.sin(F2(g5, 0, Ck))), be(v4, v4), bk(v4);
 }
 function Tk(e67, t4, n3, r3, i3 = true) {
   let a5 = wk(e67, n3), o3 = t4;
   if (r3) o3 = wk(e67, n3.sub(r3));
   else if (!e67.isPointOnMapSurface(n3)) return;
-  let s4 = _k2(a5), c3 = _k2(o3), l3 = xk(e67.center, e67.bearing), u3 = Se(at(), c3, s4), d3 = Math.sqrt(xe(u3, u3)), f4 = Math.acos(F2(xe(c3, s4), -1, 1)) / 2, p4 = Math.sin(f4), m4 = d3 ? qe2(it(), u3[1] / d3 * p4, -u3[0] / d3 * p4, u3[2] / d3 * p4, Math.cos(f4)) : Ve(it()), { lng: h4, lat: g4, bearing: _4 } = Sk(Ue(it(), l3, m4)), v4 = e67.center.lat, y5 = e67.zoom, b10 = i3 ? Ek(e67, g4, _4) : g4, x5 = i3 ? Dk(e67, n3, r3, h4) : h4;
+  let s4 = _k2(a5), c3 = _k2(o3), l3 = xk(e67.center, e67.bearing), u3 = Se(at(), c3, s4), d3 = Math.sqrt(xe(u3, u3)), f4 = Math.acos(F2(xe(c3, s4), -1, 1)) / 2, p4 = Math.sin(f4), m4 = d3 ? qe2(it(), u3[1] / d3 * p4, -u3[0] / d3 * p4, u3[2] / d3 * p4, Math.cos(f4)) : Ve(it()), { lng: h4, lat: g5, bearing: _4 } = Sk(Ue(it(), l3, m4)), v4 = e67.center.lat, y5 = e67.zoom, b10 = i3 ? Ek(e67, g5, _4) : g5, x5 = i3 ? Dk(e67, n3, r3, h4) : h4;
   e67.setCenter(new Q(wt(x5, -180, 180), b10)), i3 || e67.setBearing(_4), e67.setZoom(y5 + jk(v4, e67.center.lat));
 }
 function Ek(e67, t4, n3) {
@@ -32779,8 +33313,8 @@ var Hk = class {
       be(u3, u3);
       let d3 = Se([], t5[0], t5[3]);
       be(d3, d3), n4.push(M2([], s4, a5)), e67.y >= (1 << e67.z) / 2 && n4.push(M2([], gk(P2 / 2, 0, e67.x, e67.y, e67.z), a5)), e67.y < (1 << e67.z) / 2 && n4.push(M2([], gk(P2 / 2, P2, e67.x, e67.y, e67.z), a5));
-      let f4 = Uk(s4, n4), p4 = Uk(l3, n4), m4 = [-s4[0], -s4[1], -s4[2], f4.max], h4 = [s4[0], s4[1], s4[2], -f4.min], g4 = [-l3[0], -l3[1], -l3[2], p4.max], _4 = [l3[0], l3[1], l3[2], -p4.min], v4 = [...u3, 0], y5 = [...d3, 0], b10 = [];
-      return e67.y === 0 ? b10.push(dt(y5, v4, m4), dt(y5, v4, h4)) : b10.push(dt(g4, v4, m4), dt(g4, v4, h4), dt(g4, y5, m4), dt(g4, y5, h4)), e67.y === (1 << e67.z) - 1 ? b10.push(dt(y5, v4, m4), dt(y5, v4, h4)) : b10.push(dt(_4, v4, m4), dt(_4, v4, h4), dt(_4, y5, m4), dt(_4, y5, h4)), new zk(b10, [m4, h4, g4, _4, v4, y5], r4, o3);
+      let f4 = Uk(s4, n4), p4 = Uk(l3, n4), m4 = [-s4[0], -s4[1], -s4[2], f4.max], h4 = [s4[0], s4[1], s4[2], -f4.min], g5 = [-l3[0], -l3[1], -l3[2], p4.max], _4 = [l3[0], l3[1], l3[2], -p4.min], v4 = [...u3, 0], y5 = [...d3, 0], b10 = [];
+      return e67.y === 0 ? b10.push(dt(y5, v4, m4), dt(y5, v4, h4)) : b10.push(dt(g5, v4, m4), dt(g5, v4, h4), dt(g5, y5, m4), dt(g5, y5, h4)), e67.y === (1 << e67.z) - 1 ? b10.push(dt(y5, v4, m4), dt(y5, v4, h4)) : b10.push(dt(_4, v4, m4), dt(_4, v4, h4), dt(_4, y5, m4), dt(_4, y5, h4)), new zk(b10, [m4, h4, g5, _4, v4, y5], r4, o3);
     }
   }
 };
@@ -33160,7 +33694,7 @@ var Gk = class e62 {
     Oe(f4, r3, i3, -u3);
     let p4 = pt(f4[1], f4[2], a5[1], a5[2]), m4 = at();
     Oe(m4, r3, i3, -d3);
-    let h4 = pt(m4[1], m4[2], a5[1], a5[2]), g4 = Math.PI * 0.5, _4 = p4 >= -g4 && p4 <= g4, v4 = h4 >= -g4 && h4 <= g4, y5, b10;
+    let h4 = pt(m4[1], m4[2], a5[1], a5[2]), g5 = Math.PI * 0.5, _4 = p4 >= -g5 && p4 <= g5, v4 = h4 >= -g5 && h4 <= g5, y5, b10;
     if (_4 && v4) {
       let e68 = this._cameraState.center.lng * Math.PI / 180, t5 = this._cameraState.center.lat * Math.PI / 180, n4 = ht(u3, e68), r4 = ht(p4, t5), i4 = ht(d3, e68), a6 = ht(h4, t5);
       n4 + r4 < i4 + a6 ? (y5 = u3, b10 = p4) : (y5 = d3, b10 = h4);
@@ -33627,9 +34161,9 @@ var $k = class e64 {
     if (a5 === 0) return;
     let o3 = mt(t4.center.lng, r3.lng), s4 = o3 / (Math.abs(o3 / 180) + 1), c3 = mt(t4.center.lat, r3.lat), l3 = t4.getRayDirectionFromPixel(n3), u3 = t4.cameraPosition, d3 = xe(u3, l3) * -1, f4 = at();
     he(f4, u3, [l3[0] * d3, l3[1] * d3, l3[2] * d3]);
-    let p4 = pe2(f4), m4 = p4 - 1, h4 = Math.exp(-Math.max(m4 - 0.3, 0) * 0.5), g4 = _t2(p4, 0.95, 0.999, 0, 1), _4 = _t2(vk(t4.worldSize, t4.center.lat) / Math.min(t4.width, t4.height), 0.9, 0.5, 1, 0.25), v4 = Math.min(h4, vt(1, _4, g4)), y5 = (1 - At(-a5)) * v4, b10 = t4.center.lat, x5 = t4.zoom, S4 = new Q(t4.center.lng + s4 * y5, F2(t4.center.lat + c3 * y5, -90, 90));
+    let p4 = pe2(f4), m4 = p4 - 1, h4 = Math.exp(-Math.max(m4 - 0.3, 0) * 0.5), g5 = _t2(p4, 0.95, 0.999, 0, 1), _4 = _t2(vk(t4.worldSize, t4.center.lat) / Math.min(t4.width, t4.height), 0.9, 0.5, 1, 0.25), v4 = Math.min(h4, vt(1, _4, g5)), y5 = (1 - At(-a5)) * v4, b10 = t4.center.lat, x5 = t4.zoom, S4 = new Q(t4.center.lng + s4 * y5, F2(t4.center.lat + c3 * y5, -90, 90));
     t4.setLocationAtPoint(r3, n3);
-    let C4 = t4.center, w4 = _t2(Math.abs(o3), 45, 85, 0, 1), T3 = Math.max(w4, g4) ** 0.25, E5 = mt(C4.lng, S4.lng), D5 = mt(C4.lat, S4.lat);
+    let C4 = t4.center, w4 = _t2(Math.abs(o3), 45, 85, 0, 1), T3 = Math.max(w4, g5) ** 0.25, E5 = mt(C4.lng, S4.lng), D5 = mt(C4.lat, S4.lat);
     t4.setCenter(new Q(C4.lng + E5 * T3, F2(C4.lat + D5 * T3, -90, 90)).wrap()), t4.setZoom(x5 + jk(b10, t4.center.lat));
   }
   handleMapControlsPan(e67, t4, n3) {
@@ -33638,9 +34172,9 @@ var $k = class e64 {
   cameraForBoxAndBearing(t4, n3, r3, i3, a5, o3) {
     let s4 = ak(t4, n3, r3, i3, a5, o3);
     if (!s4) return;
-    let c3 = n3.left / o3.width * 2 - 1, l3 = (o3.width - n3.right) / o3.width * 2 - 1, u3 = n3.top / o3.height * -2 + 1, d3 = (o3.height - n3.bottom) / o3.height * -2 + 1, f4 = mt(i3.getWest(), i3.getEast()) < 0, p4 = f4 ? i3.getEast() : i3.getWest(), m4 = f4 ? i3.getWest() : i3.getEast(), h4 = Math.max(i3.getNorth(), i3.getSouth()), g4 = Math.min(i3.getNorth(), i3.getSouth()), _4 = p4 + mt(p4, m4) * 0.5, v4 = h4 + mt(h4, g4) * 0.5, y5 = o3.clone();
+    let c3 = n3.left / o3.width * 2 - 1, l3 = (o3.width - n3.right) / o3.width * 2 - 1, u3 = n3.top / o3.height * -2 + 1, d3 = (o3.height - n3.bottom) / o3.height * -2 + 1, f4 = mt(i3.getWest(), i3.getEast()) < 0, p4 = f4 ? i3.getEast() : i3.getWest(), m4 = f4 ? i3.getWest() : i3.getEast(), h4 = Math.max(i3.getNorth(), i3.getSouth()), g5 = Math.min(i3.getNorth(), i3.getSouth()), _4 = p4 + mt(p4, m4) * 0.5, v4 = h4 + mt(h4, g5) * 0.5, y5 = o3.clone();
     y5.setCenter(s4.center), y5.setPadding(r3), y5.setBearing(s4.bearing), y5.setPitch(0), y5.setRoll(0), y5.setZoom(s4.zoom);
-    let b10 = y5.modelViewProjectionMatrix, x5 = [_k2(i3.getNorthWest()), _k2(i3.getNorthEast()), _k2(i3.getSouthWest()), _k2(i3.getSouthEast()), _k2(new Q(m4, v4)), _k2(new Q(p4, v4)), _k2(new Q(_4, h4)), _k2(new Q(_4, g4))], S4 = _k2(s4.center), C4 = 1 / 0;
+    let b10 = y5.modelViewProjectionMatrix, x5 = [_k2(i3.getNorthWest()), _k2(i3.getNorthEast()), _k2(i3.getSouthWest()), _k2(i3.getSouthEast()), _k2(new Q(m4, v4)), _k2(new Q(p4, v4)), _k2(new Q(_4, h4)), _k2(new Q(_4, g5))], S4 = _k2(s4.center), C4 = 1 / 0;
     for (let t5 of x5) c3 < 0 && (C4 = e64.getLesserNonNegativeNonNull(C4, e64.solveVectorScale(t5, S4, b10, `x`, c3))), l3 > 0 && (C4 = e64.getLesserNonNegativeNonNull(C4, e64.solveVectorScale(t5, S4, b10, `x`, l3))), u3 > 0 && (C4 = e64.getLesserNonNegativeNonNull(C4, e64.solveVectorScale(t5, S4, b10, `y`, u3))), d3 < 0 && (C4 = e64.getLesserNonNegativeNonNull(C4, e64.solveVectorScale(t5, S4, b10, `y`, d3)));
     if (!Number.isFinite(C4) || C4 === 0) rk();
     else return s4.zoom = Math.min(y5.zoom + jt(C4), t4.maxZoom), s4;
@@ -33658,8 +34192,8 @@ var $k = class e64 {
     p4.setCenter(f4), p4.setZoom(s4 ? +t4.zoom : n3 + jk(r3.lat, d3.lat)), p4.setBearing(t4.bearing);
     let m4 = new u(F2(e67.centerPoint.x + t4.offsetAsPoint.x, 0, e67.width), F2(e67.centerPoint.y + t4.offsetAsPoint.y, 0, e67.height));
     p4.setLocationAtPoint(f4, m4);
-    let h4 = (t4.offset && t4.offsetAsPoint.mag()) > 0 ? p4.center : f4, g4 = s4 ? +t4.zoom : n3 + jk(r3.lat, h4.lat), _4 = n3 + jk(r3.lat, 0), v4 = g4 + jk(h4.lat, 0), y5 = mt(r3.lng, h4.lng), b10 = mt(r3.lat, h4.lat), x5 = At(v4 - _4);
-    return l3 = g4 !== n3, { easeFunc: (n4) => {
+    let h4 = (t4.offset && t4.offsetAsPoint.mag()) > 0 ? p4.center : f4, g5 = s4 ? +t4.zoom : n3 + jk(r3.lat, h4.lat), _4 = n3 + jk(r3.lat, 0), v4 = g5 + jk(h4.lat, 0), y5 = mt(r3.lng, h4.lng), b10 = mt(r3.lat, h4.lat), x5 = At(v4 - _4);
+    return l3 = g5 !== n3, { easeFunc: (n4) => {
       if ($t(a5, o3) || ik({ startEulerAngles: a5, endEulerAngles: o3, tr: e67, k: n4, useSlerp: a5.roll != o3.roll }), c3 && e67.interpolatePadding(i3, t4.padding, n4), t4.around) L2(`Easing around a point is not supported under globe projection.`), e67.setLocationAtPoint(t4.around, t4.aroundPoint);
       else {
         let t5 = n4 * (v4 > _4 ? Math.min(2, x5) : Math.max(0.5, x5)) ** (1 - n4), i4 = Fk(r3, y5, b10, t5);
@@ -33679,7 +34213,7 @@ var $k = class e64 {
     l3.setLocationAtPoint(s4, d3);
     let f4 = l3.center;
     VO(e67, f4);
-    let p4 = pk(e67, r3, f4), m4 = i3 + jk(r3.lat, 0), h4 = c3 + jk(f4.lat, 0), g4 = At(h4 - m4), _4 = typeof t4.minZoom == `number` ? +t4.minZoom : e67.minZoom, v4 = Math.max(_4, e67.minZoom) + jk(f4.lat, 0), y5 = Math.min(v4, m4, h4) + jk(0, f4.lat), b10 = At(e67.applyConstrain(f4, y5).zoom + jk(f4.lat, 0) - m4), x5 = mt(r3.lng, f4.lng), S4 = mt(r3.lat, f4.lat);
+    let p4 = pk(e67, r3, f4), m4 = i3 + jk(r3.lat, 0), h4 = c3 + jk(f4.lat, 0), g5 = At(h4 - m4), _4 = typeof t4.minZoom == `number` ? +t4.minZoom : e67.minZoom, v4 = Math.max(_4, e67.minZoom) + jk(f4.lat, 0), y5 = Math.min(v4, m4, h4) + jk(0, f4.lat), b10 = At(e67.applyConstrain(f4, y5).zoom + jk(f4.lat, 0) - m4), x5 = mt(r3.lng, f4.lng), S4 = mt(r3.lat, f4.lat);
     return { easeFunc: (n4, i4, s5, l4) => {
       let u3 = Fk(r3, x5, S4, s5);
       o3 && e67.interpolatePadding(a5, t4.padding, n4);
@@ -33687,7 +34221,7 @@ var $k = class e64 {
       e67.setCenter(d4.wrap());
       let p5 = m4 + jt(i4);
       e67.setZoom(n4 === 1 ? c3 : p5 + jk(0, d4.lat)), n4 === 1 && e67.setCenter(f4.wrap());
-    }, scaleOfZoom: g4, targetCenter: f4, scaleOfMinZoom: b10, pixelPathLength: p4 };
+    }, scaleOfZoom: g5, targetCenter: f4, scaleOfMinZoom: b10, pixelPathLength: p4 };
   }
   static solveVectorScale(e67, t4, n3, r3, i3) {
     let a5 = i3, o3 = r3 === `x` ? [n3[0], n3[4], n3[8], n3[12]] : [n3[1], n3[5], n3[9], n3[13]], s4 = [n3[3], n3[7], n3[11], n3[15]], c3 = e67[0] * o3[0] + e67[1] * o3[1] + e67[2] * o3[2], l3 = e67[0] * s4[0] + e67[1] * s4[1] + e67[2] * s4[2], u3 = t4[0] * o3[0] + t4[1] * o3[1] + t4[2] * o3[2], d3 = t4[0] * s4[0] + t4[1] * s4[1] + t4[2] * s4[2], f4 = (u3 + o3[3] - a5 * d3 - a5 * s4[3]) / (u3 - c3 - a5 * d3 + a5 * l3);
@@ -35119,8 +35653,8 @@ var Tj = class {
   constructor(e67, t4, n3, r3, i3, a5, o3, s4, c3 = []) {
     let l3 = e67.gl;
     this.program = l3.createProgram();
-    let u3 = Cj(t4.staticAttributes), d3 = n3 ? n3.getBinderAttributes() : [], f4 = u3.concat(d3), p4 = DO.prelude.staticUniforms ? Cj(DO.prelude.staticUniforms) : [], m4 = t4.staticUniforms ? Cj(t4.staticUniforms) : [], h4 = n3 ? n3.getBinderUniforms() : [], g4 = p4.concat(m4).concat(h4), _4 = [];
-    for (let e68 of g4) _4.includes(e68) || _4.push(e68);
+    let u3 = Cj(t4.staticAttributes), d3 = n3 ? n3.getBinderAttributes() : [], f4 = u3.concat(d3), p4 = DO.prelude.staticUniforms ? Cj(DO.prelude.staticUniforms) : [], m4 = t4.staticUniforms ? Cj(t4.staticUniforms) : [], h4 = n3 ? n3.getBinderUniforms() : [], g5 = p4.concat(m4).concat(h4), _4 = [];
+    for (let e68 of g5) _4.includes(e68) || _4.push(e68);
     let v4 = n3 ? n3.defines() : [];
     v4.unshift(`#version 300 es`), i3 && v4.push(`#define OVERDRAW_INSPECTOR;`), a5 && v4.push(`#define TERRAIN3D;`), s4 && v4.push(s4), c3 && v4.push(...c3);
     let y5 = v4.concat(DO.prelude.fragmentSource, o3.fragmentSource, t4.fragmentSource).join(`
@@ -35159,7 +35693,7 @@ var Tj = class {
     }
     this.fixedUniforms = r3(e67, C4), this.terrainUniforms = gj(e67, C4), this.binderUniforms = n3 ? n3.getUniforms(e67, C4) : [];
   }
-  draw(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g4, _4, v4) {
+  draw(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4, p4, m4, h4, g5, _4, v4) {
     let y5 = e67.gl;
     if (this.failedToCreate) return;
     if (e67.program.set(this.program), e67.terrainUniformBuffer.bind(), e67.frameUniformBuffer.bind(), e67.setDepthMode(n3), e67.setStencilMode(r3), e67.setColorMode(i3), e67.setCullFace(a5), s4) {
@@ -35180,7 +35714,7 @@ var Tj = class {
       case y5.LINE_STRIP:
         b10 = 1;
     }
-    for (let n4 of f4.get()) n4.vaos ||= {}, n4.vaos[l3] ||= new hj(), n4.vaos[l3].bind(e67, this, u3, h4 ? h4.getPaintVertexBuffers() : [], d3, n4.vertexOffset, g4, _4, v4), y5.drawElements(t4, n4.primitiveLength * b10, y5.UNSIGNED_SHORT, n4.primitiveOffset * b10 * 2);
+    for (let n4 of f4.get()) n4.vaos ||= {}, n4.vaos[l3] ||= new hj(), n4.vaos[l3].bind(e67, this, u3, h4 ? h4.getPaintVertexBuffers() : [], d3, n4.vertexOffset, g5, _4, v4), y5.drawElements(t4, n4.primitiveLength * b10, y5.UNSIGNED_SHORT, n4.primitiveOffset * b10 * 2);
   }
 };
 function Ej(e67, t4, n3) {
@@ -35417,32 +35951,32 @@ function KM(e67, t4, n3, r3, i3, a5) {
   return e67.add(r3);
 }
 function qM(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, d3, f4, p4) {
-  let m4 = e67.text.placedSymbolArray, h4 = e67.text.dynamicLayoutVertexArray, g4 = e67.icon.dynamicLayoutVertexArray, _4 = {};
+  let m4 = e67.text.placedSymbolArray, h4 = e67.text.dynamicLayoutVertexArray, g5 = e67.icon.dynamicLayoutVertexArray, _4 = {};
   h4.clear();
-  for (let g5 = 0; g5 < m4.length; g5++) {
-    let v4 = m4.get(g5), y5 = e67.allowVerticalPlacement && !v4.placedOrientation, b10 = !v4.hidden && v4.crossTileID && !y5 ? r3[v4.crossTileID] : null;
+  for (let g6 = 0; g6 < m4.length; g6++) {
+    let v4 = m4.get(g6), y5 = e67.allowVerticalPlacement && !v4.placedOrientation, b10 = !v4.hidden && v4.crossTileID && !y5 ? r3[v4.crossTileID] : null;
     if (!b10) LD(v4.numGlyphs, h4);
     else {
-      let r4 = new u(v4.anchorX, v4.anchorY), m5 = { getElevation: f4, heightOffset: v4.heightOffset, heightAnchorGround: p4, width: i3.width, height: i3.height, pitchedLabelPlaneMatrix: a5, lineVertexArray: null, pitchWithMap: n3, transform: i3, projectionCache: null, tileAnchorPoint: r4, translation: l3, unwrappedTileID: d3 }, g6 = n3 ? jD(r4.x, r4.y, m5) : kD(r4.x, r4.y, m5), y6 = xD(i3.cameraToCenterDistance, g6.signedDistanceFromCamera), x5 = Bv(e67.textSizeData, s4, v4) * y6 / 24;
+      let r4 = new u(v4.anchorX, v4.anchorY), m5 = { getElevation: f4, heightOffset: v4.heightOffset, heightAnchorGround: p4, width: i3.width, height: i3.height, pitchedLabelPlaneMatrix: a5, lineVertexArray: null, pitchWithMap: n3, transform: i3, projectionCache: null, tileAnchorPoint: r4, translation: l3, unwrappedTileID: d3 }, g7 = n3 ? jD(r4.x, r4.y, m5) : kD(r4.x, r4.y, m5), y6 = xD(i3.cameraToCenterDistance, g7.signedDistanceFromCamera), x5 = Bv(e67.textSizeData, s4, v4) * y6 / 24;
       n3 && (x5 *= e67.tilePixelRatio / o3);
-      let { width: S4, height: C4, anchor: w4, textOffset: T3, textBoxScale: E5 } = b10, D5 = WM(w4, S4, C4, T3, E5, x5), O4 = i3.getPitchedTextCorrection(r4.x + l3[0], r4.y + l3[1], d3), k5 = KM(g6.point, m5, t4, D5, -i3.bearingInRadians, O4), A5 = e67.allowVerticalPlacement && v4.placedOrientation === 2 ? Math.PI / 2 : 0;
+      let { width: S4, height: C4, anchor: w4, textOffset: T3, textBoxScale: E5 } = b10, D5 = WM(w4, S4, C4, T3, E5, x5), O4 = i3.getPitchedTextCorrection(r4.x + l3[0], r4.y + l3[1], d3), k5 = KM(g7.point, m5, t4, D5, -i3.bearingInRadians, O4), A5 = e67.allowVerticalPlacement && v4.placedOrientation === 2 ? Math.PI / 2 : 0;
       for (let e68 = 0; e68 < v4.numGlyphs; e68++) Oy(h4, k5, A5);
       c3 && v4.associatedIconIndex >= 0 && (_4[v4.associatedIconIndex] = { shiftedAnchor: k5, angle: A5 });
     }
   }
   if (c3) {
-    g4.clear();
+    g5.clear();
     let t5 = e67.icon.placedSymbolArray;
     for (let e68 = 0; e68 < t5.length; e68++) {
       let n4 = t5.get(e68);
-      if (n4.hidden) LD(n4.numGlyphs, g4);
+      if (n4.hidden) LD(n4.numGlyphs, g5);
       else {
         let t6 = _4[e68];
-        if (!t6) LD(n4.numGlyphs, g4);
-        else for (let e69 = 0; e69 < n4.numGlyphs; e69++) Oy(g4, t6.shiftedAnchor, t6.angle);
+        if (!t6) LD(n4.numGlyphs, g5);
+        else for (let e69 = 0; e69 < n4.numGlyphs; e69++) Oy(g5, t6.shiftedAnchor, t6.angle);
       }
     }
-    e67.icon.dynamicLayoutVertexBuffer.updateData(g4);
+    e67.icon.dynamicLayoutVertexBuffer.updateData(g5);
   }
   e67.text.dynamicLayoutVertexBuffer.updateData(h4);
 }
@@ -35450,7 +35984,7 @@ function JM(e67, t4, n3) {
   return n3.iconsInText && t4 ? `symbolTextAndIcon` : e67 ? `symbolSDF` : `symbolIcon`;
 }
 function YM(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4) {
-  let p4 = f4.context, m4 = p4.gl, h4 = f4.transform, g4 = s4 === `map`, _4 = c3 === `map`, v4 = s4 !== `viewport` && n3.layout.get(`symbol-placement`) !== `point`, y5 = g4 && !_4 && !v4, b10 = !n3.layout.get(`symbol-sort-key`).isConstant(), x5 = false, S4 = f4.getDepthModeForSublayer(0, RM.ReadOnly), C4 = n3._unevaluatedLayout.hasValue(`text-variable-anchor`) || n3._unevaluatedLayout.hasValue(`text-variable-anchor-offset`), w4 = [], E5 = h4.getCircleRadiusCorrection();
+  let p4 = f4.context, m4 = p4.gl, h4 = f4.transform, g5 = s4 === `map`, _4 = c3 === `map`, v4 = s4 !== `viewport` && n3.layout.get(`symbol-placement`) !== `point`, y5 = g5 && !_4 && !v4, b10 = !n3.layout.get(`symbol-sort-key`).isConstant(), x5 = false, S4 = f4.getDepthModeForSublayer(0, RM.ReadOnly), C4 = n3._unevaluatedLayout.hasValue(`text-variable-anchor`) || n3._unevaluatedLayout.hasValue(`text-variable-anchor-offset`), w4 = [], E5 = h4.getCircleRadiusCorrection();
   for (let s5 of r3) {
     let r4 = t4.getTile(s5), c4 = r4.getBucket(n3);
     if (!c4) continue;
@@ -35467,7 +36001,7 @@ function YM(e67, t4, n3, r3, i3, a5, o3, s4, c3, l3, u3, d3, f4) {
       let e68 = n3.layout.get(`icon-size`).constantOr(0) !== 1 || c4.iconsNeedLinear;
       te4 = r4.imageAtlasTexture, ne4 = p5 || f4.data.rotating || f4.data.zooming || e68 || D6 ? m4.LINEAR : m4.NEAREST, j4 = r4.imageAtlasTexture.size;
     }
-    let ae4 = nt(r4, 1, f4.transform.zoom), oe4 = gD(g4, f4.transform, ae4), se4 = _D(_4, g4, f4.transform, ae4), ce4 = lt(h4, r4, a5, o3), le4 = f4.getProjectionDataForTile(s5), ue3 = C4 && c4.hasTextData(), de4 = n3.layout.get(`icon-text-fit`) !== `none` && ue3 && c4.hasIconData(), fe3 = n3._unevaluatedLayout.hasValue(`icon-offset`), pe4 = n3.layout.get(`symbol-height-anchor`) === `ground`;
+    let ae4 = nt(r4, 1, f4.transform.zoom), oe4 = gD(g5, f4.transform, ae4), se4 = _D(_4, g5, f4.transform, ae4), ce4 = lt(h4, r4, a5, o3), le4 = f4.getProjectionDataForTile(s5), ue3 = C4 && c4.hasTextData(), de4 = n3.layout.get(`icon-text-fit`) !== `none` && ue3 && c4.hasIconData(), fe3 = n3._unevaluatedLayout.hasValue(`icon-offset`), pe4 = n3.layout.get(`symbol-height-anchor`) === `ground`;
     if (v4) {
       let t5 = T();
       fD(t5, oe4);
@@ -35508,11 +36042,11 @@ function ZM(e67, t4, n3, r3) {
   for (let i4 of n3) {
     let n4 = e67.getTile(i4), a6 = n4.getBucket(t4);
     if (!a6) continue;
-    let o4 = lt(u3, n4, t4.paint.get(`circle-translate`), t4.paint.get(`circle-translate-anchor`)), c4 = a6.programConfigurations.get(t4.id), l4 = r3.useProgram(`circle`, c4), d4 = a6.layoutVertexBuffer, f5 = a6.indexBuffer, p5 = r3.getTerrainDataForTile(i4), g4 = { programConfiguration: c4, program: l4, layoutVertexBuffer: d4, indexBuffer: f5, uniformValues: Vj(u3, n4, t4, o4, h4), terrainData: p5, projectionData: r3.getProjectionDataForTile(i4) };
+    let o4 = lt(u3, n4, t4.paint.get(`circle-translate`), t4.paint.get(`circle-translate-anchor`)), c4 = a6.programConfigurations.get(t4.id), l4 = r3.useProgram(`circle`, c4), d4 = a6.layoutVertexBuffer, f5 = a6.indexBuffer, p5 = r3.getTerrainDataForTile(i4), g5 = { programConfiguration: c4, program: l4, layoutVertexBuffer: d4, indexBuffer: f5, uniformValues: Vj(u3, n4, t4, o4, h4), terrainData: p5, projectionData: r3.getProjectionDataForTile(i4) };
     if (s4) {
       let e68 = a6.segments.get();
-      for (let t5 of e68) m4.push({ segments: new yd([t5]), sortKey: t5.sortKey, state: g4 });
-    } else m4.push({ segments: a6.segments, sortKey: 0, state: g4 });
+      for (let t5 of e68) m4.push({ segments: new yd([t5]), sortKey: t5.sortKey, state: g5 });
+    } else m4.push({ segments: a6.segments, sortKey: 0, state: g5 });
   }
   s4 && m4.sort((e68, t5) => e68.sortKey - t5.sortKey);
   for (let e68 of m4) {
@@ -35638,7 +36172,7 @@ function mN(e67, t4, n3, r3, i3) {
 function hN(e67, t4, n3, r3, i3) {
   let a5 = i3.getDepthModeForSublayer(0, RM.ReadOnly), o3 = i3.colorModeForRenderPass(), s4 = n3.paint.get(`line-dasharray`), c3 = s4.constantOr(1), l3 = n3.paint.get(`line-pattern`), u3 = l3.constantOr(1), d3 = n3.paint.get(`line-gradient`), f4 = n3.getCrossfadeParameters(), p4;
   p4 = u3 ? `linePattern` : c3 && d3 ? `lineGradientSDF` : c3 ? `lineSDF` : d3 ? `lineGradient` : `line`;
-  let m4 = i3.context, h4 = m4.gl, g4 = i3.transform, _4 = true;
+  let m4 = i3.context, h4 = m4.gl, g5 = i3.transform, _4 = true;
   for (let v4 of r3) {
     let r4 = t4.getTile(v4);
     if (u3 && !r4.patternsLoaded()) continue;
@@ -35652,8 +36186,8 @@ function hN(e67, t4, n3, r3, i3) {
       let t5 = n3.layout.get(`line-cap`).constantOr(null) === `round`, r5 = e67.lineAtlas.getDash(E5.to, t5), i4 = e67.lineAtlas.getDash(E5.from, t5);
       b10.setConstantDashPositions(r5, i4);
     }
-    let D5 = i3.getProjectionDataForTile(v4), O4 = g4.getPixelScale(), k5;
-    u3 ? (k5 = lM(g4, r4, n3, O4, f4), uN(m4, h4, r4, b10, f4)) : c3 && d3 ? (k5 = dM(g4, e67.lineAtlas, r4, n3, O4, f4, y5.lineClipsArray.length), pN(e67, t4, m4, h4, n3, y5, v4, b10, f4, i3)) : c3 ? (k5 = uM(g4, e67.lineAtlas, r4, n3, O4, f4), dN(e67, m4, h4, b10, C4, f4)) : d3 ? (k5 = cM(g4, r4, n3, O4, y5.lineClipsArray.length), fN(t4, m4, h4, n3, y5, v4, i3)) : k5 = sM(g4, r4, n3, O4);
+    let D5 = i3.getProjectionDataForTile(v4), O4 = g5.getPixelScale(), k5;
+    u3 ? (k5 = lM(g5, r4, n3, O4, f4), uN(m4, h4, r4, b10, f4)) : c3 && d3 ? (k5 = dM(g5, e67.lineAtlas, r4, n3, O4, f4, y5.lineClipsArray.length), pN(e67, t4, m4, h4, n3, y5, v4, b10, f4, i3)) : c3 ? (k5 = uM(g5, e67.lineAtlas, r4, n3, O4, f4), dN(e67, m4, h4, b10, C4, f4)) : d3 ? (k5 = cM(g5, r4, n3, O4, y5.lineClipsArray.length), fN(t4, m4, h4, n3, y5, v4, i3)) : k5 = sM(g5, r4, n3, O4);
     let A5 = i3.stencilModeForClipping(v4);
     S4.draw(m4, h4.TRIANGLES, a5, A5, o3, LM.disabled, k5, w4, D5, n3.id, y5.layoutVertexBuffer, y5.indexBuffer, y5.segments, n3.paint, i3.transform.zoom, b10, y5.layoutVertexBuffer2), _4 = false;
   }
@@ -35692,7 +36226,7 @@ function yN(e67, t4, n3, r3) {
   bN(e67, t4, n3, r3.getDepthModeForSublayer(t4.getPaintProperty(`fill-outline-color`) ? 2 : 0, RM.ReadOnly), i3, true, r3);
 }
 function bN(e67, t4, n3, r3, i3, a5, o3) {
-  let s4 = o3.context, c3 = s4.gl, l3 = `fill-pattern`, u3 = t4.paint.get(l3), d3 = u3?.constantOr(1), f4 = t4.getCrossfadeParameters(), p4, m4, h4, g4, _4, v4 = o3.transform, y5 = t4.paint.get(`fill-translate`), b10 = t4.paint.get(`fill-translate-anchor`);
+  let s4 = o3.context, c3 = s4.gl, l3 = `fill-pattern`, u3 = t4.paint.get(l3), d3 = u3?.constantOr(1), f4 = t4.getCrossfadeParameters(), p4, m4, h4, g5, _4, v4 = o3.transform, y5 = t4.paint.get(`fill-translate`), b10 = t4.paint.get(`fill-translate-anchor`);
   a5 ? (m4 = d3 && !t4.getPaintProperty(`fill-outline-color`) ? `fillOutlinePattern` : `fillOutline`, p4 = c3.LINES) : (m4 = d3 ? `fillPattern` : `fill`, p4 = c3.TRIANGLES);
   let x5 = u3.constantOr(null);
   for (let u4 of n3) {
@@ -35703,9 +36237,9 @@ function bN(e67, t4, n3, r3, i3, a5, o3) {
     let C4 = S4.sdfPatterns[t4.id] ?? false, w4 = S4.programConfigurations.get(t4.id), T3 = o3.useProgram(m4, w4), E5 = o3.getTerrainDataForTile(u4);
     d3 && (s4.activeTexture.set(c3.TEXTURE0), n4.imageAtlasTexture.bind(c3.LINEAR, c3.CLAMP_TO_EDGE), w4.updatePaintBuffers(f4)), gN(w4, l3, x5, n4, t4);
     let D5 = o3.getProjectionDataForTile(u4), O4 = lt(v4, n4, y5, b10);
-    a5 ? (g4 = S4.indexBuffer2, _4 = S4.segments2, h4 = m4 === `fillOutlinePattern` && d3 ? zj(v4, f4, n4, O4, C4) : Rj(O4)) : (g4 = S4.indexBuffer, _4 = S4.segments, h4 = d3 ? Ij(v4, f4, n4, O4, C4) : Lj(O4));
+    a5 ? (g5 = S4.indexBuffer2, _4 = S4.segments2, h4 = m4 === `fillOutlinePattern` && d3 ? zj(v4, f4, n4, O4, C4) : Rj(O4)) : (g5 = S4.indexBuffer, _4 = S4.segments, h4 = d3 ? Ij(v4, f4, n4, O4, C4) : Lj(O4));
     let k5 = o3.stencilModeForClipping(u4);
-    T3.draw(s4, p4, r3, k5, i3, LM.backCCW, h4, E5, D5, t4.id, S4.layoutVertexBuffer, g4, _4, t4.paint, o3.transform.zoom, w4);
+    T3.draw(s4, p4, r3, k5, i3, LM.backCCW, h4, E5, D5, t4.id, S4.layoutVertexBuffer, g5, _4, t4.paint, o3.transform.zoom, w4);
   }
 }
 function xN(e67, t4, n3, r3) {
@@ -35721,14 +36255,14 @@ function xN(e67, t4, n3, r3) {
 function SN(e67, t4, n3, r3, i3, a5, o3) {
   let s4 = o3.context, c3 = s4.gl, l3 = `fill-extrusion-pattern`, u3 = t4.paint.get(l3), d3 = u3.constantOr(1), f4 = t4.getCrossfadeParameters(), p4 = t4.paint.get(`fill-extrusion-opacity`), m4 = u3.constantOr(null), h4 = o3.transform;
   for (let u4 of n3) {
-    let n4 = e67.getTile(u4), g4 = n4.getBucket(t4);
-    if (!g4) continue;
-    let _4 = o3.getTerrainDataForTile(u4), v4 = g4.programConfigurations.get(t4.id), y5 = o3.useProgram(d3 ? `fillExtrusionPattern` : `fillExtrusion`, v4);
+    let n4 = e67.getTile(u4), g5 = n4.getBucket(t4);
+    if (!g5) continue;
+    let _4 = o3.getTerrainDataForTile(u4), v4 = g5.programConfigurations.get(t4.id), y5 = o3.useProgram(d3 ? `fillExtrusionPattern` : `fillExtrusion`, v4);
     d3 && (s4.activeTexture.set(c3.TEXTURE0), n4.imageAtlasTexture.bind(c3.LINEAR, c3.CLAMP_TO_EDGE), v4.updatePaintBuffers(f4));
     let b10 = o3.getProjectionDataForTile(u4);
     gN(v4, l3, m4, n4, t4);
     let x5 = lt(h4, n4, t4.paint.get(`fill-extrusion-translate`), t4.paint.get(`fill-extrusion-translate-anchor`)), S4 = t4.paint.get(`fill-extrusion-vertical-gradient`), C4 = d3 ? jj(h4, o3.data.light, S4, p4, x5, u4, f4, n4) : Aj(h4, o3.data.light, S4, p4, x5);
-    y5.draw(s4, s4.gl.TRIANGLES, r3, i3, a5, LM.backCCW, C4, _4, b10, t4.id, g4.layoutVertexBuffer, g4.indexBuffer, g4.segments, t4.paint, o3.transform.zoom, v4, o3.terrain && g4.centroidVertexBuffer);
+    y5.draw(s4, s4.gl.TRIANGLES, r3, i3, a5, LM.backCCW, C4, _4, b10, t4.id, g5.layoutVertexBuffer, g5.indexBuffer, g5.segments, t4.paint, o3.transform.zoom, v4, o3.terrain && g5.centroidVertexBuffer);
   }
 }
 function CN(e67, t4, n3, r3, i3) {
@@ -35752,8 +36286,8 @@ function wN(e67, t4, n3, r3, i3, a5, o3, s4) {
     if (!p4) continue;
     let m4 = s4.getMeshFromTileID(u4.canonical, o3, true, `raster`), h4 = s4.getTerrainDataForTile(u4);
     c3.activeTexture.set(l3.TEXTURE0), l3.bindTexture(l3.TEXTURE_2D, p4.colorAttachment.get());
-    let g4 = s4.getProjectionDataForTile(u4, { aligned: f4 });
-    d3.draw(c3, l3.TRIANGLES, i3, r3[u4.overscaledZ], a5, LM.backCCW, Xj(s4.transform, n4, t4), h4, g4, t4.id, m4.vertexBuffer, m4.indexBuffer, m4.segments);
+    let g5 = s4.getProjectionDataForTile(u4, { aligned: f4 });
+    d3.draw(c3, l3.TRIANGLES, i3, r3[u4.overscaledZ], a5, LM.backCCW, Xj(s4.transform, n4, t4), h4, g5, t4.id, m4.vertexBuffer, m4.indexBuffer, m4.segments);
   }
 }
 function TN(e67, t4, n3, r3, i3, a5, o3, s4) {
@@ -35767,12 +36301,12 @@ function TN(e67, t4, n3, r3, i3, a5, o3, s4) {
       e68.update(h4, { premultiply: false }), e68.bind(l3.NEAREST, l3.CLAMP_TO_EDGE);
     } else n4.demTexture = new fp(c3, h4, l3.RGBA, { premultiply: false }), n4.demTexture.bind(l3.NEAREST, l3.CLAMP_TO_EDGE);
     c3.activeTexture.set(l3.TEXTURE0);
-    let g4 = n4.fbo;
-    if (!g4) {
+    let g5 = n4.fbo;
+    if (!g5) {
       let e68 = new fp(c3, { width: p4, height: p4, data: null }, l3.RGBA);
-      e68.bind(u3, l3.CLAMP_TO_EDGE), g4 = n4.fbo = c3.createFramebuffer(p4, p4, true, false), g4.colorAttachment.set(e68.texture);
+      e68.bind(u3, l3.CLAMP_TO_EDGE), g5 = n4.fbo = c3.createFramebuffer(p4, p4, true, false), g5.colorAttachment.set(e68.texture);
     }
-    c3.bindFramebuffer.set(g4.framebuffer), c3.viewport.set([0, 0, p4, p4]), s4.useProgram(`hillshadePrepare`).draw(c3, l3.TRIANGLES, i3, a5, o3, LM.disabled, Zj(s4.transform, n4.tileID, f4), null, null, r3.id, e67.rasterBoundsBuffer, e67.quadTriangleIndexBuffer, e67.rasterBoundsSegments), n4.needsHillshadePrepare = false;
+    c3.bindFramebuffer.set(g5.framebuffer), c3.viewport.set([0, 0, p4, p4]), s4.useProgram(`hillshadePrepare`).draw(c3, l3.TRIANGLES, i3, a5, o3, LM.disabled, Zj(s4.transform, n4.tileID, f4), null, null, r3.id, e67.rasterBoundsBuffer, e67.quadTriangleIndexBuffer, e67.rasterBoundsSegments), n4.needsHillshadePrepare = false;
   }
 }
 function EN(e67, t4, n3, r3, i3) {
@@ -35789,8 +36323,8 @@ function EN(e67, t4, n3, r3, i3) {
 var DN = 0;
 function ON(e67, t4, n3, r3, i3, a5, o3, s4, c3) {
   let l3 = c3.context, u3 = l3.gl, d3 = c3.useProgram(`colorRelief`), f4 = !c3.data.moving, p4 = n3.paint.get(`resampling`) === `nearest` ? u3.NEAREST : u3.LINEAR, m4 = true, h4 = 0;
-  for (let g4 of r3) {
-    let r4 = t4.getTile(g4), _4 = r4.dem;
+  for (let g5 of r3) {
+    let r4 = t4.getTile(g5), _4 = r4.dem;
     if (!_4?.data) continue;
     if (m4) {
       DN ||= u3.getParameter(u3.MAX_TEXTURE_SIZE);
@@ -35799,8 +36333,8 @@ function ON(e67, t4, n3, r3, i3, a5, o3, s4, c3) {
     }
     let v4 = _4.stride;
     l3.activeTexture.set(u3.TEXTURE0), (!r4.demTexture || r4.needsColorReliefPrepare) && (l3.pixelStoreUnpackPremultiplyAlpha.set(false), r4.demTexture ||= e67.getTileTexture(v4) ?? new fp(l3, { width: v4, height: v4, data: null }, u3.RGBA), r4.demTexture.update(_4.getPixels(), { premultiply: false }), r4.needsColorReliefPrepare = false), r4.demTexture.bind(p4, u3.CLAMP_TO_EDGE);
-    let y5 = c3.getMeshFromTileID(g4.canonical, s4, true, `raster`), b10 = c3.getTerrainDataForTile(g4), x5 = c3.getProjectionDataForTile(g4, { aligned: f4 });
-    d3.draw(l3, u3.TRIANGLES, a5, i3[g4.overscaledZ], o3, LM.backCCW, tM(n3, r4.dem, h4), b10, x5, n3.id, y5.vertexBuffer, y5.indexBuffer, y5.segments);
+    let y5 = c3.getMeshFromTileID(g5.canonical, s4, true, `raster`), b10 = c3.getTerrainDataForTile(g5), x5 = c3.getProjectionDataForTile(g5, { aligned: f4 });
+    d3.draw(l3, u3.TRIANGLES, a5, i3[g5.overscaledZ], o3, LM.backCCW, tM(n3, r4.dem, h4), b10, x5, n3.id, y5.vertexBuffer, y5.indexBuffer, y5.segments);
   }
 }
 var kN = [new u(0, 0), new u(P2, 0), new u(P2, P2), new u(0, P2)];
@@ -35817,13 +36351,13 @@ function AN(e67, t4, n3, r3) {
   }
 }
 function jN(e67, t4, n3, r3, i3, a5, o3, s4, c3 = false, l3, u3 = null) {
-  let d3 = n3[n3.length - 1].overscaledZ, f4 = l3.context, p4 = f4.gl, m4 = l3.useProgram(`raster`), h4 = l3.colorModeForRenderPass(), g4 = !l3.data.moving, _4 = t4.paint.get(`raster-opacity`), v4 = t4.paint.get(`resampling`) === `nearest` || t4.paint.get(`raster-resampling`) === `nearest` ? p4.NEAREST : p4.LINEAR, y5 = t4.paint.get(`raster-fade-duration`), b10 = !!l3.terrain;
+  let d3 = n3[n3.length - 1].overscaledZ, f4 = l3.context, p4 = f4.gl, m4 = l3.useProgram(`raster`), h4 = l3.colorModeForRenderPass(), g5 = !l3.data.moving, _4 = t4.paint.get(`raster-opacity`), v4 = t4.paint.get(`resampling`) === `nearest` || t4.paint.get(`raster-resampling`) === `nearest` ? p4.NEAREST : p4.LINEAR, y5 = t4.paint.get(`raster-fade-duration`), b10 = !!l3.terrain;
   for (let x5 of n3) {
     let n4 = l3.getDepthModeForSublayer(x5.overscaledZ - d3, _4 === 1 ? RM.ReadWrite : RM.ReadOnly, p4.LESS), S4 = e67.getTile(x5);
     f4.activeTexture.set(p4.TEXTURE0), S4.texture.bind(v4, p4.CLAMP_TO_EDGE, p4.LINEAR_MIPMAP_NEAREST), f4.activeTexture.set(p4.TEXTURE1);
     let { parentTile: C4, parentScaleBy: w4, parentTopLeft: T3, fadeValues: E5 } = MN(S4, e67, y5, b10);
     S4.fadeOpacity = E5.tileOpacity, C4 ? (C4.fadeOpacity = E5.parentTileOpacity, C4.texture.bind(v4, p4.CLAMP_TO_EDGE, p4.LINEAR_MIPMAP_NEAREST)) : S4.texture.bind(v4, p4.CLAMP_TO_EDGE, p4.LINEAR_MIPMAP_NEAREST), S4.texture.useMipmap && f4.extTextureFilterAnisotropic && l3.transform.pitch > l3.data.anisotropicFilterPitch && p4.texParameterf(p4.TEXTURE_2D, f4.extTextureFilterAnisotropic.TEXTURE_MAX_ANISOTROPY_EXT, f4.extTextureFilterAnisotropicMax);
-    let D5 = l3.getTerrainDataForTile(x5), O4 = l3.getProjectionDataForTile(x5, { aligned: g4 }), k5 = Tx(T3, w4, E5.fadeMix, t4, o3, s4), A5 = u3 ?? l3.getMeshFromTileID(x5.canonical, i3, a5, `raster`), j4 = r3 ? r3[x5.overscaledZ] : PM.disabled;
+    let D5 = l3.getTerrainDataForTile(x5), O4 = l3.getProjectionDataForTile(x5, { aligned: g5 }), k5 = Tx(T3, w4, E5.fadeMix, t4, o3, s4), A5 = u3 ?? l3.getMeshFromTileID(x5.canonical, i3, a5, `raster`), j4 = r3 ? r3[x5.overscaledZ] : PM.disabled;
     m4.draw(f4, p4.TRIANGLES, n4, j4, h4, c3 ? LM.frontCCW : LM.backCCW, k5, D5, O4, t4.id, A5.vertexBuffer, A5.indexBuffer, A5.segments);
   }
 }
@@ -35853,12 +36387,12 @@ function FN(e67, t4, n3, r3, i3) {
   if (e67.patternAtlas.isPatternMissing(d3)) return;
   let f4 = !d3 && a5.a === 1 && o3 === 1 && i3.opaquePassEnabledForLayer() ? `opaque` : `translucent`;
   if (i3.currentPass !== f4) return;
-  let p4 = PM.disabled, m4 = i3.getDepthModeForSublayer(0, f4 === `opaque` ? RM.ReadWrite : RM.ReadOnly), h4 = i3.colorModeForRenderPass(), g4 = i3.useProgram(d3 ? `backgroundPattern` : `background`), _4 = r3 || XE(l3, { tileSize: u3, terrain: i3.terrain });
+  let p4 = PM.disabled, m4 = i3.getDepthModeForSublayer(0, f4 === `opaque` ? RM.ReadWrite : RM.ReadOnly), h4 = i3.colorModeForRenderPass(), g5 = i3.useProgram(d3 ? `backgroundPattern` : `background`), _4 = r3 || XE(l3, { tileSize: u3, terrain: i3.terrain });
   d3 && (s4.activeTexture.set(c3.TEXTURE0), e67.patternAtlas.bind(s4));
   let v4 = n3.getCrossfadeParameters();
   for (let t5 of _4) {
     let r4 = i3.getProjectionDataForTile(t5), f5 = d3 ? TM(o3, e67.patternAtlas, l3, d3, { tileID: t5, tileSize: u3 }, v4) : wM(o3, a5), _5 = i3.getTerrainDataForTile(t5), y5 = i3.getMeshFromTileID(t5.canonical, false, true, `raster`);
-    g4.draw(s4, c3.TRIANGLES, m4, p4, h4, LM.backCCW, f5, _5, r4, n3.id, y5.vertexBuffer, y5.indexBuffer, y5.segments);
+    g5.draw(s4, c3.TRIANGLES, m4, p4, h4, LM.backCCW, f5, _5, r4, n3.id, y5.vertexBuffer, y5.indexBuffer, y5.segments);
   }
 }
 var IN = new G2(1, 0, 0, 1);
@@ -35891,8 +36425,8 @@ function KN(e67, t4, n3, r3) {
 function qN(e67, t4, n3, r3) {
   let i3 = r3.context, a5 = i3.gl, o3 = r3.useProgram(`debug`), s4 = RM.disabled, c3 = PM.disabled, l3 = r3.colorModeForRenderPass(), u3 = `$debug`, d3 = r3.getTerrainDataForTile(n3);
   i3.activeTexture.set(a5.TEXTURE0);
-  let f4 = t4.getTileByID(n3.key).latestRawTileData?.byteLength || 0, p4 = Math.floor(f4 / 1024), m4 = t4.getTile(n3).tileSize, h4 = 512 / Math.min(m4, 512) * (n3.overscaledZ / r3.transform.zoom) * 0.5, g4 = n3.canonical.toString();
-  n3.overscaledZ !== n3.canonical.z && (g4 += ` => ${n3.overscaledZ}`), JN(e67, `${g4} ${p4}kB`);
+  let f4 = t4.getTileByID(n3.key).latestRawTileData?.byteLength || 0, p4 = Math.floor(f4 / 1024), m4 = t4.getTile(n3).tileSize, h4 = 512 / Math.min(m4, 512) * (n3.overscaledZ / r3.transform.zoom) * 0.5, g5 = n3.canonical.toString();
+  n3.overscaledZ !== n3.canonical.z && (g5 += ` => ${n3.overscaledZ}`), JN(e67, `${g5} ${p4}kB`);
   let _4 = r3.getProjectionDataForTile(n3);
   o3.draw(i3, a5.TRIANGLES, s4, c3, pj.alphaBlended, LM.disabled, Uj(G2.transparent, h4), null, _4, u3, e67.debugBuffer, e67.quadTriangleIndexBuffer, e67.debugSegments), o3.draw(i3, a5.LINE_STRIP, s4, c3, l3, LM.disabled, Uj(G2.red), d3, _4, u3, e67.debugBuffer, e67.tileBorderIndexBuffer, e67.debugSegments);
 }
@@ -35924,8 +36458,8 @@ function ZN(e67, t4, n3, r3) {
   for (let d3 of n3) {
     let n4 = t4.getTerrainMesh(d3.tileID, i3), f4 = e67.renderToTexture.getTexture(d3), p4 = t4.getTerrainData(d3.tileID);
     a5.activeTexture.set(o3.TEXTURE0), f4.bind(o3.LINEAR, o3.CLAMP_TO_EDGE, o3.LINEAR_MIPMAP_LINEAR);
-    let m4 = t4.getSkirtLength(s4.zoom), h4 = s4.calculateFogMatrix(d3.tileID.toUnwrapped()), g4 = bj(m4, h4, r3.data.sky, s4.pitch, i3), _4 = r3.getProjectionDataForTile(d3.tileID, { applyTerrainMatrix: false });
-    u3.draw(a5, o3.TRIANGLES, l3, PM.disabled, c3, LM.backCCW, g4, p4, _4, `terrain`, n4.vertexBuffer, n4.indexBuffer, n4.segments);
+    let m4 = t4.getSkirtLength(s4.zoom), h4 = s4.calculateFogMatrix(d3.tileID.toUnwrapped()), g5 = bj(m4, h4, r3.data.sky, s4.pitch, i3), _4 = r3.getProjectionDataForTile(d3.tileID, { applyTerrainMatrix: false });
+    u3.draw(a5, o3.TRIANGLES, l3, PM.disabled, c3, LM.backCCW, g5, p4, _4, `terrain`, n4.vertexBuffer, n4.indexBuffer, n4.segments);
   }
 }
 function QN(e67, t4, n3) {
@@ -37316,8 +37850,8 @@ var mF = class {
     t4.dragRotate = new sF(e67, d3, f4, p4), this._add(`mouseRotate`, d3, [`mousePitch`]), this._add(`mousePitch`, f4, [`mouseRotate`, `mouseRoll`]), this._add(`mouseRoll`, p4, [`mousePitch`]), e67.interactive && e67.dragRotate && t4.dragRotate.enable(e67.dragRotate);
     let m4 = RP(e67), h4 = new HP(e67, t4);
     t4.dragPan = new oF(n3, m4, h4), this._add(`mousePan`, m4), this._add(`touchPan`, h4, [`touchZoom`, `touchRotate`]), e67.interactive && e67.dragPan && t4.dragPan.enable(e67.dragPan);
-    let g4 = new YP(), _4 = new qP();
-    t4.touchZoomRotate = new cF(n3, _4, g4, s4), this._add(`touchRotate`, g4, [`touchPan`, `touchZoom`]), this._add(`touchZoom`, _4, [`touchPan`, `touchRotate`]), e67.interactive && e67.touchZoomRotate && t4.touchZoomRotate.enable(e67.touchZoomRotate), this._add(`blockableMapEvent`, new CP(t4, e67), [`touchPan`]);
+    let g5 = new YP(), _4 = new qP();
+    t4.touchZoomRotate = new cF(n3, _4, g5, s4), this._add(`touchRotate`, g5, [`touchPan`, `touchZoom`]), this._add(`touchZoom`, _4, [`touchPan`, `touchRotate`]), e67.interactive && e67.touchZoomRotate && t4.touchZoomRotate.enable(e67.touchZoomRotate), this._add(`blockableMapEvent`, new CP(t4, e67), [`touchPan`]);
     let v4 = t4.scrollZoom = new nF(t4, () => this._triggerRenderFrame(), this._transformProvider);
     this._add(`scrollZoom`, v4, [`mousePan`]), e67.interactive && e67.scrollZoom && t4.scrollZoom.enable(e67.scrollZoom);
     let y5 = t4.keyboard = new $P(t4, this._transformProvider);
@@ -37814,8 +38348,8 @@ var bF = class extends qn {
     for (let s4 = 0; s4 <= 2; s4++) {
       let c3 = s4 / 2;
       for (let s5 = 0; s5 <= 2; s5++) {
-        let l3 = s5 / 2, u3 = (1 - l3) * (1 - c3), d3 = l3 * (1 - c3), f4 = l3 * c3, p4 = (1 - l3) * c3, m4 = u3 * r3[0] + d3 * i3[0] + f4 * a5[0] + p4 * o3[0], h4 = u3 * r3[1] + d3 * i3[1] + f4 * a5[1] + p4 * o3[1], g4 = u3 * r3[2] + d3 * i3[2] + f4 * a5[2] + p4 * o3[2], _4 = YO(n3, this.terrain.exaggeration, m4, h4, e67.worldCoordinateHelper.wraps);
-        _4.covered && (t4 = Math.max(t4, _4.elevation - g4));
+        let l3 = s5 / 2, u3 = (1 - l3) * (1 - c3), d3 = l3 * (1 - c3), f4 = l3 * c3, p4 = (1 - l3) * c3, m4 = u3 * r3[0] + d3 * i3[0] + f4 * a5[0] + p4 * o3[0], h4 = u3 * r3[1] + d3 * i3[1] + f4 * a5[1] + p4 * o3[1], g5 = u3 * r3[2] + d3 * i3[2] + f4 * a5[2] + p4 * o3[2], _4 = YO(n3, this.terrain.exaggeration, m4, h4, e67.worldCoordinateHelper.wraps);
+        _4.covered && (t4 = Math.max(t4, _4.elevation - g5));
       }
     }
     return t4;
@@ -37867,9 +38401,9 @@ var bF = class extends qn {
   flyTo(e67, t4) {
     if (!e67.essential && _n.prefersReducedMotion) return this.easeTo(e67, t4);
     this._scheduler.interrupt(), e67 = I2({ offset: [0, 0], speed: 1.2, curve: 1.42, easing: Ct }, e67), e67.zoom !== void 0 && this._zoomSnap && (e67.zoom = Mt(e67.zoom, this._zoomSnap));
-    let n3 = this.getTransformForUpdate(), r3 = n3.bearing, i3 = n3.pitch, a5 = n3.roll, o3 = n3.padding, s4 = e67.bearing === void 0 ? r3 : this._normalizeBearing(e67.bearing, r3), c3 = e67.pitch === void 0 ? i3 : +e67.pitch, l3 = e67.roll === void 0 ? a5 : this._normalizeBearing(e67.roll, a5), d3 = e67.padding === void 0 ? n3.padding : e67.padding, f4 = u.convert(e67.offset), p4 = n3.centerPoint.add(f4), m4 = n3.screenPointToLocation(p4), h4 = this.cameraHelper.handleFlyTo(n3, { bearing: s4, pitch: c3, roll: l3, padding: d3, locationAtOffset: m4, offsetAsPoint: f4, center: e67.center, minZoom: e67.minZoom, zoom: e67.zoom }), g4 = e67.curve, _4 = Math.max(n3.width, n3.height), v4 = _4 / h4.scaleOfZoom, y5 = h4.pixelPathLength, b10 = _4 / h4.scaleOfMinZoom;
-    g4 = Math.min(g4, Math.sqrt(b10 / y5 * 2));
-    let x5 = g4 * g4;
+    let n3 = this.getTransformForUpdate(), r3 = n3.bearing, i3 = n3.pitch, a5 = n3.roll, o3 = n3.padding, s4 = e67.bearing === void 0 ? r3 : this._normalizeBearing(e67.bearing, r3), c3 = e67.pitch === void 0 ? i3 : +e67.pitch, l3 = e67.roll === void 0 ? a5 : this._normalizeBearing(e67.roll, a5), d3 = e67.padding === void 0 ? n3.padding : e67.padding, f4 = u.convert(e67.offset), p4 = n3.centerPoint.add(f4), m4 = n3.screenPointToLocation(p4), h4 = this.cameraHelper.handleFlyTo(n3, { bearing: s4, pitch: c3, roll: l3, padding: d3, locationAtOffset: m4, offsetAsPoint: f4, center: e67.center, minZoom: e67.minZoom, zoom: e67.zoom }), g5 = e67.curve, _4 = Math.max(n3.width, n3.height), v4 = _4 / h4.scaleOfZoom, y5 = h4.pixelPathLength, b10 = _4 / h4.scaleOfMinZoom;
+    g5 = Math.min(g5, Math.sqrt(b10 / y5 * 2));
+    let x5 = g5 * g5;
     function S4(e68) {
       let t5 = (v4 * v4 - _4 * _4 + (e68 ? -1 : 1) * x5 * x5 * y5 * y5) / (2 * (e68 ? v4 : _4) * x5 * y5);
       return Math.log(Math.sqrt(t5 * t5 + 1) - t5);
@@ -37884,18 +38418,18 @@ var bF = class extends qn {
       return C4(e68) / w4(e68);
     }
     let E5 = S4(false), D5 = function(e68) {
-      return w4(E5) / w4(E5 + g4 * e68);
+      return w4(E5) / w4(E5 + g5 * e68);
     }, O4 = function(e68) {
-      return _4 * ((w4(E5) * T3(E5 + g4 * e68) - C4(E5)) / x5) / y5;
-    }, k5 = (S4(true) - E5) / g4;
+      return _4 * ((w4(E5) * T3(E5 + g5 * e68) - C4(E5)) / x5) / y5;
+    }, k5 = (S4(true) - E5) / g5;
     if (Math.abs(y5) < 2e-6 || !isFinite(k5)) {
       if (Math.abs(_4 - v4) < 1e-6) return this.easeTo(e67, t4);
       let n4 = v4 < _4 ? -1 : 1;
-      k5 = Math.abs(Math.log(v4 / _4)) / g4, O4 = () => 0, D5 = (e68) => Math.exp(n4 * g4 * e68);
+      k5 = Math.abs(Math.log(v4 / _4)) / g5, O4 = () => 0, D5 = (e68) => Math.exp(n4 * g5 * e68);
     }
     if (e67.duration !== void 0) e67.duration = +e67.duration;
     else {
-      let t5 = e67.screenSpeed === void 0 ? +e67.speed : +e67.screenSpeed / g4;
+      let t5 = e67.screenSpeed === void 0 ? +e67.speed : +e67.screenSpeed / g5;
       e67.duration = 1e3 * k5 / t5;
     }
     e67.maxDuration && e67.duration > e67.maxDuration && (e67.duration = 0);
@@ -42711,10 +43245,10 @@ function getHookStage(hook) {
       throw new Error(type2);
   }
 }
-function injectShader(source3, stage, inject, injectStandardStubs = false) {
+function injectShader(source3, stage, inject2, injectStandardStubs = false) {
   const isVertex = stage === "vertex";
-  for (const key in inject) {
-    const fragmentData = inject[key];
+  for (const key in inject2) {
+    const fragmentData = inject2[key];
     fragmentData.sort((a5, b10) => a5.order - b10.order);
     fragments.length = fragmentData.length;
     for (let i3 = 0, len4 = fragmentData.length; i3 < len4; ++i3) {
@@ -42783,19 +43317,19 @@ function initializeShaderModule(module) {
     propTypes = {},
     deprecations = [],
     // defines = {},
-    inject = {}
+    inject: inject2 = {}
   } = module;
   const instance8 = {
-    normalizedInjections: normalizeInjections(inject),
+    normalizedInjections: normalizeInjections(inject2),
     parsedDeprecations: parseDeprecationDefinitions(deprecations)
   };
   if (propTypes) {
     instance8.propValidators = makePropValidators(propTypes);
   }
   module.instance = instance8;
-  let defaultProps10 = {};
+  let defaultProps17 = {};
   if (propTypes) {
-    defaultProps10 = Object.entries(propTypes).reduce((obj, [key, propType]) => {
+    defaultProps17 = Object.entries(propTypes).reduce((obj, [key, propType]) => {
       const value2 = propType?.value;
       if (value2) {
         obj[key] = value2;
@@ -42803,7 +43337,7 @@ function initializeShaderModule(module) {
       return obj;
     }, {});
   }
-  module.defaultUniforms = { ...module.defaultUniforms, ...defaultProps10 };
+  module.defaultUniforms = { ...module.defaultUniforms, ...defaultProps17 };
 }
 function checkShaderModuleDeprecations(shaderModule, shaderSource, log3) {
   shaderModule.deprecations?.forEach((def) => {
@@ -43064,19 +43598,19 @@ function assembleWGSLShader(options) {
   };
 }
 function assembleGLSLShaderPair(options) {
-  const { vs: vs8, fs: fs6 } = options;
+  const { vs: vs9, fs: fs7 } = options;
   const modules = getShaderModuleDependencies(options.modules || []);
   return {
     vs: assembleShaderGLSL(options.platformInfo, {
       ...options,
-      source: vs8,
+      source: vs9,
       stage: "vertex",
       modules
     }),
     fs: assembleShaderGLSL(options.platformInfo, {
       ...options,
       // @ts-expect-error
-      source: fs6,
+      source: fs7,
       stage: "fragment",
       modules
     }),
@@ -43091,7 +43625,7 @@ function assembleShaderWGSL(platformInfo, options) {
     modules,
     // defines = {},
     hookFunctions = [],
-    inject = {},
+    inject: inject2 = {},
     log: log3
   } = options;
   assert4(typeof source3 === "string", "shader source must be a string");
@@ -43101,8 +43635,8 @@ function assembleShaderWGSL(platformInfo, options) {
   const hookInjections = {};
   const declInjections = {};
   const mainInjections = {};
-  for (const key in inject) {
-    const injection = typeof inject[key] === "string" ? { injection: inject[key], order: 0 } : inject[key];
+  for (const key in inject2) {
+    const injection = typeof inject2[key] === "string" ? { injection: inject2[key], order: 0 } : inject2[key];
     const match = /^(v|f)s:(#)?([\w-]+)$/.exec(key);
     if (match) {
       const hash = match[2];
@@ -43149,7 +43683,7 @@ function assembleShaderWGSL(platformInfo, options) {
   return assembledSource;
 }
 function assembleShaderGLSL(platformInfo, options) {
-  const { id: id3, source: source3, stage, language = "glsl", modules, defines: defines2 = {}, hookFunctions = [], inject = {}, prologue = true, log: log3 } = options;
+  const { id: id3, source: source3, stage, language = "glsl", modules, defines: defines2 = {}, hookFunctions = [], inject: inject2 = {}, prologue = true, log: log3 } = options;
   assert4(typeof source3 === "string", "shader source must be a string");
   const sourceVersion = language === "glsl" ? getShaderInfo(source3).version : -1;
   const targetVersion = platformInfo.shaderLanguageVersion;
@@ -43187,8 +43721,8 @@ ${getApplicationDefines(allDefines)}
   const hookInjections = {};
   const declInjections = {};
   const mainInjections = {};
-  for (const key in inject) {
-    const injection = typeof inject[key] === "string" ? { injection: inject[key], order: 0 } : inject[key];
+  for (const key in inject2) {
+    const injection = typeof inject2[key] === "string" ? { injection: inject2[key], order: 0 } : inject2[key];
     const match = /^(v|f)s:(#)?([\w-]+)$/.exec(key);
     if (match) {
       const hash = match[2];
@@ -43533,12 +44067,12 @@ var Resource = class {
   /**
    * Create a new Resource. Called from Subclass
    */
-  constructor(device, props, defaultProps10) {
+  constructor(device, props, defaultProps17) {
     if (!device) {
       throw new Error("no device");
     }
     this._device = device;
-    this.props = selectivelyMerge(props, defaultProps10);
+    this.props = selectivelyMerge(props, defaultProps17);
     const id3 = this.props.id !== "undefined" ? this.props.id : uid(this[Symbol.toStringTag]);
     this.props.id = id3;
     this.id = id3;
@@ -43628,8 +44162,8 @@ var Resource = class {
     stats.get(`${name2}s Active`).incrementCount();
   }
 };
-function selectivelyMerge(props, defaultProps10) {
-  const mergedProps = { ...defaultProps10 };
+function selectivelyMerge(props, defaultProps17) {
+  const mergedProps = { ...defaultProps17 };
   for (const key in props) {
     if (props[key] !== void 0) {
       mergedProps[key] = props[key];
@@ -45492,7 +46026,7 @@ function getAttributeInfoFromLayouts(shaderLayout, bufferLayout, name2) {
   };
 }
 function getAttributeFromShaderLayout(shaderLayout, name2) {
-  const attribute = shaderLayout.attributes.find((attr) => attr.name === name2);
+  const attribute = shaderLayout.attributes.find((attr2) => attr2.name === name2);
   if (!attribute) {
     log2.warn(`shader layout attribute "${name2}" not present in shader`);
   }
@@ -45797,8 +46331,8 @@ var UniformBlock = class {
       if (!binding) {
         throw new Error(props?.name);
       }
-      const uniformBlock8 = binding;
-      for (const uniform of uniformBlock8.uniforms || []) {
+      const uniformBlock12 = binding;
+      for (const uniform of uniformBlock12.uniforms || []) {
         this.bindingLayout[uniform.name] = uniform;
       }
     }
@@ -45849,9 +46383,9 @@ var UniformStore = class {
       const uniformBufferName = bufferName;
       const uniformBufferLayout = new UniformBufferLayout(block.uniformTypes || {});
       this.uniformBufferLayouts.set(uniformBufferName, uniformBufferLayout);
-      const uniformBlock8 = new UniformBlock({ name: bufferName });
-      uniformBlock8.setUniforms(block.defaultUniforms || {});
-      this.uniformBlocks.set(uniformBufferName, uniformBlock8);
+      const uniformBlock12 = new UniformBlock({ name: bufferName });
+      uniformBlock12.setUniforms(block.defaultUniforms || {});
+      this.uniformBlocks.set(uniformBufferName, uniformBlock12);
     }
   }
   /** Destroy any managed uniform buffers */
@@ -45922,11 +46456,11 @@ var UniformStore = class {
   }
   /** Update one uniform buffer. Only updates if values have changed */
   updateUniformBuffer(uniformBufferName) {
-    const uniformBlock8 = this.uniformBlocks.get(uniformBufferName);
+    const uniformBlock12 = this.uniformBlocks.get(uniformBufferName);
     let uniformBuffer = this.uniformBuffers.get(uniformBufferName);
     let reason = false;
-    if (uniformBuffer && uniformBlock8?.needsRedraw) {
-      reason ||= uniformBlock8.needsRedraw;
+    if (uniformBuffer && uniformBlock12?.needsRedraw) {
+      reason ||= uniformBlock12.needsRedraw;
       const uniformBufferData = this.getUniformBufferData(uniformBufferName);
       uniformBuffer = this.uniformBuffers.get(uniformBufferName);
       uniformBuffer?.write(uniformBufferData);
@@ -46056,11 +46590,11 @@ var BufferLayoutHelper = class {
 
 // node_modules/@luma.gl/core/dist/adapter-utils/buffer-layout-order.js
 function sortedBufferLayoutByShaderSourceLocations(shaderLayout, bufferLayout) {
-  const shaderLayoutMap = Object.fromEntries(shaderLayout.attributes.map((attr) => [attr.name, attr.location]));
+  const shaderLayoutMap = Object.fromEntries(shaderLayout.attributes.map((attr2) => [attr2.name, attr2.location]));
   const sortedLayout = bufferLayout.slice();
   sortedLayout.sort((a5, b10) => {
-    const attributeNamesA = a5.attributes ? a5.attributes.map((attr) => attr.attribute) : [a5.name];
-    const attributeNamesB = b10.attributes ? b10.attributes.map((attr) => attr.attribute) : [b10.name];
+    const attributeNamesA = a5.attributes ? a5.attributes.map((attr2) => attr2.attribute) : [a5.name];
+    const attributeNamesB = b10.attributes ? b10.attributes.map((attr2) => attr2.attribute) : [b10.name];
     const minLocationA = Math.min(...attributeNamesA.map((name2) => shaderLayoutMap[name2]));
     const minLocationB = Math.min(...attributeNamesB.map((name2) => shaderLayoutMap[name2]));
     return minLocationA - minLocationB;
@@ -46246,11 +46780,11 @@ function m3(e67) {
   return 0 == n3 ? (t4 ? -1 : 1) * Math.pow(2, -14) * (s4 / Math.pow(2, 10)) : 31 == n3 ? s4 ? NaN : 1 / 0 * (t4 ? -1 : 1) : (t4 ? -1 : 1) * Math.pow(2, n3 - 15) * (1 + s4 / Math.pow(2, 10));
 }
 var _3 = new Float32Array(1);
-var g3 = new Int32Array(_3.buffer);
+var g4 = new Int32Array(_3.buffer);
 var x3 = new Uint16Array(1);
 function y3(e67) {
   _3[0] = e67;
-  const t4 = g3[0], n3 = t4 >> 31 & 1;
+  const t4 = g4[0], n3 = t4 >> 31 & 1;
   let s4 = t4 >> 23 & 255, r3 = 8388607 & t4;
   if (255 === s4) return x3[0] = n3 << 15 | 31744 | (0 !== r3 ? 512 : 0), x3[0];
   if (0 === s4) {
@@ -48675,8 +49209,8 @@ var _t3 = class __t {
       if ("mat2x2" === s4 || "mat2x2f" === s4 || "mat2x2h" === s4) return new Fe2(t5[0] * t5[3] - t5[1] * t5[2], r3);
       if ("mat3x3" === s4 || "mat3x3f" === s4 || "mat3x3h" === s4) return new Fe2(t5[0] * (t5[4] * t5[8] - t5[5] * t5[7]) - t5[1] * (t5[3] * t5[8] - t5[5] * t5[6]) + t5[2] * (t5[3] * t5[7] - t5[4] * t5[6]), r3);
       if ("mat4x4" === s4 || "mat4x4f" === s4 || "mat4x4h" === s4) {
-        const e68 = t5[0], n4 = t5[1], s5 = t5[2], i3 = t5[3], a5 = t5[4], o3 = t5[5], l3 = t5[6], u3 = t5[7], c3 = t5[8], h4 = t5[9], f4 = t5[10], p4 = t5[11], d3 = t5[12], m4 = t5[13], _4 = t5[14], g4 = t5[15];
-        return new Fe2((e68 * o3 - a5 * n4) * (f4 * g4 - _4 * p4) - (e68 * l3 - a5 * s5) * (h4 * g4 - m4 * p4) + (e68 * u3 - a5 * i3) * (h4 * _4 - m4 * f4) + (n4 * l3 - o3 * s5) * (c3 * g4 - d3 * p4) - (n4 * u3 - o3 * i3) * (c3 * _4 - d3 * f4) + (s5 * u3 - l3 * i3) * (c3 * m4 - d3 * h4), r3);
+        const e68 = t5[0], n4 = t5[1], s5 = t5[2], i3 = t5[3], a5 = t5[4], o3 = t5[5], l3 = t5[6], u3 = t5[7], c3 = t5[8], h4 = t5[9], f4 = t5[10], p4 = t5[11], d3 = t5[12], m4 = t5[13], _4 = t5[14], g5 = t5[15];
+        return new Fe2((e68 * o3 - a5 * n4) * (f4 * g5 - _4 * p4) - (e68 * l3 - a5 * s5) * (h4 * g5 - m4 * p4) + (e68 * u3 - a5 * i3) * (h4 * _4 - m4 * f4) + (n4 * l3 - o3 * s5) * (c3 * g5 - d3 * p4) - (n4 * u3 - o3 * i3) * (c3 * _4 - d3 * f4) + (s5 * u3 - l3 * i3) * (c3 * m4 - d3 * h4), r3);
       }
       return console.error(`Determinant: unsupported matrix type ${s4}. Line ${e67.line}`), null;
     }
@@ -49178,7 +49712,7 @@ var _t3 = class __t {
     var a5, o3, l3;
     const u3 = null !== (a5 = null == i3 ? void 0 : i3.descriptor) && void 0 !== a5 ? a5 : {}, c3 = null !== (o3 = u3.addressModeU) && void 0 !== o3 ? o3 : "clamp-to-edge", h4 = null !== (l3 = u3.addressModeV) && void 0 !== l3 ? l3 : "clamp-to-edge", f4 = e67.getMipLevelSize(r3), p4 = Math.max(1, f4[0]), d3 = Math.max(1, f4[1]);
     if ("nearest" === u3.magFilter) return this._texel(e67, Math.floor(t4 * p4), Math.floor(n3 * d3), s4, r3, c3, h4);
-    const m4 = t4 * p4 - 0.5, _4 = n3 * d3 - 0.5, g4 = Math.floor(m4), x5 = Math.floor(_4), y5 = m4 - g4, v4 = _4 - x5, b10 = this._texel(e67, g4, x5, s4, r3, c3, h4), w4 = this._texel(e67, g4 + 1, x5, s4, r3, c3, h4), k5 = this._texel(e67, g4, x5 + 1, s4, r3, c3, h4), I4 = this._texel(e67, g4 + 1, x5 + 1, s4, r3, c3, h4), T3 = [0, 0, 0, 0];
+    const m4 = t4 * p4 - 0.5, _4 = n3 * d3 - 0.5, g5 = Math.floor(m4), x5 = Math.floor(_4), y5 = m4 - g5, v4 = _4 - x5, b10 = this._texel(e67, g5, x5, s4, r3, c3, h4), w4 = this._texel(e67, g5 + 1, x5, s4, r3, c3, h4), k5 = this._texel(e67, g5, x5 + 1, s4, r3, c3, h4), I4 = this._texel(e67, g5 + 1, x5 + 1, s4, r3, c3, h4), T3 = [0, 0, 0, 0];
     for (let e68 = 0; e68 < 4; ++e68) {
       const t5 = b10[e68] + (w4[e68] - b10[e68]) * y5, n4 = k5[e68] + (I4[e68] - k5[e68]) * y5;
       T3[e68] = t5 + (n4 - t5) * v4;
@@ -49231,9 +49765,9 @@ var _t3 = class __t {
     var n3, s4, r3, i3;
     const a5 = this._sampleArgs(e67, t4, 2);
     if (null === a5) return null;
-    const o3 = this._resolveSampler(e67.args[1], t4), l3 = null !== (n3 = null == o3 ? void 0 : o3.descriptor) && void 0 !== n3 ? n3 : {}, u3 = a5.texture.typeInfo.name.includes("_array") ? 4 : 3, c3 = this.exec.evalExpression(e67.args[u3], t4), h4 = c3 instanceof Fe2 ? c3.value : 0, f4 = this._compareFn(null !== (s4 = l3.compare) && void 0 !== s4 ? s4 : "less-equal"), p4 = null !== (r3 = l3.addressModeU) && void 0 !== r3 ? r3 : "clamp-to-edge", d3 = null !== (i3 = l3.addressModeV) && void 0 !== i3 ? i3 : "clamp-to-edge", m4 = a5.texture.getMipLevelSize(0), _4 = Math.max(1, m4[0]), g4 = Math.max(1, m4[1]), x5 = (e68, t5) => f4(h4, this._texel(a5.texture, e68, t5, a5.layer, 0, p4, d3)[0]) ? 1 : 0;
-    if ("nearest" === l3.magFilter) return new Fe2(x5(Math.floor(a5.u * _4), Math.floor(a5.v * g4)), this.getTypeInfo("f32"));
-    const y5 = a5.u * _4 - 0.5, v4 = a5.v * g4 - 0.5, b10 = Math.floor(y5), w4 = Math.floor(v4), k5 = y5 - b10, I4 = v4 - w4, T3 = x5(b10, w4) + (x5(b10 + 1, w4) - x5(b10, w4)) * k5, S4 = x5(b10, w4 + 1) + (x5(b10 + 1, w4 + 1) - x5(b10, w4 + 1)) * k5;
+    const o3 = this._resolveSampler(e67.args[1], t4), l3 = null !== (n3 = null == o3 ? void 0 : o3.descriptor) && void 0 !== n3 ? n3 : {}, u3 = a5.texture.typeInfo.name.includes("_array") ? 4 : 3, c3 = this.exec.evalExpression(e67.args[u3], t4), h4 = c3 instanceof Fe2 ? c3.value : 0, f4 = this._compareFn(null !== (s4 = l3.compare) && void 0 !== s4 ? s4 : "less-equal"), p4 = null !== (r3 = l3.addressModeU) && void 0 !== r3 ? r3 : "clamp-to-edge", d3 = null !== (i3 = l3.addressModeV) && void 0 !== i3 ? i3 : "clamp-to-edge", m4 = a5.texture.getMipLevelSize(0), _4 = Math.max(1, m4[0]), g5 = Math.max(1, m4[1]), x5 = (e68, t5) => f4(h4, this._texel(a5.texture, e68, t5, a5.layer, 0, p4, d3)[0]) ? 1 : 0;
+    if ("nearest" === l3.magFilter) return new Fe2(x5(Math.floor(a5.u * _4), Math.floor(a5.v * g5)), this.getTypeInfo("f32"));
+    const y5 = a5.u * _4 - 0.5, v4 = a5.v * g5 - 0.5, b10 = Math.floor(y5), w4 = Math.floor(v4), k5 = y5 - b10, I4 = v4 - w4, T3 = x5(b10, w4) + (x5(b10 + 1, w4) - x5(b10, w4)) * k5, S4 = x5(b10, w4 + 1) + (x5(b10 + 1, w4 + 1) - x5(b10, w4 + 1)) * k5;
     return new Fe2(T3 + (S4 - T3) * I4, this.getTypeInfo("f32"));
   }
   _sampleResult(e67, t4) {
@@ -57255,13 +57789,13 @@ function computeIntervalInputData(session, input) {
 }
 
 // node_modules/mjolnir.js/dist/hammerjs/input/compute-input-data.js
-function getPointerId(pointer, index) {
-  return "pointerId" in pointer ? pointer.pointerId : index;
+function getPointerId(pointer2, index) {
+  return "pointerId" in pointer2 ? pointer2.pointerId : index;
 }
 function resetPointerMovementData(session, pointers) {
-  session.movementOrigin = new Map(pointers.map((pointer, index) => [
-    getPointerId(pointer, index),
-    { clientX: pointer.clientX, clientY: pointer.clientY }
+  session.movementOrigin = new Map(pointers.map((pointer2, index) => [
+    getPointerId(pointer2, index),
+    { clientX: pointer2.clientX, clientY: pointer2.clientY }
   ]));
   session.firstMovementTime = void 0;
 }
@@ -57271,14 +57805,14 @@ function computePointerMovementData(session, input) {
   if (!hasSamePointers) {
     resetPointerMovementData(session, input.pointers);
   }
-  input.distancePerPointer = input.pointers.map((pointer, index) => getEventDistance(session.movementOrigin.get(pointerIds[index]), pointer));
+  input.distancePerPointer = input.pointers.map((pointer2, index) => getEventDistance(session.movementOrigin.get(pointerIds[index]), pointer2));
   if (input.eventType & InputEvent.Move && input.distancePerPointer.some((distance5) => distance5 > 0)) {
     session.firstMovementTime ?? (session.firstMovementTime = input.timeStamp);
   }
   input.movementDeltaTime = session.firstMovementTime === void 0 ? 0 : input.timeStamp - session.firstMovementTime;
   if (input.eventType & (InputEvent.End | InputEvent.Cancel)) {
-    const removedPointerIds = input.changedPointers.map((pointer) => getPointerId(pointer, input.pointers.indexOf(pointer)));
-    resetPointerMovementData(session, input.pointers.filter((pointer, index) => !removedPointerIds.includes(pointerIds[index])));
+    const removedPointerIds = input.changedPointers.map((pointer2) => getPointerId(pointer2, input.pointers.indexOf(pointer2)));
+    resetPointerMovementData(session, input.pointers.filter((pointer2, index) => !removedPointerIds.includes(pointerIds[index])));
   }
 }
 function computeInputData(manager, input) {
@@ -58053,12 +58587,12 @@ var TrackpadRecognizer = class extends AttrRecognizer {
     const deltaY = overrides.deltaY ?? event.deltaY;
     const direction = getDirection(deltaX, deltaY);
     const pointerDistance = Math.sqrt(event.deltaX * event.deltaX + event.deltaY * event.deltaY);
-    const pointer = srcEvent;
+    const pointer2 = srcEvent;
     return {
-      pointers: [pointer, pointer],
-      changedPointers: [pointer, pointer],
+      pointers: [pointer2, pointer2],
+      changedPointers: [pointer2, pointer2],
       pointerType: "trackpad",
-      srcEvent: pointer,
+      srcEvent: pointer2,
       eventType: event.eventType,
       timeStamp: event.timeStamp,
       deltaTime: event.deltaTime,
@@ -62622,12 +63156,12 @@ var PipelineFactory = class _PipelineFactory {
   }
   release(pipeline) {
     const hash = pipeline.hash;
-    const cache = pipeline instanceof ComputePipeline ? this._computePipelineCache : this._renderPipelineCache;
-    cache[hash].useCount--;
-    if (cache[hash].useCount === 0) {
+    const cache2 = pipeline instanceof ComputePipeline ? this._computePipelineCache : this._renderPipelineCache;
+    cache2[hash].useCount--;
+    if (cache2[hash].useCount === 0) {
       if (this.destroyPolicy === "unused") {
-        cache[hash].pipeline.destroy();
-        delete cache[hash];
+        cache2[hash].pipeline.destroy();
+        delete cache2[hash];
       }
     }
   }
@@ -63160,13 +63694,13 @@ var Model = class _Model {
       this._getModuleUniforms = getUniforms4;
       this.props.shaderLayout ||= getShaderLayoutFromWGSL(this.source);
     } else {
-      const { vs: vs8, fs: fs6, getUniforms: getUniforms4 } = this.props.shaderAssembler.assembleGLSLShaderPair({
+      const { vs: vs9, fs: fs7, getUniforms: getUniforms4 } = this.props.shaderAssembler.assembleGLSLShaderPair({
         platformInfo,
         ...this.props,
         modules
       });
-      this.vs = vs8;
-      this.fs = fs6;
+      this.vs = vs9;
+      this.fs = fs7;
       this._getModuleUniforms = getUniforms4;
     }
     this.vertexCount = this.props.vertexCount;
@@ -63578,17 +64112,17 @@ var Model = class _Model {
         prevShaderFs = this.pipeline.fs;
       }
       this._pipelineNeedsUpdate = false;
-      const vs8 = this.shaderFactory.createShader({
+      const vs9 = this.shaderFactory.createShader({
         id: `${this.id}-vertex`,
         stage: "vertex",
         source: this.source || this.vs,
         debugShaders: this.props.debugShaders
       });
-      let fs6 = null;
+      let fs7 = null;
       if (this.source) {
-        fs6 = vs8;
+        fs7 = vs9;
       } else if (this.fs) {
-        fs6 = this.shaderFactory.createShader({
+        fs7 = this.shaderFactory.createShader({
           id: `${this.id}-fragment`,
           stage: "fragment",
           source: this.source || this.fs,
@@ -63603,8 +64137,8 @@ var Model = class _Model {
         // TODO - why set bindings here when we reset them every frame?
         // Should we expose a BindGroup abstraction?
         bindings: this._getBindings(),
-        vs: vs8,
-        fs: fs6
+        vs: vs9,
+        fs: fs7
       });
       this._attributeInfos = getAttributeInfosFromLayouts(this.pipeline.shaderLayout, this.bufferLayout);
       if (prevShaderVs)
@@ -68008,18 +68542,18 @@ var GL_PARAMETER_SETTERS = {
   },
   viewport: (gl2, value2) => gl2.viewport(...value2)
 };
-function getValue(glEnum, values, cache) {
-  return values[glEnum] !== void 0 ? values[glEnum] : cache[glEnum];
+function getValue(glEnum, values, cache2) {
+  return values[glEnum] !== void 0 ? values[glEnum] : cache2[glEnum];
 }
 var GL_COMPOSITE_PARAMETER_SETTERS = {
-  blendEquation: (gl2, values, cache) => gl2.blendEquationSeparate(getValue(32777, values, cache), getValue(34877, values, cache)),
-  blendFunc: (gl2, values, cache) => gl2.blendFuncSeparate(getValue(32969, values, cache), getValue(32968, values, cache), getValue(32971, values, cache), getValue(32970, values, cache)),
-  polygonOffset: (gl2, values, cache) => gl2.polygonOffset(getValue(32824, values, cache), getValue(10752, values, cache)),
-  sampleCoverage: (gl2, values, cache) => gl2.sampleCoverage(getValue(32938, values, cache), getValue(32939, values, cache)),
-  stencilFuncFront: (gl2, values, cache) => gl2.stencilFuncSeparate(1028, getValue(2962, values, cache), getValue(2967, values, cache), getValue(2963, values, cache)),
-  stencilFuncBack: (gl2, values, cache) => gl2.stencilFuncSeparate(1029, getValue(34816, values, cache), getValue(36003, values, cache), getValue(36004, values, cache)),
-  stencilOpFront: (gl2, values, cache) => gl2.stencilOpSeparate(1028, getValue(2964, values, cache), getValue(2965, values, cache), getValue(2966, values, cache)),
-  stencilOpBack: (gl2, values, cache) => gl2.stencilOpSeparate(1029, getValue(34817, values, cache), getValue(34818, values, cache), getValue(34819, values, cache))
+  blendEquation: (gl2, values, cache2) => gl2.blendEquationSeparate(getValue(32777, values, cache2), getValue(34877, values, cache2)),
+  blendFunc: (gl2, values, cache2) => gl2.blendFuncSeparate(getValue(32969, values, cache2), getValue(32968, values, cache2), getValue(32971, values, cache2), getValue(32970, values, cache2)),
+  polygonOffset: (gl2, values, cache2) => gl2.polygonOffset(getValue(32824, values, cache2), getValue(10752, values, cache2)),
+  sampleCoverage: (gl2, values, cache2) => gl2.sampleCoverage(getValue(32938, values, cache2), getValue(32939, values, cache2)),
+  stencilFuncFront: (gl2, values, cache2) => gl2.stencilFuncSeparate(1028, getValue(2962, values, cache2), getValue(2967, values, cache2), getValue(2963, values, cache2)),
+  stencilFuncBack: (gl2, values, cache2) => gl2.stencilFuncSeparate(1029, getValue(34816, values, cache2), getValue(36003, values, cache2), getValue(36004, values, cache2)),
+  stencilOpFront: (gl2, values, cache2) => gl2.stencilOpSeparate(1028, getValue(2964, values, cache2), getValue(2965, values, cache2), getValue(2966, values, cache2)),
+  stencilOpBack: (gl2, values, cache2) => gl2.stencilOpSeparate(1029, getValue(34817, values, cache2), getValue(34818, values, cache2), getValue(34819, values, cache2))
 };
 var GL_HOOKED_SETTERS = {
   // GENERIC SETTERS
@@ -68076,8 +68610,8 @@ var GL_HOOKED_SETTERS = {
     }
     return { valueChanged: true };
   },
-  blendColor: (update, r3, g4, b10, a5) => update({
-    [32773]: new Float32Array([r3, g4, b10, a5])
+  blendColor: (update, r3, g5, b10, a5) => update({
+    [32773]: new Float32Array([r3, g5, b10, a5])
   }),
   blendEquation: (update, mode) => update({
     [32777]: mode,
@@ -68099,8 +68633,8 @@ var GL_HOOKED_SETTERS = {
     [32971]: srcAlpha,
     [32970]: dstAlpha
   }),
-  clearColor: (update, r3, g4, b10, a5) => update({
-    [3106]: new Float32Array([r3, g4, b10, a5])
+  clearColor: (update, r3, g5, b10, a5) => update({
+    [3106]: new Float32Array([r3, g5, b10, a5])
   }),
   clearDepth: (update, depth) => update({
     [2931]: depth
@@ -68108,8 +68642,8 @@ var GL_HOOKED_SETTERS = {
   clearStencil: (update, s4) => update({
     [2961]: s4
   }),
-  colorMask: (update, r3, g4, b10, a5) => update({
-    [3107]: [r3, g4, b10, a5]
+  colorMask: (update, r3, g5, b10, a5) => update({
+    [3107]: [r3, g5, b10, a5]
   }),
   cullFace: (update, mode) => update({
     [2885]: mode
@@ -68240,11 +68774,11 @@ function setGLParameters(gl2, parameters) {
       }
     }
   }
-  const cache = gl2.state && gl2.state.cache;
-  if (cache) {
+  const cache2 = gl2.state && gl2.state.cache;
+  if (cache2) {
     for (const key in compositeSetters) {
       const compositeSetter = GL_COMPOSITE_PARAMETER_SETTERS[key];
-      compositeSetter(gl2, parameters, cache);
+      compositeSetter(gl2, parameters, cache2);
     }
   }
 }
@@ -70857,8 +71391,8 @@ function getShaderLayoutFromGLSL(gl2, program) {
   };
   shaderLayout.attributes = readAttributeDeclarations(gl2, program);
   const uniformBlocks = readUniformBlocks(gl2, program);
-  for (const uniformBlock8 of uniformBlocks) {
-    const uniforms2 = uniformBlock8.uniforms.map((uniform) => ({
+  for (const uniformBlock12 of uniformBlocks) {
+    const uniforms2 = uniformBlock12.uniforms.map((uniform) => ({
       name: uniform.name,
       format: uniform.format,
       byteOffset: uniform.byteOffset,
@@ -70867,11 +71401,11 @@ function getShaderLayoutFromGLSL(gl2, program) {
     }));
     shaderLayout.bindings.push({
       type: "uniform",
-      name: uniformBlock8.name,
+      name: uniformBlock12.name,
       group: 0,
-      location: uniformBlock8.location,
-      visibility: (uniformBlock8.vertex ? 1 : 0) & (uniformBlock8.fragment ? 2 : 0),
-      minBindingSize: uniformBlock8.byteLength,
+      location: uniformBlock12.location,
+      visibility: (uniformBlock12.vertex ? 1 : 0) & (uniformBlock12.fragment ? 2 : 0),
+      minBindingSize: uniformBlock12.byteLength,
       uniforms: uniforms2
     });
   }
@@ -71551,7 +72085,7 @@ function mergeShaderLayout(baseLayout, overrideLayout) {
     attributes: baseLayout.attributes.map((attribute) => ({ ...attribute }))
   };
   for (const attribute of overrideLayout?.attributes || []) {
-    const baseAttribute = mergedLayout.attributes.find((attr) => attr.name === attribute.name);
+    const baseAttribute = mergedLayout.attributes.find((attr2) => attr2.name === attribute.name);
     if (!baseAttribute) {
       log2.warn(`shader layout attribute ${attribute.name} not present in shader`);
     } else {
@@ -75717,7 +76251,7 @@ var TYPE_DEFINITIONS = {
 };
 function parsePropTypes(propDefs) {
   const propTypes = {};
-  const defaultProps10 = {};
+  const defaultProps17 = {};
   const deprecatedProps = {};
   for (const [propName, propDef] of Object.entries(propDefs)) {
     const deprecated = propDef?.deprecatedFor;
@@ -75726,10 +76260,10 @@ function parsePropTypes(propDefs) {
     } else {
       const propType = parsePropType(propName, propDef);
       propTypes[propName] = propType;
-      defaultProps10[propName] = propType.value;
+      defaultProps17[propName] = propType.value;
     }
   }
-  return { propTypes, defaultProps: defaultProps10, deprecatedProps };
+  return { propTypes, defaultProps: defaultProps17, deprecatedProps };
 }
 function parsePropType(name2, propDef) {
   switch (getTypeOf2(propDef)) {
@@ -75805,11 +76339,11 @@ function getPropsPrototype(componentClass, extensions) {
       }
     }
   }
-  const defaultProps10 = getOwnProperty(componentClass, cacheKey);
-  if (!defaultProps10) {
+  const defaultProps17 = getOwnProperty(componentClass, cacheKey);
+  if (!defaultProps17) {
     return componentClass[cacheKey] = createPropsPrototypeAndTypes(componentClass, extensions || []);
   }
-  return defaultProps10;
+  return defaultProps17;
 }
 function createPropsPrototypeAndTypes(componentClass, extensions) {
   const parent = componentClass.prototype;
@@ -75820,30 +76354,30 @@ function createPropsPrototypeAndTypes(componentClass, extensions) {
   const parentDefaultProps = getPropsPrototype(parentClass);
   const componentDefaultProps = getOwnProperty(componentClass, "defaultProps") || {};
   const componentPropDefs = parsePropTypes(componentDefaultProps);
-  const defaultProps10 = Object.assign(/* @__PURE__ */ Object.create(null), parentDefaultProps, componentPropDefs.defaultProps);
+  const defaultProps17 = Object.assign(/* @__PURE__ */ Object.create(null), parentDefaultProps, componentPropDefs.defaultProps);
   const propTypes = Object.assign(/* @__PURE__ */ Object.create(null), parentDefaultProps?.[PROP_TYPES_SYMBOL], componentPropDefs.propTypes);
   const deprecatedProps = Object.assign(/* @__PURE__ */ Object.create(null), parentDefaultProps?.[DEPRECATED_PROPS_SYMBOL], componentPropDefs.deprecatedProps);
   for (const extension of extensions) {
     const extensionDefaultProps = getPropsPrototype(extension.constructor);
     if (extensionDefaultProps) {
-      Object.assign(defaultProps10, extensionDefaultProps);
+      Object.assign(defaultProps17, extensionDefaultProps);
       Object.assign(propTypes, extensionDefaultProps[PROP_TYPES_SYMBOL]);
       Object.assign(deprecatedProps, extensionDefaultProps[DEPRECATED_PROPS_SYMBOL]);
     }
   }
-  createPropsPrototype(defaultProps10, componentClass);
-  addAsyncPropsToPropPrototype(defaultProps10, propTypes);
-  addDeprecatedPropsToPropPrototype(defaultProps10, deprecatedProps);
-  defaultProps10[PROP_TYPES_SYMBOL] = propTypes;
-  defaultProps10[DEPRECATED_PROPS_SYMBOL] = deprecatedProps;
+  createPropsPrototype(defaultProps17, componentClass);
+  addAsyncPropsToPropPrototype(defaultProps17, propTypes);
+  addDeprecatedPropsToPropPrototype(defaultProps17, deprecatedProps);
+  defaultProps17[PROP_TYPES_SYMBOL] = propTypes;
+  defaultProps17[DEPRECATED_PROPS_SYMBOL] = deprecatedProps;
   if (extensions.length === 0 && !hasOwnProperty(componentClass, "_propTypes")) {
     componentClass._propTypes = propTypes;
   }
-  return defaultProps10;
+  return defaultProps17;
 }
-function createPropsPrototype(defaultProps10, componentClass) {
+function createPropsPrototype(defaultProps17, componentClass) {
   const id3 = getComponentName(componentClass);
-  Object.defineProperties(defaultProps10, {
+  Object.defineProperties(defaultProps17, {
     // `id` is treated specially because layer might need to override it
     id: {
       writable: true,
@@ -75851,9 +76385,9 @@ function createPropsPrototype(defaultProps10, componentClass) {
     }
   });
 }
-function addDeprecatedPropsToPropPrototype(defaultProps10, deprecatedProps) {
+function addDeprecatedPropsToPropPrototype(defaultProps17, deprecatedProps) {
   for (const propName in deprecatedProps) {
-    Object.defineProperty(defaultProps10, propName, {
+    Object.defineProperty(defaultProps17, propName, {
       enumerable: false,
       set(newValue) {
         const nameStr = `${this.id}: ${propName}`;
@@ -75867,7 +76401,7 @@ function addDeprecatedPropsToPropPrototype(defaultProps10, deprecatedProps) {
     });
   }
 }
-function addAsyncPropsToPropPrototype(defaultProps10, propTypes) {
+function addAsyncPropsToPropPrototype(defaultProps17, propTypes) {
   const defaultValues = {};
   const descriptors = {};
   for (const propName in propTypes) {
@@ -75878,9 +76412,9 @@ function addAsyncPropsToPropPrototype(defaultProps10, propTypes) {
       descriptors[name2] = getDescriptorForAsyncProp(name2);
     }
   }
-  defaultProps10[ASYNC_DEFAULTS_SYMBOL] = defaultValues;
-  defaultProps10[ASYNC_ORIGINAL_SYMBOL] = {};
-  Object.defineProperties(defaultProps10, descriptors);
+  defaultProps17[ASYNC_DEFAULTS_SYMBOL] = defaultValues;
+  defaultProps17[ASYNC_ORIGINAL_SYMBOL] = {};
+  Object.defineProperties(defaultProps17, descriptors);
 }
 function getDescriptorForAsyncProp(name2) {
   return {
@@ -77486,6 +78020,67 @@ var GlobeView = class extends View {
 GlobeView.displayName = "GlobeView";
 var globe_view_default = GlobeView;
 
+// node_modules/@deck.gl/core/dist/lib/layer-extension.js
+var LayerExtension = class {
+  static get componentName() {
+    return Object.prototype.hasOwnProperty.call(this, "extensionName") ? this.extensionName : "";
+  }
+  constructor(opts) {
+    if (opts) {
+      this.opts = opts;
+    }
+  }
+  /** Returns true if two extensions are equivalent */
+  equals(extension) {
+    if (this === extension) {
+      return true;
+    }
+    return this.constructor === extension.constructor && deepEqual2(this.opts, extension.opts, 1);
+  }
+  /** Only called if attached to a primitive layer */
+  getShaders(extension) {
+    return null;
+  }
+  /** Only called if attached to a CompositeLayer */
+  getSubLayerProps(extension) {
+    const { defaultProps: defaultProps17 } = extension.constructor;
+    const newProps = {
+      updateTriggers: {}
+    };
+    for (const key in defaultProps17) {
+      if (key in this.props) {
+        const propDef = defaultProps17[key];
+        const propValue = this.props[key];
+        newProps[key] = propValue;
+        if (propDef && propDef.type === "accessor") {
+          newProps.updateTriggers[key] = this.props.updateTriggers[key];
+          if (typeof propValue === "function") {
+            newProps[key] = this.getSubLayerAccessor(propValue);
+          }
+        }
+      }
+    }
+    return newProps;
+  }
+  /* eslint-disable @typescript-eslint/no-empty-function */
+  initializeState(context, extension) {
+  }
+  updateState(params, extension) {
+  }
+  onNeedsRedraw(extension) {
+  }
+  getNeedsPickingBuffer(extension) {
+    return false;
+  }
+  draw(params, extension) {
+  }
+  finalizeState(context, extension) {
+  }
+};
+LayerExtension.defaultProps = {};
+LayerExtension.extensionName = "LayerExtension";
+var layer_extension_default = LayerExtension;
+
 // node_modules/@deck.gl/core/dist/utils/tesselator.js
 var Tesselator = class {
   constructor(opts) {
@@ -78200,6 +78795,1025 @@ var MapboxOverlay = class {
   }
 };
 
+// node_modules/@deck.gl/layers/dist/icon-layer/icon-layer-uniforms.js
+var uniformBlock5 = `uniform iconUniforms {
+  float sizeScale;
+  vec2 iconsTextureDim;
+  float sizeMinPixels;
+  float sizeMaxPixels;
+  bool billboard;
+  highp int sizeUnits;
+  float alphaCutoff;
+} icon;
+`;
+var iconUniforms = {
+  name: "icon",
+  vs: uniformBlock5,
+  fs: uniformBlock5,
+  uniformTypes: {
+    sizeScale: "f32",
+    iconsTextureDim: "vec2<f32>",
+    sizeMinPixels: "f32",
+    sizeMaxPixels: "f32",
+    billboard: "f32",
+    sizeUnits: "i32",
+    alphaCutoff: "f32"
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/icon-layer/icon-layer-vertex.glsl.js
+var icon_layer_vertex_glsl_default = `#version 300 es
+#define SHADER_NAME icon-layer-vertex-shader
+in vec2 positions;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in float instanceSizes;
+in float instanceAngles;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
+in vec4 instanceIconFrames;
+in float instanceColorModes;
+in vec2 instanceOffsets;
+in vec2 instancePixelOffset;
+out float vColorMode;
+out vec4 vColor;
+out vec2 vTextureCoords;
+out vec2 uv;
+vec2 rotate_by_angle(vec2 vertex, float angle) {
+float angle_radian = angle * PI / 180.0;
+float cos_angle = cos(angle_radian);
+float sin_angle = sin(angle_radian);
+mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
+return rotationMatrix * vertex;
+}
+void main(void) {
+geometry.worldPosition = instancePositions;
+geometry.uv = positions;
+geometry.pickingColor = instancePickingColors;
+uv = positions;
+vec2 iconSize = instanceIconFrames.zw;
+float sizePixels = clamp(
+project_size_to_pixel(instanceSizes * icon.sizeScale, icon.sizeUnits),
+icon.sizeMinPixels, icon.sizeMaxPixels
+);
+float instanceScale = iconSize.y == 0.0 ? 0.0 : sizePixels / iconSize.y;
+vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
+pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
+pixelOffset += instancePixelOffset;
+pixelOffset.y *= -1.0;
+if (icon.billboard)  {
+gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+vec3 offset = vec3(pixelOffset, 0.0);
+DECKGL_FILTER_SIZE(offset, geometry);
+gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+} else {
+vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
+DECKGL_FILTER_SIZE(offset_common, geometry);
+gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
+DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+}
+vTextureCoords = mix(
+instanceIconFrames.xy,
+instanceIconFrames.xy + iconSize,
+(positions.xy + 1.0) / 2.0
+) / icon.iconsTextureDim;
+vColor = instanceColors;
+DECKGL_FILTER_COLOR(vColor, geometry);
+vColorMode = instanceColorModes;
+}
+`;
+
+// node_modules/@deck.gl/layers/dist/icon-layer/icon-layer-fragment.glsl.js
+var icon_layer_fragment_glsl_default = `#version 300 es
+#define SHADER_NAME icon-layer-fragment-shader
+precision highp float;
+uniform sampler2D iconsTexture;
+in float vColorMode;
+in vec4 vColor;
+in vec2 vTextureCoords;
+in vec2 uv;
+out vec4 fragColor;
+void main(void) {
+geometry.uv = uv;
+vec4 texColor = texture(iconsTexture, vTextureCoords);
+vec3 color = mix(texColor.rgb, vColor.rgb, vColorMode);
+float a = texColor.a * layer.opacity * vColor.a;
+if (a < icon.alphaCutoff) {
+discard;
+}
+fragColor = vec4(color, a);
+DECKGL_FILTER_COLOR(fragColor, geometry);
+}
+`;
+
+// node_modules/@deck.gl/layers/dist/icon-layer/icon-manager.js
+var DEFAULT_CANVAS_WIDTH = 1024;
+var DEFAULT_BUFFER = 4;
+var noop4 = () => {
+};
+var DEFAULT_SAMPLER_PARAMETERS = {
+  minFilter: "linear",
+  mipmapFilter: "linear",
+  // LINEAR is the default value but explicitly set it here
+  magFilter: "linear",
+  // minimize texture boundary artifacts
+  addressModeU: "clamp-to-edge",
+  addressModeV: "clamp-to-edge"
+};
+var MISSING_ICON = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0
+};
+function nextPowOfTwo(number4) {
+  return Math.pow(2, Math.ceil(Math.log2(number4)));
+}
+function resizeImage(ctx2, imageData, maxWidth, maxHeight) {
+  const resizeRatio = Math.min(maxWidth / imageData.width, maxHeight / imageData.height);
+  const width = Math.floor(imageData.width * resizeRatio);
+  const height = Math.floor(imageData.height * resizeRatio);
+  if (resizeRatio === 1) {
+    return { image: imageData, width, height };
+  }
+  ctx2.canvas.height = height;
+  ctx2.canvas.width = width;
+  ctx2.clearRect(0, 0, width, height);
+  ctx2.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
+  return { image: ctx2.canvas, width, height };
+}
+function getIconId(icon) {
+  return icon && (icon.id || icon.url);
+}
+function resizeTexture(texture, width, height, sampler) {
+  const { width: oldWidth, height: oldHeight, device } = texture;
+  const newTexture = device.createTexture({
+    format: "rgba8unorm",
+    width,
+    height,
+    sampler,
+    mipmaps: true
+  });
+  const commandEncoder = device.createCommandEncoder();
+  commandEncoder.copyTextureToTexture({
+    sourceTexture: texture,
+    destinationTexture: newTexture,
+    width: oldWidth,
+    height: oldHeight
+  });
+  commandEncoder.finish();
+  texture.destroy();
+  return newTexture;
+}
+function buildRowMapping(mapping, columns, yOffset) {
+  for (let i3 = 0; i3 < columns.length; i3++) {
+    const { icon, xOffset } = columns[i3];
+    const id3 = getIconId(icon);
+    mapping[id3] = {
+      ...icon,
+      x: xOffset,
+      y: yOffset
+    };
+  }
+}
+function buildMapping({ icons, buffer, mapping = {}, xOffset = 0, yOffset = 0, rowHeight = 0, canvasWidth }) {
+  let columns = [];
+  for (let i3 = 0; i3 < icons.length; i3++) {
+    const icon = icons[i3];
+    const id3 = getIconId(icon);
+    if (!mapping[id3]) {
+      const { height, width } = icon;
+      if (xOffset + width + buffer > canvasWidth) {
+        buildRowMapping(mapping, columns, yOffset);
+        xOffset = 0;
+        yOffset = rowHeight + yOffset + buffer;
+        rowHeight = 0;
+        columns = [];
+      }
+      columns.push({
+        icon,
+        xOffset
+      });
+      xOffset = xOffset + width + buffer;
+      rowHeight = Math.max(rowHeight, height);
+    }
+  }
+  if (columns.length > 0) {
+    buildRowMapping(mapping, columns, yOffset);
+  }
+  return {
+    mapping,
+    rowHeight,
+    xOffset,
+    yOffset,
+    canvasWidth,
+    canvasHeight: nextPowOfTwo(rowHeight + yOffset + buffer)
+  };
+}
+function getDiffIcons(data, getIcon, cachedIcons) {
+  if (!data || !getIcon) {
+    return null;
+  }
+  cachedIcons = cachedIcons || {};
+  const icons = {};
+  const { iterable, objectInfo } = createIterable(data);
+  for (const object2 of iterable) {
+    objectInfo.index++;
+    const icon = getIcon(object2, objectInfo);
+    const id3 = getIconId(icon);
+    if (!icon) {
+      throw new Error("Icon is missing.");
+    }
+    if (!icon.url) {
+      throw new Error("Icon url is missing.");
+    }
+    if (!icons[id3] && (!cachedIcons[id3] || icon.url !== cachedIcons[id3].url)) {
+      icons[id3] = { ...icon, source: object2, sourceIndex: objectInfo.index };
+    }
+  }
+  return icons;
+}
+var IconManager = class {
+  constructor(device, { onUpdate = noop4, onError = noop4 }) {
+    this._loadOptions = null;
+    this._texture = null;
+    this._externalTexture = null;
+    this._mapping = {};
+    this._samplerParameters = null;
+    this._pendingCount = 0;
+    this._autoPacking = false;
+    this._xOffset = 0;
+    this._yOffset = 0;
+    this._rowHeight = 0;
+    this._buffer = DEFAULT_BUFFER;
+    this._canvasWidth = DEFAULT_CANVAS_WIDTH;
+    this._canvasHeight = 0;
+    this._canvas = null;
+    this.device = device;
+    this.onUpdate = onUpdate;
+    this.onError = onError;
+  }
+  finalize() {
+    this._texture?.delete();
+  }
+  getTexture() {
+    return this._texture || this._externalTexture;
+  }
+  getIconMapping(icon) {
+    const id3 = this._autoPacking ? getIconId(icon) : icon;
+    return this._mapping[id3] || MISSING_ICON;
+  }
+  setProps({ loadOptions, autoPacking, iconAtlas, iconMapping, textureParameters }) {
+    if (loadOptions) {
+      this._loadOptions = loadOptions;
+    }
+    if (autoPacking !== void 0) {
+      this._autoPacking = autoPacking;
+    }
+    if (iconMapping) {
+      this._mapping = iconMapping;
+    }
+    if (iconAtlas) {
+      this._texture?.delete();
+      this._texture = null;
+      this._externalTexture = iconAtlas;
+    }
+    if (textureParameters) {
+      this._samplerParameters = textureParameters;
+    }
+  }
+  get isLoaded() {
+    return this._pendingCount === 0;
+  }
+  packIcons(data, getIcon) {
+    if (!this._autoPacking || typeof document === "undefined") {
+      return;
+    }
+    const icons = Object.values(getDiffIcons(data, getIcon, this._mapping) || {});
+    if (icons.length > 0) {
+      const { mapping, xOffset, yOffset, rowHeight, canvasHeight } = buildMapping({
+        icons,
+        buffer: this._buffer,
+        canvasWidth: this._canvasWidth,
+        mapping: this._mapping,
+        rowHeight: this._rowHeight,
+        xOffset: this._xOffset,
+        yOffset: this._yOffset
+      });
+      this._rowHeight = rowHeight;
+      this._mapping = mapping;
+      this._xOffset = xOffset;
+      this._yOffset = yOffset;
+      this._canvasHeight = canvasHeight;
+      if (!this._texture) {
+        this._texture = this.device.createTexture({
+          format: "rgba8unorm",
+          width: this._canvasWidth,
+          height: this._canvasHeight,
+          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS,
+          mipmaps: true
+        });
+      }
+      if (this._texture.height !== this._canvasHeight) {
+        this._texture = resizeTexture(this._texture, this._canvasWidth, this._canvasHeight, this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS);
+      }
+      this.onUpdate();
+      this._canvas = this._canvas || document.createElement("canvas");
+      this._loadIcons(icons);
+    }
+  }
+  _loadIcons(icons) {
+    const ctx2 = this._canvas.getContext("2d", {
+      willReadFrequently: true
+    });
+    for (const icon of icons) {
+      this._pendingCount++;
+      load(icon.url, this._loadOptions).then((imageData) => {
+        const id3 = getIconId(icon);
+        const iconDef = this._mapping[id3];
+        const { x: x5, y: y5, width: maxWidth, height: maxHeight } = iconDef;
+        const { image, width, height } = resizeImage(ctx2, imageData, maxWidth, maxHeight);
+        this._texture?.copyExternalImage({
+          image,
+          x: x5 + (maxWidth - width) / 2,
+          y: y5 + (maxHeight - height) / 2,
+          width,
+          height
+        });
+        iconDef.width = width;
+        iconDef.height = height;
+        this._texture.generateMipmap();
+        this.onUpdate();
+      }).catch((error) => {
+        this.onError({
+          url: icon.url,
+          source: icon.source,
+          sourceIndex: icon.sourceIndex,
+          loadOptions: this._loadOptions,
+          error
+        });
+      }).finally(() => {
+        this._pendingCount--;
+      });
+    }
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/icon-layer/icon-layer.js
+var DEFAULT_COLOR = [0, 0, 0, 255];
+var defaultProps3 = {
+  iconAtlas: { type: "image", value: null, async: true },
+  iconMapping: { type: "object", value: {}, async: true },
+  sizeScale: { type: "number", value: 1, min: 0 },
+  billboard: true,
+  sizeUnits: "pixels",
+  sizeMinPixels: { type: "number", min: 0, value: 0 },
+  //  min point radius in pixels
+  sizeMaxPixels: { type: "number", min: 0, value: Number.MAX_SAFE_INTEGER },
+  // max point radius in pixels
+  alphaCutoff: { type: "number", value: 0.05, min: 0, max: 1 },
+  getPosition: { type: "accessor", value: (x5) => x5.position },
+  getIcon: { type: "accessor", value: (x5) => x5.icon },
+  getColor: { type: "accessor", value: DEFAULT_COLOR },
+  getSize: { type: "accessor", value: 1 },
+  getAngle: { type: "accessor", value: 0 },
+  getPixelOffset: { type: "accessor", value: [0, 0] },
+  onIconError: { type: "function", value: null, optional: true },
+  textureParameters: { type: "object", ignore: true, value: null }
+};
+var IconLayer = class extends layer_default {
+  getShaders() {
+    return super.getShaders({ vs: icon_layer_vertex_glsl_default, fs: icon_layer_fragment_glsl_default, modules: [project32_default, picking_default, iconUniforms] });
+  }
+  initializeState() {
+    this.state = {
+      iconManager: new IconManager(this.context.device, {
+        onUpdate: this._onUpdate.bind(this),
+        onError: this._onError.bind(this)
+      })
+    };
+    const attributeManager = this.getAttributeManager();
+    attributeManager.addInstanced({
+      instancePositions: {
+        size: 3,
+        type: "float64",
+        fp64: this.use64bitPositions(),
+        transition: true,
+        accessor: "getPosition"
+      },
+      instanceSizes: {
+        size: 1,
+        transition: true,
+        accessor: "getSize",
+        defaultValue: 1
+      },
+      instanceOffsets: {
+        size: 2,
+        accessor: "getIcon",
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        transform: this.getInstanceOffset
+      },
+      instanceIconFrames: {
+        size: 4,
+        accessor: "getIcon",
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        transform: this.getInstanceIconFrame
+      },
+      instanceColorModes: {
+        size: 1,
+        type: "uint8",
+        accessor: "getIcon",
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        transform: this.getInstanceColorMode
+      },
+      instanceColors: {
+        size: this.props.colorFormat.length,
+        type: "unorm8",
+        transition: true,
+        accessor: "getColor",
+        defaultValue: DEFAULT_COLOR
+      },
+      instanceAngles: {
+        size: 1,
+        transition: true,
+        accessor: "getAngle"
+      },
+      instancePixelOffset: {
+        size: 2,
+        transition: true,
+        accessor: "getPixelOffset"
+      }
+    });
+  }
+  /* eslint-disable max-statements, complexity */
+  updateState(params) {
+    super.updateState(params);
+    const { props, oldProps, changeFlags } = params;
+    const attributeManager = this.getAttributeManager();
+    const { iconAtlas, iconMapping, data, getIcon, textureParameters } = props;
+    const { iconManager } = this.state;
+    if (typeof iconAtlas === "string") {
+      return;
+    }
+    const prePacked = iconAtlas || this.internalState.isAsyncPropLoading("iconAtlas");
+    iconManager.setProps({
+      loadOptions: props.loadOptions,
+      autoPacking: !prePacked,
+      iconAtlas,
+      iconMapping: prePacked ? iconMapping : null,
+      textureParameters
+    });
+    if (prePacked) {
+      if (oldProps.iconMapping !== props.iconMapping) {
+        attributeManager.invalidate("getIcon");
+      }
+    } else if (changeFlags.dataChanged || changeFlags.updateTriggersChanged && (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon)) {
+      iconManager.packIcons(data, getIcon);
+    }
+    if (changeFlags.extensionsChanged) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+      attributeManager.invalidateAll();
+    }
+  }
+  /* eslint-enable max-statements, complexity */
+  get isLoaded() {
+    return super.isLoaded && this.state.iconManager.isLoaded;
+  }
+  finalizeState(context) {
+    super.finalizeState(context);
+    this.state.iconManager.finalize();
+  }
+  draw({ uniforms }) {
+    const { sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff } = this.props;
+    const { iconManager } = this.state;
+    const iconsTexture = iconManager.getTexture();
+    if (iconsTexture) {
+      const model = this.state.model;
+      const iconProps = {
+        iconsTexture,
+        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+        sizeUnits: UNIT[sizeUnits],
+        sizeScale,
+        sizeMinPixels,
+        sizeMaxPixels,
+        billboard,
+        alphaCutoff
+      };
+      model.shaderInputs.setProps({ icon: iconProps });
+      model.draw(this.context.renderPass);
+    }
+  }
+  _getModel() {
+    const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
+    return new Model(this.context.device, {
+      ...this.getShaders(),
+      id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      geometry: new Geometry({
+        topology: "triangle-strip",
+        attributes: {
+          // The size must be explicitly passed here otherwise luma.gl
+          // will default to assuming that positions are 3D (x,y,z)
+          positions: {
+            size: 2,
+            value: new Float32Array(positions)
+          }
+        }
+      }),
+      isInstanced: true
+    });
+  }
+  _onUpdate() {
+    this.setNeedsRedraw();
+  }
+  _onError(evt) {
+    const onIconError = this.getCurrentLayer()?.props.onIconError;
+    if (onIconError) {
+      onIconError(evt);
+    } else {
+      log_default.error(evt.error.message)();
+    }
+  }
+  getInstanceOffset(icon) {
+    const { width, height, anchorX = width / 2, anchorY = height / 2 } = this.state.iconManager.getIconMapping(icon);
+    return [width / 2 - anchorX, height / 2 - anchorY];
+  }
+  getInstanceColorMode(icon) {
+    const mapping = this.state.iconManager.getIconMapping(icon);
+    return mapping.mask ? 1 : 0;
+  }
+  getInstanceIconFrame(icon) {
+    const { x: x5, y: y5, width, height } = this.state.iconManager.getIconMapping(icon);
+    return [x5, y5, width, height];
+  }
+};
+IconLayer.defaultProps = defaultProps3;
+IconLayer.layerName = "IconLayer";
+var icon_layer_default = IconLayer;
+
+// node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer-uniforms.js
+var glslUniformBlock = `uniform scatterplotUniforms {
+  float radiusScale;
+  float radiusMinPixels;
+  float radiusMaxPixels;
+  float lineWidthScale;
+  float lineWidthMinPixels;
+  float lineWidthMaxPixels;
+  float stroked;
+  float filled;
+  bool antialiasing;
+  bool billboard;
+  highp int radiusUnits;
+  highp int lineWidthUnits;
+} scatterplot;
+`;
+var scatterplotUniforms = {
+  name: "scatterplot",
+  vs: glslUniformBlock,
+  fs: glslUniformBlock,
+  source: "",
+  uniformTypes: {
+    radiusScale: "f32",
+    radiusMinPixels: "f32",
+    radiusMaxPixels: "f32",
+    lineWidthScale: "f32",
+    lineWidthMinPixels: "f32",
+    lineWidthMaxPixels: "f32",
+    stroked: "f32",
+    filled: "f32",
+    antialiasing: "f32",
+    billboard: "f32",
+    radiusUnits: "i32",
+    lineWidthUnits: "i32"
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer-vertex.glsl.js
+var scatterplot_layer_vertex_glsl_default = (
+  /* glsl */
+  `#version 300 es
+#define SHADER_NAME scatterplot-layer-vertex-shader
+in vec3 positions;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in float instanceRadius;
+in float instanceLineWidths;
+in vec4 instanceFillColors;
+in vec4 instanceLineColors;
+in vec3 instancePickingColors;
+out vec4 vFillColor;
+out vec4 vLineColor;
+out vec2 unitPosition;
+out float innerUnitRadius;
+out float outerRadiusPixels;
+void main(void) {
+geometry.worldPosition = instancePositions;
+outerRadiusPixels = clamp(
+project_size_to_pixel(scatterplot.radiusScale * instanceRadius, scatterplot.radiusUnits),
+scatterplot.radiusMinPixels, scatterplot.radiusMaxPixels
+);
+float lineWidthPixels = clamp(
+project_size_to_pixel(scatterplot.lineWidthScale * instanceLineWidths, scatterplot.lineWidthUnits),
+scatterplot.lineWidthMinPixels, scatterplot.lineWidthMaxPixels
+);
+outerRadiusPixels += scatterplot.stroked * lineWidthPixels / 2.0;
+float edgePadding = scatterplot.antialiasing ? (outerRadiusPixels + SMOOTH_EDGE_RADIUS) / outerRadiusPixels : 1.0;
+unitPosition = edgePadding * positions.xy;
+geometry.uv = unitPosition;
+geometry.pickingColor = instancePickingColors;
+innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / outerRadiusPixels;
+if (scatterplot.billboard) {
+gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+vec3 offset = edgePadding * positions * outerRadiusPixels;
+DECKGL_FILTER_SIZE(offset, geometry);
+gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+} else {
+vec3 offset = edgePadding * positions * project_pixel_size(outerRadiusPixels);
+DECKGL_FILTER_SIZE(offset, geometry);
+gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
+DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+}
+vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);
+DECKGL_FILTER_COLOR(vFillColor, geometry);
+vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
+DECKGL_FILTER_COLOR(vLineColor, geometry);
+}
+`
+);
+
+// node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer-fragment.glsl.js
+var scatterplot_layer_fragment_glsl_default = (
+  /* glsl */
+  `#version 300 es
+#define SHADER_NAME scatterplot-layer-fragment-shader
+precision highp float;
+in vec4 vFillColor;
+in vec4 vLineColor;
+in vec2 unitPosition;
+in float innerUnitRadius;
+in float outerRadiusPixels;
+out vec4 fragColor;
+void main(void) {
+geometry.uv = unitPosition;
+float distToCenter = length(unitPosition) * outerRadiusPixels;
+float inCircle = scatterplot.antialiasing ?
+smoothedge(distToCenter, outerRadiusPixels) :
+step(distToCenter, outerRadiusPixels);
+if (inCircle == 0.0) {
+discard;
+}
+if (scatterplot.stroked > 0.5) {
+float isLine = scatterplot.antialiasing ?
+smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter) :
+step(innerUnitRadius * outerRadiusPixels, distToCenter);
+if (scatterplot.filled > 0.5) {
+fragColor = mix(vFillColor, vLineColor, isLine);
+} else {
+if (isLine == 0.0) {
+discard;
+}
+fragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
+}
+} else if (scatterplot.filled < 0.5) {
+discard;
+} else {
+fragColor = vFillColor;
+}
+fragColor.a *= inCircle;
+DECKGL_FILTER_COLOR(fragColor, geometry);
+}
+`
+);
+
+// node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer.wgsl.js
+var scatterplot_layer_wgsl_default = (
+  /* wgsl */
+  `// TODO(ibgreen): Hack for Layer uniforms (move to new "color" module?)
+
+struct LayerUniforms {
+  opacity: f32,
+};
+
+var<private> layer: LayerUniforms = LayerUniforms(1.0);
+// @group(0) @binding(1) var<uniform> layer: LayerUniforms;
+
+// Main shaders
+
+struct ScatterplotUniforms {
+  radiusScale: f32,
+  radiusMinPixels: f32,
+  radiusMaxPixels: f32,
+  lineWidthScale: f32,
+  lineWidthMinPixels: f32,
+  lineWidthMaxPixels: f32,
+  stroked: f32,
+  filled: i32,
+  antialiasing: i32,
+  billboard: i32,
+  radiusUnits: i32,
+  lineWidthUnits: i32,
+};
+
+struct ConstantAttributeUniforms {
+ instancePositions: vec3<f32>,
+ instancePositions64Low: vec3<f32>,
+ instanceRadius: f32,
+ instanceLineWidths: f32,
+ instanceFillColors: vec4<f32>,
+ instanceLineColors: vec4<f32>,
+ instancePickingColors: vec3<f32>,
+
+ instancePositionsConstant: i32,
+ instancePositions64LowConstant: i32,
+ instanceRadiusConstant: i32,
+ instanceLineWidthsConstant: i32,
+ instanceFillColorsConstant: i32,
+ instanceLineColorsConstant: i32,
+ instancePickingColorsConstant: i32
+};
+
+@group(0) @binding(2) var<uniform> scatterplot: ScatterplotUniforms;
+
+struct ConstantAttributes {
+  instancePositions: vec3<f32>,
+  instancePositions64Low: vec3<f32>,
+  instanceRadius: f32,
+  instanceLineWidths: f32,
+  instanceFillColors: vec4<f32>,
+  instanceLineColors: vec4<f32>,
+  instancePickingColors: vec3<f32>
+};
+
+const constants = ConstantAttributes(
+  vec3<f32>(0.0),
+  vec3<f32>(0.0),
+  0.0,
+  0.0,
+  vec4<f32>(0.0, 0.0, 0.0, 1.0),
+  vec4<f32>(0.0, 0.0, 0.0, 1.0),
+  vec3<f32>(0.0)
+);
+
+struct Attributes {
+  @builtin(instance_index) instanceIndex : u32,
+  @builtin(vertex_index) vertexIndex : u32,
+  @location(0) positions: vec3<f32>,
+  @location(1) instancePositions: vec3<f32>,
+  @location(2) instancePositions64Low: vec3<f32>,
+  @location(3) instanceRadius: f32,
+  @location(4) instanceLineWidths: f32,
+  @location(5) instanceFillColors: vec4<f32>,
+  @location(6) instanceLineColors: vec4<f32>,
+  @location(7) instancePickingColors: vec3<f32>
+};
+
+struct Varyings {
+  @builtin(position) position: vec4<f32>,
+  @location(0) vFillColor: vec4<f32>,
+  @location(1) vLineColor: vec4<f32>,
+  @location(2) unitPosition: vec2<f32>,
+  @location(3) innerUnitRadius: f32,
+  @location(4) outerRadiusPixels: f32,
+};
+
+@vertex
+fn vertexMain(attributes: Attributes) -> Varyings {
+  var varyings: Varyings;
+
+  // Draw an inline geometry constant array clip space triangle to verify that rendering works.
+  // var positions = array<vec2<f32>, 3>(vec2(0.0, 0.5), vec2(-0.5, -0.5), vec2(0.5, -0.5));
+  // if (attributes.instanceIndex == 0) {
+  //   varyings.position = vec4<f32>(positions[attributes.vertexIndex], 0.0, 1.0);
+  //   return varyings;
+  // }
+
+  // var geometry: Geometry;
+  // geometry.worldPosition = instancePositions;
+
+  // Multiply out radius and clamp to limits
+  varyings.outerRadiusPixels = clamp(
+    project_unit_size_to_pixel(scatterplot.radiusScale * attributes.instanceRadius, scatterplot.radiusUnits),
+    scatterplot.radiusMinPixels, scatterplot.radiusMaxPixels
+  );
+
+  // Multiply out line width and clamp to limits
+  let lineWidthPixels = clamp(
+    project_unit_size_to_pixel(scatterplot.lineWidthScale * attributes.instanceLineWidths, scatterplot.lineWidthUnits),
+    scatterplot.lineWidthMinPixels, scatterplot.lineWidthMaxPixels
+  );
+
+  // outer radius needs to offset by half stroke width
+  varyings.outerRadiusPixels += scatterplot.stroked * lineWidthPixels / 2.0;
+  // Expand geometry to accommodate edge smoothing
+  let edgePadding = select(
+    (varyings.outerRadiusPixels + SMOOTH_EDGE_RADIUS) / varyings.outerRadiusPixels,
+    1.0,
+    scatterplot.antialiasing != 0
+  );
+
+  // position on the containing square in [-1, 1] space
+  varyings.unitPosition = edgePadding * attributes.positions.xy;
+  geometry.uv = varyings.unitPosition;
+  geometry.pickingColor = attributes.instancePickingColors;
+
+  varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
+
+  if (scatterplot.billboard != 0) {
+    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0)); // TODO , geometry.position);
+    // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
+    let offset = attributes.positions; // * edgePadding * varyings.outerRadiusPixels;
+    // DECKGL_FILTER_SIZE(offset, geometry);
+    let clipPixels = project_pixel_size_to_clipspace(offset.xy);
+    varyings.position.x = clipPixels.x;
+    varyings.position.y = clipPixels.y;
+  } else {
+    let offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
+    // DECKGL_FILTER_SIZE(offset, geometry);
+    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset); // TODO , geometry.position);
+    // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
+  }
+
+  // Apply opacity to instance color, or return instance picking color
+  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
+  // DECKGL_FILTER_COLOR(varyings.vFillColor, geometry);
+  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * layer.opacity);
+  // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
+
+  return varyings;
+}
+
+@fragment
+fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
+  // var geometry: Geometry;
+  // geometry.uv = unitPosition;
+
+  let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
+  let inCircle = select(
+    smoothedge(distToCenter, varyings.outerRadiusPixels),
+    step(distToCenter, varyings.outerRadiusPixels),
+    scatterplot.antialiasing != 0
+  );
+
+  if (inCircle == 0.0) {
+    // discard;
+  }
+
+  var fragColor: vec4<f32>;
+
+  if (scatterplot.stroked != 0) {
+    let isLine = select(
+      smoothedge(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+      step(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+      scatterplot.antialiasing != 0
+    );
+
+    if (scatterplot.filled != 0) {
+      fragColor = mix(varyings.vFillColor, varyings.vLineColor, isLine);
+    } else {
+      if (isLine == 0.0) {
+        // discard;
+      }
+      fragColor = vec4<f32>(varyings.vLineColor.rgb, varyings.vLineColor.a * isLine);
+    }
+  } else if (scatterplot.filled == 0) {
+    // discard;
+  } else {
+    fragColor = varyings.vFillColor;
+  }
+
+  fragColor.a *= inCircle;
+  // DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  return fragColor;
+  // return vec4<f32>(0, 0, 1, 1);
+}
+`
+);
+
+// node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer.js
+var DEFAULT_COLOR2 = [0, 0, 0, 255];
+var defaultProps4 = {
+  radiusUnits: "meters",
+  radiusScale: { type: "number", min: 0, value: 1 },
+  radiusMinPixels: { type: "number", min: 0, value: 0 },
+  //  min point radius in pixels
+  radiusMaxPixels: { type: "number", min: 0, value: Number.MAX_SAFE_INTEGER },
+  // max point radius in pixels
+  lineWidthUnits: "meters",
+  lineWidthScale: { type: "number", min: 0, value: 1 },
+  lineWidthMinPixels: { type: "number", min: 0, value: 0 },
+  lineWidthMaxPixels: { type: "number", min: 0, value: Number.MAX_SAFE_INTEGER },
+  stroked: false,
+  filled: true,
+  billboard: false,
+  antialiasing: true,
+  getPosition: { type: "accessor", value: (x5) => x5.position },
+  getRadius: { type: "accessor", value: 1 },
+  getFillColor: { type: "accessor", value: DEFAULT_COLOR2 },
+  getLineColor: { type: "accessor", value: DEFAULT_COLOR2 },
+  getLineWidth: { type: "accessor", value: 1 },
+  // deprecated
+  strokeWidth: { deprecatedFor: "getLineWidth" },
+  outline: { deprecatedFor: "stroked" },
+  getColor: { deprecatedFor: ["getFillColor", "getLineColor"] }
+};
+var ScatterplotLayer = class extends layer_default {
+  getShaders() {
+    return super.getShaders({
+      vs: scatterplot_layer_vertex_glsl_default,
+      fs: scatterplot_layer_fragment_glsl_default,
+      source: scatterplot_layer_wgsl_default,
+      modules: [project32_default, picking_default, scatterplotUniforms]
+    });
+  }
+  initializeState() {
+    this.getAttributeManager().addInstanced({
+      instancePositions: {
+        size: 3,
+        type: "float64",
+        fp64: this.use64bitPositions(),
+        transition: true,
+        accessor: "getPosition"
+      },
+      instanceRadius: {
+        size: 1,
+        transition: true,
+        accessor: "getRadius",
+        defaultValue: 1
+      },
+      instanceFillColors: {
+        size: this.props.colorFormat.length,
+        transition: true,
+        type: "unorm8",
+        accessor: "getFillColor",
+        defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineColors: {
+        size: this.props.colorFormat.length,
+        transition: true,
+        type: "unorm8",
+        accessor: "getLineColor",
+        defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineWidths: {
+        size: 1,
+        transition: true,
+        accessor: "getLineWidth",
+        defaultValue: 1
+      }
+    });
+  }
+  updateState(params) {
+    super.updateState(params);
+    if (params.changeFlags.extensionsChanged) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+      this.getAttributeManager().invalidateAll();
+    }
+  }
+  draw({ uniforms }) {
+    const { radiusUnits, radiusScale, radiusMinPixels, radiusMaxPixels, stroked, filled, billboard, antialiasing, lineWidthUnits, lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels } = this.props;
+    const scatterplotProps = {
+      stroked,
+      filled,
+      billboard,
+      antialiasing,
+      radiusUnits: UNIT[radiusUnits],
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      lineWidthUnits: UNIT[lineWidthUnits],
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels
+    };
+    const model = this.state.model;
+    model.shaderInputs.setProps({ scatterplot: scatterplotProps });
+    model.draw(this.context.renderPass);
+  }
+  _getModel() {
+    const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
+    return new Model(this.context.device, {
+      ...this.getShaders(),
+      id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      geometry: new Geometry({
+        topology: "triangle-strip",
+        attributes: {
+          positions: { size: 3, value: new Float32Array(positions) }
+        }
+      }),
+      isInstanced: true
+    });
+  }
+};
+ScatterplotLayer.defaultProps = defaultProps4;
+ScatterplotLayer.layerName = "ScatterplotLayer";
+var scatterplot_layer_default = ScatterplotLayer;
+
 // node_modules/@math.gl/polygon/dist/polygon-utils.js
 var WINDING = {
   CLOCKWISE: 1,
@@ -78700,7 +80314,7 @@ function tesselateColumn(props) {
 }
 
 // node_modules/@deck.gl/layers/dist/column-layer/column-layer-uniforms.js
-var uniformBlock5 = `uniform columnUniforms {
+var uniformBlock6 = `uniform columnUniforms {
   float radius;
   float angle;
   vec2 offset;
@@ -78719,8 +80333,8 @@ var uniformBlock5 = `uniform columnUniforms {
 `;
 var columnUniforms = {
   name: "column",
-  vs: uniformBlock5,
-  fs: uniformBlock5,
+  vs: uniformBlock6,
+  fs: uniformBlock6,
   uniformTypes: {
     radius: "f32",
     angle: "f32",
@@ -78829,8 +80443,8 @@ DECKGL_FILTER_COLOR(fragColor, geometry);
 `;
 
 // node_modules/@deck.gl/layers/dist/column-layer/column-layer.js
-var DEFAULT_COLOR = [0, 0, 0, 255];
-var defaultProps3 = {
+var DEFAULT_COLOR3 = [0, 0, 0, 255];
+var defaultProps5 = {
   diskResolution: { type: "number", min: 4, value: 20 },
   vertices: null,
   radius: { type: "number", min: 0, value: 1e3 },
@@ -78849,8 +80463,8 @@ var defaultProps3 = {
   stroked: false,
   flatShading: false,
   getPosition: { type: "accessor", value: (x5) => x5.position },
-  getFillColor: { type: "accessor", value: DEFAULT_COLOR },
-  getLineColor: { type: "accessor", value: DEFAULT_COLOR },
+  getFillColor: { type: "accessor", value: DEFAULT_COLOR3 },
+  getLineColor: { type: "accessor", value: DEFAULT_COLOR3 },
   getLineWidth: { type: "accessor", value: 1 },
   getElevation: { type: "accessor", value: 1e3 },
   material: true,
@@ -78894,14 +80508,14 @@ var ColumnLayer = class extends layer_default {
         type: "unorm8",
         transition: true,
         accessor: "getFillColor",
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR3
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
         type: "unorm8",
         transition: true,
         accessor: "getLineColor",
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR3
       },
       instanceStrokeWidths: {
         size: 1,
@@ -79034,7 +80648,7 @@ var ColumnLayer = class extends layer_default {
   }
 };
 ColumnLayer.layerName = "ColumnLayer";
-ColumnLayer.defaultProps = defaultProps3;
+ColumnLayer.defaultProps = defaultProps5;
 var column_layer_default = ColumnLayer;
 
 // node_modules/@deck.gl/layers/dist/path-layer/path.js
@@ -79194,7 +80808,7 @@ function isCut(path2) {
 }
 
 // node_modules/@deck.gl/layers/dist/path-layer/path-layer-uniforms.js
-var uniformBlock6 = `uniform pathUniforms {
+var uniformBlock7 = `uniform pathUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;
@@ -79207,8 +80821,8 @@ var uniformBlock6 = `uniform pathUniforms {
 `;
 var pathUniforms = {
   name: "path",
-  vs: uniformBlock6,
-  fs: uniformBlock6,
+  vs: uniformBlock7,
+  fs: uniformBlock7,
   uniformTypes: {
     widthScale: "f32",
     widthMinPixels: "f32",
@@ -79396,8 +81010,8 @@ DECKGL_FILTER_COLOR(fragColor, geometry);
 `;
 
 // node_modules/@deck.gl/layers/dist/path-layer/path-layer.js
-var DEFAULT_COLOR2 = [0, 0, 0, 255];
-var defaultProps4 = {
+var DEFAULT_COLOR4 = [0, 0, 0, 255];
+var defaultProps6 = {
   widthUnits: "meters",
   widthScale: { type: "number", min: 0, value: 1 },
   widthMinPixels: { type: "number", min: 0, value: 0 },
@@ -79408,7 +81022,7 @@ var defaultProps4 = {
   billboard: false,
   _pathType: null,
   getPath: { type: "accessor", value: (object2) => object2.path },
-  getColor: { type: "accessor", value: DEFAULT_COLOR2 },
+  getColor: { type: "accessor", value: DEFAULT_COLOR4 },
   getWidth: { type: "accessor", value: 1 },
   // deprecated props
   rounded: { deprecatedFor: ["jointRounded", "capRounded"] }
@@ -79476,7 +81090,7 @@ var PathLayer = class extends layer_default {
         type: "unorm8",
         accessor: "getColor",
         transition: ATTRIBUTE_TRANSITION,
-        defaultValue: DEFAULT_COLOR2
+        defaultValue: DEFAULT_COLOR4
       },
       instancePickingColors: {
         size: 4,
@@ -79626,7 +81240,7 @@ var PathLayer = class extends layer_default {
     attribute.value = pathTesselator.get("segmentTypes");
   }
 };
-PathLayer.defaultProps = defaultProps4;
+PathLayer.defaultProps = defaultProps6;
 PathLayer.layerName = "PathLayer";
 var path_layer_default = PathLayer;
 
@@ -79955,7 +81569,7 @@ function isCut2(polygon) {
 }
 
 // node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer-uniforms.js
-var uniformBlock7 = `uniform solidPolygonUniforms {
+var uniformBlock8 = `uniform solidPolygonUniforms {
   bool extruded;
   bool isWireframe;
   float elevationScale;
@@ -79963,8 +81577,8 @@ var uniformBlock7 = `uniform solidPolygonUniforms {
 `;
 var solidPolygonUniforms = {
   name: "solidPolygon",
-  vs: uniformBlock7,
-  fs: uniformBlock7,
+  vs: uniformBlock8,
+  fs: uniformBlock8,
   uniformTypes: {
     extruded: "f32",
     isWireframe: "f32",
@@ -80093,8 +81707,8 @@ DECKGL_FILTER_COLOR(fragColor, geometry);
 `;
 
 // node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer.js
-var DEFAULT_COLOR3 = [0, 0, 0, 255];
-var defaultProps5 = {
+var DEFAULT_COLOR5 = [0, 0, 0, 255];
+var defaultProps7 = {
   filled: true,
   extruded: false,
   wireframe: false,
@@ -80104,8 +81718,8 @@ var defaultProps5 = {
   elevationScale: { type: "number", min: 0, value: 1 },
   getPolygon: { type: "accessor", value: (f4) => f4.polygon },
   getElevation: { type: "accessor", value: 1e3 },
-  getFillColor: { type: "accessor", value: DEFAULT_COLOR3 },
-  getLineColor: { type: "accessor", value: DEFAULT_COLOR3 },
+  getFillColor: { type: "accessor", value: DEFAULT_COLOR5 },
+  getLineColor: { type: "accessor", value: DEFAULT_COLOR5 },
   material: true
 };
 var ATTRIBUTE_TRANSITION2 = {
@@ -80202,7 +81816,7 @@ var SolidPolygonLayer = class extends layer_default {
         stepMode: "dynamic",
         transition: ATTRIBUTE_TRANSITION2,
         accessor: "getFillColor",
-        defaultValue: DEFAULT_COLOR3
+        defaultValue: DEFAULT_COLOR5
       },
       lineColors: {
         size: this.props.colorFormat.length,
@@ -80210,7 +81824,7 @@ var SolidPolygonLayer = class extends layer_default {
         stepMode: "dynamic",
         transition: ATTRIBUTE_TRANSITION2,
         accessor: "getLineColor",
-        defaultValue: DEFAULT_COLOR3
+        defaultValue: DEFAULT_COLOR5
       },
       pickingColors: {
         size: 4,
@@ -80387,7 +82001,7 @@ var SolidPolygonLayer = class extends layer_default {
     attribute.value = this.state.polygonTesselator.get("vertexValid");
   }
 };
-SolidPolygonLayer.defaultProps = defaultProps5;
+SolidPolygonLayer.defaultProps = defaultProps7;
 SolidPolygonLayer.layerName = "SolidPolygonLayer";
 var solid_polygon_layer_default = SolidPolygonLayer;
 
@@ -80428,7 +82042,7 @@ function replaceInRange({ data, getIndex, dataRange, replace }) {
 // node_modules/@deck.gl/layers/dist/polygon-layer/polygon-layer.js
 var defaultLineColor = [0, 0, 0, 255];
 var defaultFillColor = [0, 0, 0, 255];
-var defaultProps6 = {
+var defaultProps8 = {
   stroked: true,
   filled: true,
   extruded: false,
@@ -80585,11 +82199,1842 @@ var PolygonLayer = class extends composite_layer_default {
   }
 };
 PolygonLayer.layerName = "PolygonLayer";
-PolygonLayer.defaultProps = defaultProps6;
+PolygonLayer.defaultProps = defaultProps8;
 var polygon_layer_default = PolygonLayer;
 
+// node_modules/@deck.gl/layers/dist/geojson-layer/geojson-binary.js
+function binaryToFeatureForAccesor(data, index) {
+  if (!data) {
+    return null;
+  }
+  const featureIndex = "startIndices" in data ? data.startIndices[index] : index;
+  const geometryIndex = data.featureIds.value[featureIndex];
+  if (featureIndex !== -1) {
+    return getPropertiesForIndex(data, geometryIndex, featureIndex);
+  }
+  return null;
+}
+function getPropertiesForIndex(data, propertiesIndex, numericPropsIndex) {
+  const feature = {
+    properties: { ...data.properties[propertiesIndex] }
+  };
+  for (const prop in data.numericProps) {
+    feature.properties[prop] = data.numericProps[prop].value[numericPropsIndex];
+  }
+  return feature;
+}
+function calculatePickingColors(geojsonBinary, encodePickingColor) {
+  const pickingColors = {
+    points: null,
+    lines: null,
+    polygons: null
+  };
+  for (const key in pickingColors) {
+    const featureIds = geojsonBinary[key].globalFeatureIds.value;
+    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 4);
+    const pickingColor = [];
+    for (let i3 = 0; i3 < featureIds.length; i3++) {
+      encodePickingColor(featureIds[i3], pickingColor);
+      pickingColors[key][i3 * 4 + 0] = pickingColor[0];
+      pickingColors[key][i3 * 4 + 1] = pickingColor[1];
+      pickingColors[key][i3 * 4 + 2] = pickingColor[2];
+      pickingColors[key][i3 * 4 + 3] = 255;
+    }
+  }
+  return pickingColors;
+}
+
+// node_modules/@deck.gl/layers/dist/text-layer/multi-icon-layer/sdf-uniforms.js
+var uniformBlock9 = `uniform sdfUniforms {
+  float gamma;
+  bool enabled;
+  float buffer;
+  float outlineBuffer;
+  vec4 outlineColor;
+} sdf;
+`;
+var sdfUniforms = {
+  name: "sdf",
+  vs: uniformBlock9,
+  fs: uniformBlock9,
+  uniformTypes: {
+    gamma: "f32",
+    enabled: "f32",
+    buffer: "f32",
+    outlineBuffer: "f32",
+    outlineColor: "vec4<f32>"
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/text-layer/multi-icon-layer/multi-icon-layer-fragment.glsl.js
+var multi_icon_layer_fragment_glsl_default = `#version 300 es
+#define SHADER_NAME multi-icon-layer-fragment-shader
+precision highp float;
+uniform sampler2D iconsTexture;
+in vec4 vColor;
+in vec2 vTextureCoords;
+in vec2 uv;
+out vec4 fragColor;
+void main(void) {
+geometry.uv = uv;
+if (!bool(picking.isActive)) {
+float alpha = texture(iconsTexture, vTextureCoords).a;
+vec4 color = vColor;
+if (sdf.enabled) {
+float distance = alpha;
+alpha = smoothstep(sdf.buffer - sdf.gamma, sdf.buffer + sdf.gamma, distance);
+if (sdf.outlineBuffer > 0.0) {
+float inFill = alpha;
+float inBorder = smoothstep(sdf.outlineBuffer - sdf.gamma, sdf.outlineBuffer + sdf.gamma, distance);
+color = mix(sdf.outlineColor, vColor, inFill);
+alpha = inBorder;
+}
+}
+float a = alpha * color.a;
+if (a < icon.alphaCutoff) {
+discard;
+}
+fragColor = vec4(color.rgb, a * layer.opacity);
+}
+DECKGL_FILTER_COLOR(fragColor, geometry);
+}
+`;
+
+// node_modules/@deck.gl/layers/dist/text-layer/multi-icon-layer/multi-icon-layer.js
+var DEFAULT_BUFFER2 = 192 / 256;
+var EMPTY_ARRAY3 = [];
+var defaultProps9 = {
+  getIconOffsets: { type: "accessor", value: (x5) => x5.offsets },
+  alphaCutoff: 1e-3,
+  smoothing: 0.1,
+  outlineWidth: 0,
+  outlineColor: { type: "color", value: [0, 0, 0, 255] }
+};
+var MultiIconLayer = class extends icon_layer_default {
+  getShaders() {
+    const shaders = super.getShaders();
+    return { ...shaders, modules: [...shaders.modules, sdfUniforms], fs: multi_icon_layer_fragment_glsl_default };
+  }
+  initializeState() {
+    super.initializeState();
+    const attributeManager = this.getAttributeManager();
+    attributeManager.addInstanced({
+      instanceOffsets: {
+        size: 2,
+        accessor: "getIconOffsets"
+      },
+      instancePickingColors: {
+        type: "uint8",
+        size: 3,
+        accessor: (object2, { index, target: value2 }) => this.encodePickingColor(index, value2)
+      }
+    });
+  }
+  updateState(params) {
+    super.updateState(params);
+    const { props, oldProps } = params;
+    let { outlineColor } = props;
+    if (outlineColor !== oldProps.outlineColor) {
+      outlineColor = outlineColor.map((x5) => x5 / 255);
+      outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
+      this.setState({
+        outlineColor
+      });
+    }
+    if (!props.sdf && props.outlineWidth) {
+      log_default.warn(`${this.id}: fontSettings.sdf is required to render outline`)();
+    }
+  }
+  draw(params) {
+    const { sdf, smoothing, outlineWidth } = this.props;
+    const { outlineColor } = this.state;
+    const outlineBuffer = outlineWidth ? Math.max(smoothing, DEFAULT_BUFFER2 * (1 - outlineWidth)) : -1;
+    const model = this.state.model;
+    const sdfProps = {
+      buffer: DEFAULT_BUFFER2,
+      outlineBuffer,
+      gamma: smoothing,
+      enabled: Boolean(sdf),
+      outlineColor
+    };
+    model.shaderInputs.setProps({ sdf: sdfProps });
+    super.draw(params);
+    if (sdf && outlineWidth) {
+      const { iconManager } = this.state;
+      const iconsTexture = iconManager.getTexture();
+      if (iconsTexture) {
+        model.shaderInputs.setProps({ sdf: { ...sdfProps, outlineBuffer: DEFAULT_BUFFER2 } });
+        model.draw(this.context.renderPass);
+      }
+    }
+  }
+  getInstanceOffset(icons) {
+    return icons ? Array.from(icons).flatMap((icon) => super.getInstanceOffset(icon)) : EMPTY_ARRAY3;
+  }
+  getInstanceColorMode(icons) {
+    return 1;
+  }
+  getInstanceIconFrame(icons) {
+    return icons ? Array.from(icons).flatMap((icon) => super.getInstanceIconFrame(icon)) : EMPTY_ARRAY3;
+  }
+};
+MultiIconLayer.defaultProps = defaultProps9;
+MultiIconLayer.layerName = "MultiIconLayer";
+var multi_icon_layer_default = MultiIconLayer;
+
+// node_modules/@mapbox/tiny-sdf/index.js
+var INF = 1e20;
+var alphaTable = new Float64Array(256);
+for (let i3 = 0; i3 < 256; i3++) {
+  const d3 = 0.5 - Math.pow(i3 / 255, 1 / 2.2);
+  alphaTable[i3] = d3 * Math.abs(d3);
+}
+alphaTable[255] = -INF;
+var TinySDF = class {
+  constructor({
+    fontSize = 24,
+    buffer = 3,
+    radius = 8,
+    cutoff = 0.25,
+    fontFamily = "sans-serif",
+    fontWeight = "normal",
+    fontStyle = "normal",
+    lang = null
+  } = {}) {
+    buffer = this.buffer = Math.round(buffer);
+    this.radius = radius;
+    this.cutoff = cutoff;
+    this.lang = lang;
+    const size = this.size = Math.ceil(fontSize) + buffer * 4;
+    const canvas2 = this._createCanvas(size);
+    const ctx2 = this.ctx = canvas2.getContext("2d", { willReadFrequently: true });
+    ctx2.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+    ctx2.textBaseline = "alphabetic";
+    ctx2.textAlign = "left";
+    ctx2.fillStyle = "black";
+    if (lang) ctx2.lang = lang;
+    const maxGlyphDim = this.maxGlyphDim = size - buffer;
+    const gridDim = maxGlyphDim + 2 * buffer;
+    this.gridOuter = new Float64Array(gridDim * gridDim);
+    this.gridInner = new Float64Array(gridDim * gridDim);
+    this.f = new Float64Array(gridDim);
+    this.z = new Float64Array(gridDim + 1);
+    this.v = new Uint16Array(gridDim);
+  }
+  _createCanvas(size) {
+    if (typeof OffscreenCanvas !== "undefined") {
+      return new OffscreenCanvas(size, size);
+    }
+    const canvas2 = document.createElement("canvas");
+    canvas2.width = canvas2.height = size;
+    return canvas2;
+  }
+  draw(char) {
+    const {
+      width: glyphAdvance,
+      actualBoundingBoxAscent,
+      actualBoundingBoxDescent,
+      actualBoundingBoxLeft,
+      actualBoundingBoxRight
+    } = this.ctx.measureText(char);
+    const glyphTop = Math.ceil(actualBoundingBoxAscent);
+    const glyphLeft = Math.floor(-actualBoundingBoxLeft);
+    const glyphWidth = Math.max(0, Math.min(this.maxGlyphDim, Math.ceil(actualBoundingBoxRight) - glyphLeft));
+    const glyphHeight = Math.max(0, Math.min(this.maxGlyphDim, glyphTop + Math.ceil(actualBoundingBoxDescent)));
+    const width = glyphWidth + 2 * this.buffer;
+    const height = glyphHeight + 2 * this.buffer;
+    const len4 = width * height;
+    const data = new Uint8ClampedArray(len4);
+    const glyph = { data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance };
+    if (glyphWidth === 0 || glyphHeight === 0) return glyph;
+    const { ctx: ctx2, buffer, gridInner, gridOuter } = this;
+    ctx2.clearRect(buffer, buffer, glyphWidth, glyphHeight);
+    ctx2.fillText(char, buffer - glyphLeft, buffer + glyphTop);
+    const imgData = ctx2.getImageData(buffer, buffer, glyphWidth, glyphHeight);
+    gridOuter.fill(INF, 0, len4);
+    gridInner.fill(0, 0, len4);
+    let imgIdx = 3;
+    for (let y5 = 0; y5 < glyphHeight; y5++) {
+      let j4 = (y5 + buffer) * width + buffer;
+      for (let x5 = 0; x5 < glyphWidth; x5++, imgIdx += 4, j4++) {
+        const a5 = imgData.data[imgIdx];
+        if (a5 === 0) continue;
+        const t4 = alphaTable[a5];
+        gridOuter[j4] = Math.max(0, t4);
+        gridInner[j4] = Math.max(0, -t4);
+      }
+    }
+    edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z, buffer);
+    const pad = Math.min(buffer, 1);
+    edt(gridInner, buffer - pad, buffer - pad, glyphWidth + 2 * pad, glyphHeight + 2 * pad, width, this.f, this.v, this.z);
+    const scale5 = 255 / this.radius;
+    const base = 255 * (1 - this.cutoff);
+    for (let i3 = 0; i3 < len4; i3++) {
+      const d3 = Math.sqrt(gridOuter[i3]) - Math.sqrt(gridInner[i3]);
+      data[i3] = base - scale5 * d3;
+    }
+    return glyph;
+  }
+};
+function edt(data, x0, y0, width, height, gridSize, f4, v4, z4, skipCols = 0) {
+  for (let x5 = x0 + skipCols; x5 < x0 + width - skipCols; x5++) edt1d(data, y0 * gridSize + x5, gridSize, height, f4, v4, z4);
+  for (let y5 = y0; y5 < y0 + height; y5++) edt1d(data, y5 * gridSize + x0, 1, width, f4, v4, z4);
+}
+function edt1d(grid, offset, stride, length4, f4, v4, z4) {
+  v4[0] = 0;
+  z4[0] = -INF;
+  z4[1] = INF;
+  f4[0] = grid[offset];
+  for (let q4 = 1, k5 = 0; q4 < length4; q4++) {
+    const fq = f4[q4] = grid[offset + q4 * stride];
+    const q22 = q4 * q4;
+    let s4;
+    do {
+      const r3 = v4[k5];
+      s4 = (fq - f4[r3] + q22 - r3 * r3) / (q4 - r3) / 2;
+    } while (s4 <= z4[k5] && --k5 > -1);
+    k5++;
+    v4[k5] = q4;
+    z4[k5] = s4;
+    z4[k5 + 1] = INF;
+  }
+  for (let q4 = 0, k5 = 0; q4 < length4; q4++) {
+    while (z4[k5 + 1] < q4) k5++;
+    const r3 = v4[k5];
+    const qr2 = q4 - r3;
+    grid[offset + q4 * stride] = f4[r3] + qr2 * qr2;
+  }
+}
+
+// node_modules/@deck.gl/layers/dist/text-layer/utils.js
+var MISSING_CHAR_WIDTH = 32;
+var SINGLE_LINE = [];
+function nextPowOfTwo2(number4) {
+  return Math.pow(2, Math.ceil(Math.log2(number4)));
+}
+function buildMapping2({ characterSet, getFontWidth, fontHeight, buffer, maxCanvasWidth, mapping = {}, xOffset = 0, yOffset = 0 }) {
+  let row = 0;
+  let x5 = xOffset;
+  const rowHeight = fontHeight + buffer * 2;
+  for (const char of characterSet) {
+    if (!mapping[char]) {
+      const width = getFontWidth(char);
+      if (x5 + width + buffer * 2 > maxCanvasWidth) {
+        x5 = 0;
+        row++;
+      }
+      mapping[char] = {
+        x: x5 + buffer,
+        y: yOffset + row * rowHeight + buffer,
+        width,
+        height: rowHeight,
+        layoutWidth: width,
+        layoutHeight: fontHeight
+      };
+      x5 += width + buffer * 2;
+    }
+  }
+  return {
+    mapping,
+    xOffset: x5,
+    yOffset: yOffset + row * rowHeight,
+    canvasHeight: nextPowOfTwo2(yOffset + (row + 1) * rowHeight)
+  };
+}
+function getTextWidth(text, startIndex, endIndex, mapping) {
+  let width = 0;
+  for (let i3 = startIndex; i3 < endIndex; i3++) {
+    const character = text[i3];
+    width += mapping[character]?.layoutWidth || 0;
+  }
+  return width;
+}
+function breakAll(text, startIndex, endIndex, maxWidth, iconMapping, target2) {
+  let rowStartCharIndex = startIndex;
+  let rowOffsetLeft = 0;
+  for (let i3 = startIndex; i3 < endIndex; i3++) {
+    const textWidth = getTextWidth(text, i3, i3 + 1, iconMapping);
+    if (rowOffsetLeft + textWidth > maxWidth) {
+      if (rowStartCharIndex < i3) {
+        target2.push(i3);
+      }
+      rowStartCharIndex = i3;
+      rowOffsetLeft = 0;
+    }
+    rowOffsetLeft += textWidth;
+  }
+  return rowOffsetLeft;
+}
+function breakWord(text, startIndex, endIndex, maxWidth, iconMapping, target2) {
+  let rowStartCharIndex = startIndex;
+  let groupStartCharIndex = startIndex;
+  let groupEndCharIndex = startIndex;
+  let rowOffsetLeft = 0;
+  for (let i3 = startIndex; i3 < endIndex; i3++) {
+    if (text[i3] === " ") {
+      groupEndCharIndex = i3 + 1;
+    } else if (text[i3 + 1] === " " || i3 + 1 === endIndex) {
+      groupEndCharIndex = i3 + 1;
+    }
+    if (groupEndCharIndex > groupStartCharIndex) {
+      let groupWidth = getTextWidth(text, groupStartCharIndex, groupEndCharIndex, iconMapping);
+      if (rowOffsetLeft + groupWidth > maxWidth) {
+        if (rowStartCharIndex < groupStartCharIndex) {
+          target2.push(groupStartCharIndex);
+          rowStartCharIndex = groupStartCharIndex;
+          rowOffsetLeft = 0;
+        }
+        if (groupWidth > maxWidth) {
+          groupWidth = breakAll(text, groupStartCharIndex, groupEndCharIndex, maxWidth, iconMapping, target2);
+          rowStartCharIndex = target2[target2.length - 1];
+        }
+      }
+      groupStartCharIndex = groupEndCharIndex;
+      rowOffsetLeft += groupWidth;
+    }
+  }
+  return rowOffsetLeft;
+}
+function autoWrapping(text, wordBreak, maxWidth, iconMapping, startIndex = 0, endIndex) {
+  if (endIndex === void 0) {
+    endIndex = text.length;
+  }
+  const result = [];
+  if (wordBreak === "break-all") {
+    breakAll(text, startIndex, endIndex, maxWidth, iconMapping, result);
+  } else {
+    breakWord(text, startIndex, endIndex, maxWidth, iconMapping, result);
+  }
+  return result;
+}
+function transformRow(line2, startIndex, endIndex, iconMapping, leftOffsets, rowSize) {
+  let x5 = 0;
+  let rowHeight = 0;
+  for (let i3 = startIndex; i3 < endIndex; i3++) {
+    const character = line2[i3];
+    const frame2 = iconMapping[character];
+    if (frame2) {
+      if (!rowHeight) {
+        rowHeight = frame2.layoutHeight;
+      }
+      leftOffsets[i3] = x5 + frame2.layoutWidth / 2;
+      x5 += frame2.layoutWidth;
+    } else {
+      log_default.warn(`Missing character: ${character} (${character.codePointAt(0)})`)();
+      leftOffsets[i3] = x5;
+      x5 += MISSING_CHAR_WIDTH;
+    }
+  }
+  rowSize[0] = x5;
+  rowSize[1] = rowHeight;
+}
+function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping) {
+  const characters = Array.from(paragraph);
+  const numCharacters = characters.length;
+  const x5 = new Array(numCharacters);
+  const y5 = new Array(numCharacters);
+  const rowWidth = new Array(numCharacters);
+  const autoWrappingEnabled = (wordBreak === "break-word" || wordBreak === "break-all") && isFinite(maxWidth) && maxWidth > 0;
+  const size = [0, 0];
+  const rowSize = [0, 0];
+  let rowOffsetTop = 0;
+  let lineStartIndex = 0;
+  let lineEndIndex = 0;
+  for (let i3 = 0; i3 <= numCharacters; i3++) {
+    const char = characters[i3];
+    if (char === "\n" || i3 === numCharacters) {
+      lineEndIndex = i3;
+    }
+    if (lineEndIndex > lineStartIndex) {
+      const rows = autoWrappingEnabled ? autoWrapping(characters, wordBreak, maxWidth, iconMapping, lineStartIndex, lineEndIndex) : SINGLE_LINE;
+      for (let rowIndex = 0; rowIndex <= rows.length; rowIndex++) {
+        const rowStart = rowIndex === 0 ? lineStartIndex : rows[rowIndex - 1];
+        const rowEnd = rowIndex < rows.length ? rows[rowIndex] : lineEndIndex;
+        transformRow(characters, rowStart, rowEnd, iconMapping, x5, rowSize);
+        for (let j4 = rowStart; j4 < rowEnd; j4++) {
+          const rowOffsetLeft = x5[j4] - rowSize[0] / 2;
+          const char2 = characters[j4];
+          const layoutOffsetY = iconMapping[char2]?.layoutOffsetY || 0;
+          y5[j4] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;
+          rowWidth[j4] = rowSize[0];
+        }
+        rowOffsetTop = rowOffsetTop + rowSize[1] * lineHeight;
+        size[0] = Math.max(size[0], rowSize[0]);
+      }
+      lineStartIndex = lineEndIndex;
+    }
+    if (char === "\n") {
+      x5[lineStartIndex] = 0;
+      y5[lineStartIndex] = 0;
+      rowWidth[lineStartIndex] = 0;
+      lineStartIndex++;
+    }
+  }
+  size[1] = rowOffsetTop;
+  return { x: x5, y: y5, rowWidth, size };
+}
+function getTextFromBuffer({ value: value2, length: length4, stride, offset, startIndices, characterSet }) {
+  const bytesPerElement = value2.BYTES_PER_ELEMENT;
+  const elementStride = stride ? stride / bytesPerElement : 1;
+  const elementOffset = offset ? offset / bytesPerElement : 0;
+  const characterCount = startIndices[length4] || Math.ceil((value2.length - elementOffset) / elementStride);
+  const autoCharacterSet = characterSet && /* @__PURE__ */ new Set();
+  const texts = new Array(length4);
+  let codes = value2;
+  if (elementStride > 1 || elementOffset > 0) {
+    const ArrayType = value2.constructor;
+    codes = new ArrayType(characterCount);
+    for (let i3 = 0; i3 < characterCount; i3++) {
+      codes[i3] = value2[i3 * elementStride + elementOffset];
+    }
+  }
+  for (let index = 0; index < length4; index++) {
+    const startIndex = startIndices[index];
+    const endIndex = startIndices[index + 1] || characterCount;
+    const codesAtIndex = codes.subarray(startIndex, endIndex);
+    texts[index] = String.fromCodePoint.apply(null, codesAtIndex);
+    if (autoCharacterSet) {
+      codesAtIndex.forEach(autoCharacterSet.add, autoCharacterSet);
+    }
+  }
+  if (autoCharacterSet) {
+    for (const charCode of autoCharacterSet) {
+      characterSet.add(String.fromCodePoint(charCode));
+    }
+  }
+  return { texts, characterCount };
+}
+
+// node_modules/@deck.gl/layers/dist/text-layer/lru-cache.js
+var LRUCache = class {
+  constructor(limit = 5) {
+    this._cache = {};
+    this._order = [];
+    this.limit = limit;
+  }
+  get(key) {
+    const value2 = this._cache[key];
+    if (value2) {
+      this._deleteOrder(key);
+      this._appendOrder(key);
+    }
+    return value2;
+  }
+  set(key, value2) {
+    if (!this._cache[key]) {
+      if (Object.keys(this._cache).length === this.limit) {
+        this.delete(this._order[0]);
+      }
+      this._cache[key] = value2;
+      this._appendOrder(key);
+    } else {
+      this.delete(key);
+      this._cache[key] = value2;
+      this._appendOrder(key);
+    }
+  }
+  delete(key) {
+    const value2 = this._cache[key];
+    if (value2) {
+      delete this._cache[key];
+      this._deleteOrder(key);
+    }
+  }
+  _deleteOrder(key) {
+    const index = this._order.indexOf(key);
+    if (index >= 0) {
+      this._order.splice(index, 1);
+    }
+  }
+  _appendOrder(key) {
+    this._order.push(key);
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/text-layer/font-atlas-manager.js
+function getDefaultCharacterSet() {
+  const charSet = [];
+  for (let i3 = 32; i3 < 128; i3++) {
+    charSet.push(String.fromCharCode(i3));
+  }
+  return charSet;
+}
+var DEFAULT_FONT_SETTINGS = {
+  fontFamily: "Monaco, monospace",
+  fontWeight: "normal",
+  characterSet: getDefaultCharacterSet(),
+  fontSize: 64,
+  buffer: 4,
+  sdf: false,
+  cutoff: 0.25,
+  radius: 12,
+  smoothing: 0.1
+};
+var MAX_CANVAS_WIDTH = 1024;
+var BASELINE_SCALE = 0.9;
+var HEIGHT_SCALE = 1.2;
+var CACHE_LIMIT = 3;
+var cache = new LRUCache(CACHE_LIMIT);
+function getNewChars(cacheKey, characterSet) {
+  let newCharSet;
+  if (typeof characterSet === "string") {
+    newCharSet = new Set(Array.from(characterSet));
+  } else {
+    newCharSet = new Set(characterSet);
+  }
+  const cachedFontAtlas = cache.get(cacheKey);
+  if (!cachedFontAtlas) {
+    return newCharSet;
+  }
+  for (const char in cachedFontAtlas.mapping) {
+    if (newCharSet.has(char)) {
+      newCharSet.delete(char);
+    }
+  }
+  return newCharSet;
+}
+function populateAlphaChannel(alphaChannel, imageData) {
+  for (let i3 = 0; i3 < alphaChannel.length; i3++) {
+    imageData.data[4 * i3 + 3] = alphaChannel[i3];
+  }
+}
+function setTextStyle(ctx2, fontFamily, fontSize, fontWeight) {
+  ctx2.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx2.fillStyle = "#000";
+  ctx2.textBaseline = "alphabetic";
+  ctx2.textAlign = "left";
+}
+function setFontAtlasCacheLimit(limit) {
+  log_default.assert(Number.isFinite(limit) && limit >= CACHE_LIMIT, "Invalid cache limit");
+  cache = new LRUCache(limit);
+}
+var FontAtlasManager = class {
+  constructor() {
+    this.props = { ...DEFAULT_FONT_SETTINGS };
+  }
+  get atlas() {
+    return this._atlas;
+  }
+  // TODO - cut during v9 porting as types reveal this is not correct
+  // get texture(): Texture | undefined {
+  //   return this._atlas;
+  // }
+  get mapping() {
+    return this._atlas && this._atlas.mapping;
+  }
+  get scale() {
+    const { fontSize, buffer } = this.props;
+    return (fontSize * HEIGHT_SCALE + buffer * 2) / fontSize;
+  }
+  setProps(props = {}) {
+    Object.assign(this.props, props);
+    this._key = this._getKey();
+    const charSet = getNewChars(this._key, this.props.characterSet);
+    const cachedFontAtlas = cache.get(this._key);
+    if (cachedFontAtlas && charSet.size === 0) {
+      if (this._atlas !== cachedFontAtlas) {
+        this._atlas = cachedFontAtlas;
+      }
+      return;
+    }
+    const fontAtlas = this._generateFontAtlas(charSet, cachedFontAtlas);
+    this._atlas = fontAtlas;
+    cache.set(this._key, fontAtlas);
+  }
+  // eslint-disable-next-line max-statements
+  _generateFontAtlas(characterSet, cachedFontAtlas) {
+    const { fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff } = this.props;
+    let canvas2 = cachedFontAtlas && cachedFontAtlas.data;
+    if (!canvas2) {
+      canvas2 = document.createElement("canvas");
+      canvas2.width = MAX_CANVAS_WIDTH;
+    }
+    const ctx2 = canvas2.getContext("2d", { willReadFrequently: true });
+    setTextStyle(ctx2, fontFamily, fontSize, fontWeight);
+    const { mapping, canvasHeight, xOffset, yOffset } = buildMapping2({
+      getFontWidth: (char) => ctx2.measureText(char).width,
+      fontHeight: fontSize * HEIGHT_SCALE,
+      buffer,
+      characterSet,
+      maxCanvasWidth: MAX_CANVAS_WIDTH,
+      ...cachedFontAtlas && {
+        mapping: cachedFontAtlas.mapping,
+        xOffset: cachedFontAtlas.xOffset,
+        yOffset: cachedFontAtlas.yOffset
+      }
+    });
+    if (canvas2.height !== canvasHeight) {
+      const imageData = ctx2.getImageData(0, 0, canvas2.width, canvas2.height);
+      canvas2.height = canvasHeight;
+      ctx2.putImageData(imageData, 0, 0);
+    }
+    setTextStyle(ctx2, fontFamily, fontSize, fontWeight);
+    if (sdf) {
+      const tinySDF = new TinySDF({
+        fontSize,
+        buffer,
+        radius,
+        cutoff,
+        fontFamily,
+        fontWeight: `${fontWeight}`
+      });
+      for (const char of characterSet) {
+        const { data, width, height, glyphTop } = tinySDF.draw(char);
+        mapping[char].width = width;
+        mapping[char].layoutOffsetY = fontSize * BASELINE_SCALE - glyphTop;
+        const imageData = ctx2.createImageData(width, height);
+        populateAlphaChannel(data, imageData);
+        ctx2.putImageData(imageData, mapping[char].x, mapping[char].y);
+      }
+    } else {
+      for (const char of characterSet) {
+        ctx2.fillText(char, mapping[char].x, mapping[char].y + buffer + fontSize * BASELINE_SCALE);
+      }
+    }
+    return {
+      xOffset,
+      yOffset,
+      mapping,
+      data: canvas2,
+      width: canvas2.width,
+      height: canvas2.height
+    };
+  }
+  _getKey() {
+    const { fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff } = this.props;
+    if (sdf) {
+      return `${fontFamily} ${fontWeight} ${fontSize} ${buffer} ${radius} ${cutoff}`;
+    }
+    return `${fontFamily} ${fontWeight} ${fontSize} ${buffer}`;
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer-uniforms.js
+var uniformBlock10 = `uniform textBackgroundUniforms {
+  bool billboard;
+  float sizeScale;
+  float sizeMinPixels;
+  float sizeMaxPixels;
+  vec4 borderRadius;
+  vec4 padding;
+  highp int sizeUnits;
+  bool stroked;
+} textBackground;
+`;
+var textBackgroundUniforms = {
+  name: "textBackground",
+  vs: uniformBlock10,
+  fs: uniformBlock10,
+  uniformTypes: {
+    billboard: "f32",
+    sizeScale: "f32",
+    sizeMinPixels: "f32",
+    sizeMaxPixels: "f32",
+    borderRadius: "vec4<f32>",
+    padding: "vec4<f32>",
+    sizeUnits: "i32",
+    stroked: "f32"
+  }
+};
+
+// node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer-vertex.glsl.js
+var text_background_layer_vertex_glsl_default = `#version 300 es
+#define SHADER_NAME text-background-layer-vertex-shader
+in vec2 positions;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in vec4 instanceRects;
+in float instanceSizes;
+in float instanceAngles;
+in vec2 instancePixelOffsets;
+in float instanceLineWidths;
+in vec4 instanceFillColors;
+in vec4 instanceLineColors;
+in vec3 instancePickingColors;
+out vec4 vFillColor;
+out vec4 vLineColor;
+out float vLineWidth;
+out vec2 uv;
+out vec2 dimensions;
+vec2 rotate_by_angle(vec2 vertex, float angle) {
+float angle_radian = radians(angle);
+float cos_angle = cos(angle_radian);
+float sin_angle = sin(angle_radian);
+mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
+return rotationMatrix * vertex;
+}
+void main(void) {
+geometry.worldPosition = instancePositions;
+geometry.uv = positions;
+geometry.pickingColor = instancePickingColors;
+uv = positions;
+vLineWidth = instanceLineWidths;
+float sizePixels = clamp(
+project_size_to_pixel(instanceSizes * textBackground.sizeScale, textBackground.sizeUnits),
+textBackground.sizeMinPixels, textBackground.sizeMaxPixels
+);
+dimensions = instanceRects.zw * sizePixels + textBackground.padding.xy + textBackground.padding.zw;
+vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * sizePixels + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
+pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
+pixelOffset += instancePixelOffsets;
+pixelOffset.y *= -1.0;
+if (textBackground.billboard)  {
+gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+vec3 offset = vec3(pixelOffset, 0.0);
+DECKGL_FILTER_SIZE(offset, geometry);
+gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+} else {
+vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
+DECKGL_FILTER_SIZE(offset_common, geometry);
+gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
+DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+}
+vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);
+DECKGL_FILTER_COLOR(vFillColor, geometry);
+vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
+DECKGL_FILTER_COLOR(vLineColor, geometry);
+}
+`;
+
+// node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer-fragment.glsl.js
+var text_background_layer_fragment_glsl_default = `#version 300 es
+#define SHADER_NAME text-background-layer-fragment-shader
+precision highp float;
+in vec4 vFillColor;
+in vec4 vLineColor;
+in float vLineWidth;
+in vec2 uv;
+in vec2 dimensions;
+out vec4 fragColor;
+float round_rect(vec2 p, vec2 size, vec4 radii) {
+vec2 pixelPositionCB = (p - 0.5) * size;
+vec2 sizeCB = size * 0.5;
+float maxBorderRadius = min(size.x, size.y) * 0.5;
+vec4 borderRadius = vec4(min(radii, maxBorderRadius));
+borderRadius.xy =
+(pixelPositionCB.x > 0.0) ? borderRadius.xy : borderRadius.zw;
+borderRadius.x = (pixelPositionCB.y > 0.0) ? borderRadius.x : borderRadius.y;
+vec2 q = abs(pixelPositionCB) - sizeCB + borderRadius.x;
+return -(min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - borderRadius.x);
+}
+float rect(vec2 p, vec2 size) {
+vec2 pixelPosition = p * size;
+return min(min(pixelPosition.x, size.x - pixelPosition.x),
+min(pixelPosition.y, size.y - pixelPosition.y));
+}
+vec4 get_stroked_fragColor(float dist) {
+float isBorder = smoothedge(dist, vLineWidth);
+return mix(vFillColor, vLineColor, isBorder);
+}
+void main(void) {
+geometry.uv = uv;
+if (textBackground.borderRadius != vec4(0.0)) {
+float distToEdge = round_rect(uv, dimensions, textBackground.borderRadius);
+if (textBackground.stroked) {
+fragColor = get_stroked_fragColor(distToEdge);
+} else {
+fragColor = vFillColor;
+}
+float shapeAlpha = smoothedge(-distToEdge, 0.0);
+fragColor.a *= shapeAlpha;
+} else {
+if (textBackground.stroked) {
+float distToEdge = rect(uv, dimensions);
+fragColor = get_stroked_fragColor(distToEdge);
+} else {
+fragColor = vFillColor;
+}
+}
+DECKGL_FILTER_COLOR(fragColor, geometry);
+}
+`;
+
+// node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer.js
+var defaultProps10 = {
+  billboard: true,
+  sizeScale: 1,
+  sizeUnits: "pixels",
+  sizeMinPixels: 0,
+  sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+  borderRadius: { type: "object", value: 0 },
+  padding: { type: "array", value: [0, 0, 0, 0] },
+  getPosition: { type: "accessor", value: (x5) => x5.position },
+  getSize: { type: "accessor", value: 1 },
+  getAngle: { type: "accessor", value: 0 },
+  getPixelOffset: { type: "accessor", value: [0, 0] },
+  getBoundingRect: { type: "accessor", value: [0, 0, 0, 0] },
+  getFillColor: { type: "accessor", value: [0, 0, 0, 255] },
+  getLineColor: { type: "accessor", value: [0, 0, 0, 255] },
+  getLineWidth: { type: "accessor", value: 1 }
+};
+var TextBackgroundLayer = class extends layer_default {
+  getShaders() {
+    return super.getShaders({ vs: text_background_layer_vertex_glsl_default, fs: text_background_layer_fragment_glsl_default, modules: [project32_default, picking_default, textBackgroundUniforms] });
+  }
+  initializeState() {
+    this.getAttributeManager().addInstanced({
+      instancePositions: {
+        size: 3,
+        type: "float64",
+        fp64: this.use64bitPositions(),
+        transition: true,
+        accessor: "getPosition"
+      },
+      instanceSizes: {
+        size: 1,
+        transition: true,
+        accessor: "getSize",
+        defaultValue: 1
+      },
+      instanceAngles: {
+        size: 1,
+        transition: true,
+        accessor: "getAngle"
+      },
+      instanceRects: {
+        size: 4,
+        accessor: "getBoundingRect"
+      },
+      instancePixelOffsets: {
+        size: 2,
+        transition: true,
+        accessor: "getPixelOffset"
+      },
+      instanceFillColors: {
+        size: 4,
+        transition: true,
+        type: "unorm8",
+        accessor: "getFillColor",
+        defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineColors: {
+        size: 4,
+        transition: true,
+        type: "unorm8",
+        accessor: "getLineColor",
+        defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineWidths: {
+        size: 1,
+        transition: true,
+        accessor: "getLineWidth",
+        defaultValue: 1
+      }
+    });
+  }
+  updateState(params) {
+    super.updateState(params);
+    const { changeFlags } = params;
+    if (changeFlags.extensionsChanged) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+      this.getAttributeManager().invalidateAll();
+    }
+  }
+  draw({ uniforms }) {
+    const { billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth } = this.props;
+    let { padding, borderRadius } = this.props;
+    if (padding.length < 4) {
+      padding = [padding[0], padding[1], padding[0], padding[1]];
+    }
+    if (!Array.isArray(borderRadius)) {
+      borderRadius = [borderRadius, borderRadius, borderRadius, borderRadius];
+    }
+    const model = this.state.model;
+    const textBackgroundProps = {
+      billboard,
+      stroked: Boolean(getLineWidth),
+      borderRadius,
+      padding,
+      sizeUnits: UNIT[sizeUnits],
+      sizeScale,
+      sizeMinPixels,
+      sizeMaxPixels
+    };
+    model.shaderInputs.setProps({ textBackground: textBackgroundProps });
+    model.draw(this.context.renderPass);
+  }
+  _getModel() {
+    const positions = [0, 0, 1, 0, 0, 1, 1, 1];
+    return new Model(this.context.device, {
+      ...this.getShaders(),
+      id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      geometry: new Geometry({
+        topology: "triangle-strip",
+        vertexCount: 4,
+        attributes: {
+          positions: { size: 2, value: new Float32Array(positions) }
+        }
+      }),
+      isInstanced: true
+    });
+  }
+};
+TextBackgroundLayer.defaultProps = defaultProps10;
+TextBackgroundLayer.layerName = "TextBackgroundLayer";
+var text_background_layer_default = TextBackgroundLayer;
+
+// node_modules/@deck.gl/layers/dist/text-layer/text-layer.js
+var TEXT_ANCHOR = {
+  start: 1,
+  middle: 0,
+  end: -1
+};
+var ALIGNMENT_BASELINE = {
+  top: 1,
+  center: 0,
+  bottom: -1
+};
+var DEFAULT_COLOR6 = [0, 0, 0, 255];
+var DEFAULT_LINE_HEIGHT = 1;
+var defaultProps11 = {
+  billboard: true,
+  sizeScale: 1,
+  sizeUnits: "pixels",
+  sizeMinPixels: 0,
+  sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+  background: false,
+  getBackgroundColor: { type: "accessor", value: [255, 255, 255, 255] },
+  getBorderColor: { type: "accessor", value: DEFAULT_COLOR6 },
+  getBorderWidth: { type: "accessor", value: 0 },
+  backgroundBorderRadius: { type: "object", value: 0 },
+  backgroundPadding: { type: "array", value: [0, 0, 0, 0] },
+  characterSet: { type: "object", value: DEFAULT_FONT_SETTINGS.characterSet },
+  fontFamily: DEFAULT_FONT_SETTINGS.fontFamily,
+  fontWeight: DEFAULT_FONT_SETTINGS.fontWeight,
+  lineHeight: DEFAULT_LINE_HEIGHT,
+  outlineWidth: { type: "number", value: 0, min: 0 },
+  outlineColor: { type: "color", value: DEFAULT_COLOR6 },
+  fontSettings: { type: "object", value: {}, compare: 1 },
+  // auto wrapping options
+  wordBreak: "break-word",
+  maxWidth: { type: "number", value: -1 },
+  getText: { type: "accessor", value: (x5) => x5.text },
+  getPosition: { type: "accessor", value: (x5) => x5.position },
+  getColor: { type: "accessor", value: DEFAULT_COLOR6 },
+  getSize: { type: "accessor", value: 32 },
+  getAngle: { type: "accessor", value: 0 },
+  getTextAnchor: { type: "accessor", value: "middle" },
+  getAlignmentBaseline: { type: "accessor", value: "center" },
+  getPixelOffset: { type: "accessor", value: [0, 0] },
+  // deprecated
+  backgroundColor: { deprecatedFor: ["background", "getBackgroundColor"] }
+};
+var TextLayer = class extends composite_layer_default {
+  constructor() {
+    super(...arguments);
+    this.getBoundingRect = (object2, objectInfo) => {
+      let { size: [width, height] } = this.transformParagraph(object2, objectInfo);
+      const { fontSize } = this.state.fontAtlasManager.props;
+      width /= fontSize;
+      height /= fontSize;
+      const { getTextAnchor, getAlignmentBaseline } = this.props;
+      const anchorX = TEXT_ANCHOR[typeof getTextAnchor === "function" ? getTextAnchor(object2, objectInfo) : getTextAnchor];
+      const anchorY = ALIGNMENT_BASELINE[typeof getAlignmentBaseline === "function" ? getAlignmentBaseline(object2, objectInfo) : getAlignmentBaseline];
+      return [(anchorX - 1) * width / 2, (anchorY - 1) * height / 2, width, height];
+    };
+    this.getIconOffsets = (object2, objectInfo) => {
+      const { getTextAnchor, getAlignmentBaseline } = this.props;
+      const { x: x5, y: y5, rowWidth, size: [width, height] } = this.transformParagraph(object2, objectInfo);
+      const anchorX = TEXT_ANCHOR[typeof getTextAnchor === "function" ? getTextAnchor(object2, objectInfo) : getTextAnchor];
+      const anchorY = ALIGNMENT_BASELINE[typeof getAlignmentBaseline === "function" ? getAlignmentBaseline(object2, objectInfo) : getAlignmentBaseline];
+      const numCharacters = x5.length;
+      const offsets = new Array(numCharacters * 2);
+      let index = 0;
+      for (let i3 = 0; i3 < numCharacters; i3++) {
+        const rowOffset = (1 - anchorX) * (width - rowWidth[i3]) / 2;
+        offsets[index++] = (anchorX - 1) * width / 2 + rowOffset + x5[i3];
+        offsets[index++] = (anchorY - 1) * height / 2 + y5[i3];
+      }
+      return offsets;
+    };
+  }
+  initializeState() {
+    this.state = {
+      styleVersion: 0,
+      fontAtlasManager: new FontAtlasManager()
+    };
+    if (this.props.maxWidth > 0) {
+      log_default.once(1, "v8.9 breaking change: TextLayer maxWidth is now relative to text size")();
+    }
+  }
+  // eslint-disable-next-line complexity
+  updateState(params) {
+    const { props, oldProps, changeFlags } = params;
+    const textChanged = changeFlags.dataChanged || changeFlags.updateTriggersChanged && (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText);
+    if (textChanged) {
+      this._updateText();
+    }
+    const fontChanged = this._updateFontAtlas();
+    const styleChanged = fontChanged || props.lineHeight !== oldProps.lineHeight || props.wordBreak !== oldProps.wordBreak || props.maxWidth !== oldProps.maxWidth;
+    if (styleChanged) {
+      this.setState({
+        styleVersion: this.state.styleVersion + 1
+      });
+    }
+  }
+  getPickingInfo({ info }) {
+    info.object = info.index >= 0 ? this.props.data[info.index] : null;
+    return info;
+  }
+  /** Returns true if font has changed */
+  _updateFontAtlas() {
+    const { fontSettings, fontFamily, fontWeight } = this.props;
+    const { fontAtlasManager, characterSet } = this.state;
+    const fontProps = {
+      ...fontSettings,
+      characterSet,
+      fontFamily,
+      fontWeight
+    };
+    if (!fontAtlasManager.mapping) {
+      fontAtlasManager.setProps(fontProps);
+      return true;
+    }
+    for (const key in fontProps) {
+      if (fontProps[key] !== fontAtlasManager.props[key]) {
+        fontAtlasManager.setProps(fontProps);
+        return true;
+      }
+    }
+    return false;
+  }
+  // Text strings are variable width objects
+  // Count characters and start offsets
+  _updateText() {
+    const { data, characterSet } = this.props;
+    const textBuffer = data.attributes?.getText;
+    let { getText } = this.props;
+    let startIndices = data.startIndices;
+    let numInstances;
+    const autoCharacterSet = characterSet === "auto" && /* @__PURE__ */ new Set();
+    if (textBuffer && startIndices) {
+      const { texts, characterCount } = getTextFromBuffer({
+        ...ArrayBuffer.isView(textBuffer) ? { value: textBuffer } : textBuffer,
+        // @ts-ignore if data.attribute is defined then length is expected
+        length: data.length,
+        startIndices,
+        characterSet: autoCharacterSet
+      });
+      numInstances = characterCount;
+      getText = (_4, { index }) => texts[index];
+    } else {
+      const { iterable, objectInfo } = createIterable(data);
+      startIndices = [0];
+      numInstances = 0;
+      for (const object2 of iterable) {
+        objectInfo.index++;
+        const text = Array.from(getText(object2, objectInfo) || "");
+        if (autoCharacterSet) {
+          text.forEach(autoCharacterSet.add, autoCharacterSet);
+        }
+        numInstances += text.length;
+        startIndices.push(numInstances);
+      }
+    }
+    this.setState({
+      getText,
+      startIndices,
+      numInstances,
+      characterSet: autoCharacterSet || characterSet
+    });
+  }
+  /** There are two size systems in this layer:
+  
+      + Pixel size: user-specified text size, via getSize, sizeScale, sizeUnits etc.
+        The layer roughly matches the output of the layer to CSS pixels, e.g. getSize: 12, sizeScale: 2
+        in layer props is roughly equivalent to font-size: 24px in CSS.
+      + Texture size: internally, character positions in a text blob are calculated using the sizes of iconMapping,
+        which depends on how large each character is drawn into the font atlas. This is controlled by
+        fontSettings.fontSize (default 64) and most users do not set it manually.
+        These numbers are intended to be used in the vertex shader and never to be exposed to the end user.
+  
+      All surfaces exposed to the user should either use the pixel size or a multiplier relative to the pixel size. */
+  /** Calculate the size and position of each character in a text string.
+   * Values are in texture size */
+  transformParagraph(object2, objectInfo) {
+    const { fontAtlasManager } = this.state;
+    const iconMapping = fontAtlasManager.mapping;
+    const getText = this.state.getText;
+    const { wordBreak, lineHeight, maxWidth } = this.props;
+    const paragraph = getText(object2, objectInfo) || "";
+    return transformParagraph(paragraph, lineHeight, wordBreak, maxWidth * fontAtlasManager.props.fontSize, iconMapping);
+  }
+  renderLayers() {
+    const { startIndices, numInstances, getText, fontAtlasManager: { scale: scale5, atlas, mapping }, styleVersion } = this.state;
+    const { data, _dataDiff, getPosition: getPosition2, getColor: getColor2, getSize, getAngle, getPixelOffset, getBackgroundColor, getBorderColor, getBorderWidth, backgroundBorderRadius, backgroundPadding, background, billboard, fontSettings, outlineWidth, outlineColor, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, transitions, updateTriggers } = this.props;
+    const CharactersLayerClass = this.getSubLayerClass("characters", multi_icon_layer_default);
+    const BackgroundLayerClass = this.getSubLayerClass("background", text_background_layer_default);
+    return [
+      background && new BackgroundLayerClass({
+        // background props
+        getFillColor: getBackgroundColor,
+        getLineColor: getBorderColor,
+        getLineWidth: getBorderWidth,
+        borderRadius: backgroundBorderRadius,
+        padding: backgroundPadding,
+        // props shared with characters layer
+        getPosition: getPosition2,
+        getSize,
+        getAngle,
+        getPixelOffset,
+        billboard,
+        sizeScale,
+        sizeUnits,
+        sizeMinPixels,
+        sizeMaxPixels,
+        transitions: transitions && {
+          getPosition: transitions.getPosition,
+          getAngle: transitions.getAngle,
+          getSize: transitions.getSize,
+          getFillColor: transitions.getBackgroundColor,
+          getLineColor: transitions.getBorderColor,
+          getLineWidth: transitions.getBorderWidth,
+          getPixelOffset: transitions.getPixelOffset
+        }
+      }, this.getSubLayerProps({
+        id: "background",
+        updateTriggers: {
+          getPosition: updateTriggers.getPosition,
+          getAngle: updateTriggers.getAngle,
+          getSize: updateTriggers.getSize,
+          getFillColor: updateTriggers.getBackgroundColor,
+          getLineColor: updateTriggers.getBorderColor,
+          getLineWidth: updateTriggers.getBorderWidth,
+          getPixelOffset: updateTriggers.getPixelOffset,
+          getBoundingRect: {
+            getText: updateTriggers.getText,
+            getTextAnchor: updateTriggers.getTextAnchor,
+            getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+            styleVersion
+          }
+        }
+      }), {
+        data: (
+          // @ts-ignore (2339) attribute is not defined on all data types
+          data.attributes && data.attributes.background ? (
+            // @ts-ignore (2339) attribute is not defined on all data types
+            { length: data.length, attributes: data.attributes.background }
+          ) : data
+        ),
+        _dataDiff,
+        // Maintain the same background behavior as <=8.3. Remove in v9?
+        autoHighlight: false,
+        getBoundingRect: this.getBoundingRect
+      }),
+      new CharactersLayerClass({
+        sdf: fontSettings.sdf,
+        smoothing: Number.isFinite(fontSettings.smoothing) ? fontSettings.smoothing : DEFAULT_FONT_SETTINGS.smoothing,
+        outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
+        outlineColor,
+        iconAtlas: atlas,
+        iconMapping: mapping,
+        getPosition: getPosition2,
+        getColor: getColor2,
+        getSize,
+        getAngle,
+        getPixelOffset,
+        billboard,
+        sizeScale: sizeScale * scale5,
+        sizeUnits,
+        sizeMinPixels: sizeMinPixels * scale5,
+        sizeMaxPixels: sizeMaxPixels * scale5,
+        transitions: transitions && {
+          getPosition: transitions.getPosition,
+          getAngle: transitions.getAngle,
+          getColor: transitions.getColor,
+          getSize: transitions.getSize,
+          getPixelOffset: transitions.getPixelOffset
+        }
+      }, this.getSubLayerProps({
+        id: "characters",
+        updateTriggers: {
+          all: updateTriggers.getText,
+          getPosition: updateTriggers.getPosition,
+          getAngle: updateTriggers.getAngle,
+          getColor: updateTriggers.getColor,
+          getSize: updateTriggers.getSize,
+          getPixelOffset: updateTriggers.getPixelOffset,
+          getIconOffsets: {
+            getTextAnchor: updateTriggers.getTextAnchor,
+            getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+            styleVersion
+          }
+        }
+      }), {
+        data,
+        _dataDiff,
+        startIndices,
+        numInstances,
+        getIconOffsets: this.getIconOffsets,
+        getIcon: getText
+      })
+    ];
+  }
+  static set fontAtlasCacheLimit(limit) {
+    setFontAtlasCacheLimit(limit);
+  }
+};
+TextLayer.defaultProps = defaultProps11;
+TextLayer.layerName = "TextLayer";
+var text_layer_default = TextLayer;
+
+// node_modules/@deck.gl/layers/dist/geojson-layer/sub-layer-map.js
+var POINT_LAYER = {
+  circle: {
+    type: scatterplot_layer_default,
+    props: {
+      filled: "filled",
+      stroked: "stroked",
+      lineWidthMaxPixels: "lineWidthMaxPixels",
+      lineWidthMinPixels: "lineWidthMinPixels",
+      lineWidthScale: "lineWidthScale",
+      lineWidthUnits: "lineWidthUnits",
+      pointRadiusMaxPixels: "radiusMaxPixels",
+      pointRadiusMinPixels: "radiusMinPixels",
+      pointRadiusScale: "radiusScale",
+      pointRadiusUnits: "radiusUnits",
+      pointAntialiasing: "antialiasing",
+      pointBillboard: "billboard",
+      getFillColor: "getFillColor",
+      getLineColor: "getLineColor",
+      getLineWidth: "getLineWidth",
+      getPointRadius: "getRadius"
+    }
+  },
+  icon: {
+    type: icon_layer_default,
+    props: {
+      iconAtlas: "iconAtlas",
+      iconMapping: "iconMapping",
+      iconSizeMaxPixels: "sizeMaxPixels",
+      iconSizeMinPixels: "sizeMinPixels",
+      iconSizeScale: "sizeScale",
+      iconSizeUnits: "sizeUnits",
+      iconAlphaCutoff: "alphaCutoff",
+      iconBillboard: "billboard",
+      getIcon: "getIcon",
+      getIconAngle: "getAngle",
+      getIconColor: "getColor",
+      getIconPixelOffset: "getPixelOffset",
+      getIconSize: "getSize"
+    }
+  },
+  text: {
+    type: text_layer_default,
+    props: {
+      textSizeMaxPixels: "sizeMaxPixels",
+      textSizeMinPixels: "sizeMinPixels",
+      textSizeScale: "sizeScale",
+      textSizeUnits: "sizeUnits",
+      textBackground: "background",
+      textBackgroundPadding: "backgroundPadding",
+      textFontFamily: "fontFamily",
+      textFontWeight: "fontWeight",
+      textLineHeight: "lineHeight",
+      textMaxWidth: "maxWidth",
+      textOutlineColor: "outlineColor",
+      textOutlineWidth: "outlineWidth",
+      textWordBreak: "wordBreak",
+      textCharacterSet: "characterSet",
+      textBillboard: "billboard",
+      textFontSettings: "fontSettings",
+      getText: "getText",
+      getTextAngle: "getAngle",
+      getTextColor: "getColor",
+      getTextPixelOffset: "getPixelOffset",
+      getTextSize: "getSize",
+      getTextAnchor: "getTextAnchor",
+      getTextAlignmentBaseline: "getAlignmentBaseline",
+      getTextBackgroundColor: "getBackgroundColor",
+      getTextBorderColor: "getBorderColor",
+      getTextBorderWidth: "getBorderWidth"
+    }
+  }
+};
+var LINE_LAYER = {
+  type: path_layer_default,
+  props: {
+    lineWidthUnits: "widthUnits",
+    lineWidthScale: "widthScale",
+    lineWidthMinPixels: "widthMinPixels",
+    lineWidthMaxPixels: "widthMaxPixels",
+    lineJointRounded: "jointRounded",
+    lineCapRounded: "capRounded",
+    lineMiterLimit: "miterLimit",
+    lineBillboard: "billboard",
+    getLineColor: "getColor",
+    getLineWidth: "getWidth"
+  }
+};
+var POLYGON_LAYER = {
+  type: solid_polygon_layer_default,
+  props: {
+    extruded: "extruded",
+    filled: "filled",
+    wireframe: "wireframe",
+    elevationScale: "elevationScale",
+    material: "material",
+    _full3d: "_full3d",
+    getElevation: "getElevation",
+    getFillColor: "getFillColor",
+    getLineColor: "getLineColor"
+  }
+};
+function getDefaultProps({ type: type2, props }) {
+  const result = {};
+  for (const key in props) {
+    result[key] = type2.defaultProps[props[key]];
+  }
+  return result;
+}
+function forwardProps(layer, mapping) {
+  const { transitions, updateTriggers } = layer.props;
+  const result = {
+    updateTriggers: {},
+    transitions: transitions && {
+      getPosition: transitions.geometry
+    }
+  };
+  for (const sourceKey in mapping) {
+    const targetKey = mapping[sourceKey];
+    let value2 = layer.props[sourceKey];
+    if (sourceKey.startsWith("get")) {
+      value2 = layer.getSubLayerAccessor(value2);
+      result.updateTriggers[targetKey] = updateTriggers[sourceKey];
+      if (transitions) {
+        result.transitions[targetKey] = transitions[sourceKey];
+      }
+    }
+    result[targetKey] = value2;
+  }
+  return result;
+}
+
+// node_modules/@deck.gl/layers/dist/geojson-layer/geojson.js
+function getGeojsonFeatures(geojson) {
+  if (Array.isArray(geojson)) {
+    return geojson;
+  }
+  log_default.assert(geojson.type, "GeoJSON does not have type");
+  switch (geojson.type) {
+    case "Feature":
+      return [geojson];
+    case "FeatureCollection":
+      log_default.assert(Array.isArray(geojson.features), "GeoJSON does not have features array");
+      return geojson.features;
+    default:
+      return [{ geometry: geojson }];
+  }
+}
+function separateGeojsonFeatures(features, wrapFeature, dataRange = {}) {
+  const separated = {
+    pointFeatures: [],
+    lineFeatures: [],
+    polygonFeatures: [],
+    polygonOutlineFeatures: []
+  };
+  const { startRow = 0, endRow = features.length } = dataRange;
+  for (let featureIndex = startRow; featureIndex < endRow; featureIndex++) {
+    const feature = features[featureIndex];
+    const { geometry } = feature;
+    if (!geometry) {
+      continue;
+    }
+    if (geometry.type === "GeometryCollection") {
+      log_default.assert(Array.isArray(geometry.geometries), "GeoJSON does not have geometries array");
+      const { geometries } = geometry;
+      for (let i3 = 0; i3 < geometries.length; i3++) {
+        const subGeometry = geometries[i3];
+        separateGeometry(subGeometry, separated, wrapFeature, feature, featureIndex);
+      }
+    } else {
+      separateGeometry(geometry, separated, wrapFeature, feature, featureIndex);
+    }
+  }
+  return separated;
+}
+function separateGeometry(geometry, separated, wrapFeature, sourceFeature, sourceFeatureIndex) {
+  const { type: type2, coordinates } = geometry;
+  const { pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures } = separated;
+  if (!validateGeometry(type2, coordinates)) {
+    log_default.warn(`${type2} coordinates are malformed`)();
+    return;
+  }
+  switch (type2) {
+    case "Point":
+      pointFeatures.push(wrapFeature({
+        geometry
+      }, sourceFeature, sourceFeatureIndex));
+      break;
+    case "MultiPoint":
+      coordinates.forEach((point3) => {
+        pointFeatures.push(wrapFeature({
+          geometry: { type: "Point", coordinates: point3 }
+        }, sourceFeature, sourceFeatureIndex));
+      });
+      break;
+    case "LineString":
+      lineFeatures.push(wrapFeature({
+        geometry
+      }, sourceFeature, sourceFeatureIndex));
+      break;
+    case "MultiLineString":
+      coordinates.forEach((path2) => {
+        lineFeatures.push(wrapFeature({
+          geometry: { type: "LineString", coordinates: path2 }
+        }, sourceFeature, sourceFeatureIndex));
+      });
+      break;
+    case "Polygon":
+      polygonFeatures.push(wrapFeature({
+        geometry
+      }, sourceFeature, sourceFeatureIndex));
+      coordinates.forEach((path2) => {
+        polygonOutlineFeatures.push(wrapFeature({
+          geometry: { type: "LineString", coordinates: path2 }
+        }, sourceFeature, sourceFeatureIndex));
+      });
+      break;
+    case "MultiPolygon":
+      coordinates.forEach((polygon) => {
+        polygonFeatures.push(wrapFeature({
+          geometry: { type: "Polygon", coordinates: polygon }
+        }, sourceFeature, sourceFeatureIndex));
+        polygon.forEach((path2) => {
+          polygonOutlineFeatures.push(wrapFeature({
+            geometry: { type: "LineString", coordinates: path2 }
+          }, sourceFeature, sourceFeatureIndex));
+        });
+      });
+      break;
+    default:
+  }
+}
+var COORDINATE_NEST_LEVEL = {
+  Point: 1,
+  MultiPoint: 2,
+  LineString: 2,
+  MultiLineString: 3,
+  Polygon: 3,
+  MultiPolygon: 4
+};
+function validateGeometry(type2, coordinates) {
+  let nestLevel = COORDINATE_NEST_LEVEL[type2];
+  log_default.assert(nestLevel, `Unknown GeoJSON type ${type2}`);
+  while (coordinates && --nestLevel > 0) {
+    coordinates = coordinates[0];
+  }
+  return coordinates && Number.isFinite(coordinates[0]);
+}
+
+// node_modules/@deck.gl/layers/dist/geojson-layer/geojson-layer-props.js
+function createEmptyLayerProps() {
+  return {
+    points: {},
+    lines: {},
+    polygons: {},
+    polygonsOutline: {}
+  };
+}
+function getCoordinates(f4) {
+  return f4.geometry.coordinates;
+}
+function createLayerPropsFromFeatures(features, featuresDiff) {
+  const layerProps = createEmptyLayerProps();
+  const { pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures } = features;
+  layerProps.points.data = pointFeatures;
+  layerProps.points._dataDiff = featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures);
+  layerProps.points.getPosition = getCoordinates;
+  layerProps.lines.data = lineFeatures;
+  layerProps.lines._dataDiff = featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures);
+  layerProps.lines.getPath = getCoordinates;
+  layerProps.polygons.data = polygonFeatures;
+  layerProps.polygons._dataDiff = featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures);
+  layerProps.polygons.getPolygon = getCoordinates;
+  layerProps.polygonsOutline.data = polygonOutlineFeatures;
+  layerProps.polygonsOutline._dataDiff = featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures);
+  layerProps.polygonsOutline.getPath = getCoordinates;
+  return layerProps;
+}
+function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
+  const layerProps = createEmptyLayerProps();
+  const { points, lines, polygons } = geojsonBinary;
+  const customPickingColors = calculatePickingColors(geojsonBinary, encodePickingColor);
+  layerProps.points.data = {
+    length: points.positions.value.length / points.positions.size,
+    attributes: {
+      ...points.attributes,
+      getPosition: points.positions,
+      instancePickingColors: {
+        size: 4,
+        value: customPickingColors.points
+      }
+    },
+    properties: points.properties,
+    numericProps: points.numericProps,
+    featureIds: points.featureIds
+  };
+  layerProps.lines.data = {
+    length: lines.pathIndices.value.length - 1,
+    startIndices: lines.pathIndices.value,
+    attributes: {
+      ...lines.attributes,
+      getPath: lines.positions,
+      instancePickingColors: {
+        size: 4,
+        value: customPickingColors.lines
+      }
+    },
+    properties: lines.properties,
+    numericProps: lines.numericProps,
+    featureIds: lines.featureIds
+  };
+  layerProps.lines._pathType = "open";
+  layerProps.polygons.data = {
+    length: polygons.polygonIndices.value.length - 1,
+    startIndices: polygons.polygonIndices.value,
+    attributes: {
+      ...polygons.attributes,
+      getPolygon: polygons.positions,
+      pickingColors: {
+        size: 4,
+        value: customPickingColors.polygons
+      }
+    },
+    properties: polygons.properties,
+    numericProps: polygons.numericProps,
+    featureIds: polygons.featureIds
+  };
+  layerProps.polygons._normalize = false;
+  if (polygons.triangles) {
+    layerProps.polygons.data.attributes.indices = polygons.triangles.value;
+  }
+  layerProps.polygonsOutline.data = {
+    length: polygons.primitivePolygonIndices.value.length - 1,
+    startIndices: polygons.primitivePolygonIndices.value,
+    attributes: {
+      ...polygons.attributes,
+      getPath: polygons.positions,
+      instancePickingColors: {
+        size: 4,
+        value: customPickingColors.polygons
+      }
+    },
+    properties: polygons.properties,
+    numericProps: polygons.numericProps,
+    featureIds: polygons.featureIds
+  };
+  layerProps.polygonsOutline._pathType = "open";
+  return layerProps;
+}
+
+// node_modules/@deck.gl/layers/dist/geojson-layer/geojson-layer.js
+var FEATURE_TYPES = ["points", "linestrings", "polygons"];
+var defaultProps12 = {
+  ...getDefaultProps(POINT_LAYER.circle),
+  ...getDefaultProps(POINT_LAYER.icon),
+  ...getDefaultProps(POINT_LAYER.text),
+  ...getDefaultProps(LINE_LAYER),
+  ...getDefaultProps(POLYGON_LAYER),
+  // Overwrite sub layer defaults
+  stroked: true,
+  filled: true,
+  extruded: false,
+  wireframe: false,
+  _full3d: false,
+  iconAtlas: { type: "object", value: null },
+  iconMapping: { type: "object", value: {} },
+  getIcon: { type: "accessor", value: (f4) => f4.properties.icon },
+  getText: { type: "accessor", value: (f4) => f4.properties.text },
+  // Self props
+  pointType: "circle",
+  // TODO: deprecated, remove in v9
+  getRadius: { deprecatedFor: "getPointRadius" }
+};
+var GeoJsonLayer = class extends composite_layer_default {
+  initializeState() {
+    this.state = {
+      layerProps: {},
+      features: {},
+      featuresDiff: {}
+    };
+  }
+  updateState({ props, changeFlags }) {
+    if (!changeFlags.dataChanged) {
+      return;
+    }
+    const { data } = this.props;
+    const binary = data && "points" in data && "polygons" in data && "lines" in data;
+    this.setState({ binary });
+    if (binary) {
+      this._updateStateBinary({ props, changeFlags });
+    } else {
+      this._updateStateJSON({ props, changeFlags });
+    }
+  }
+  _updateStateBinary({ props, changeFlags }) {
+    const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
+    this.setState({ layerProps });
+  }
+  _updateStateJSON({ props, changeFlags }) {
+    const features = getGeojsonFeatures(props.data);
+    const wrapFeature = this.getSubLayerRow.bind(this);
+    let newFeatures = {};
+    const featuresDiff = {};
+    if (Array.isArray(changeFlags.dataChanged)) {
+      const oldFeatures = this.state.features;
+      for (const key in oldFeatures) {
+        newFeatures[key] = oldFeatures[key].slice();
+        featuresDiff[key] = [];
+      }
+      for (const dataRange of changeFlags.dataChanged) {
+        const partialFeatures = separateGeojsonFeatures(features, wrapFeature, dataRange);
+        for (const key in oldFeatures) {
+          featuresDiff[key].push(replaceInRange({
+            data: newFeatures[key],
+            getIndex: (f4) => f4.__source.index,
+            dataRange,
+            replace: partialFeatures[key]
+          }));
+        }
+      }
+    } else {
+      newFeatures = separateGeojsonFeatures(features, wrapFeature);
+    }
+    const layerProps = createLayerPropsFromFeatures(newFeatures, featuresDiff);
+    this.setState({
+      features: newFeatures,
+      featuresDiff,
+      layerProps
+    });
+  }
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+    const { index, sourceLayer } = info;
+    info.featureType = FEATURE_TYPES.find((ft3) => sourceLayer.id.startsWith(`${this.id}-${ft3}-`));
+    if (index >= 0 && sourceLayer.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
+      info.index = this.props.data.points.globalFeatureIds.value[index];
+    }
+    return info;
+  }
+  _updateAutoHighlight(info) {
+    const pointLayerIdPrefix = `${this.id}-points-`;
+    const sourceIsPoints = info.featureType === "points";
+    for (const layer of this.getSubLayers()) {
+      if (layer.id.startsWith(pointLayerIdPrefix) === sourceIsPoints) {
+        layer.updateAutoHighlight(info);
+      }
+    }
+  }
+  _renderPolygonLayer() {
+    const { extruded, wireframe } = this.props;
+    const { layerProps } = this.state;
+    const id3 = "polygons-fill";
+    const PolygonFillLayer = this.shouldRenderSubLayer(id3, layerProps.polygons?.data) && this.getSubLayerClass(id3, POLYGON_LAYER.type);
+    if (PolygonFillLayer) {
+      const forwardedProps = forwardProps(this, POLYGON_LAYER.props);
+      const useLineColor = extruded && wireframe;
+      if (!useLineColor) {
+        delete forwardedProps.getLineColor;
+      }
+      forwardedProps.updateTriggers.lineColors = useLineColor;
+      return new PolygonFillLayer(forwardedProps, this.getSubLayerProps({
+        id: id3,
+        updateTriggers: forwardedProps.updateTriggers
+      }), layerProps.polygons);
+    }
+    return null;
+  }
+  _renderLineLayers() {
+    const { extruded, stroked } = this.props;
+    const { layerProps } = this.state;
+    const polygonStrokeLayerId = "polygons-stroke";
+    const lineStringsLayerId = "linestrings";
+    const PolygonStrokeLayer = !extruded && stroked && this.shouldRenderSubLayer(polygonStrokeLayerId, layerProps.polygonsOutline?.data) && this.getSubLayerClass(polygonStrokeLayerId, LINE_LAYER.type);
+    const LineStringsLayer = this.shouldRenderSubLayer(lineStringsLayerId, layerProps.lines?.data) && this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
+    if (PolygonStrokeLayer || LineStringsLayer) {
+      const forwardedProps = forwardProps(this, LINE_LAYER.props);
+      return [
+        PolygonStrokeLayer && new PolygonStrokeLayer(forwardedProps, this.getSubLayerProps({
+          id: polygonStrokeLayerId,
+          updateTriggers: forwardedProps.updateTriggers
+        }), layerProps.polygonsOutline),
+        LineStringsLayer && new LineStringsLayer(forwardedProps, this.getSubLayerProps({
+          id: lineStringsLayerId,
+          updateTriggers: forwardedProps.updateTriggers
+        }), layerProps.lines)
+      ];
+    }
+    return null;
+  }
+  _renderPointLayers() {
+    const { pointType } = this.props;
+    const { layerProps, binary } = this.state;
+    let { highlightedObjectIndex } = this.props;
+    if (!binary && Number.isFinite(highlightedObjectIndex)) {
+      highlightedObjectIndex = layerProps.points.data.findIndex((d3) => d3.__source.index === highlightedObjectIndex);
+    }
+    const types = new Set(pointType.split("+"));
+    const pointLayers = [];
+    for (const type2 of types) {
+      const id3 = `points-${type2}`;
+      const PointLayerMapping = POINT_LAYER[type2];
+      const PointsLayer = PointLayerMapping && this.shouldRenderSubLayer(id3, layerProps.points?.data) && this.getSubLayerClass(id3, PointLayerMapping.type);
+      if (PointsLayer) {
+        const forwardedProps = forwardProps(this, PointLayerMapping.props);
+        let pointsLayerProps = layerProps.points;
+        if (type2 === "text" && binary) {
+          const { instancePickingColors, ...rest } = pointsLayerProps.data.attributes;
+          pointsLayerProps = {
+            ...pointsLayerProps,
+            // @ts-expect-error TODO - type binary data
+            data: { ...pointsLayerProps.data, attributes: rest }
+          };
+        }
+        pointLayers.push(new PointsLayer(forwardedProps, this.getSubLayerProps({
+          id: id3,
+          updateTriggers: forwardedProps.updateTriggers,
+          highlightedObjectIndex
+        }), pointsLayerProps));
+      }
+    }
+    return pointLayers;
+  }
+  renderLayers() {
+    const { extruded } = this.props;
+    const polygonFillLayer = this._renderPolygonLayer();
+    const lineLayers = this._renderLineLayers();
+    const pointLayers = this._renderPointLayers();
+    return [
+      // If not extruded: flat fill layer is drawn below outlines
+      !extruded && polygonFillLayer,
+      lineLayers,
+      pointLayers,
+      // If extruded: draw fill layer last for correct blending behavior
+      extruded && polygonFillLayer
+    ];
+  }
+  getSubLayerAccessor(accessor) {
+    const { binary } = this.state;
+    if (!binary || typeof accessor !== "function") {
+      return super.getSubLayerAccessor(accessor);
+    }
+    return (object2, info) => {
+      const { data, index } = info;
+      const feature = binaryToFeatureForAccesor(data, index);
+      return accessor(feature, info);
+    };
+  }
+};
+GeoJsonLayer.layerName = "GeoJsonLayer";
+GeoJsonLayer.defaultProps = defaultProps12;
+var geojson_layer_default = GeoJsonLayer;
+
 // node_modules/@deck.gl/geo-layers/dist/geo-cell-layer/GeoCellLayer.js
-var defaultProps7 = {
+var defaultProps13 = {
   ...polygon_layer_default.defaultProps
 };
 var GeoCellLayer = class extends composite_layer_default {
@@ -80634,7 +84079,7 @@ var GeoCellLayer = class extends composite_layer_default {
   }
 };
 GeoCellLayer.layerName = "GeoCellLayer";
-GeoCellLayer.defaultProps = defaultProps7;
+GeoCellLayer.defaultProps = defaultProps13;
 var GeoCellLayer_default = GeoCellLayer;
 
 // node_modules/h3-js/dist/browser/h3-js.es.js
@@ -81208,7 +84653,7 @@ var libh3 = (function(libh32) {
     /** @suppress {uselessCode} */
     (function(global2, env, buffer2) {
       "almost asm";
-      var a5 = new global2.Int8Array(buffer2), b10 = new global2.Int32Array(buffer2), c3 = new global2.Uint8Array(buffer2), d3 = new global2.Float32Array(buffer2), e67 = new global2.Float64Array(buffer2), f4 = env.o | 0, g4 = env.p | 0, p4 = global2.Math.floor, q4 = global2.Math.abs, r3 = global2.Math.sqrt, s4 = global2.Math.pow, t4 = global2.Math.cos, u3 = global2.Math.sin, v4 = global2.Math.tan, w4 = global2.Math.acos, x5 = global2.Math.asin, y5 = global2.Math.atan, z4 = global2.Math.atan2, A5 = global2.Math.ceil, B5 = global2.Math.imul, C4 = global2.Math.min, D5 = global2.Math.max, E5 = global2.Math.clz32, G4 = env.b, H4 = env.c, I4 = env.d, J4 = env.e, K5 = env.f, L4 = env.g, M4 = env.h, N3 = env.i, T3 = 28640;
+      var a5 = new global2.Int8Array(buffer2), b10 = new global2.Int32Array(buffer2), c3 = new global2.Uint8Array(buffer2), d3 = new global2.Float32Array(buffer2), e67 = new global2.Float64Array(buffer2), f4 = env.o | 0, g5 = env.p | 0, p4 = global2.Math.floor, q4 = global2.Math.abs, r3 = global2.Math.sqrt, s4 = global2.Math.pow, t4 = global2.Math.cos, u3 = global2.Math.sin, v4 = global2.Math.tan, w4 = global2.Math.acos, x5 = global2.Math.asin, y5 = global2.Math.atan, z4 = global2.Math.atan2, A5 = global2.Math.ceil, B5 = global2.Math.imul, C4 = global2.Math.min, D5 = global2.Math.max, E5 = global2.Math.clz32, G4 = env.b, H4 = env.c, I4 = env.d, J4 = env.e, K5 = env.f, L4 = env.g, M4 = env.h, N3 = env.i, T3 = 28640;
       function W4(newBuffer) {
         a5 = new Int8Array(newBuffer);
         c3 = new Uint8Array(newBuffer);
@@ -81277,7 +84722,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         j4 = T3;
         T3 = T3 + 16 | 0;
         h4 = j4;
@@ -81289,44 +84734,44 @@ var libh3 = (function(libh32) {
         do {
           if ((d4 | 0) >= 0) {
             if ((d4 | 0) > 13780509) {
-              g5 = sc2(15, h4) | 0;
-              if (g5 | 0) {
+              g6 = sc2(15, h4) | 0;
+              if (g6 | 0) {
                 break;
               }
               i3 = h4;
               h4 = b10[i3 >> 2] | 0;
               i3 = b10[i3 + 4 >> 2] | 0;
             } else {
-              g5 = ((d4 | 0) < 0) << 31 >> 31;
-              k5 = Kd2(d4 | 0, g5 | 0, 3, 0) | 0;
+              g6 = ((d4 | 0) < 0) << 31 >> 31;
+              k5 = Kd2(d4 | 0, g6 | 0, 3, 0) | 0;
               i3 = H4() | 0;
-              g5 = Ed2(d4 | 0, g5 | 0, 1, 0) | 0;
-              g5 = Kd2(k5 | 0, i3 | 0, g5 | 0, H4() | 0) | 0;
-              g5 = Ed2(g5 | 0, H4() | 0, 1, 0) | 0;
+              g6 = Ed2(d4 | 0, g6 | 0, 1, 0) | 0;
+              g6 = Kd2(k5 | 0, i3 | 0, g6 | 0, H4() | 0) | 0;
+              g6 = Ed2(g6 | 0, H4() | 0, 1, 0) | 0;
               i3 = H4() | 0;
-              b10[h4 >> 2] = g5;
+              b10[h4 >> 2] = g6;
               b10[h4 + 4 >> 2] = i3;
-              h4 = g5;
+              h4 = g6;
             }
             Vd2(e68 | 0, 0, h4 << 3 | 0) | 0;
             if (f5 | 0) {
               Vd2(f5 | 0, 0, h4 << 2 | 0) | 0;
-              g5 = da2(a6, c4, d4, e68, f5, h4, i3, 0) | 0;
+              g6 = da2(a6, c4, d4, e68, f5, h4, i3, 0) | 0;
               break;
             }
-            g5 = Dd2(h4, 4) | 0;
-            if (!g5) {
-              g5 = 13;
+            g6 = Dd2(h4, 4) | 0;
+            if (!g6) {
+              g6 = 13;
             } else {
-              k5 = da2(a6, c4, d4, e68, g5, h4, i3, 0) | 0;
-              Cd2(g5);
-              g5 = k5;
+              k5 = da2(a6, c4, d4, e68, g6, h4, i3, 0) | 0;
+              Cd2(g6);
+              g6 = k5;
             }
           } else {
-            g5 = 2;
+            g6 = 2;
           }
         } while (0);
-        k5 = g5;
+        k5 = g6;
         T3 = j4;
         return k5 | 0;
       }
@@ -81336,7 +84781,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0;
         q5 = T3;
         T3 = T3 + 16 | 0;
         o3 = q5;
@@ -81349,11 +84794,11 @@ var libh3 = (function(libh32) {
           T3 = q5;
           return p5 | 0;
         }
-        g5 = e68;
-        b10[g5 >> 2] = a6;
-        b10[g5 + 4 >> 2] = c4;
-        g5 = (f5 | 0) != 0;
-        if (g5) {
+        g6 = e68;
+        b10[g6 >> 2] = a6;
+        b10[g6 + 4 >> 2] = c4;
+        g6 = (f5 | 0) != 0;
+        if (g6) {
           b10[f5 >> 2] = 0;
         }
         if (Fb2(a6, c4) | 0) {
@@ -81364,48 +84809,48 @@ var libh3 = (function(libh32) {
         b10[p5 >> 2] = 0;
         a: do {
           if ((d4 | 0) >= 1) {
-            if (g5) {
+            if (g6) {
               l3 = 1;
               k5 = 0;
               m4 = 0;
               n3 = 1;
-              g5 = a6;
+              g6 = a6;
               while (1) {
                 if (!(k5 | m4)) {
-                  g5 = ea2(g5, c4, 4, p5, o3) | 0;
-                  if (g5 | 0) {
+                  g6 = ea2(g6, c4, 4, p5, o3) | 0;
+                  if (g6 | 0) {
                     break a;
                   }
                   c4 = o3;
-                  g5 = b10[c4 >> 2] | 0;
+                  g6 = b10[c4 >> 2] | 0;
                   c4 = b10[c4 + 4 >> 2] | 0;
-                  if (Fb2(g5, c4) | 0) {
-                    g5 = 9;
+                  if (Fb2(g6, c4) | 0) {
+                    g6 = 9;
                     break a;
                   }
                 }
-                g5 = ea2(g5, c4, b10[26800 + (m4 << 2) >> 2] | 0, p5, o3) | 0;
-                if (g5 | 0) {
+                g6 = ea2(g6, c4, b10[26800 + (m4 << 2) >> 2] | 0, p5, o3) | 0;
+                if (g6 | 0) {
                   break a;
                 }
                 c4 = o3;
-                g5 = b10[c4 >> 2] | 0;
+                g6 = b10[c4 >> 2] | 0;
                 c4 = b10[c4 + 4 >> 2] | 0;
                 a6 = e68 + (l3 << 3) | 0;
-                b10[a6 >> 2] = g5;
+                b10[a6 >> 2] = g6;
                 b10[a6 + 4 >> 2] = c4;
                 b10[f5 + (l3 << 2) >> 2] = n3;
                 a6 = k5 + 1 | 0;
                 h4 = (a6 | 0) == (n3 | 0);
                 i3 = m4 + 1 | 0;
                 j4 = (i3 | 0) == 6;
-                if (Fb2(g5, c4) | 0) {
-                  g5 = 9;
+                if (Fb2(g6, c4) | 0) {
+                  g6 = 9;
                   break a;
                 }
                 n3 = n3 + (j4 & h4 & 1) | 0;
                 if ((n3 | 0) > (d4 | 0)) {
-                  g5 = 0;
+                  g6 = 0;
                   break;
                 } else {
                   l3 = l3 + 1 | 0;
@@ -81418,42 +84863,42 @@ var libh3 = (function(libh32) {
               k5 = 0;
               m4 = 0;
               n3 = 1;
-              g5 = a6;
+              g6 = a6;
               while (1) {
                 if (!(k5 | m4)) {
-                  g5 = ea2(g5, c4, 4, p5, o3) | 0;
-                  if (g5 | 0) {
+                  g6 = ea2(g6, c4, 4, p5, o3) | 0;
+                  if (g6 | 0) {
                     break a;
                   }
                   c4 = o3;
-                  g5 = b10[c4 >> 2] | 0;
+                  g6 = b10[c4 >> 2] | 0;
                   c4 = b10[c4 + 4 >> 2] | 0;
-                  if (Fb2(g5, c4) | 0) {
-                    g5 = 9;
+                  if (Fb2(g6, c4) | 0) {
+                    g6 = 9;
                     break a;
                   }
                 }
-                g5 = ea2(g5, c4, b10[26800 + (m4 << 2) >> 2] | 0, p5, o3) | 0;
-                if (g5 | 0) {
+                g6 = ea2(g6, c4, b10[26800 + (m4 << 2) >> 2] | 0, p5, o3) | 0;
+                if (g6 | 0) {
                   break a;
                 }
                 c4 = o3;
-                g5 = b10[c4 >> 2] | 0;
+                g6 = b10[c4 >> 2] | 0;
                 c4 = b10[c4 + 4 >> 2] | 0;
                 a6 = e68 + (l3 << 3) | 0;
-                b10[a6 >> 2] = g5;
+                b10[a6 >> 2] = g6;
                 b10[a6 + 4 >> 2] = c4;
                 a6 = k5 + 1 | 0;
                 h4 = (a6 | 0) == (n3 | 0);
                 i3 = m4 + 1 | 0;
                 j4 = (i3 | 0) == 6;
-                if (Fb2(g5, c4) | 0) {
-                  g5 = 9;
+                if (Fb2(g6, c4) | 0) {
+                  g6 = 9;
                   break a;
                 }
                 n3 = n3 + (j4 & h4 & 1) | 0;
                 if ((n3 | 0) > (d4 | 0)) {
-                  g5 = 0;
+                  g6 = 0;
                   break;
                 } else {
                   l3 = l3 + 1 | 0;
@@ -81463,20 +84908,20 @@ var libh3 = (function(libh32) {
               }
             }
           } else {
-            g5 = 0;
+            g6 = 0;
           }
         } while (0);
-        p5 = g5;
+        p5 = g6;
         T3 = q5;
         return p5 | 0;
       }
-      function da2(a6, c4, d4, e68, f5, g5, h4, i3) {
+      function da2(a6, c4, d4, e68, f5, g6, h4, i3) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         h4 = h4 | 0;
         i3 = i3 | 0;
         var j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0;
@@ -81484,7 +84929,7 @@ var libh3 = (function(libh32) {
         T3 = T3 + 16 | 0;
         o3 = q5 + 8 | 0;
         p5 = q5;
-        j4 = Md2(a6 | 0, c4 | 0, g5 | 0, h4 | 0) | 0;
+        j4 = Md2(a6 | 0, c4 | 0, g6 | 0, h4 | 0) | 0;
         l3 = H4() | 0;
         m4 = e68 + (j4 << 3) | 0;
         r4 = m4;
@@ -81494,7 +84939,7 @@ var libh3 = (function(libh32) {
         if (!((s5 | 0) == 0 & (r4 | 0) == 0 | k5)) {
           do {
             j4 = Ed2(j4 | 0, l3 | 0, 1, 0) | 0;
-            j4 = Ld2(j4 | 0, H4() | 0, g5 | 0, h4 | 0) | 0;
+            j4 = Ld2(j4 | 0, H4() | 0, g6 | 0, h4 | 0) | 0;
             l3 = H4() | 0;
             m4 = e68 + (j4 << 3) | 0;
             s5 = m4;
@@ -81528,7 +84973,7 @@ var libh3 = (function(libh32) {
           }
           case 0: {
             j4 = p5;
-            j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g5, h4, k5) | 0;
+            j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g6, h4, k5) | 0;
             if (!j4) {
               n3 = 9;
             }
@@ -81545,7 +84990,7 @@ var libh3 = (function(libh32) {
                 break;
               case 0: {
                 j4 = p5;
-                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g5, h4, k5) | 0;
+                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g6, h4, k5) | 0;
                 if (j4 | 0) {
                   break a;
                 }
@@ -81561,7 +85006,7 @@ var libh3 = (function(libh32) {
                 break;
               case 0: {
                 j4 = p5;
-                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g5, h4, k5) | 0;
+                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g6, h4, k5) | 0;
                 if (j4 | 0) {
                   break a;
                 }
@@ -81577,7 +85022,7 @@ var libh3 = (function(libh32) {
                 break;
               case 0: {
                 j4 = p5;
-                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g5, h4, k5) | 0;
+                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g6, h4, k5) | 0;
                 if (j4 | 0) {
                   break a;
                 }
@@ -81593,7 +85038,7 @@ var libh3 = (function(libh32) {
                 break;
               case 0: {
                 j4 = p5;
-                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g5, h4, k5) | 0;
+                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g6, h4, k5) | 0;
                 if (j4 | 0) {
                   break a;
                 }
@@ -81609,7 +85054,7 @@ var libh3 = (function(libh32) {
                 break;
               case 0: {
                 j4 = p5;
-                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g5, h4, k5) | 0;
+                j4 = da2(b10[j4 >> 2] | 0, b10[j4 + 4 >> 2] | 0, d4, e68, f5, g6, h4, k5) | 0;
                 if (j4 | 0) {
                   break a;
                 }
@@ -81633,7 +85078,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
         if (d4 >>> 0 > 6) {
           f5 = 1;
           return f5 | 0;
@@ -81641,11 +85086,11 @@ var libh3 = (function(libh32) {
         m4 = (b10[e68 >> 2] | 0) % 6 | 0;
         b10[e68 >> 2] = m4;
         if ((m4 | 0) > 0) {
-          g5 = 0;
+          g6 = 0;
           do {
             d4 = Za2(d4) | 0;
-            g5 = g5 + 1 | 0;
-          } while ((g5 | 0) < (b10[e68 >> 2] | 0));
+            g6 = g6 + 1 | 0;
+          } while ((g6 | 0) < (b10[e68 >> 2] | 0));
         }
         m4 = Od2(a6 | 0, c4 | 0, 45) | 0;
         H4() | 0;
@@ -81655,15 +85100,15 @@ var libh3 = (function(libh32) {
           return f5 | 0;
         }
         j4 = Nb2(a6, c4) | 0;
-        g5 = Od2(a6 | 0, c4 | 0, 52) | 0;
+        g6 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
-        g5 = g5 & 15;
+        g6 = g6 & 15;
         a: do {
-          if (!g5) {
+          if (!g6) {
             k5 = 8;
           } else {
             while (1) {
-              h4 = (15 - g5 | 0) * 3 | 0;
+              h4 = (15 - g6 | 0) * 3 | 0;
               i3 = Od2(a6 | 0, c4 | 0, h4 | 0) | 0;
               H4() | 0;
               i3 = i3 & 7;
@@ -81671,8 +85116,8 @@ var libh3 = (function(libh32) {
                 c4 = 5;
                 break;
               }
-              p5 = (Tb2(g5) | 0) == 0;
-              g5 = g5 + -1 | 0;
+              p5 = (Tb2(g6) | 0) == 0;
+              g6 = g6 + -1 | 0;
               n3 = Pd2(7, 0, h4 | 0) | 0;
               c4 = c4 & ~(H4() | 0);
               o3 = Pd2(b10[(p5 ? 432 : 16) + (i3 * 28 | 0) + (d4 << 2) >> 2] | 0, 0, h4 | 0) | 0;
@@ -81684,7 +85129,7 @@ var libh3 = (function(libh32) {
                 d4 = 0;
                 break a;
               }
-              if (!g5) {
+              if (!g6) {
                 k5 = 8;
                 break a;
               }
@@ -81713,12 +85158,12 @@ var libh3 = (function(libh32) {
         b: do {
           if (!(ma2(i3) | 0)) {
             if ((d4 | 0) > 0) {
-              g5 = 0;
+              g6 = 0;
               do {
                 a6 = Pb2(a6, c4) | 0;
                 c4 = H4() | 0;
-                g5 = g5 + 1 | 0;
-              } while ((g5 | 0) != (d4 | 0));
+                g6 = g6 + 1 | 0;
+              } while ((g6 | 0) != (d4 | 0));
             }
           } else {
             c: do {
@@ -81762,12 +85207,12 @@ var libh3 = (function(libh32) {
               }
             } while (0);
             if ((d4 | 0) > 0) {
-              g5 = 0;
+              g6 = 0;
               do {
                 a6 = Ob2(a6, c4) | 0;
                 c4 = H4() | 0;
-                g5 = g5 + 1 | 0;
-              } while ((g5 | 0) != (d4 | 0));
+                g6 = g6 + 1 | 0;
+              } while ((g6 | 0) != (d4 | 0));
             }
             if ((l3 | 0) != (i3 | 0)) {
               if (!(na2(i3) | 0)) {
@@ -81801,17 +85246,17 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         i3 = T3;
         T3 = T3 + 16 | 0;
-        g5 = i3;
+        g6 = i3;
         h4 = i3 + 8 | 0;
         f5 = (Fb2(a6, c4) | 0) == 0;
         f5 = f5 ? 1 : 2;
         while (1) {
           b10[h4 >> 2] = 0;
-          k5 = (ea2(a6, c4, f5, h4, g5) | 0) == 0;
-          j4 = g5;
+          k5 = (ea2(a6, c4, f5, h4, g6) | 0) == 0;
+          j4 = g6;
           if (k5 & ((b10[j4 >> 2] | 0) == (d4 | 0) ? (b10[j4 + 4 >> 2] | 0) == (e68 | 0) : 0)) {
             a6 = 4;
             break;
@@ -81834,7 +85279,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
         p5 = T3;
         T3 = T3 + 16 | 0;
         n3 = p5;
@@ -81853,8 +85298,8 @@ var libh3 = (function(libh32) {
         b10[o3 >> 2] = 0;
         a: do {
           if (!(Fb2(a6, c4) | 0)) {
-            g5 = (d4 | 0) > 0;
-            if (g5) {
+            g6 = (d4 | 0) > 0;
+            if (g6) {
               f5 = 0;
               m4 = a6;
               do {
@@ -81875,14 +85320,14 @@ var libh3 = (function(libh32) {
               b10[l3 >> 2] = m4;
               b10[l3 + 4 >> 2] = c4;
               l3 = d4 + -1 | 0;
-              if (g5) {
+              if (g6) {
                 k5 = 0;
                 a6 = 1;
                 do {
                   f5 = 26800 + (k5 << 2) | 0;
                   if ((k5 | 0) == 5) {
                     h4 = b10[f5 >> 2] | 0;
-                    g5 = 0;
+                    g6 = 0;
                     f5 = a6;
                     while (1) {
                       a6 = n3;
@@ -81890,7 +85335,7 @@ var libh3 = (function(libh32) {
                       if (a6 | 0) {
                         break a;
                       }
-                      if ((g5 | 0) != (l3 | 0)) {
+                      if ((g6 | 0) != (l3 | 0)) {
                         j4 = n3;
                         i3 = b10[j4 >> 2] | 0;
                         j4 = b10[j4 + 4 >> 2] | 0;
@@ -81906,8 +85351,8 @@ var libh3 = (function(libh32) {
                       } else {
                         a6 = f5;
                       }
-                      g5 = g5 + 1 | 0;
-                      if ((g5 | 0) >= (d4 | 0)) {
+                      g6 = g6 + 1 | 0;
+                      if ((g6 | 0) >= (d4 | 0)) {
                         break;
                       } else {
                         f5 = a6;
@@ -81918,21 +85363,21 @@ var libh3 = (function(libh32) {
                     j4 = b10[f5 >> 2] | 0;
                     i3 = 0;
                     f5 = a6;
-                    g5 = b10[h4 >> 2] | 0;
+                    g6 = b10[h4 >> 2] | 0;
                     h4 = b10[h4 + 4 >> 2] | 0;
                     while (1) {
-                      a6 = ea2(g5, h4, j4, o3, n3) | 0;
+                      a6 = ea2(g6, h4, j4, o3, n3) | 0;
                       if (a6 | 0) {
                         break a;
                       }
                       h4 = n3;
-                      g5 = b10[h4 >> 2] | 0;
+                      g6 = b10[h4 >> 2] | 0;
                       h4 = b10[h4 + 4 >> 2] | 0;
                       a6 = e68 + (f5 << 3) | 0;
-                      b10[a6 >> 2] = g5;
+                      b10[a6 >> 2] = g6;
                       b10[a6 + 4 >> 2] = h4;
                       a6 = f5 + 1 | 0;
-                      if (Fb2(g5, h4) | 0) {
+                      if (Fb2(g6, h4) | 0) {
                         a6 = 9;
                         break a;
                       }
@@ -81949,12 +85394,12 @@ var libh3 = (function(libh32) {
                 a6 = n3;
                 h4 = m4;
                 f5 = b10[a6 >> 2] | 0;
-                g5 = c4;
+                g6 = c4;
                 a6 = b10[a6 + 4 >> 2] | 0;
               } else {
                 h4 = m4;
                 f5 = m4;
-                g5 = c4;
+                g6 = c4;
                 a6 = c4;
               }
             } else {
@@ -81963,10 +85408,10 @@ var libh3 = (function(libh32) {
               b10[h4 + 4 >> 2] = c4;
               h4 = a6;
               f5 = a6;
-              g5 = c4;
+              g6 = c4;
               a6 = c4;
             }
-            a6 = (h4 | 0) == (f5 | 0) & (g5 | 0) == (a6 | 0) ? 0 : 9;
+            a6 = (h4 | 0) == (f5 | 0) & (g6 | 0) == (a6 | 0) ? 0 : 9;
           } else {
             a6 = 9;
           }
@@ -81980,11 +85425,11 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         i3 = T3;
         T3 = T3 + 48 | 0;
         f5 = i3 + 16 | 0;
-        g5 = i3 + 8 | 0;
+        g6 = i3 + 8 | 0;
         h4 = i3;
         d4 = Vc2(d4) | 0;
         if (d4 | 0) {
@@ -81994,31 +85439,31 @@ var libh3 = (function(libh32) {
         }
         k5 = a6;
         j4 = b10[k5 + 4 >> 2] | 0;
-        d4 = g5;
+        d4 = g6;
         b10[d4 >> 2] = b10[k5 >> 2];
         b10[d4 + 4 >> 2] = j4;
-        Uc2(g5, f5);
+        Uc2(g6, f5);
         d4 = Fa2(f5, c4, h4) | 0;
         if (!d4) {
-          c4 = b10[g5 >> 2] | 0;
-          g5 = b10[a6 + 8 >> 2] | 0;
-          if ((g5 | 0) > 0) {
+          c4 = b10[g6 >> 2] | 0;
+          g6 = b10[a6 + 8 >> 2] | 0;
+          if ((g6 | 0) > 0) {
             f5 = b10[a6 + 12 >> 2] | 0;
             d4 = 0;
             do {
               c4 = (b10[f5 + (d4 << 3) >> 2] | 0) + c4 | 0;
               d4 = d4 + 1 | 0;
-            } while ((d4 | 0) < (g5 | 0));
+            } while ((d4 | 0) < (g6 | 0));
           }
           d4 = h4;
           f5 = b10[d4 >> 2] | 0;
           d4 = b10[d4 + 4 >> 2] | 0;
-          g5 = ((c4 | 0) < 0) << 31 >> 31;
-          if ((d4 | 0) < (g5 | 0) | (d4 | 0) == (g5 | 0) & f5 >>> 0 < c4 >>> 0) {
+          g6 = ((c4 | 0) < 0) << 31 >> 31;
+          if ((d4 | 0) < (g6 | 0) | (d4 | 0) == (g6 | 0) & f5 >>> 0 < c4 >>> 0) {
             d4 = h4;
             b10[d4 >> 2] = c4;
-            b10[d4 + 4 >> 2] = g5;
-            d4 = g5;
+            b10[d4 + 4 >> 2] = g6;
+            d4 = g6;
           } else {
             c4 = f5;
           }
@@ -82036,12 +85481,12 @@ var libh3 = (function(libh32) {
         T3 = i3;
         return k5 | 0;
       }
-      function ia2(a6, c4, d4, f5, g5, h4, i3) {
+      function ia2(a6, c4, d4, f5, g6, h4, i3) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         h4 = h4 | 0;
         i3 = i3 | 0;
         var j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0, F4 = 0, G5 = 0, I5 = 0, J5 = 0, K6 = 0, L5 = 0, M5 = 0;
@@ -82150,13 +85595,13 @@ var libh3 = (function(libh32) {
                     q5 = w5;
                     b10[q5 >> 2] = r4;
                     b10[q5 + 4 >> 2] = s5;
-                    q5 = h4 + (b10[g5 >> 2] << 3) | 0;
+                    q5 = h4 + (b10[g6 >> 2] << 3) | 0;
                     b10[q5 >> 2] = r4;
                     b10[q5 + 4 >> 2] = s5;
-                    q5 = g5;
+                    q5 = g6;
                     q5 = Ed2(b10[q5 >> 2] | 0, b10[q5 + 4 >> 2] | 0, 1, 0) | 0;
                     r4 = H4() | 0;
-                    s5 = g5;
+                    s5 = g6;
                     b10[s5 >> 2] = q5;
                     b10[s5 + 4 >> 2] = r4;
                   }
@@ -82202,7 +85647,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0, F4 = 0, G5 = 0, I5 = 0, J5 = 0, K6 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0, F4 = 0, G5 = 0, I5 = 0, J5 = 0, K6 = 0;
         K6 = T3;
         T3 = T3 + 112 | 0;
         F4 = K6 + 80 | 0;
@@ -82234,29 +85679,29 @@ var libh3 = (function(libh32) {
           f5 = Fa2(F4, c4, G5) | 0;
           if (!f5) {
             f5 = b10[j4 >> 2] | 0;
-            g5 = b10[k5 >> 2] | 0;
-            if ((g5 | 0) > 0) {
+            g6 = b10[k5 >> 2] | 0;
+            if ((g6 | 0) > 0) {
               h4 = b10[a6 + 12 >> 2] | 0;
               d4 = 0;
               do {
                 f5 = (b10[h4 + (d4 << 3) >> 2] | 0) + f5 | 0;
                 d4 = d4 + 1 | 0;
-              } while ((d4 | 0) != (g5 | 0));
+              } while ((d4 | 0) != (g6 | 0));
               d4 = f5;
             } else {
               d4 = f5;
             }
             f5 = G5;
-            g5 = b10[f5 >> 2] | 0;
+            g6 = b10[f5 >> 2] | 0;
             f5 = b10[f5 + 4 >> 2] | 0;
             h4 = ((d4 | 0) < 0) << 31 >> 31;
-            if ((f5 | 0) < (h4 | 0) | (f5 | 0) == (h4 | 0) & g5 >>> 0 < d4 >>> 0) {
+            if ((f5 | 0) < (h4 | 0) | (f5 | 0) == (h4 | 0) & g6 >>> 0 < d4 >>> 0) {
               f5 = G5;
               b10[f5 >> 2] = d4;
               b10[f5 + 4 >> 2] = h4;
               f5 = h4;
             } else {
-              d4 = g5;
+              d4 = g6;
             }
             D6 = Ed2(d4 | 0, f5 | 0, 12, 0) | 0;
             E6 = H4() | 0;
@@ -82298,14 +85743,14 @@ var libh3 = (function(libh32) {
                 b: do {
                   if ((b10[k5 >> 2] | 0) > 0) {
                     h4 = a6 + 12 | 0;
-                    g5 = 0;
+                    g6 = 0;
                     while (1) {
-                      f5 = ia2((b10[h4 >> 2] | 0) + (g5 << 3) | 0, D6, E6, c4, F4, d4, i3) | 0;
-                      g5 = g5 + 1 | 0;
+                      f5 = ia2((b10[h4 >> 2] | 0) + (g6 << 3) | 0, D6, E6, c4, F4, d4, i3) | 0;
+                      g6 = g6 + 1 | 0;
                       if (f5 | 0) {
                         break;
                       }
-                      if ((g5 | 0) >= (b10[k5 >> 2] | 0)) {
+                      if ((g6 | 0) >= (b10[k5 >> 2] | 0)) {
                         break b;
                       }
                     }
@@ -82337,7 +85782,7 @@ var libh3 = (function(libh32) {
                       s5 = 0;
                       t5 = 0;
                       u4 = 0;
-                      g5 = 0;
+                      g6 = 0;
                       h4 = 0;
                       while (1) {
                         i3 = G5;
@@ -82369,7 +85814,7 @@ var libh3 = (function(libh32) {
                           p5 = b10[p5 + 4 >> 2] | 0;
                           e: do {
                             if ((o3 | 0) == 0 & (p5 | 0) == 0) {
-                              i3 = g5;
+                              i3 = g6;
                               j4 = h4;
                             } else {
                               l3 = Md2(o3 | 0, p5 | 0, D6 | 0, E6 | 0) | 0;
@@ -82386,7 +85831,7 @@ var libh3 = (function(libh32) {
                                     break d;
                                   }
                                   if ((j4 | 0) == (o3 | 0) & (c4 | 0) == (p5 | 0)) {
-                                    i3 = g5;
+                                    i3 = g6;
                                     j4 = h4;
                                     break e;
                                   }
@@ -82402,23 +85847,23 @@ var libh3 = (function(libh32) {
                                 } while (!((j4 | 0) == 0 & (c4 | 0) == 0));
                               }
                               if ((o3 | 0) == 0 & (p5 | 0) == 0) {
-                                i3 = g5;
+                                i3 = g6;
                                 j4 = h4;
                                 break;
                               }
                               Xb2(o3, p5, I5) | 0;
                               if (Xc2(a6, J5, I5) | 0) {
-                                n3 = Ed2(g5 | 0, h4 | 0, 1, 0) | 0;
+                                n3 = Ed2(g6 | 0, h4 | 0, 1, 0) | 0;
                                 h4 = H4() | 0;
                                 m4 = i3;
                                 b10[m4 >> 2] = o3;
                                 b10[m4 + 4 >> 2] = p5;
-                                g5 = z5 + (g5 << 3) | 0;
-                                b10[g5 >> 2] = o3;
-                                b10[g5 + 4 >> 2] = p5;
-                                g5 = n3;
+                                g6 = z5 + (g6 << 3) | 0;
+                                b10[g6 >> 2] = o3;
+                                b10[g6 + 4 >> 2] = p5;
+                                g6 = n3;
                               }
-                              i3 = g5;
+                              i3 = g6;
                               j4 = h4;
                             }
                           } while (0);
@@ -82426,7 +85871,7 @@ var libh3 = (function(libh32) {
                           if (q5 >>> 0 >= 7) {
                             break;
                           } else {
-                            g5 = i3;
+                            g6 = i3;
                             h4 = j4;
                           }
                         }
@@ -82435,27 +85880,27 @@ var libh3 = (function(libh32) {
                         t5 = Ed2(t5 | 0, u4 | 0, 1, 0) | 0;
                         u4 = H4() | 0;
                         h4 = F4;
-                        g5 = b10[h4 >> 2] | 0;
+                        g6 = b10[h4 >> 2] | 0;
                         h4 = b10[h4 + 4 >> 2] | 0;
-                        if (!((u4 | 0) < (h4 | 0) | (u4 | 0) == (h4 | 0) & t5 >>> 0 < g5 >>> 0)) {
+                        if (!((u4 | 0) < (h4 | 0) | (u4 | 0) == (h4 | 0) & t5 >>> 0 < g6 >>> 0)) {
                           break;
                         } else {
-                          g5 = i3;
+                          g6 = i3;
                           h4 = j4;
                         }
                       }
-                      if ((h4 | 0) > 0 | (h4 | 0) == 0 & g5 >>> 0 > 0) {
-                        g5 = 0;
+                      if ((h4 | 0) > 0 | (h4 | 0) == 0 & g6 >>> 0 > 0) {
+                        g6 = 0;
                         h4 = 0;
                         do {
-                          u4 = y6 + (g5 << 3) | 0;
+                          u4 = y6 + (g6 << 3) | 0;
                           b10[u4 >> 2] = 0;
                           b10[u4 + 4 >> 2] = 0;
-                          g5 = Ed2(g5 | 0, h4 | 0, 1, 0) | 0;
+                          g6 = Ed2(g6 | 0, h4 | 0, 1, 0) | 0;
                           h4 = H4() | 0;
                           u4 = F4;
                           t5 = b10[u4 + 4 >> 2] | 0;
-                        } while ((h4 | 0) < (t5 | 0) | ((h4 | 0) == (t5 | 0) ? g5 >>> 0 < (b10[u4 >> 2] | 0) >>> 0 : 0));
+                        } while ((h4 | 0) < (t5 | 0) | ((h4 | 0) == (t5 | 0) ? g6 >>> 0 < (b10[u4 >> 2] | 0) >>> 0 : 0));
                       }
                       u4 = F4;
                       b10[u4 >> 2] = i3;
@@ -82513,7 +85958,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
         l3 = T3;
         T3 = T3 + 176 | 0;
         j4 = l3;
@@ -82538,12 +85983,12 @@ var libh3 = (function(libh32) {
           if ((e68 | 0) > 0) {
             h4 = 0;
             do {
-              g5 = j4 + 8 + (h4 << 4) | 0;
+              g6 = j4 + 8 + (h4 << 4) | 0;
               h4 = h4 + 1 | 0;
               e68 = j4 + 8 + (((h4 | 0) % (e68 | 0) | 0) << 4) | 0;
-              f5 = xd2(d4, e68, g5) | 0;
+              f5 = xd2(d4, e68, g6) | 0;
               if (!f5) {
-                wd2(d4, g5, e68) | 0;
+                wd2(d4, g6, e68) | 0;
               } else {
                 vd2(d4, f5) | 0;
               }
@@ -82570,15 +86015,15 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0;
-        g5 = T3;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0;
+        g6 = T3;
         T3 = T3 + 32 | 0;
-        e68 = g5;
-        f5 = g5 + 16 | 0;
+        e68 = g6;
+        f5 = g6 + 16 | 0;
         a6 = ka2(a6, c4, f5) | 0;
         if (a6 | 0) {
           d4 = a6;
-          T3 = g5;
+          T3 = g6;
           return d4 | 0;
         }
         b10[d4 >> 2] = 0;
@@ -82605,12 +86050,12 @@ var libh3 = (function(libh32) {
         a6 = Dc2(d4) | 0;
         if (!a6) {
           h4 = 0;
-          T3 = g5;
+          T3 = g6;
           return h4 | 0;
         }
         Cc2(d4);
         h4 = a6;
-        T3 = g5;
+        T3 = g6;
         return h4 | 0;
       }
       function ma2(a6) {
@@ -82932,7 +86377,7 @@ var libh3 = (function(libh32) {
       function Ba2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
         if (+e67[a6 >> 3] < +e67[b11 + 8 >> 3]) {
           d4 = 0;
           return d4 | 0;
@@ -82941,20 +86386,20 @@ var libh3 = (function(libh32) {
           d4 = 0;
           return d4 | 0;
         }
-        g5 = +e67[a6 + 16 >> 3];
+        g6 = +e67[a6 + 16 >> 3];
         c4 = a6 + 24 | 0;
         l3 = +e67[c4 >> 3];
-        h4 = g5 < l3;
+        h4 = g6 < l3;
         d4 = b11 + 16 | 0;
         k5 = +e67[d4 >> 3];
         f5 = b11 + 24 | 0;
         j4 = +e67[f5 >> 3];
         i3 = k5 < j4;
-        b11 = l3 - k5 < j4 - g5;
+        b11 = l3 - k5 < j4 - g6;
         a6 = h4 ? i3 | b11 ? 1 : 2 : 0;
         b11 = i3 ? h4 ? 1 : b11 ? 2 : 1 : 0;
-        g5 = +ic2(g5, a6);
-        if (g5 < +ic2(+e67[f5 >> 3], b11)) {
+        g6 = +ic2(g6, a6);
+        if (g6 < +ic2(+e67[f5 >> 3], b11)) {
           i3 = 0;
           return i3 | 0;
         }
@@ -82971,22 +86416,22 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         h4 = +e67[a6 + 16 >> 3];
         k5 = +e67[a6 + 24 >> 3];
         a6 = h4 < k5;
         j4 = +e67[c4 + 16 >> 3];
         i3 = +e67[c4 + 24 >> 3];
-        g5 = j4 < i3;
+        g6 = j4 < i3;
         c4 = k5 - j4 < i3 - h4;
-        b10[d4 >> 2] = a6 ? g5 | c4 ? 1 : 2 : 0;
-        b10[f5 >> 2] = g5 ? a6 ? 1 : c4 ? 2 : 1 : 0;
+        b10[d4 >> 2] = a6 ? g6 | c4 ? 1 : 2 : 0;
+        b10[f5 >> 2] = g6 ? a6 ? 1 : c4 ? 2 : 1 : 0;
         return;
       }
       function Da2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
         if (+e67[a6 >> 3] < +e67[b11 >> 3]) {
           d4 = 0;
           return d4 | 0;
@@ -82997,18 +86442,18 @@ var libh3 = (function(libh32) {
         }
         d4 = a6 + 16 | 0;
         j4 = +e67[d4 >> 3];
-        g5 = +e67[a6 + 24 >> 3];
-        h4 = j4 < g5;
+        g6 = +e67[a6 + 24 >> 3];
+        h4 = j4 < g6;
         c4 = b11 + 16 | 0;
         l3 = +e67[c4 >> 3];
         f5 = b11 + 24 | 0;
         k5 = +e67[f5 >> 3];
         i3 = l3 < k5;
-        b11 = g5 - l3 < k5 - j4;
+        b11 = g6 - l3 < k5 - j4;
         a6 = h4 ? i3 | b11 ? 1 : 2 : 0;
         b11 = i3 ? h4 ? 1 : b11 ? 2 : 1 : 0;
-        g5 = +ic2(g5, a6);
-        if (!(g5 <= +ic2(+e67[f5 >> 3], b11))) {
+        g6 = +ic2(g6, a6);
+        if (!(g6 <= +ic2(+e67[f5 >> 3], b11))) {
           i3 = 0;
           return i3 | 0;
         }
@@ -83019,10 +86464,10 @@ var libh3 = (function(libh32) {
       function Ea2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
-        g5 = T3;
+        var d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
+        g6 = T3;
         T3 = T3 + 176 | 0;
-        f5 = g5;
+        f5 = g6;
         b10[f5 >> 2] = 4;
         j4 = +e67[c4 >> 3];
         e67[f5 + 8 >> 3] = j4;
@@ -83043,14 +86488,14 @@ var libh3 = (function(libh32) {
           c4 = c4 + 4 | 0;
         } while ((c4 | 0) < (d4 | 0));
         Ud2(a6 | 0, f5 | 0, 168) | 0;
-        T3 = g5;
+        T3 = g6;
         return;
       }
       function Fa2(a6, c4, d4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0;
         t5 = T3;
         T3 = T3 + 288 | 0;
         n3 = t5 + 264 | 0;
@@ -83084,8 +86529,8 @@ var libh3 = (function(libh32) {
         v5 = +e67[l3 >> 3] - +e67[m4 >> 3];
         i3 = +q4(+v5);
         u4 = +e67[n3 >> 3] - +e67[o3 >> 3];
-        g5 = +q4(+u4);
-        if (!(v5 == 0 | u4 == 0) ? (v5 = +Rd2(+i3, +g5), v5 = +A5(+(h4 * h4 / +Sd2(+(v5 / +Sd2(+i3, +g5)), 3) / (j4 * (j4 * 2.59807621135) * 0.8))), e67[f4 >> 3] = v5, r4 = ~~v5 >>> 0, s5 = +q4(v5) >= 1 ? v5 > 0 ? ~~+C4(+p4(v5 / 4294967296), 4294967295) >>> 0 : ~~+A5((v5 - +(~~v5 >>> 0)) / 4294967296) >>> 0 : 0, !((b10[f4 + 4 >> 2] & 2146435072 | 0) == 2146435072)) : 0) {
+        g6 = +q4(+u4);
+        if (!(v5 == 0 | u4 == 0) ? (v5 = +Rd2(+i3, +g6), v5 = +A5(+(h4 * h4 / +Sd2(+(v5 / +Sd2(+i3, +g6)), 3) / (j4 * (j4 * 2.59807621135) * 0.8))), e67[f4 >> 3] = v5, r4 = ~~v5 >>> 0, s5 = +q4(v5) >= 1 ? v5 > 0 ? ~~+C4(+p4(v5 / 4294967296), 4294967295) >>> 0 : ~~+A5((v5 - +(~~v5 >>> 0)) / 4294967296) >>> 0 : 0, !((b10[f4 + 4 >> 2] & 2146435072 | 0) == 2146435072)) : 0) {
           o3 = (r4 | 0) == 0 & (s5 | 0) == 0;
           c4 = d4;
           b10[c4 >> 2] = o3 ? 1 : r4;
@@ -83098,11 +86543,11 @@ var libh3 = (function(libh32) {
         T3 = t5;
         return s5 | 0;
       }
-      function Ga2(a6, c4, d4, g5) {
+      function Ga2(a6, c4, d4, g6) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
         m4 = T3;
         T3 = T3 + 288 | 0;
@@ -83117,9 +86562,9 @@ var libh3 = (function(libh32) {
         } while ((h4 | 0) < (i3 | 0));
         d4 = ac2(d4, l3) | 0;
         if (d4 | 0) {
-          g5 = d4;
+          g6 = d4;
           T3 = m4;
-          return g5 | 0;
+          return g6 | 0;
         }
         d4 = l3;
         h4 = b10[d4 >> 2] | 0;
@@ -83132,23 +86577,23 @@ var libh3 = (function(libh32) {
         d4 = ~~n3 >>> 0;
         h4 = +q4(n3) >= 1 ? n3 > 0 ? ~~+C4(+p4(n3 / 4294967296), 4294967295) >>> 0 : ~~+A5((n3 - +(~~n3 >>> 0)) / 4294967296) >>> 0 : 0;
         if ((b10[f4 + 4 >> 2] & 2146435072 | 0) == 2146435072) {
-          g5 = 1;
+          g6 = 1;
           T3 = m4;
-          return g5 | 0;
+          return g6 | 0;
         }
         l3 = (d4 | 0) == 0 & (h4 | 0) == 0;
-        b10[g5 >> 2] = l3 ? 1 : d4;
-        b10[g5 + 4 >> 2] = l3 ? 0 : h4;
-        g5 = 0;
+        b10[g6 >> 2] = l3 ? 1 : d4;
+        b10[g6 + 4 >> 2] = l3 ? 0 : h4;
+        g6 = 0;
         T3 = m4;
-        return g5 | 0;
+        return g6 | 0;
       }
       function Ha2(a6, b11) {
         a6 = a6 | 0;
         b11 = +b11;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
-        g5 = a6 + 16 | 0;
-        h4 = +e67[g5 >> 3];
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        g6 = a6 + 16 | 0;
+        h4 = +e67[g6 >> 3];
         c4 = a6 + 24 | 0;
         f5 = +e67[c4 >> 3];
         d4 = h4 - f5;
@@ -83165,7 +86610,7 @@ var libh3 = (function(libh32) {
         e67[i3 >> 3] = b11 < -1.5707963267948966 ? -1.5707963267948966 : b11;
         b11 = h4 + d4;
         b11 = b11 > 3.141592653589793 ? b11 + -6.283185307179586 : b11;
-        e67[g5 >> 3] = b11 < -3.141592653589793 ? b11 + 6.283185307179586 : b11;
+        e67[g6 >> 3] = b11 < -3.141592653589793 ? b11 + 6.283185307179586 : b11;
         b11 = f5 - d4;
         b11 = b11 > 3.141592653589793 ? b11 + -6.283185307179586 : b11;
         e67[c4 >> 3] = b11 < -3.141592653589793 ? b11 + 6.283185307179586 : b11;
@@ -83184,7 +86629,7 @@ var libh3 = (function(libh32) {
       function Ja2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0;
+        var d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0;
         n3 = c4 + 8 | 0;
         b10[n3 >> 2] = 0;
         k5 = +e67[a6 >> 3];
@@ -83274,68 +86719,68 @@ var libh3 = (function(libh32) {
         }
         f5 = a6 - d4 | 0;
         if ((d4 | 0) < 0) {
-          g5 = 0 - d4 | 0;
+          g6 = 0 - d4 | 0;
           b10[m4 >> 2] = f5;
-          b10[n3 >> 2] = g5;
+          b10[n3 >> 2] = g6;
           b10[c4 >> 2] = 0;
           a6 = f5;
           d4 = 0;
         } else {
-          g5 = 0;
+          g6 = 0;
         }
         if ((a6 | 0) < 0) {
           d4 = d4 - a6 | 0;
           b10[c4 >> 2] = d4;
-          g5 = g5 - a6 | 0;
-          b10[n3 >> 2] = g5;
+          g6 = g6 - a6 | 0;
+          b10[n3 >> 2] = g6;
           b10[m4 >> 2] = 0;
           a6 = 0;
         }
-        h4 = d4 - g5 | 0;
-        f5 = a6 - g5 | 0;
-        if ((g5 | 0) < 0) {
+        h4 = d4 - g6 | 0;
+        f5 = a6 - g6 | 0;
+        if ((g6 | 0) < 0) {
           b10[c4 >> 2] = h4;
           b10[m4 >> 2] = f5;
           b10[n3 >> 2] = 0;
           a6 = f5;
           d4 = h4;
-          g5 = 0;
+          g6 = 0;
         }
         f5 = (a6 | 0) < (d4 | 0) ? a6 : d4;
-        f5 = (g5 | 0) < (f5 | 0) ? g5 : f5;
+        f5 = (g6 | 0) < (f5 | 0) ? g6 : f5;
         if ((f5 | 0) <= 0) {
           return;
         }
         b10[c4 >> 2] = d4 - f5;
         b10[m4 >> 2] = a6 - f5;
-        b10[n3 >> 2] = g5 - f5;
+        b10[n3 >> 2] = g6 - f5;
         return;
       }
       function Ka2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0;
         c4 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         d4 = b10[h4 >> 2] | 0;
         if ((c4 | 0) < 0) {
           d4 = d4 - c4 | 0;
           b10[h4 >> 2] = d4;
-          g5 = a6 + 8 | 0;
-          b10[g5 >> 2] = (b10[g5 >> 2] | 0) - c4;
+          g6 = a6 + 8 | 0;
+          b10[g6 >> 2] = (b10[g6 >> 2] | 0) - c4;
           b10[a6 >> 2] = 0;
           c4 = 0;
         }
         if ((d4 | 0) < 0) {
           c4 = c4 - d4 | 0;
           b10[a6 >> 2] = c4;
-          g5 = a6 + 8 | 0;
-          f5 = (b10[g5 >> 2] | 0) - d4 | 0;
-          b10[g5 >> 2] = f5;
+          g6 = a6 + 8 | 0;
+          f5 = (b10[g6 >> 2] | 0) - d4 | 0;
+          b10[g6 >> 2] = f5;
           b10[h4 >> 2] = 0;
           d4 = 0;
         } else {
           f5 = a6 + 8 | 0;
-          g5 = f5;
+          g6 = f5;
           f5 = b10[f5 >> 2] | 0;
         }
         if ((f5 | 0) < 0) {
@@ -83343,7 +86788,7 @@ var libh3 = (function(libh32) {
           b10[a6 >> 2] = c4;
           d4 = d4 - f5 | 0;
           b10[h4 >> 2] = d4;
-          b10[g5 >> 2] = 0;
+          b10[g6 >> 2] = 0;
           f5 = 0;
         }
         e68 = (d4 | 0) < (c4 | 0) ? d4 : c4;
@@ -83353,7 +86798,7 @@ var libh3 = (function(libh32) {
         }
         b10[a6 >> 2] = c4 - e68;
         b10[h4 >> 2] = d4 - e68;
-        b10[g5 >> 2] = f5 - e68;
+        b10[g6 >> 2] = f5 - e68;
         return;
       }
       function La2(a6, c4) {
@@ -83400,16 +86845,16 @@ var libh3 = (function(libh32) {
       }
       function Pa2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = b10[a6 >> 2] | 0;
         i3 = (h4 | 0) < 0;
         e68 = (b10[a6 + 4 >> 2] | 0) - (i3 ? h4 : 0) | 0;
-        g5 = (e68 | 0) < 0;
-        f5 = (g5 ? 0 - e68 | 0 : 0) + ((b10[a6 + 8 >> 2] | 0) - (i3 ? h4 : 0)) | 0;
+        g6 = (e68 | 0) < 0;
+        f5 = (g6 ? 0 - e68 | 0 : 0) + ((b10[a6 + 8 >> 2] | 0) - (i3 ? h4 : 0)) | 0;
         d4 = (f5 | 0) < 0;
         a6 = d4 ? 0 : f5;
-        c4 = (g5 ? 0 : e68) - (d4 ? f5 : 0) | 0;
-        f5 = (i3 ? 0 : h4) - (g5 ? e68 : 0) - (d4 ? f5 : 0) | 0;
+        c4 = (g6 ? 0 : e68) - (d4 ? f5 : 0) | 0;
+        f5 = (i3 ? 0 : h4) - (g6 ? e68 : 0) - (d4 ? f5 : 0) | 0;
         d4 = (c4 | 0) < (f5 | 0) ? c4 : f5;
         d4 = (a6 | 0) < (d4 | 0) ? a6 : d4;
         e68 = (d4 | 0) > 0;
@@ -83455,7 +86900,7 @@ var libh3 = (function(libh32) {
       }
       function Qa2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         j4 = a6 + 8 | 0;
         h4 = b10[j4 >> 2] | 0;
         i3 = (b10[a6 >> 2] | 0) - h4 | 0;
@@ -83464,8 +86909,8 @@ var libh3 = (function(libh32) {
         if (i3 >>> 0 > 715827881 | h4 >>> 0 > 715827881) {
           e68 = (i3 | 0) > 0;
           f5 = 2147483647 - i3 | 0;
-          g5 = -2147483648 - i3 | 0;
-          if (e68 ? (f5 | 0) < (i3 | 0) : (g5 | 0) > (i3 | 0)) {
+          g6 = -2147483648 - i3 | 0;
+          if (e68 ? (f5 | 0) < (i3 | 0) : (g6 | 0) > (i3 | 0)) {
             k5 = 1;
             return k5 | 0;
           }
@@ -83480,7 +86925,7 @@ var libh3 = (function(libh32) {
           }
           c4 = i3 * 3 | 0;
           d4 = h4 << 1;
-          if ((e68 ? (f5 | 0) < (d4 | 0) : (g5 | 0) > (d4 | 0)) ? 1 : (i3 | 0) > -1 ? (c4 | -2147483648 | 0) >= (h4 | 0) : (c4 ^ -2147483648 | 0) < (h4 | 0)) {
+          if ((e68 ? (f5 | 0) < (d4 | 0) : (g6 | 0) > (d4 | 0)) ? 1 : (i3 | 0) > -1 ? (c4 | -2147483648 | 0) >= (h4 | 0) : (c4 ^ -2147483648 | 0) < (h4 | 0)) {
             k5 = 1;
             return k5 | 0;
           }
@@ -83523,14 +86968,14 @@ var libh3 = (function(libh32) {
           b10[k5 >> 2] = 0;
           c4 = 0;
         }
-        g5 = e68 - d4 | 0;
+        g6 = e68 - d4 | 0;
         f5 = c4 - d4 | 0;
         if ((d4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[k5 >> 2] = f5;
           b10[j4 >> 2] = 0;
           c4 = f5;
-          f5 = g5;
+          f5 = g6;
           d4 = 0;
         } else {
           f5 = e68;
@@ -83549,19 +86994,19 @@ var libh3 = (function(libh32) {
       }
       function Ra2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         h4 = a6 + 8 | 0;
         f5 = b10[h4 >> 2] | 0;
-        g5 = (b10[a6 >> 2] | 0) - f5 | 0;
+        g6 = (b10[a6 >> 2] | 0) - f5 | 0;
         i3 = a6 + 4 | 0;
         f5 = (b10[i3 >> 2] | 0) - f5 | 0;
-        if (g5 >>> 0 > 715827881 | f5 >>> 0 > 715827881) {
-          d4 = (g5 | 0) > 0;
-          if (d4 ? (2147483647 - g5 | 0) < (g5 | 0) : (-2147483648 - g5 | 0) > (g5 | 0)) {
+        if (g6 >>> 0 > 715827881 | f5 >>> 0 > 715827881) {
+          d4 = (g6 | 0) > 0;
+          if (d4 ? (2147483647 - g6 | 0) < (g6 | 0) : (-2147483648 - g6 | 0) > (g6 | 0)) {
             i3 = 1;
             return i3 | 0;
           }
-          c4 = g5 << 1;
+          c4 = g6 << 1;
           e68 = (f5 | 0) > 0;
           if (e68 ? (2147483647 - f5 | 0) < (f5 | 0) : (-2147483648 - f5 | 0) > (f5 | 0)) {
             i3 = 1;
@@ -83577,17 +87022,17 @@ var libh3 = (function(libh32) {
             return j4 | 0;
           }
           d4 = f5 * 3 | 0;
-          if ((f5 | 0) > -1 ? (d4 | -2147483648 | 0) >= (g5 | 0) : (d4 ^ -2147483648 | 0) < (g5 | 0)) {
+          if ((f5 | 0) > -1 ? (d4 | -2147483648 | 0) >= (g6 | 0) : (d4 ^ -2147483648 | 0) < (g6 | 0)) {
             j4 = 1;
             return j4 | 0;
           }
         } else {
           d4 = f5 * 3 | 0;
-          c4 = g5 << 1;
+          c4 = g6 << 1;
         }
         e68 = Ad2(+(c4 + f5 | 0) * 0.14285714285714285) | 0;
         b10[a6 >> 2] = e68;
-        f5 = Ad2(+(d4 - g5 | 0) * 0.14285714285714285) | 0;
+        f5 = Ad2(+(d4 - g6 | 0) * 0.14285714285714285) | 0;
         b10[i3 >> 2] = f5;
         b10[h4 >> 2] = 0;
         d4 = (f5 | 0) < (e68 | 0);
@@ -83620,14 +87065,14 @@ var libh3 = (function(libh32) {
           b10[i3 >> 2] = 0;
           c4 = 0;
         }
-        g5 = e68 - d4 | 0;
+        g6 = e68 - d4 | 0;
         f5 = c4 - d4 | 0;
         if ((d4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[i3 >> 2] = f5;
           b10[h4 >> 2] = 0;
           c4 = f5;
-          f5 = g5;
+          f5 = g6;
           d4 = 0;
         } else {
           f5 = e68;
@@ -83646,7 +87091,7 @@ var libh3 = (function(libh32) {
       }
       function Sa2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = a6 + 8 | 0;
         d4 = b10[h4 >> 2] | 0;
         c4 = (b10[a6 >> 2] | 0) - d4 | 0;
@@ -83659,13 +87104,13 @@ var libh3 = (function(libh32) {
         b10[h4 >> 2] = 0;
         d4 = c4 - e68 | 0;
         if ((e68 | 0) < 0) {
-          g5 = 0 - e68 | 0;
+          g6 = 0 - e68 | 0;
           b10[i3 >> 2] = d4;
-          b10[h4 >> 2] = g5;
+          b10[h4 >> 2] = g6;
           b10[a6 >> 2] = 0;
           c4 = d4;
           e68 = 0;
-          d4 = g5;
+          d4 = g6;
         } else {
           d4 = 0;
         }
@@ -83677,14 +87122,14 @@ var libh3 = (function(libh32) {
           b10[i3 >> 2] = 0;
           c4 = 0;
         }
-        g5 = e68 - d4 | 0;
+        g6 = e68 - d4 | 0;
         f5 = c4 - d4 | 0;
         if ((d4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[i3 >> 2] = f5;
           b10[h4 >> 2] = 0;
           c4 = f5;
-          f5 = g5;
+          f5 = g6;
           d4 = 0;
         } else {
           f5 = e68;
@@ -83701,7 +87146,7 @@ var libh3 = (function(libh32) {
       }
       function Ta2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = a6 + 8 | 0;
         d4 = b10[h4 >> 2] | 0;
         c4 = (b10[a6 >> 2] | 0) - d4 | 0;
@@ -83714,13 +87159,13 @@ var libh3 = (function(libh32) {
         b10[h4 >> 2] = 0;
         d4 = c4 - e68 | 0;
         if ((e68 | 0) < 0) {
-          g5 = 0 - e68 | 0;
+          g6 = 0 - e68 | 0;
           b10[i3 >> 2] = d4;
-          b10[h4 >> 2] = g5;
+          b10[h4 >> 2] = g6;
           b10[a6 >> 2] = 0;
           c4 = d4;
           e68 = 0;
-          d4 = g5;
+          d4 = g6;
         } else {
           d4 = 0;
         }
@@ -83732,14 +87177,14 @@ var libh3 = (function(libh32) {
           b10[i3 >> 2] = 0;
           c4 = 0;
         }
-        g5 = e68 - d4 | 0;
+        g6 = e68 - d4 | 0;
         f5 = c4 - d4 | 0;
         if ((d4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[i3 >> 2] = f5;
           b10[h4 >> 2] = 0;
           c4 = f5;
-          f5 = g5;
+          f5 = g6;
           d4 = 0;
         } else {
           f5 = e68;
@@ -83756,7 +87201,7 @@ var libh3 = (function(libh32) {
       }
       function Ua2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         c4 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         d4 = b10[h4 >> 2] | 0;
@@ -83787,13 +87232,13 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           d4 = 0;
         }
-        g5 = e68 - c4 | 0;
+        g6 = e68 - c4 | 0;
         f5 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[h4 >> 2] = f5;
           b10[i3 >> 2] = 0;
-          e68 = g5;
+          e68 = g6;
           c4 = 0;
         } else {
           f5 = d4;
@@ -83810,7 +87255,7 @@ var libh3 = (function(libh32) {
       }
       function Va2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         f5 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         c4 = b10[h4 >> 2] | 0;
@@ -83840,13 +87285,13 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           d4 = 0;
         }
-        g5 = f5 - c4 | 0;
+        g6 = f5 - c4 | 0;
         e68 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[h4 >> 2] = e68;
           b10[i3 >> 2] = 0;
-          f5 = g5;
+          f5 = g6;
           c4 = 0;
         } else {
           e68 = d4;
@@ -83864,7 +87309,7 @@ var libh3 = (function(libh32) {
       function Wa2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         if ((c4 + -1 | 0) >>> 0 >= 6) {
           return;
         }
@@ -83895,13 +87340,13 @@ var libh3 = (function(libh32) {
           b10[i3 >> 2] = 0;
           d4 = 0;
         }
-        g5 = e68 - c4 | 0;
+        g6 = e68 - c4 | 0;
         f5 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[i3 >> 2] = f5;
           b10[h4 >> 2] = 0;
-          e68 = g5;
+          e68 = g6;
           c4 = 0;
         } else {
           f5 = d4;
@@ -83918,7 +87363,7 @@ var libh3 = (function(libh32) {
       }
       function Xa2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         f5 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         c4 = b10[h4 >> 2] | 0;
@@ -83949,13 +87394,13 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           d4 = 0;
         }
-        g5 = e68 - c4 | 0;
+        g6 = e68 - c4 | 0;
         f5 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[h4 >> 2] = f5;
           b10[i3 >> 2] = 0;
-          e68 = g5;
+          e68 = g6;
           c4 = 0;
         } else {
           f5 = d4;
@@ -83972,7 +87417,7 @@ var libh3 = (function(libh32) {
       }
       function Ya2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         c4 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         e68 = b10[h4 >> 2] | 0;
@@ -84003,13 +87448,13 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           d4 = 0;
         }
-        g5 = e68 - c4 | 0;
+        g6 = e68 - c4 | 0;
         f5 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[h4 >> 2] = f5;
           b10[i3 >> 2] = 0;
-          e68 = g5;
+          e68 = g6;
           c4 = 0;
         } else {
           f5 = d4;
@@ -84088,7 +87533,7 @@ var libh3 = (function(libh32) {
       }
       function $a2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         c4 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         d4 = b10[h4 >> 2] | 0;
@@ -84119,13 +87564,13 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           d4 = 0;
         }
-        g5 = e68 - c4 | 0;
+        g6 = e68 - c4 | 0;
         f5 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[h4 >> 2] = f5;
           b10[i3 >> 2] = 0;
-          e68 = g5;
+          e68 = g6;
           c4 = 0;
         } else {
           f5 = d4;
@@ -84142,7 +87587,7 @@ var libh3 = (function(libh32) {
       }
       function ab2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         f5 = b10[a6 >> 2] | 0;
         h4 = a6 + 4 | 0;
         c4 = b10[h4 >> 2] | 0;
@@ -84172,13 +87617,13 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           d4 = 0;
         }
-        g5 = f5 - c4 | 0;
+        g6 = f5 - c4 | 0;
         e68 = d4 - c4 | 0;
         if ((c4 | 0) < 0) {
-          b10[a6 >> 2] = g5;
+          b10[a6 >> 2] = g6;
           b10[h4 >> 2] = e68;
           b10[i3 >> 2] = 0;
-          f5 = g5;
+          f5 = g6;
           c4 = 0;
         } else {
           e68 = d4;
@@ -84196,16 +87641,16 @@ var libh3 = (function(libh32) {
       function bb2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = (b10[a6 >> 2] | 0) - (b10[c4 >> 2] | 0) | 0;
         i3 = (h4 | 0) < 0;
         e68 = (b10[a6 + 4 >> 2] | 0) - (b10[c4 + 4 >> 2] | 0) - (i3 ? h4 : 0) | 0;
-        g5 = (e68 | 0) < 0;
-        f5 = (i3 ? 0 - h4 | 0 : 0) + (b10[a6 + 8 >> 2] | 0) - (b10[c4 + 8 >> 2] | 0) + (g5 ? 0 - e68 | 0 : 0) | 0;
+        g6 = (e68 | 0) < 0;
+        f5 = (i3 ? 0 - h4 | 0 : 0) + (b10[a6 + 8 >> 2] | 0) - (b10[c4 + 8 >> 2] | 0) + (g6 ? 0 - e68 | 0 : 0) | 0;
         a6 = (f5 | 0) < 0;
         c4 = a6 ? 0 : f5;
-        d4 = (g5 ? 0 : e68) - (a6 ? f5 : 0) | 0;
-        f5 = (i3 ? 0 : h4) - (g5 ? e68 : 0) - (a6 ? f5 : 0) | 0;
+        d4 = (g6 ? 0 : e68) - (a6 ? f5 : 0) | 0;
+        f5 = (i3 ? 0 : h4) - (g6 ? e68 : 0) - (a6 ? f5 : 0) | 0;
         a6 = (d4 | 0) < (f5 | 0) ? d4 : f5;
         a6 = (c4 | 0) < (a6 | 0) ? c4 : a6;
         e68 = (a6 | 0) > 0;
@@ -84230,7 +87675,7 @@ var libh3 = (function(libh32) {
       function db2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         e68 = b10[a6 >> 2] | 0;
         b10[c4 >> 2] = e68;
         f5 = b10[a6 + 4 >> 2] | 0;
@@ -84270,14 +87715,14 @@ var libh3 = (function(libh32) {
           b10[h4 >> 2] = 0;
           a6 = 0;
         }
-        g5 = e68 - d4 | 0;
+        g6 = e68 - d4 | 0;
         f5 = a6 - d4 | 0;
         if ((d4 | 0) < 0) {
-          b10[c4 >> 2] = g5;
+          b10[c4 >> 2] = g6;
           b10[h4 >> 2] = f5;
           b10[i3 >> 2] = 0;
           a6 = f5;
-          f5 = g5;
+          f5 = g6;
           d4 = 0;
         } else {
           f5 = e68;
@@ -84309,7 +87754,7 @@ var libh3 = (function(libh32) {
       }
       function fb2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         d4 = b10[a6 >> 2] | 0;
         c4 = 0 - d4 | 0;
         b10[a6 >> 2] = c4;
@@ -84328,12 +87773,12 @@ var libh3 = (function(libh32) {
           d4 = 0;
         }
         if ((e68 | 0) < 0) {
-          g5 = c4 - e68 | 0;
-          b10[a6 >> 2] = g5;
+          g6 = c4 - e68 | 0;
+          b10[a6 >> 2] = g6;
           d4 = d4 - e68 | 0;
           b10[h4 >> 2] = d4;
           b10[i3 >> 2] = 0;
-          f5 = g5 - d4 | 0;
+          f5 = g6 - d4 | 0;
           c4 = 0 - d4 | 0;
           if ((d4 | 0) < 0) {
             b10[a6 >> 2] = f5;
@@ -84343,7 +87788,7 @@ var libh3 = (function(libh32) {
             d4 = 0;
           } else {
             e68 = 0;
-            f5 = g5;
+            f5 = g6;
           }
         } else {
           f5 = c4;
@@ -84364,7 +87809,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         m4 = T3;
         T3 = T3 + 64 | 0;
         l3 = m4;
@@ -84390,63 +87835,63 @@ var libh3 = (function(libh32) {
           T3 = m4;
           return f5 | 0;
         }
-        g5 = h4 + -1 | 0;
+        g6 = h4 + -1 | 0;
         if (h4 >>> 0 > 1) {
-          Db2(a6, c4, g5, l3) | 0;
-          Db2(d4, e68, g5, i3) | 0;
+          Db2(a6, c4, g6, l3) | 0;
+          Db2(d4, e68, g6, i3) | 0;
           k5 = l3;
           j4 = b10[k5 >> 2] | 0;
           k5 = b10[k5 + 4 >> 2] | 0;
           a: do {
             if ((j4 | 0) == (b10[i3 >> 2] | 0) ? (k5 | 0) == (b10[i3 + 4 >> 2] | 0) : 0) {
               h4 = (h4 ^ 15) * 3 | 0;
-              g5 = Od2(a6 | 0, c4 | 0, h4 | 0) | 0;
+              g6 = Od2(a6 | 0, c4 | 0, h4 | 0) | 0;
               H4() | 0;
-              g5 = g5 & 7;
+              g6 = g6 & 7;
               h4 = Od2(d4 | 0, e68 | 0, h4 | 0) | 0;
               H4() | 0;
               h4 = h4 & 7;
               do {
-                if (!((g5 | 0) == 0 | (h4 | 0) == 0)) {
-                  if ((g5 | 0) == 7) {
-                    g5 = 5;
+                if (!((g6 | 0) == 0 | (h4 | 0) == 0)) {
+                  if ((g6 | 0) == 7) {
+                    g6 = 5;
                   } else {
-                    if ((g5 | 0) == 1 | (h4 | 0) == 1 ? Fb2(j4, k5) | 0 : 0) {
-                      g5 = 5;
+                    if ((g6 | 0) == 1 | (h4 | 0) == 1 ? Fb2(j4, k5) | 0 : 0) {
+                      g6 = 5;
                       break;
                     }
-                    if ((b10[15536 + (g5 << 2) >> 2] | 0) != (h4 | 0) ? (b10[15568 + (g5 << 2) >> 2] | 0) != (h4 | 0) : 0) {
+                    if ((b10[15536 + (g6 << 2) >> 2] | 0) != (h4 | 0) ? (b10[15568 + (g6 << 2) >> 2] | 0) != (h4 | 0) : 0) {
                       break a;
                     }
                     b10[f5 >> 2] = 1;
-                    g5 = 0;
+                    g6 = 0;
                   }
                 } else {
                   b10[f5 >> 2] = 1;
-                  g5 = 0;
+                  g6 = 0;
                 }
               } while (0);
-              f5 = g5;
+              f5 = g6;
               T3 = m4;
               return f5 | 0;
             }
           } while (0);
         }
-        g5 = l3;
-        h4 = g5 + 56 | 0;
+        g6 = l3;
+        h4 = g6 + 56 | 0;
         do {
-          b10[g5 >> 2] = 0;
-          g5 = g5 + 4 | 0;
-        } while ((g5 | 0) < (h4 | 0));
+          b10[g6 >> 2] = 0;
+          g6 = g6 + 4 | 0;
+        } while ((g6 | 0) < (h4 | 0));
         aa2(a6, c4, 1, l3) | 0;
         c4 = l3;
         if (((((!((b10[c4 >> 2] | 0) == (d4 | 0) ? (b10[c4 + 4 >> 2] | 0) == (e68 | 0) : 0) ? (c4 = l3 + 8 | 0, !((b10[c4 >> 2] | 0) == (d4 | 0) ? (b10[c4 + 4 >> 2] | 0) == (e68 | 0) : 0)) : 0) ? (c4 = l3 + 16 | 0, !((b10[c4 >> 2] | 0) == (d4 | 0) ? (b10[c4 + 4 >> 2] | 0) == (e68 | 0) : 0)) : 0) ? (c4 = l3 + 24 | 0, !((b10[c4 >> 2] | 0) == (d4 | 0) ? (b10[c4 + 4 >> 2] | 0) == (e68 | 0) : 0)) : 0) ? (c4 = l3 + 32 | 0, !((b10[c4 >> 2] | 0) == (d4 | 0) ? (b10[c4 + 4 >> 2] | 0) == (e68 | 0) : 0)) : 0) ? (c4 = l3 + 40 | 0, !((b10[c4 >> 2] | 0) == (d4 | 0) ? (b10[c4 + 4 >> 2] | 0) == (e68 | 0) : 0)) : 0) {
-          g5 = l3 + 48 | 0;
-          g5 = ((b10[g5 >> 2] | 0) == (d4 | 0) ? (b10[g5 + 4 >> 2] | 0) == (e68 | 0) : 0) & 1;
+          g6 = l3 + 48 | 0;
+          g6 = ((b10[g6 >> 2] | 0) == (d4 | 0) ? (b10[g6 + 4 >> 2] | 0) == (e68 | 0) : 0) & 1;
         } else {
-          g5 = 1;
+          g6 = 1;
         }
-        b10[f5 >> 2] = g5;
+        b10[f5 >> 2] = g6;
         f5 = 0;
         T3 = m4;
         return f5 | 0;
@@ -84486,7 +87931,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0;
+        var e68 = 0, f5 = 0, g6 = 0;
         f5 = T3;
         T3 = T3 + 16 | 0;
         e68 = f5;
@@ -84496,9 +87941,9 @@ var libh3 = (function(libh32) {
           T3 = f5;
           return e68 | 0;
         }
-        g5 = Od2(a6 | 0, c4 | 0, 56) | 0;
+        g6 = Od2(a6 | 0, c4 | 0, 56) | 0;
         H4() | 0;
-        e68 = ea2(a6, c4 & -2130706433 | 134217728, g5 & 7, e68, d4) | 0;
+        e68 = ea2(a6, c4 & -2130706433 | 134217728, g6 & 7, e68, d4) | 0;
         T3 = f5;
         return e68 | 0;
       }
@@ -84532,7 +87977,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0;
         f5 = T3;
         T3 = T3 + 16 | 0;
         e68 = f5;
@@ -84541,14 +87986,14 @@ var libh3 = (function(libh32) {
           T3 = f5;
           return e68 | 0;
         }
-        g5 = c4 & -2130706433 | 134217728;
+        g6 = c4 & -2130706433 | 134217728;
         h4 = d4;
         b10[h4 >> 2] = a6;
-        b10[h4 + 4 >> 2] = g5;
+        b10[h4 + 4 >> 2] = g6;
         b10[e68 >> 2] = 0;
         c4 = Od2(a6 | 0, c4 | 0, 56) | 0;
         H4() | 0;
-        e68 = ea2(a6, g5, c4 & 7, e68, d4 + 8 | 0) | 0;
+        e68 = ea2(a6, g6, c4 & 7, e68, d4 + 8 | 0) | 0;
         T3 = f5;
         return e68 | 0;
       }
@@ -84583,39 +88028,39 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0;
         h4 = T3;
         T3 = T3 + 16 | 0;
         f5 = h4;
-        g5 = c4 & -2130706433 | 134217728;
+        g6 = c4 & -2130706433 | 134217728;
         if (!(true & (c4 & 2013265920 | 0) == 268435456)) {
-          g5 = 6;
+          g6 = 6;
           T3 = h4;
-          return g5 | 0;
+          return g6 | 0;
         }
         e68 = Od2(a6 | 0, c4 | 0, 56) | 0;
         H4() | 0;
-        e68 = md2(a6, g5, e68 & 7) | 0;
+        e68 = md2(a6, g6, e68 & 7) | 0;
         if ((e68 | 0) == -1) {
           b10[d4 >> 2] = 0;
-          g5 = 6;
+          g6 = 6;
           T3 = h4;
-          return g5 | 0;
+          return g6 | 0;
         }
-        if (Wb2(a6, g5, f5) | 0) {
+        if (Wb2(a6, g6, f5) | 0) {
           I4(27795, 26932, 282, 26947);
         }
         c4 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
         c4 = c4 & 15;
-        if (!(Fb2(a6, g5) | 0)) {
+        if (!(Fb2(a6, g6) | 0)) {
           xb2(f5, c4, e68, 2, d4);
         } else {
           tb2(f5, c4, e68, 2, d4);
         }
-        g5 = 0;
+        g6 = 0;
         T3 = h4;
-        return g5 | 0;
+        return g6 | 0;
       }
       function ob2(a6, b11, c4) {
         a6 = a6 | 0;
@@ -84635,7 +88080,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         j4 = T3;
         T3 = T3 + 16 | 0;
         k5 = j4;
@@ -84650,24 +88095,24 @@ var libh3 = (function(libh32) {
           return;
         }
         k5 = b10[d4 >> 2] | 0;
-        g5 = +e67[15920 + (k5 * 24 | 0) >> 3];
-        g5 = +gc2(g5 - +gc2(+mc2(15600 + (k5 << 4) | 0, a6)));
+        g6 = +e67[15920 + (k5 * 24 | 0) >> 3];
+        g6 = +gc2(g6 - +gc2(+mc2(15600 + (k5 << 4) | 0, a6)));
         if (!(Tb2(c4) | 0)) {
-          i3 = g5;
+          i3 = g6;
         } else {
-          i3 = +gc2(g5 + -0.3334731722518321);
+          i3 = +gc2(g6 + -0.3334731722518321);
         }
-        g5 = +v4(+h4) * 2.618033988749896;
+        g6 = +v4(+h4) * 2.618033988749896;
         if ((c4 | 0) > 0) {
           a6 = 0;
           do {
-            g5 = g5 * 2.6457513110645907;
+            g6 = g6 * 2.6457513110645907;
             a6 = a6 + 1 | 0;
           } while ((a6 | 0) != (c4 | 0));
         }
-        h4 = +t4(+i3) * g5;
+        h4 = +t4(+i3) * g6;
         e67[f5 >> 3] = h4;
-        i3 = +u3(+i3) * g5;
+        i3 = +u3(+i3) * g6;
         e67[f5 + 8 >> 3] = i3;
         T3 = j4;
         return;
@@ -84676,109 +88121,109 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0;
         h4 = T3;
         T3 = T3 + 32 | 0;
-        g5 = h4;
-        ld2(a6, g5);
+        g6 = h4;
+        ld2(a6, g6);
         b10[c4 >> 2] = 0;
         e67[d4 >> 3] = 5;
-        f5 = +kd2(16400, g5);
+        f5 = +kd2(16400, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 0;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16424, g5);
+        f5 = +kd2(16424, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 1;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16448, g5);
+        f5 = +kd2(16448, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 2;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16472, g5);
+        f5 = +kd2(16472, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 3;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16496, g5);
+        f5 = +kd2(16496, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 4;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16520, g5);
+        f5 = +kd2(16520, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 5;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16544, g5);
+        f5 = +kd2(16544, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 6;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16568, g5);
+        f5 = +kd2(16568, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 7;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16592, g5);
+        f5 = +kd2(16592, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 8;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16616, g5);
+        f5 = +kd2(16616, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 9;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16640, g5);
+        f5 = +kd2(16640, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 10;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16664, g5);
+        f5 = +kd2(16664, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 11;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16688, g5);
+        f5 = +kd2(16688, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 12;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16712, g5);
+        f5 = +kd2(16712, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 13;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16736, g5);
+        f5 = +kd2(16736, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 14;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16760, g5);
+        f5 = +kd2(16760, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 15;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16784, g5);
+        f5 = +kd2(16784, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 16;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16808, g5);
+        f5 = +kd2(16808, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 17;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16832, g5);
+        f5 = +kd2(16832, g6);
         if (f5 < +e67[d4 >> 3]) {
           b10[c4 >> 2] = 18;
           e67[d4 >> 3] = f5;
         }
-        f5 = +kd2(16856, g5);
+        f5 = +kd2(16856, g6);
         if (!(f5 < +e67[d4 >> 3])) {
           T3 = h4;
           return;
@@ -84788,20 +88233,20 @@ var libh3 = (function(libh32) {
         T3 = h4;
         return;
       }
-      function rb2(a6, c4, d4, f5, g5) {
+      function rb2(a6, c4, d4, f5, g6) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0;
         h4 = +hd2(a6);
         if (h4 < 1e-16) {
           c4 = 15600 + (c4 << 4) | 0;
-          b10[g5 >> 2] = b10[c4 >> 2];
-          b10[g5 + 4 >> 2] = b10[c4 + 4 >> 2];
-          b10[g5 + 8 >> 2] = b10[c4 + 8 >> 2];
-          b10[g5 + 12 >> 2] = b10[c4 + 12 >> 2];
+          b10[g6 >> 2] = b10[c4 >> 2];
+          b10[g6 + 4 >> 2] = b10[c4 + 4 >> 2];
+          b10[g6 + 8 >> 2] = b10[c4 + 8 >> 2];
+          b10[g6 + 12 >> 2] = b10[c4 + 12 >> 2];
           return;
         }
         i3 = +z4(+ +e67[a6 + 8 >> 3], + +e67[a6 >> 3]);
@@ -84822,7 +88267,7 @@ var libh3 = (function(libh32) {
           d4 = (Tb2(d4) | 0) == 0;
           h4 = +y5(+((d4 ? j4 : j4 * 0.37796447300922725) * 0.381966011250105));
         }
-        nc2(15600 + (c4 << 4) | 0, +gc2(+e67[15920 + (c4 * 24 | 0) >> 3] - i3), h4, g5);
+        nc2(15600 + (c4 << 4) | 0, +gc2(+e67[15920 + (c4 * 24 | 0) >> 3] - i3), h4, g6);
         return;
       }
       function sb2(a6, c4, d4) {
@@ -84838,12 +88283,12 @@ var libh3 = (function(libh32) {
         T3 = e68;
         return;
       }
-      function tb2(a6, c4, d4, f5, g5) {
+      function tb2(a6, c4, d4, f5, g6) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0, F4 = 0, G5 = 0, H5 = 0, J5 = 0;
         G5 = T3;
         T3 = T3 + 272 | 0;
@@ -84866,7 +88311,7 @@ var libh3 = (function(libh32) {
         b10[u4 + 8 >> 2] = b10[a6 + 8 >> 2];
         b10[u4 + 12 >> 2] = b10[a6 + 12 >> 2];
         ub2(u4, h4, D6);
-        b10[g5 >> 2] = 0;
+        b10[g6 >> 2] = 0;
         u4 = f5 + d4 + ((f5 | 0) == 5 & 1) | 0;
         if ((u4 | 0) <= (d4 | 0)) {
           T3 = G5;
@@ -84946,13 +88391,13 @@ var libh3 = (function(libh32) {
               }
             }
             id3(w5, y6, f5, a6, C5);
-            rb2(C5, b10[v5 >> 2] | 0, k5, 1, g5 + 8 + (b10[g5 >> 2] << 4) | 0);
-            b10[g5 >> 2] = (b10[g5 >> 2] | 0) + 1;
+            rb2(C5, b10[v5 >> 2] | 0, k5, 1, g6 + 8 + (b10[g6 >> 2] << 4) | 0);
+            b10[g6 >> 2] = (b10[g6 >> 2] | 0) + 1;
           }
           if ((j4 | 0) < (n3 | 0)) {
             La2(t5, v5);
-            rb2(v5, b10[F4 >> 2] | 0, k5, 1, g5 + 8 + (b10[g5 >> 2] << 4) | 0);
-            b10[g5 >> 2] = (b10[g5 >> 2] | 0) + 1;
+            rb2(v5, b10[F4 >> 2] | 0, k5, 1, g6 + 8 + (b10[g6 >> 2] << 4) | 0);
+            b10[g6 >> 2] = (b10[g6 >> 2] | 0) + 1;
           }
           b10[E6 >> 2] = b10[F4 >> 2];
           b10[E6 + 4 >> 2] = b10[F4 + 4 >> 2];
@@ -84975,27 +88420,27 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = T3;
         T3 = T3 + 128 | 0;
         e68 = j4 + 64 | 0;
         f5 = j4;
-        g5 = e68;
+        g6 = e68;
         h4 = 20240;
-        i3 = g5 + 60 | 0;
+        i3 = g6 + 60 | 0;
         do {
-          b10[g5 >> 2] = b10[h4 >> 2];
-          g5 = g5 + 4 | 0;
+          b10[g6 >> 2] = b10[h4 >> 2];
+          g6 = g6 + 4 | 0;
           h4 = h4 + 4 | 0;
-        } while ((g5 | 0) < (i3 | 0));
-        g5 = f5;
+        } while ((g6 | 0) < (i3 | 0));
+        g6 = f5;
         h4 = 20304;
-        i3 = g5 + 60 | 0;
+        i3 = g6 + 60 | 0;
         do {
-          b10[g5 >> 2] = b10[h4 >> 2];
-          g5 = g5 + 4 | 0;
+          b10[g6 >> 2] = b10[h4 >> 2];
+          g6 = g6 + 4 | 0;
           h4 = h4 + 4 | 0;
-        } while ((g5 | 0) < (i3 | 0));
+        } while ((g6 | 0) < (i3 | 0));
         i3 = (Tb2(b10[c4 >> 2] | 0) | 0) == 0;
         e68 = i3 ? e68 : f5;
         f5 = a6 + 4 | 0;
@@ -85033,7 +88478,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
         p5 = T3;
         T3 = T3 + 32 | 0;
         n3 = p5 + 12 | 0;
@@ -85046,15 +88491,15 @@ var libh3 = (function(libh32) {
         k5 = a6 + 8 | 0;
         h4 = b10[k5 >> 2] | 0;
         if (l3) {
-          g5 = a6 + 12 | 0;
-          e68 = b10[g5 >> 2] | 0;
+          g6 = a6 + 12 | 0;
+          e68 = b10[g6 >> 2] | 0;
           f5 = h4 + f5 + e68 | 0;
           if ((f5 | 0) == (m4 | 0)) {
             o3 = 1;
             T3 = p5;
             return o3 | 0;
           } else {
-            j4 = g5;
+            j4 = g6;
           }
         } else {
           j4 = a6 + 12 | 0;
@@ -85070,29 +88515,29 @@ var libh3 = (function(libh32) {
           if ((e68 | 0) > 0) {
             e68 = b10[a6 >> 2] | 0;
             if ((h4 | 0) > 0) {
-              g5 = 18640 + (e68 * 80 | 0) + 60 | 0;
+              g6 = 18640 + (e68 * 80 | 0) + 60 | 0;
               e68 = a6;
               break;
             }
             e68 = 18640 + (e68 * 80 | 0) + 40 | 0;
             if (!d4) {
-              g5 = e68;
+              g6 = e68;
               e68 = a6;
             } else {
               Ia2(n3, m4, 0, 0);
               Na2(o3, n3, i3);
               Ya2(i3);
               Ma2(i3, n3, o3);
-              g5 = e68;
+              g6 = e68;
               e68 = a6;
             }
           } else {
-            g5 = 18640 + ((b10[a6 >> 2] | 0) * 80 | 0) + 20 | 0;
+            g6 = 18640 + ((b10[a6 >> 2] | 0) * 80 | 0) + 20 | 0;
             e68 = a6;
           }
         } while (0);
-        b10[e68 >> 2] = b10[g5 >> 2];
-        f5 = g5 + 16 | 0;
+        b10[e68 >> 2] = b10[g6 >> 2];
+        f5 = g6 + 16 | 0;
         if ((b10[f5 >> 2] | 0) > 0) {
           e68 = 0;
           do {
@@ -85100,7 +88545,7 @@ var libh3 = (function(libh32) {
             e68 = e68 + 1 | 0;
           } while ((e68 | 0) < (b10[f5 >> 2] | 0));
         }
-        a6 = g5 + 4 | 0;
+        a6 = g6 + 4 | 0;
         b10[n3 >> 2] = b10[a6 >> 2];
         b10[n3 + 4 >> 2] = b10[a6 + 4 >> 2];
         b10[n3 + 8 >> 2] = b10[a6 + 8 >> 2];
@@ -85126,12 +88571,12 @@ var libh3 = (function(libh32) {
         } while ((c4 | 0) == 2);
         return c4 | 0;
       }
-      function xb2(a6, c4, d4, f5, g5) {
+      function xb2(a6, c4, d4, f5, g6) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0;
         B6 = T3;
         T3 = T3 + 240 | 0;
@@ -85151,7 +88596,7 @@ var libh3 = (function(libh32) {
         b10[x6 + 8 >> 2] = b10[a6 + 8 >> 2];
         b10[x6 + 12 >> 2] = b10[a6 + 12 >> 2];
         yb2(x6, h4, y6);
-        b10[g5 >> 2] = 0;
+        b10[g6 >> 2] = 0;
         r4 = f5 + d4 + ((f5 | 0) == 6 & 1) | 0;
         if ((r4 | 0) <= (d4 | 0)) {
           T3 = B6;
@@ -85211,14 +88656,14 @@ var libh3 = (function(libh32) {
             }
             id3(A6, s5, f5, a6, w5);
             if (!(jd2(A6, w5) | 0) ? !(jd2(s5, w5) | 0) : 0) {
-              rb2(w5, b10[x6 >> 2] | 0, k5, 1, g5 + 8 + (b10[g5 >> 2] << 4) | 0);
-              b10[g5 >> 2] = (b10[g5 >> 2] | 0) + 1;
+              rb2(w5, b10[x6 >> 2] | 0, k5, 1, g6 + 8 + (b10[g6 >> 2] << 4) | 0);
+              b10[g6 >> 2] = (b10[g6 >> 2] | 0) + 1;
             }
           }
           if ((j4 | 0) < (l3 | 0)) {
             La2(q5, A6);
-            rb2(A6, b10[z5 >> 2] | 0, k5, 1, g5 + 8 + (b10[g5 >> 2] << 4) | 0);
-            b10[g5 >> 2] = (b10[g5 >> 2] | 0) + 1;
+            rb2(A6, b10[z5 >> 2] | 0, k5, 1, g6 + 8 + (b10[g6 >> 2] << 4) | 0);
+            b10[g6 >> 2] = (b10[g6 >> 2] | 0) + 1;
           }
           j4 = j4 + 1 | 0;
           if ((j4 | 0) >= (r4 | 0)) {
@@ -85239,27 +88684,27 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = T3;
         T3 = T3 + 160 | 0;
         e68 = j4 + 80 | 0;
         f5 = j4;
-        g5 = e68;
+        g6 = e68;
         h4 = 20368;
-        i3 = g5 + 72 | 0;
+        i3 = g6 + 72 | 0;
         do {
-          b10[g5 >> 2] = b10[h4 >> 2];
-          g5 = g5 + 4 | 0;
+          b10[g6 >> 2] = b10[h4 >> 2];
+          g6 = g6 + 4 | 0;
           h4 = h4 + 4 | 0;
-        } while ((g5 | 0) < (i3 | 0));
-        g5 = f5;
+        } while ((g6 | 0) < (i3 | 0));
+        g6 = f5;
         h4 = 20448;
-        i3 = g5 + 72 | 0;
+        i3 = g6 + 72 | 0;
         do {
-          b10[g5 >> 2] = b10[h4 >> 2];
-          g5 = g5 + 4 | 0;
+          b10[g6 >> 2] = b10[h4 >> 2];
+          g6 = g6 + 4 | 0;
           h4 = h4 + 4 | 0;
-        } while ((g5 | 0) < (i3 | 0));
+        } while ((g6 | 0) < (i3 | 0));
         i3 = (Tb2(b10[c4 >> 2] | 0) | 0) == 0;
         e68 = i3 ? e68 : f5;
         f5 = a6 + 4 | 0;
@@ -85313,7 +88758,7 @@ var libh3 = (function(libh32) {
       function Bb2(b11, c4) {
         b11 = b11 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0;
         if (!(true & (c4 & -16777216 | 0) == 134217728)) {
           b11 = 0;
           return b11 | 0;
@@ -85332,14 +88777,14 @@ var libh3 = (function(libh32) {
         f5 = Od2(b11 | 0, c4 | 0, h4 | 0) | 0;
         h4 = Pd2(f5 | 0, H4() | 0, h4 | 0) | 0;
         f5 = H4() | 0;
-        g5 = Fd2(-1227133514, -1171, h4 | 0, f5 | 0) | 0;
-        if (!((h4 & 613566756 & g5 | 0) == 0 & (f5 & 4681 & (H4() | 0) | 0) == 0)) {
+        g6 = Fd2(-1227133514, -1171, h4 | 0, f5 | 0) | 0;
+        if (!((h4 & 613566756 & g6 | 0) == 0 & (f5 & 4681 & (H4() | 0) | 0) == 0)) {
           h4 = 0;
           return h4 | 0;
         }
         h4 = (e68 * 3 | 0) + 19 | 0;
-        g5 = Pd2(~b11 | 0, ~c4 | 0, h4 | 0) | 0;
-        h4 = Od2(g5 | 0, H4() | 0, h4 | 0) | 0;
+        g6 = Pd2(~b11 | 0, ~c4 | 0, h4 | 0) | 0;
+        h4 = Od2(g6 | 0, H4() | 0, h4 | 0) | 0;
         if (!((e68 | 0) == 15 | (h4 | 0) == 0 & (H4() | 0) == 0)) {
           h4 = 0;
           return h4 | 0;
@@ -85364,33 +88809,33 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         f5 = Pd2(c4 | 0, 0, 52) | 0;
-        g5 = H4() | 0;
+        g6 = H4() | 0;
         d4 = Pd2(d4 | 0, 0, 45) | 0;
-        d4 = g5 | (H4() | 0) | 134225919;
+        d4 = g6 | (H4() | 0) | 134225919;
         if ((c4 | 0) < 1) {
-          g5 = -1;
+          g6 = -1;
           e68 = d4;
           c4 = a6;
-          b10[c4 >> 2] = g5;
+          b10[c4 >> 2] = g6;
           a6 = a6 + 4 | 0;
           b10[a6 >> 2] = e68;
           return;
         }
-        g5 = 1;
+        g6 = 1;
         f5 = -1;
         while (1) {
-          h4 = (15 - g5 | 0) * 3 | 0;
+          h4 = (15 - g6 | 0) * 3 | 0;
           i3 = Pd2(7, 0, h4 | 0) | 0;
           d4 = d4 & ~(H4() | 0);
           h4 = Pd2(e68 | 0, 0, h4 | 0) | 0;
           f5 = f5 & ~i3 | h4;
           d4 = d4 | (H4() | 0);
-          if ((g5 | 0) == (c4 | 0)) {
+          if ((g6 | 0) == (c4 | 0)) {
             break;
           } else {
-            g5 = g5 + 1 | 0;
+            g6 = g6 + 1 | 0;
           }
         }
         i3 = a6;
@@ -85405,19 +88850,19 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0;
-        g5 = Od2(a6 | 0, c4 | 0, 52) | 0;
+        var f5 = 0, g6 = 0;
+        g6 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
-        g5 = g5 & 15;
+        g6 = g6 & 15;
         if (d4 >>> 0 > 15) {
           e68 = 4;
           return e68 | 0;
         }
-        if ((g5 | 0) < (d4 | 0)) {
+        if ((g6 | 0) < (d4 | 0)) {
           e68 = 12;
           return e68 | 0;
         }
-        if ((g5 | 0) == (d4 | 0)) {
+        if ((g6 | 0) == (d4 | 0)) {
           b10[e68 >> 2] = a6;
           b10[e68 + 4 >> 2] = c4;
           e68 = 0;
@@ -85426,13 +88871,13 @@ var libh3 = (function(libh32) {
         f5 = Pd2(d4 | 0, 0, 52) | 0;
         f5 = f5 | a6;
         a6 = H4() | 0 | c4 & -15728641;
-        if ((g5 | 0) > (d4 | 0)) {
+        if ((g6 | 0) > (d4 | 0)) {
           do {
             c4 = Pd2(7, 0, (14 - d4 | 0) * 3 | 0) | 0;
             d4 = d4 + 1 | 0;
             f5 = c4 | f5;
             a6 = H4() | 0 | a6;
-          } while ((d4 | 0) < (g5 | 0));
+          } while ((d4 | 0) < (g6 | 0));
         }
         b10[e68 >> 2] = f5;
         b10[e68 + 4 >> 2] = a6;
@@ -85444,15 +88889,15 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0;
-        g5 = Od2(a6 | 0, c4 | 0, 52) | 0;
+        var f5 = 0, g6 = 0, h4 = 0;
+        g6 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
-        g5 = g5 & 15;
-        if (!((d4 | 0) < 16 & (g5 | 0) <= (d4 | 0))) {
+        g6 = g6 & 15;
+        if (!((d4 | 0) < 16 & (g6 | 0) <= (d4 | 0))) {
           e68 = 4;
           return e68 | 0;
         }
-        f5 = d4 - g5 | 0;
+        f5 = d4 - g6 | 0;
         d4 = Od2(a6 | 0, c4 | 0, 45) | 0;
         H4() | 0;
         a: do {
@@ -85461,14 +88906,14 @@ var libh3 = (function(libh32) {
             f5 = H4() | 0;
           } else {
             b: do {
-              if (g5 | 0) {
+              if (g6 | 0) {
                 d4 = 1;
                 while (1) {
                   h4 = Pd2(7, 0, (15 - d4 | 0) * 3 | 0) | 0;
                   if (!((h4 & a6 | 0) == 0 & ((H4() | 0) & c4 | 0) == 0)) {
                     break;
                   }
-                  if (d4 >>> 0 < g5 >>> 0) {
+                  if (d4 >>> 0 < g6 >>> 0) {
                     d4 = d4 + 1 | 0;
                   } else {
                     break b;
@@ -85535,12 +88980,12 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = T3;
         T3 = T3 + 16 | 0;
-        g5 = h4;
-        dc2(g5, a6, c4, d4);
-        c4 = g5;
+        g6 = h4;
+        dc2(g6, a6, c4, d4);
+        c4 = g6;
         a6 = b10[c4 >> 2] | 0;
         c4 = b10[c4 + 4 >> 2] | 0;
         if ((a6 | 0) == 0 & (c4 | 0) == 0) {
@@ -85555,8 +89000,8 @@ var libh3 = (function(libh32) {
           b10[i3 + 4 >> 2] = c4;
           f5 = Ed2(f5 | 0, d4 | 0, 1, 0) | 0;
           d4 = H4() | 0;
-          fc2(g5);
-          i3 = g5;
+          fc2(g6);
+          i3 = g6;
           a6 = b10[i3 >> 2] | 0;
           c4 = b10[i3 + 4 >> 2] | 0;
         } while (!((a6 | 0) == 0 & (c4 | 0) == 0));
@@ -85612,13 +89057,13 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0;
         if ((d4 | 0) == 0 & (e68 | 0) == 0) {
           E6 = 0;
           return E6 | 0;
         }
         f5 = a6;
-        g5 = b10[f5 >> 2] | 0;
+        g6 = b10[f5 >> 2] | 0;
         f5 = b10[f5 + 4 >> 2] | 0;
         if (true & (f5 & 15728640 | 0) == 0) {
           if (!((e68 | 0) > 0 | (e68 | 0) == 0 & d4 >>> 0 > 0)) {
@@ -85626,23 +89071,23 @@ var libh3 = (function(libh32) {
             return E6 | 0;
           }
           E6 = c4;
-          b10[E6 >> 2] = g5;
+          b10[E6 >> 2] = g6;
           b10[E6 + 4 >> 2] = f5;
           if ((d4 | 0) == 1 & (e68 | 0) == 0) {
             E6 = 0;
             return E6 | 0;
           }
           f5 = 1;
-          g5 = 0;
+          g6 = 0;
           do {
             C5 = a6 + (f5 << 3) | 0;
             D6 = b10[C5 + 4 >> 2] | 0;
             E6 = c4 + (f5 << 3) | 0;
             b10[E6 >> 2] = b10[C5 >> 2];
             b10[E6 + 4 >> 2] = D6;
-            f5 = Ed2(f5 | 0, g5 | 0, 1, 0) | 0;
-            g5 = H4() | 0;
-          } while ((g5 | 0) < (e68 | 0) | (g5 | 0) == (e68 | 0) & f5 >>> 0 < d4 >>> 0);
+            f5 = Ed2(f5 | 0, g6 | 0, 1, 0) | 0;
+            g6 = H4() | 0;
+          } while ((g6 | 0) < (e68 | 0) | (g6 | 0) == (e68 | 0) & f5 >>> 0 < d4 >>> 0);
           f5 = 0;
           return f5 | 0;
         }
@@ -85678,15 +89123,15 @@ var libh3 = (function(libh32) {
                   E6 = 16;
                   break a;
                 }
-                g5 = 0;
+                g6 = 0;
                 a6 = 0;
                 while (1) {
-                  g5 = Ed2(g5 | 0, a6 | 0, 1, 0) | 0;
+                  g6 = Ed2(g6 | 0, a6 | 0, 1, 0) | 0;
                   a6 = H4() | 0;
-                  if (!((a6 | 0) < (e68 | 0) | (a6 | 0) == (e68 | 0) & g5 >>> 0 < d4 >>> 0)) {
+                  if (!((a6 | 0) < (e68 | 0) | (a6 | 0) == (e68 | 0) & g6 >>> 0 < d4 >>> 0)) {
                     break b;
                   }
-                  h4 = D6 + (g5 << 3) | 0;
+                  h4 = D6 + (g6 << 3) | 0;
                   w5 = b10[h4 >> 2] | 0;
                   h4 = b10[h4 + 4 >> 2] | 0;
                   if (!((w5 | 0) == 0 & (h4 | 0) == 0)) {
@@ -85698,7 +89143,7 @@ var libh3 = (function(libh32) {
               }
               i3 = k5;
               a6 = f5;
-              g5 = 0;
+              g6 = 0;
               h4 = 0;
               while (1) {
                 if (!((i3 | 0) == 0 & (a6 | 0) == 0)) {
@@ -85802,12 +89247,12 @@ var libh3 = (function(libh32) {
                   b10[w5 >> 2] = i3;
                   b10[w5 + 4 >> 2] = a6;
                 }
-                g5 = Ed2(g5 | 0, h4 | 0, 1, 0) | 0;
+                g6 = Ed2(g6 | 0, h4 | 0, 1, 0) | 0;
                 h4 = H4() | 0;
-                if (!((h4 | 0) < (e68 | 0) | (h4 | 0) == (e68 | 0) & g5 >>> 0 < d4 >>> 0)) {
+                if (!((h4 | 0) < (e68 | 0) | (h4 | 0) == (e68 | 0) & g6 >>> 0 < d4 >>> 0)) {
                   break b;
                 }
-                a6 = D6 + (g5 << 3) | 0;
+                a6 = D6 + (g6 << 3) | 0;
                 i3 = b10[a6 >> 2] | 0;
                 a6 = b10[a6 + 4 >> 2] | 0;
               }
@@ -85835,26 +89280,26 @@ var libh3 = (function(libh32) {
               while (1) {
                 l3 = C5 + (q5 << 3) | 0;
                 h4 = l3;
-                g5 = b10[h4 >> 2] | 0;
+                g6 = b10[h4 >> 2] | 0;
                 h4 = b10[h4 + 4 >> 2] | 0;
-                if (!((g5 | 0) == 0 & (h4 | 0) == 0)) {
-                  m4 = Od2(g5 | 0, h4 | 0, 56) | 0;
+                if (!((g6 | 0) == 0 & (h4 | 0) == 0)) {
+                  m4 = Od2(g6 | 0, h4 | 0, 56) | 0;
                   H4() | 0;
                   m4 = m4 & 7;
                   i3 = m4 + 1 | 0;
                   n3 = h4 & -117440513;
-                  v5 = Od2(g5 | 0, h4 | 0, 45) | 0;
+                  v5 = Od2(g6 | 0, h4 | 0, 45) | 0;
                   H4() | 0;
                   d: do {
                     if (ma2(v5 & 127) | 0) {
-                      o3 = Od2(g5 | 0, h4 | 0, 52) | 0;
+                      o3 = Od2(g6 | 0, h4 | 0, 52) | 0;
                       H4() | 0;
                       o3 = o3 & 15;
                       if (o3 | 0) {
                         j4 = 1;
                         while (1) {
                           v5 = Pd2(7, 0, (15 - j4 | 0) * 3 | 0) | 0;
-                          if (!((g5 & v5 | 0) == 0 & (n3 & (H4() | 0) | 0) == 0)) {
+                          if (!((g6 & v5 | 0) == 0 & (n3 & (H4() | 0) | 0) == 0)) {
                             break d;
                           }
                           if (j4 >>> 0 < o3 >>> 0) {
@@ -85865,17 +89310,17 @@ var libh3 = (function(libh32) {
                         }
                       }
                       h4 = Pd2(i3 | 0, 0, 56) | 0;
-                      g5 = h4 | g5;
+                      g6 = h4 | g6;
                       h4 = H4() | 0 | n3;
                       i3 = l3;
-                      b10[i3 >> 2] = g5;
+                      b10[i3 >> 2] = g6;
                       b10[i3 + 4 >> 2] = h4;
                       i3 = m4 + 2 | 0;
                     }
                   } while (0);
                   if ((i3 | 0) == 7) {
                     v5 = w5 + (a6 << 3) | 0;
-                    b10[v5 >> 2] = g5;
+                    b10[v5 >> 2] = g6;
                     b10[v5 + 4 >> 2] = h4 & -117440513;
                     a6 = Ed2(a6 | 0, p5 | 0, 1, 0) | 0;
                     v5 = H4() | 0;
@@ -85898,16 +89343,16 @@ var libh3 = (function(libh32) {
                 t5 = Pd2(A6 | 0, 0, 52) | 0;
                 u4 = H4() | 0;
                 if (!y6) {
-                  g5 = 0;
+                  g6 = 0;
                   j4 = 0;
                   i3 = 0;
                   h4 = 0;
                   while (1) {
                     if (!((k5 | 0) == 0 & (f5 | 0) == 0)) {
-                      A6 = c4 + (g5 << 3) | 0;
+                      A6 = c4 + (g6 << 3) | 0;
                       b10[A6 >> 2] = k5;
                       b10[A6 + 4 >> 2] = f5;
-                      g5 = Ed2(g5 | 0, j4 | 0, 1, 0) | 0;
+                      g6 = Ed2(g6 | 0, j4 | 0, 1, 0) | 0;
                       j4 = H4() | 0;
                     }
                     i3 = Ed2(i3 | 0, h4 | 0, 1, 0) | 0;
@@ -85922,7 +89367,7 @@ var libh3 = (function(libh32) {
                   f5 = v5;
                   break;
                 }
-                g5 = 0;
+                g6 = 0;
                 j4 = 0;
                 h4 = 0;
                 i3 = 0;
@@ -85977,10 +89422,10 @@ var libh3 = (function(libh32) {
                       if ((E6 | 0) == 65 ? (E6 = 0, true & (q5 & 117440512 | 0) == 100663296) : 0) {
                         break;
                       }
-                      y6 = c4 + (g5 << 3) | 0;
+                      y6 = c4 + (g6 << 3) | 0;
                       b10[y6 >> 2] = k5;
                       b10[y6 + 4 >> 2] = f5;
-                      g5 = Ed2(g5 | 0, j4 | 0, 1, 0) | 0;
+                      g6 = Ed2(g6 | 0, j4 | 0, 1, 0) | 0;
                       j4 = H4() | 0;
                     }
                   } while (0);
@@ -85995,11 +89440,11 @@ var libh3 = (function(libh32) {
                 }
                 f5 = v5;
               } else {
-                g5 = 0;
+                g6 = 0;
                 f5 = v5;
               }
             } else {
-              g5 = 0;
+              g6 = 0;
               a6 = 0;
               f5 = 0;
             }
@@ -86011,7 +89456,7 @@ var libh3 = (function(libh32) {
             E6 = 89;
             break;
           } else {
-            c4 = c4 + (g5 << 3) | 0;
+            c4 = c4 + (g6 << 3) | 0;
             e68 = f5;
             d4 = a6;
           }
@@ -86061,13 +89506,13 @@ var libh3 = (function(libh32) {
         }
         return 0;
       }
-      function Kb2(a6, c4, d4, e68, f5, g5, h4) {
+      function Kb2(a6, c4, d4, e68, f5, g6, h4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         h4 = h4 | 0;
         var i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0;
         q5 = T3;
@@ -86107,7 +89552,7 @@ var libh3 = (function(libh32) {
           } else {
             j4 = m4;
             do {
-              if (!((i3 | 0) < (g5 | 0) | (i3 | 0) == (g5 | 0) & j4 >>> 0 < f5 >>> 0)) {
+              if (!((i3 | 0) < (g6 | 0) | (i3 | 0) == (g6 | 0) & j4 >>> 0 < f5 >>> 0)) {
                 j4 = 10;
                 break a;
               }
@@ -86148,7 +89593,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
         n3 = T3;
         T3 = T3 + 16 | 0;
         m4 = n3;
@@ -86156,7 +89601,7 @@ var libh3 = (function(libh32) {
           if ((d4 | 0) > 0 | (d4 | 0) == 0 & c4 >>> 0 > 0) {
             k5 = 0;
             h4 = 0;
-            g5 = 0;
+            g6 = 0;
             l3 = 0;
             while (1) {
               j4 = a6 + (k5 << 3) | 0;
@@ -86165,10 +89610,10 @@ var libh3 = (function(libh32) {
               if (!((i3 | 0) == 0 & (j4 | 0) == 0)) {
                 j4 = (Eb2(i3, j4, e68, m4) | 0) == 0;
                 i3 = m4;
-                h4 = Ed2(b10[i3 >> 2] | 0, b10[i3 + 4 >> 2] | 0, h4 | 0, g5 | 0) | 0;
-                g5 = H4() | 0;
+                h4 = Ed2(b10[i3 >> 2] | 0, b10[i3 + 4 >> 2] | 0, h4 | 0, g6 | 0) | 0;
+                g6 = H4() | 0;
                 if (!j4) {
-                  g5 = 12;
+                  g6 = 12;
                   break;
                 }
               }
@@ -86179,14 +89624,14 @@ var libh3 = (function(libh32) {
               }
             }
             T3 = n3;
-            return g5 | 0;
+            return g6 | 0;
           } else {
             h4 = 0;
-            g5 = 0;
+            g6 = 0;
           }
         } while (0);
         b10[f5 >> 2] = h4;
-        b10[f5 + 4 >> 2] = g5;
+        b10[f5 + 4 >> 2] = g6;
         f5 = 0;
         T3 = n3;
         return f5 | 0;
@@ -86234,7 +89679,7 @@ var libh3 = (function(libh32) {
       function Ob2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         i3 = Od2(a6 | 0, b11 | 0, 52) | 0;
         H4() | 0;
         i3 = i3 & 15;
@@ -86250,15 +89695,15 @@ var libh3 = (function(libh32) {
           f5 = (15 - h4 | 0) * 3 | 0;
           d4 = Pd2(7, 0, f5 | 0) | 0;
           e68 = H4() | 0;
-          g5 = Od2(a6 | 0, b11 | 0, f5 | 0) | 0;
+          g6 = Od2(a6 | 0, b11 | 0, f5 | 0) | 0;
           H4() | 0;
-          f5 = Pd2(Za2(g5 & 7) | 0, 0, f5 | 0) | 0;
-          g5 = H4() | 0;
+          f5 = Pd2(Za2(g6 & 7) | 0, 0, f5 | 0) | 0;
+          g6 = H4() | 0;
           a6 = f5 | a6 & ~d4;
-          b11 = g5 | b11 & ~e68;
+          b11 = g6 | b11 & ~e68;
           a: do {
             if (!c4) {
-              if (!((f5 & d4 | 0) == 0 & (g5 & e68 | 0) == 0)) {
+              if (!((f5 & d4 | 0) == 0 & (g6 & e68 | 0) == 0)) {
                 d4 = Od2(a6 | 0, b11 | 0, 52) | 0;
                 H4() | 0;
                 d4 = d4 & 15;
@@ -86267,9 +89712,9 @@ var libh3 = (function(libh32) {
                 } else {
                   c4 = 1;
                   b: while (1) {
-                    g5 = Od2(a6 | 0, b11 | 0, (15 - c4 | 0) * 3 | 0) | 0;
+                    g6 = Od2(a6 | 0, b11 | 0, (15 - c4 | 0) * 3 | 0) | 0;
                     H4() | 0;
-                    switch (g5 & 7) {
+                    switch (g6 & 7) {
                       case 1:
                         break b;
                       case 0:
@@ -86288,13 +89733,13 @@ var libh3 = (function(libh32) {
                   }
                   c4 = 1;
                   while (1) {
-                    g5 = (15 - c4 | 0) * 3 | 0;
-                    e68 = Od2(a6 | 0, b11 | 0, g5 | 0) | 0;
+                    g6 = (15 - c4 | 0) * 3 | 0;
+                    e68 = Od2(a6 | 0, b11 | 0, g6 | 0) | 0;
                     H4() | 0;
-                    f5 = Pd2(7, 0, g5 | 0) | 0;
+                    f5 = Pd2(7, 0, g6 | 0) | 0;
                     b11 = b11 & ~(H4() | 0);
-                    g5 = Pd2(Za2(e68 & 7) | 0, 0, g5 | 0) | 0;
-                    a6 = a6 & ~f5 | g5;
+                    g6 = Pd2(Za2(e68 & 7) | 0, 0, g6 | 0) | 0;
+                    a6 = a6 & ~f5 | g6;
                     b11 = b11 | (H4() | 0);
                     if (c4 >>> 0 < d4 >>> 0) {
                       c4 = c4 + 1 | 0;
@@ -86321,7 +89766,7 @@ var libh3 = (function(libh32) {
       function Pb2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0;
         d4 = Od2(a6 | 0, b11 | 0, 52) | 0;
         H4() | 0;
         d4 = d4 & 15;
@@ -86334,11 +89779,11 @@ var libh3 = (function(libh32) {
         c4 = 1;
         while (1) {
           f5 = (15 - c4 | 0) * 3 | 0;
-          g5 = Od2(a6 | 0, b11 | 0, f5 | 0) | 0;
+          g6 = Od2(a6 | 0, b11 | 0, f5 | 0) | 0;
           H4() | 0;
           e68 = Pd2(7, 0, f5 | 0) | 0;
           b11 = b11 & ~(H4() | 0);
-          f5 = Pd2(Za2(g5 & 7) | 0, 0, f5 | 0) | 0;
+          f5 = Pd2(Za2(g6 & 7) | 0, 0, f5 | 0) | 0;
           a6 = f5 | a6 & ~e68;
           b11 = H4() | 0 | b11;
           if (c4 >>> 0 < d4 >>> 0) {
@@ -86353,7 +89798,7 @@ var libh3 = (function(libh32) {
       function Qb2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         i3 = Od2(a6 | 0, b11 | 0, 52) | 0;
         H4() | 0;
         i3 = i3 & 15;
@@ -86369,15 +89814,15 @@ var libh3 = (function(libh32) {
           f5 = (15 - h4 | 0) * 3 | 0;
           d4 = Pd2(7, 0, f5 | 0) | 0;
           e68 = H4() | 0;
-          g5 = Od2(a6 | 0, b11 | 0, f5 | 0) | 0;
+          g6 = Od2(a6 | 0, b11 | 0, f5 | 0) | 0;
           H4() | 0;
-          f5 = Pd2(_a6(g5 & 7) | 0, 0, f5 | 0) | 0;
-          g5 = H4() | 0;
+          f5 = Pd2(_a6(g6 & 7) | 0, 0, f5 | 0) | 0;
+          g6 = H4() | 0;
           a6 = f5 | a6 & ~d4;
-          b11 = g5 | b11 & ~e68;
+          b11 = g6 | b11 & ~e68;
           a: do {
             if (!c4) {
-              if (!((f5 & d4 | 0) == 0 & (g5 & e68 | 0) == 0)) {
+              if (!((f5 & d4 | 0) == 0 & (g6 & e68 | 0) == 0)) {
                 d4 = Od2(a6 | 0, b11 | 0, 52) | 0;
                 H4() | 0;
                 d4 = d4 & 15;
@@ -86386,9 +89831,9 @@ var libh3 = (function(libh32) {
                 } else {
                   c4 = 1;
                   b: while (1) {
-                    g5 = Od2(a6 | 0, b11 | 0, (15 - c4 | 0) * 3 | 0) | 0;
+                    g6 = Od2(a6 | 0, b11 | 0, (15 - c4 | 0) * 3 | 0) | 0;
                     H4() | 0;
-                    switch (g5 & 7) {
+                    switch (g6 & 7) {
                       case 1:
                         break b;
                       case 0:
@@ -86409,12 +89854,12 @@ var libh3 = (function(libh32) {
                   while (1) {
                     e68 = (15 - c4 | 0) * 3 | 0;
                     f5 = Pd2(7, 0, e68 | 0) | 0;
-                    g5 = b11 & ~(H4() | 0);
+                    g6 = b11 & ~(H4() | 0);
                     b11 = Od2(a6 | 0, b11 | 0, e68 | 0) | 0;
                     H4() | 0;
                     b11 = Pd2(_a6(b11 & 7) | 0, 0, e68 | 0) | 0;
                     a6 = a6 & ~f5 | b11;
-                    b11 = g5 | (H4() | 0);
+                    b11 = g6 | (H4() | 0);
                     if (c4 >>> 0 < d4 >>> 0) {
                       c4 = c4 + 1 | 0;
                     } else {
@@ -86440,7 +89885,7 @@ var libh3 = (function(libh32) {
       function Rb2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0;
         d4 = Od2(a6 | 0, b11 | 0, 52) | 0;
         H4() | 0;
         d4 = d4 & 15;
@@ -86452,12 +89897,12 @@ var libh3 = (function(libh32) {
         }
         c4 = 1;
         while (1) {
-          g5 = (15 - c4 | 0) * 3 | 0;
-          f5 = Pd2(7, 0, g5 | 0) | 0;
+          g6 = (15 - c4 | 0) * 3 | 0;
+          f5 = Pd2(7, 0, g6 | 0) | 0;
           e68 = b11 & ~(H4() | 0);
-          b11 = Od2(a6 | 0, b11 | 0, g5 | 0) | 0;
+          b11 = Od2(a6 | 0, b11 | 0, g6 | 0) | 0;
           H4() | 0;
-          b11 = Pd2(_a6(b11 & 7) | 0, 0, g5 | 0) | 0;
+          b11 = Pd2(_a6(b11 & 7) | 0, 0, g6 | 0) | 0;
           a6 = b11 | a6 & ~f5;
           b11 = H4() | 0 | e68;
           if (c4 >>> 0 < d4 >>> 0) {
@@ -86472,13 +89917,13 @@ var libh3 = (function(libh32) {
       function Sb2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
         j4 = T3;
         T3 = T3 + 64 | 0;
         i3 = j4 + 40 | 0;
         e68 = j4 + 24 | 0;
         f5 = j4 + 12 | 0;
-        g5 = j4;
+        g6 = j4;
         Pd2(c4 | 0, 0, 52) | 0;
         d4 = H4() | 0 | 134225919;
         if (!c4) {
@@ -86534,12 +89979,12 @@ var libh3 = (function(libh32) {
               b10[f5 + 8 >> 2] = b10[h4 + 8 >> 2];
               Ua2(f5);
             }
-            Na2(e68, f5, g5);
-            Ka2(g5);
+            Na2(e68, f5, g6);
+            Ka2(g6);
             l3 = (15 - c4 | 0) * 3 | 0;
             k5 = Pd2(7, 0, l3 | 0) | 0;
             d4 = d4 & ~(H4() | 0);
-            l3 = Pd2(Pa2(g5) | 0, 0, l3 | 0) | 0;
+            l3 = Pd2(Pa2(g6) | 0, 0, l3 | 0) | 0;
             a6 = l3 | a6 & ~k5;
             d4 = H4() | 0 | d4;
             if ((c4 | 0) > 1) {
@@ -86557,9 +90002,9 @@ var libh3 = (function(libh32) {
             c4 = Pd2(e68 | 0, 0, 45) | 0;
             c4 = c4 | a6;
             a6 = H4() | 0 | d4 & -1040385;
-            g5 = pa2(i3) | 0;
+            g6 = pa2(i3) | 0;
             if (!(ma2(e68) | 0)) {
-              if ((g5 | 0) <= 0) {
+              if ((g6 | 0) <= 0) {
                 break;
               }
               f5 = 0;
@@ -86586,7 +90031,7 @@ var libh3 = (function(libh32) {
                   }
                 }
                 f5 = f5 + 1 | 0;
-                if ((f5 | 0) == (g5 | 0)) {
+                if ((f5 | 0) == (g6 | 0)) {
                   break a;
                 }
               }
@@ -86651,13 +90096,13 @@ var libh3 = (function(libh32) {
                 }
               }
             } while (0);
-            if ((g5 | 0) > 0) {
+            if ((g6 | 0) > 0) {
               d4 = 0;
               do {
                 c4 = Ob2(c4, a6) | 0;
                 a6 = H4() | 0;
                 d4 = d4 + 1 | 0;
-              } while ((d4 | 0) != (g5 | 0));
+              } while ((d4 | 0) != (g6 | 0));
             }
           } else {
             c4 = 0;
@@ -86713,14 +90158,14 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0;
         f5 = d4 + 4 | 0;
-        g5 = Od2(a6 | 0, c4 | 0, 52) | 0;
+        g6 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
-        g5 = g5 & 15;
+        g6 = g6 & 15;
         h4 = Od2(a6 | 0, c4 | 0, 45) | 0;
         H4() | 0;
-        e68 = (g5 | 0) == 0;
+        e68 = (g6 | 0) == 0;
         if (!(ma2(h4 & 127) | 0)) {
           if (e68) {
             h4 = 0;
@@ -86747,7 +90192,7 @@ var libh3 = (function(libh32) {
           h4 = Od2(a6 | 0, c4 | 0, (15 - d4 | 0) * 3 | 0) | 0;
           H4() | 0;
           Wa2(f5, h4 & 7);
-          if (d4 >>> 0 < g5 >>> 0) {
+          if (d4 >>> 0 < g6 >>> 0) {
             d4 = d4 + 1 | 0;
           } else {
             break;
@@ -86759,7 +90204,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
         l3 = T3;
         T3 = T3 + 16 | 0;
         j4 = l3;
@@ -86776,7 +90221,7 @@ var libh3 = (function(libh32) {
           return k5 | 0;
         }
         a: do {
-          if ((ma2(k5) | 0) != 0 ? (g5 = Od2(a6 | 0, c4 | 0, 52) | 0, H4() | 0, g5 = g5 & 15, (g5 | 0) != 0) : 0) {
+          if ((ma2(k5) | 0) != 0 ? (g6 = Od2(a6 | 0, c4 | 0, 52) | 0, H4() | 0, g6 = g6 & 15, (g6 | 0) != 0) : 0) {
             e68 = 1;
             b: while (1) {
               i3 = Od2(a6 | 0, c4 | 0, (15 - e68 | 0) * 3 | 0) | 0;
@@ -86791,7 +90236,7 @@ var libh3 = (function(libh32) {
                   break a;
                 }
               }
-              if (e68 >>> 0 < g5 >>> 0) {
+              if (e68 >>> 0 < g6 >>> 0) {
                 e68 = e68 + 1 | 0;
               } else {
                 e68 = c4;
@@ -86809,7 +90254,7 @@ var libh3 = (function(libh32) {
               e68 = Pd2(_a6(e68 & 7) | 0, 0, c4 | 0) | 0;
               a6 = a6 & ~h4 | e68;
               e68 = i3 | (H4() | 0);
-              if (f5 >>> 0 < g5 >>> 0) {
+              if (f5 >>> 0 < g6 >>> 0) {
                 f5 = f5 + 1 | 0;
               } else {
                 break;
@@ -86833,14 +90278,14 @@ var libh3 = (function(libh32) {
         b10[j4 >> 2] = b10[h4 >> 2];
         b10[j4 + 4 >> 2] = b10[h4 + 4 >> 2];
         b10[j4 + 8 >> 2] = b10[h4 + 8 >> 2];
-        g5 = Od2(a6 | 0, e68 | 0, 52) | 0;
+        g6 = Od2(a6 | 0, e68 | 0, 52) | 0;
         H4() | 0;
-        i3 = g5 & 15;
-        if (!(g5 & 1)) {
-          g5 = i3;
+        i3 = g6 & 15;
+        if (!(g6 & 1)) {
+          g6 = i3;
         } else {
           Va2(h4);
-          g5 = i3 + 1 | 0;
+          g6 = i3 + 1 | 0;
         }
         if (!(ma2(k5) | 0)) {
           e68 = 0;
@@ -86869,8 +90314,8 @@ var libh3 = (function(libh32) {
           } while (0);
           e68 = (e68 | 0) == 4 & 1;
         }
-        if (!(vb2(d4, g5, e68, 0) | 0)) {
-          if ((g5 | 0) != (i3 | 0)) {
+        if (!(vb2(d4, g6, e68, 0) | 0)) {
+          if ((g6 | 0) != (i3 | 0)) {
             b10[h4 >> 2] = b10[j4 >> 2];
             b10[h4 + 4 >> 2] = b10[j4 + 4 >> 2];
             b10[h4 + 8 >> 2] = b10[j4 + 8 >> 2];
@@ -86878,9 +90323,9 @@ var libh3 = (function(libh32) {
         } else {
           if (ma2(k5) | 0) {
             do {
-            } while ((vb2(d4, g5, 0, 0) | 0) != 0);
+            } while ((vb2(d4, g6, 0, 0) | 0) != 0);
           }
-          if ((g5 | 0) != (i3 | 0)) {
+          if ((g6 | 0) != (i3 | 0)) {
             Ta2(h4);
           }
         }
@@ -86912,14 +90357,14 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         b11 = b11 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0;
-        g5 = T3;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0;
+        g6 = T3;
         T3 = T3 + 16 | 0;
-        f5 = g5;
+        f5 = g6;
         d4 = Wb2(a6, b11, f5) | 0;
         if (d4 | 0) {
           f5 = d4;
-          T3 = g5;
+          T3 = g6;
           return f5 | 0;
         }
         d4 = Od2(a6 | 0, b11 | 0, 45) | 0;
@@ -86946,20 +90391,20 @@ var libh3 = (function(libh32) {
             }
             tb2(f5, e68, 0, 5, c4);
             h4 = 0;
-            T3 = g5;
+            T3 = g6;
             return h4 | 0;
           }
         } while (0);
         xb2(f5, e68, 0, 6, c4);
         h4 = 0;
-        T3 = g5;
+        T3 = g6;
         return h4 | 0;
       }
       function Zb2(a6, c4, d4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0;
+        var e68 = 0, f5 = 0, g6 = 0;
         f5 = Od2(a6 | 0, c4 | 0, 45) | 0;
         H4() | 0;
         if (!(ma2(f5 & 127) | 0)) {
@@ -86977,8 +90422,8 @@ var libh3 = (function(libh32) {
         }
         e68 = 1;
         while (1) {
-          g5 = Pd2(7, 0, (15 - e68 | 0) * 3 | 0) | 0;
-          if (!((g5 & a6 | 0) == 0 & ((H4() | 0) & c4 | 0) == 0)) {
+          g6 = Pd2(7, 0, (15 - e68 | 0) * 3 | 0) | 0;
+          if (!((g6 & a6 | 0) == 0 & ((H4() | 0) & c4 | 0) == 0)) {
             e68 = 2;
             a6 = 6;
             break;
@@ -87001,11 +90446,11 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         m4 = T3;
         T3 = T3 + 128 | 0;
         k5 = m4 + 112 | 0;
-        g5 = m4 + 96 | 0;
+        g6 = m4 + 96 | 0;
         l3 = m4;
         f5 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
@@ -87045,13 +90490,13 @@ var libh3 = (function(libh32) {
             f5 = 0;
           }
         } while (0);
-        e68 = Wb2(a6, c4, g5) | 0;
+        e68 = Wb2(a6, c4, g6) | 0;
         if (!e68) {
           if (f5) {
-            ub2(g5, k5, l3);
+            ub2(g6, k5, l3);
             j4 = 5;
           } else {
-            yb2(g5, k5, l3);
+            yb2(g6, k5, l3);
             j4 = 6;
           }
           b: do {
@@ -87081,9 +90526,9 @@ var libh3 = (function(libh32) {
           Vd2(d4 | 0, -1, a6 << 2 | 0) | 0;
           c: do {
             if (f5) {
-              g5 = 0;
+              g6 = 0;
               while (1) {
-                h4 = l3 + (g5 << 4) | 0;
+                h4 = l3 + (g6 << 4) | 0;
                 wb2(h4, b10[k5 >> 2] | 0) | 0;
                 h4 = b10[h4 >> 2] | 0;
                 i3 = b10[d4 >> 2] | 0;
@@ -87102,16 +90547,16 @@ var libh3 = (function(libh32) {
                   } while (!((i3 | 0) == -1 | (i3 | 0) == (h4 | 0)));
                 }
                 b10[e68 >> 2] = h4;
-                g5 = g5 + 1 | 0;
-                if (g5 >>> 0 >= j4 >>> 0) {
+                g6 = g6 + 1 | 0;
+                if (g6 >>> 0 >= j4 >>> 0) {
                   e68 = 0;
                   break;
                 }
               }
             } else {
-              g5 = 0;
+              g6 = 0;
               while (1) {
-                h4 = l3 + (g5 << 4) | 0;
+                h4 = l3 + (g6 << 4) | 0;
                 vb2(h4, b10[k5 >> 2] | 0, 0, 1) | 0;
                 h4 = b10[h4 >> 2] | 0;
                 i3 = b10[d4 >> 2] | 0;
@@ -87130,8 +90575,8 @@ var libh3 = (function(libh32) {
                   } while (!((i3 | 0) == -1 | (i3 | 0) == (h4 | 0)));
                 }
                 b10[e68 >> 2] = h4;
-                g5 = g5 + 1 | 0;
-                if (g5 >>> 0 >= j4 >>> 0) {
+                g6 = g6 + 1 | 0;
+                if (g6 >>> 0 >= j4 >>> 0) {
                   e68 = 0;
                   break;
                 }
@@ -87149,7 +90594,7 @@ var libh3 = (function(libh32) {
       function ac2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         if (a6 >>> 0 > 15) {
           i3 = 4;
           return i3 | 0;
@@ -87180,11 +90625,11 @@ var libh3 = (function(libh32) {
             Pd2(h4 | 0, 0, 45) | 0;
             e68 = 1;
             f5 = -1;
-            g5 = i3 | (H4() | 0);
+            g6 = i3 | (H4() | 0);
             while (1) {
               j4 = Pd2(7, 0, (15 - e68 | 0) * 3 | 0) | 0;
               f5 = f5 & ~j4;
-              g5 = g5 & ~(H4() | 0);
+              g6 = g6 & ~(H4() | 0);
               if ((e68 | 0) == (a6 | 0)) {
                 break;
               } else {
@@ -87193,7 +90638,7 @@ var libh3 = (function(libh32) {
             }
             j4 = c4 + (d4 << 3) | 0;
             b10[j4 >> 2] = f5;
-            b10[j4 + 4 >> 2] = g5;
+            b10[j4 + 4 >> 2] = g6;
             d4 = d4 + 1 | 0;
           }
           h4 = h4 + 1 | 0;
@@ -87206,7 +90651,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0;
         t5 = T3;
         T3 = T3 + 16 | 0;
         r4 = t5;
@@ -87224,20 +90669,20 @@ var libh3 = (function(libh32) {
           return s5 | 0;
         }
         if ((s5 | 0) != (d4 | 0)) {
-          g5 = Pd2(d4 | 0, 0, 52) | 0;
-          g5 = g5 | a6;
+          g6 = Pd2(d4 | 0, 0, 52) | 0;
+          g6 = g6 | a6;
           i3 = H4() | 0 | c4 & -15728641;
           if ((s5 | 0) > (d4 | 0)) {
             j4 = d4;
             do {
               q5 = Pd2(7, 0, (14 - j4 | 0) * 3 | 0) | 0;
               j4 = j4 + 1 | 0;
-              g5 = q5 | g5;
+              g6 = q5 | g6;
               i3 = H4() | 0 | i3;
             } while ((j4 | 0) < (s5 | 0));
-            q5 = g5;
+            q5 = g6;
           } else {
-            q5 = g5;
+            q5 = g6;
           }
         } else {
           q5 = a6;
@@ -87251,15 +90696,15 @@ var libh3 = (function(libh32) {
             H4() | 0;
             j4 = j4 & 15;
             if (j4 | 0) {
-              g5 = 1;
+              g6 = 1;
               while (1) {
-                p5 = Pd2(7, 0, (15 - g5 | 0) * 3 | 0) | 0;
+                p5 = Pd2(7, 0, (15 - g6 | 0) * 3 | 0) | 0;
                 if (!((p5 & q5 | 0) == 0 & ((H4() | 0) & i3 | 0) == 0)) {
                   k5 = 33;
                   break a;
                 }
-                if (g5 >>> 0 < j4 >>> 0) {
-                  g5 = g5 + 1 | 0;
+                if (g6 >>> 0 < j4 >>> 0) {
+                  g6 = g6 + 1 | 0;
                 } else {
                   break;
                 }
@@ -87279,20 +90724,20 @@ var libh3 = (function(libh32) {
                   break;
                 }
                 if ((s5 | 0) != (o3 | 0)) {
-                  g5 = Pd2(o3 | 0, 0, 52) | 0;
-                  g5 = g5 | a6;
+                  g6 = Pd2(o3 | 0, 0, 52) | 0;
+                  g6 = g6 | a6;
                   j4 = H4() | 0 | p5;
                   if ((s5 | 0) < (n3 | 0)) {
-                    m4 = g5;
+                    m4 = g6;
                   } else {
                     k5 = o3;
                     do {
                       m4 = Pd2(7, 0, (14 - k5 | 0) * 3 | 0) | 0;
                       k5 = k5 + 1 | 0;
-                      g5 = m4 | g5;
+                      g6 = m4 | g6;
                       j4 = H4() | 0 | j4;
                     } while ((k5 | 0) < (s5 | 0));
-                    m4 = g5;
+                    m4 = g6;
                   }
                 } else {
                   m4 = a6;
@@ -87301,33 +90746,33 @@ var libh3 = (function(libh32) {
                 l3 = Od2(m4 | 0, j4 | 0, 45) | 0;
                 H4() | 0;
                 if (!(ma2(l3 & 127) | 0)) {
-                  g5 = 0;
+                  g6 = 0;
                 } else {
                   l3 = Od2(m4 | 0, j4 | 0, 52) | 0;
                   H4() | 0;
                   l3 = l3 & 15;
                   b: do {
                     if (!l3) {
-                      g5 = 0;
+                      g6 = 0;
                     } else {
                       k5 = 1;
                       while (1) {
-                        g5 = Od2(m4 | 0, j4 | 0, (15 - k5 | 0) * 3 | 0) | 0;
+                        g6 = Od2(m4 | 0, j4 | 0, (15 - k5 | 0) * 3 | 0) | 0;
                         H4() | 0;
-                        g5 = g5 & 7;
-                        if (g5 | 0) {
+                        g6 = g6 & 7;
+                        if (g6 | 0) {
                           break b;
                         }
                         if (k5 >>> 0 < l3 >>> 0) {
                           k5 = k5 + 1 | 0;
                         } else {
-                          g5 = 0;
+                          g6 = 0;
                           break;
                         }
                       }
                     }
                   } while (0);
-                  g5 = (g5 | 0) == 0 & 1;
+                  g6 = (g6 | 0) == 0 & 1;
                 }
                 j4 = Od2(a6 | 0, c4 | 0, (15 - n3 | 0) * 3 | 0) | 0;
                 H4() | 0;
@@ -87337,30 +90782,30 @@ var libh3 = (function(libh32) {
                   k5 = 42;
                   break;
                 }
-                g5 = (g5 | 0) != 0;
-                if ((j4 | 0) == 1 & g5) {
+                g6 = (g6 | 0) != 0;
+                if ((j4 | 0) == 1 & g6) {
                   f5 = 5;
                   k5 = 42;
                   break;
                 }
-                m4 = j4 + (((j4 | 0) != 0 & g5) << 31 >> 31) | 0;
+                m4 = j4 + (((j4 | 0) != 0 & g6) << 31 >> 31) | 0;
                 if (m4 | 0) {
                   k5 = s5 - n3 | 0;
                   k5 = Mc2(7, 0, k5, ((k5 | 0) < 0) << 31 >> 31) | 0;
                   l3 = H4() | 0;
-                  if (g5) {
-                    g5 = Kd2(k5 | 0, l3 | 0, 5, 0) | 0;
-                    g5 = Ed2(g5 | 0, H4() | 0, -5, -1) | 0;
-                    g5 = Id2(g5 | 0, H4() | 0, 6, 0) | 0;
-                    g5 = Ed2(g5 | 0, H4() | 0, 1, 0) | 0;
+                  if (g6) {
+                    g6 = Kd2(k5 | 0, l3 | 0, 5, 0) | 0;
+                    g6 = Ed2(g6 | 0, H4() | 0, -5, -1) | 0;
+                    g6 = Id2(g6 | 0, H4() | 0, 6, 0) | 0;
+                    g6 = Ed2(g6 | 0, H4() | 0, 1, 0) | 0;
                     j4 = H4() | 0;
                   } else {
-                    g5 = k5;
+                    g6 = k5;
                     j4 = l3;
                   }
                   n3 = m4 + -1 | 0;
                   n3 = Kd2(k5 | 0, l3 | 0, n3 | 0, ((n3 | 0) < 0) << 31 >> 31 | 0) | 0;
-                  n3 = Ed2(g5 | 0, j4 | 0, n3 | 0, H4() | 0) | 0;
+                  n3 = Ed2(g6 | 0, j4 | 0, n3 | 0, H4() | 0) | 0;
                   m4 = H4() | 0;
                   l3 = e68;
                   l3 = Ed2(n3 | 0, m4 | 0, b10[l3 >> 2] | 0, b10[l3 + 4 >> 2] | 0) | 0;
@@ -87399,16 +90844,16 @@ var libh3 = (function(libh32) {
             b10[p5 >> 2] = 0;
             b10[p5 + 4 >> 2] = 0;
             if ((s5 | 0) > (d4 | 0)) {
-              g5 = s5;
+              g6 = s5;
               while (1) {
-                f5 = Od2(a6 | 0, c4 | 0, (15 - g5 | 0) * 3 | 0) | 0;
+                f5 = Od2(a6 | 0, c4 | 0, (15 - g6 | 0) * 3 | 0) | 0;
                 H4() | 0;
                 f5 = f5 & 7;
                 if ((f5 | 0) == 7) {
                   f5 = 5;
                   break;
                 }
-                h4 = s5 - g5 | 0;
+                h4 = s5 - g6 | 0;
                 h4 = Mc2(7, 0, h4, ((h4 | 0) < 0) << 31 >> 31) | 0;
                 f5 = Kd2(h4 | 0, H4() | 0, f5 | 0, 0) | 0;
                 h4 = H4() | 0;
@@ -87418,8 +90863,8 @@ var libh3 = (function(libh32) {
                 p5 = e68;
                 b10[p5 >> 2] = h4;
                 b10[p5 + 4 >> 2] = f5;
-                g5 = g5 + -1 | 0;
-                if ((g5 | 0) <= (d4 | 0)) {
+                g6 = g6 + -1 | 0;
+                if ((g6 | 0) <= (d4 | 0)) {
                   break c;
                 }
               }
@@ -87445,29 +90890,29 @@ var libh3 = (function(libh32) {
         }
         return 0;
       }
-      function cc2(a6, c4, d4, e68, f5, g5) {
+      function cc2(a6, c4, d4, e68, f5, g6) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0;
         m4 = T3;
         T3 = T3 + 16 | 0;
         h4 = m4;
         if (f5 >>> 0 > 15) {
-          g5 = 4;
+          g6 = 4;
           T3 = m4;
-          return g5 | 0;
+          return g6 | 0;
         }
         i3 = Od2(d4 | 0, e68 | 0, 52) | 0;
         H4() | 0;
         i3 = i3 & 15;
         if ((i3 | 0) > (f5 | 0)) {
-          g5 = 12;
+          g6 = 12;
           T3 = m4;
-          return g5 | 0;
+          return g6 | 0;
         }
         if (Eb2(d4, e68, f5, h4) | 0) {
           I4(27795, 27122, 1236, 27173);
@@ -87475,14 +90920,14 @@ var libh3 = (function(libh32) {
         l3 = h4;
         k5 = b10[l3 + 4 >> 2] | 0;
         if (!(((c4 | 0) > -1 | (c4 | 0) == -1 & a6 >>> 0 > 4294967295) & ((k5 | 0) > (c4 | 0) | ((k5 | 0) == (c4 | 0) ? (b10[l3 >> 2] | 0) >>> 0 > a6 >>> 0 : 0)))) {
-          g5 = 2;
+          g6 = 2;
           T3 = m4;
-          return g5 | 0;
+          return g6 | 0;
         }
         l3 = f5 - i3 | 0;
         f5 = Pd2(f5 | 0, 0, 52) | 0;
         j4 = H4() | 0 | e68 & -15728641;
-        k5 = g5;
+        k5 = g6;
         b10[k5 >> 2] = f5 | d4;
         b10[k5 + 4 >> 2] = j4;
         k5 = Od2(d4 | 0, e68 | 0, 45) | 0;
@@ -87504,9 +90949,9 @@ var libh3 = (function(libh32) {
               }
             }
             if ((l3 | 0) < 1) {
-              g5 = 0;
+              g6 = 0;
               T3 = m4;
-              return g5 | 0;
+              return g6 | 0;
             }
             k5 = i3 ^ 15;
             e68 = -1;
@@ -87526,7 +90971,7 @@ var libh3 = (function(libh32) {
                     c4 = Ed2(a6 | 0, c4 | 0, -1, -1) | 0;
                     c4 = Fd2(c4 | 0, H4() | 0, h4 | 0, f5 | 0) | 0;
                     h4 = H4() | 0;
-                    n3 = g5;
+                    n3 = g6;
                     p5 = b10[n3 >> 2] | 0;
                     n3 = b10[n3 + 4 >> 2] | 0;
                     q5 = (k5 + e68 | 0) * 3 | 0;
@@ -87537,7 +90982,7 @@ var libh3 = (function(libh32) {
                     f5 = Ed2(e68 | 0, a6 | 0, 2, 0) | 0;
                     q5 = Pd2(f5 | 0, H4() | 0, q5 | 0) | 0;
                     n3 = H4() | 0 | n3;
-                    f5 = g5;
+                    f5 = g6;
                     b10[f5 >> 2] = q5 | p5 & ~o3;
                     b10[f5 + 4 >> 2] = n3;
                     a6 = Kd2(e68 | 0, a6 | 0, i3 | 0, d4 | 0) | 0;
@@ -87546,19 +90991,19 @@ var libh3 = (function(libh32) {
                     c4 = H4() | 0;
                     break;
                   } else {
-                    q5 = g5;
+                    q5 = g6;
                     o3 = b10[q5 >> 2] | 0;
                     q5 = b10[q5 + 4 >> 2] | 0;
                     p5 = Pd2(7, 0, (k5 + e68 | 0) * 3 | 0) | 0;
                     q5 = q5 & ~(H4() | 0);
-                    h4 = g5;
+                    h4 = g6;
                     b10[h4 >> 2] = o3 & ~p5;
                     b10[h4 + 4 >> 2] = q5;
                     h4 = 1;
                     break;
                   }
                 } else {
-                  o3 = g5;
+                  o3 = g6;
                   f5 = b10[o3 >> 2] | 0;
                   o3 = b10[o3 + 4 >> 2] | 0;
                   e68 = (k5 + e68 | 0) * 3 | 0;
@@ -87568,7 +91013,7 @@ var libh3 = (function(libh32) {
                   h4 = H4() | 0;
                   e68 = Pd2(q5 | 0, h4 | 0, e68 | 0) | 0;
                   o3 = H4() | 0 | o3;
-                  p5 = g5;
+                  p5 = g6;
                   b10[p5 >> 2] = e68 | f5 & ~n3;
                   b10[p5 + 4 >> 2] = o3;
                   h4 = Kd2(q5 | 0, h4 | 0, i3 | 0, d4 | 0) | 0;
@@ -87600,7 +91045,7 @@ var libh3 = (function(libh32) {
           p5 = l3 - h4 | 0;
           p5 = Mc2(7, 0, p5, ((p5 | 0) < 0) << 31 >> 31) | 0;
           q5 = H4() | 0;
-          j4 = g5;
+          j4 = g6;
           d4 = b10[j4 >> 2] | 0;
           j4 = b10[j4 + 4 >> 2] | 0;
           i3 = (f5 - h4 | 0) * 3 | 0;
@@ -87610,7 +91055,7 @@ var libh3 = (function(libh32) {
           o3 = H4() | 0;
           i3 = Pd2(n3 | 0, o3 | 0, i3 | 0) | 0;
           j4 = H4() | 0 | j4;
-          k5 = g5;
+          k5 = g6;
           b10[k5 >> 2] = i3 | d4 & ~e68;
           b10[k5 + 4 >> 2] = j4;
           q5 = Kd2(n3 | 0, o3 | 0, p5 | 0, q5 | 0) | 0;
@@ -87631,12 +91076,12 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0;
         f5 = Od2(c4 | 0, d4 | 0, 52) | 0;
         H4() | 0;
         f5 = f5 & 15;
         if ((c4 | 0) == 0 & (d4 | 0) == 0 | ((e68 | 0) > 15 | (f5 | 0) > (e68 | 0))) {
-          g5 = -1;
+          g6 = -1;
           c4 = -1;
           d4 = 0;
           f5 = 0;
@@ -87647,14 +91092,14 @@ var libh3 = (function(libh32) {
           d4 = c4 | d4;
           h4 = h4 | (H4() | 0);
           c4 = (Fb2(d4, h4) | 0) == 0;
-          g5 = f5;
+          g6 = f5;
           c4 = c4 ? -1 : e68;
           f5 = h4;
         }
         h4 = a6;
         b10[h4 >> 2] = d4;
         b10[h4 + 4 >> 2] = f5;
-        b10[a6 + 8 >> 2] = g5;
+        b10[a6 + 8 >> 2] = g6;
         b10[a6 + 12 >> 2] = c4;
         return;
       }
@@ -87663,30 +91108,30 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0;
+        var f5 = 0, g6 = 0;
         f5 = Od2(a6 | 0, c4 | 0, 52) | 0;
         H4() | 0;
         f5 = f5 & 15;
-        g5 = e68 + 8 | 0;
-        b10[g5 >> 2] = f5;
+        g6 = e68 + 8 | 0;
+        b10[g6 >> 2] = f5;
         if ((a6 | 0) == 0 & (c4 | 0) == 0 | ((d4 | 0) > 15 | (f5 | 0) > (d4 | 0))) {
           d4 = e68;
           b10[d4 >> 2] = 0;
           b10[d4 + 4 >> 2] = 0;
-          b10[g5 >> 2] = -1;
+          b10[g6 >> 2] = -1;
           b10[e68 + 12 >> 2] = -1;
           return;
         }
         a6 = Hb2(a6, c4, f5 + 1 | 0, d4) | 0;
-        g5 = (H4() | 0) & -15728641;
+        g6 = (H4() | 0) & -15728641;
         f5 = Pd2(d4 | 0, 0, 52) | 0;
         f5 = a6 | f5;
-        g5 = g5 | (H4() | 0);
+        g6 = g6 | (H4() | 0);
         a6 = e68;
         b10[a6 >> 2] = f5;
-        b10[a6 + 4 >> 2] = g5;
+        b10[a6 + 4 >> 2] = g6;
         a6 = e68 + 12 | 0;
-        if (!(Fb2(f5, g5) | 0)) {
+        if (!(Fb2(f5, g6) | 0)) {
           b10[a6 >> 2] = -1;
           return;
         } else {
@@ -87696,7 +91141,7 @@ var libh3 = (function(libh32) {
       }
       function fc2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         d4 = a6;
         c4 = b10[d4 >> 2] | 0;
         d4 = b10[d4 + 4 >> 2] | 0;
@@ -87718,14 +91163,14 @@ var libh3 = (function(libh32) {
           return;
         }
         j4 = a6 + 12 | 0;
-        g5 = e68;
+        g6 = e68;
         while (1) {
-          if ((g5 | 0) == (h4 | 0)) {
+          if ((g6 | 0) == (h4 | 0)) {
             e68 = 5;
             break;
           }
-          k5 = (g5 | 0) == (b10[j4 >> 2] | 0);
-          f5 = (15 - g5 | 0) * 3 | 0;
+          k5 = (g6 | 0) == (b10[j4 >> 2] | 0);
+          f5 = (15 - g6 | 0) * 3 | 0;
           e68 = Od2(c4 | 0, d4 | 0, f5 | 0) | 0;
           H4() | 0;
           e68 = e68 & 7;
@@ -87743,8 +91188,8 @@ var libh3 = (function(libh32) {
           k5 = a6;
           b10[k5 >> 2] = c4;
           b10[k5 + 4 >> 2] = d4;
-          if ((g5 | 0) > (h4 | 0)) {
-            g5 = g5 + -1 | 0;
+          if ((g6 | 0) > (h4 | 0)) {
+            g6 = g6 + -1 | 0;
           } else {
             e68 = 10;
             break;
@@ -87764,7 +91209,7 @@ var libh3 = (function(libh32) {
           k5 = a6;
           b10[k5 >> 2] = h4;
           b10[k5 + 4 >> 2] = i3;
-          b10[j4 >> 2] = g5 + -1;
+          b10[j4 >> 2] = g6 + -1;
           return;
         } else if ((e68 | 0) == 10) {
           return;
@@ -87805,53 +91250,53 @@ var libh3 = (function(libh32) {
       function jc2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0;
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0;
         f5 = +e67[b11 >> 3];
         d4 = +e67[a6 >> 3];
-        g5 = +u3(+((f5 - d4) * 0.5));
+        g6 = +u3(+((f5 - d4) * 0.5));
         c4 = +u3(+((+e67[b11 + 8 >> 3] - +e67[a6 + 8 >> 3]) * 0.5));
-        c4 = g5 * g5 + c4 * (+t4(+f5) * +t4(+d4) * c4);
+        c4 = g6 * g6 + c4 * (+t4(+f5) * +t4(+d4) * c4);
         return +(+z4(+ +r3(+c4), + +r3(+(1 - c4))) * 2);
       }
       function kc2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0;
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0;
         f5 = +e67[b11 >> 3];
         d4 = +e67[a6 >> 3];
-        g5 = +u3(+((f5 - d4) * 0.5));
+        g6 = +u3(+((f5 - d4) * 0.5));
         c4 = +u3(+((+e67[b11 + 8 >> 3] - +e67[a6 + 8 >> 3]) * 0.5));
-        c4 = g5 * g5 + c4 * (+t4(+f5) * +t4(+d4) * c4);
+        c4 = g6 * g6 + c4 * (+t4(+f5) * +t4(+d4) * c4);
         return +(+z4(+ +r3(+c4), + +r3(+(1 - c4))) * 2 * 6371.007180918475);
       }
       function lc2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0;
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0;
         f5 = +e67[b11 >> 3];
         d4 = +e67[a6 >> 3];
-        g5 = +u3(+((f5 - d4) * 0.5));
+        g6 = +u3(+((f5 - d4) * 0.5));
         c4 = +u3(+((+e67[b11 + 8 >> 3] - +e67[a6 + 8 >> 3]) * 0.5));
-        c4 = g5 * g5 + c4 * (+t4(+f5) * +t4(+d4) * c4);
+        c4 = g6 * g6 + c4 * (+t4(+f5) * +t4(+d4) * c4);
         return +(+z4(+ +r3(+c4), + +r3(+(1 - c4))) * 2 * 6371.007180918475 * 1e3);
       }
       function mc2(a6, b11) {
         a6 = a6 | 0;
         b11 = b11 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0, h4 = 0;
-        g5 = +e67[b11 >> 3];
-        d4 = +t4(+g5);
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0, h4 = 0;
+        g6 = +e67[b11 >> 3];
+        d4 = +t4(+g6);
         f5 = +e67[b11 + 8 >> 3] - +e67[a6 + 8 >> 3];
         h4 = d4 * +u3(+f5);
         c4 = +e67[a6 >> 3];
-        return + +z4(+h4, +(+u3(+g5) * +t4(+c4) - +t4(+f5) * (d4 * +u3(+c4))));
+        return + +z4(+h4, +(+u3(+g6) * +t4(+c4) - +t4(+f5) * (d4 * +u3(+c4))));
       }
       function nc2(a6, c4, d4, f5) {
         a6 = a6 | 0;
         c4 = +c4;
         d4 = +d4;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         if (d4 < 1e-16) {
           b10[f5 >> 2] = b10[a6 >> 2];
           b10[f5 + 4 >> 2] = b10[a6 + 4 >> 2];
@@ -87865,14 +91310,14 @@ var libh3 = (function(libh32) {
           if (h4 < 1e-16) {
             c4 = +e67[a6 >> 3] + d4;
             e67[f5 >> 3] = c4;
-            g5 = f5;
+            g6 = f5;
           } else {
-            g5 = +q4(+(h4 + -3.141592653589793)) < 1e-16;
+            g6 = +q4(+(h4 + -3.141592653589793)) < 1e-16;
             c4 = +e67[a6 >> 3];
-            if (g5) {
+            if (g6) {
               c4 = c4 - d4;
               e67[f5 >> 3] = c4;
-              g5 = f5;
+              g6 = f5;
               break;
             }
             i3 = +t4(+d4);
@@ -87913,12 +91358,12 @@ var libh3 = (function(libh32) {
           }
         } while (0);
         if (+q4(+(c4 + -1.5707963267948966)) < 1e-16) {
-          e67[g5 >> 3] = 1.5707963267948966;
+          e67[g6 >> 3] = 1.5707963267948966;
           e67[f5 + 8 >> 3] = 0;
           return;
         }
         if (+q4(+(c4 + 1.5707963267948966)) < 1e-16) {
-          e67[g5 >> 3] = -1.5707963267948966;
+          e67[g6 >> 3] = -1.5707963267948966;
           e67[f5 + 8 >> 3] = 0;
           return;
         }
@@ -88000,13 +91445,13 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         b11 = b11 | 0;
         c4 = c4 | 0;
-        var d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
+        var d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
         n3 = +e67[b11 >> 3];
         l3 = +e67[a6 >> 3];
         j4 = +u3(+((n3 - l3) * 0.5));
-        g5 = +e67[b11 + 8 >> 3];
+        g6 = +e67[b11 + 8 >> 3];
         k5 = +e67[a6 + 8 >> 3];
-        h4 = +u3(+((g5 - k5) * 0.5));
+        h4 = +u3(+((g6 - k5) * 0.5));
         i3 = +t4(+l3);
         m4 = +t4(+n3);
         h4 = j4 * j4 + h4 * (m4 * i3 * h4);
@@ -88014,29 +91459,29 @@ var libh3 = (function(libh32) {
         j4 = +e67[c4 >> 3];
         n3 = +u3(+((j4 - n3) * 0.5));
         d4 = +e67[c4 + 8 >> 3];
-        g5 = +u3(+((d4 - g5) * 0.5));
+        g6 = +u3(+((d4 - g6) * 0.5));
         f5 = +t4(+j4);
-        g5 = n3 * n3 + g5 * (m4 * f5 * g5);
-        g5 = +z4(+ +r3(+g5), + +r3(+(1 - g5))) * 2;
+        g6 = n3 * n3 + g6 * (m4 * f5 * g6);
+        g6 = +z4(+ +r3(+g6), + +r3(+(1 - g6))) * 2;
         j4 = +u3(+((l3 - j4) * 0.5));
         d4 = +u3(+((k5 - d4) * 0.5));
         d4 = j4 * j4 + d4 * (i3 * f5 * d4);
         d4 = +z4(+ +r3(+d4), + +r3(+(1 - d4))) * 2;
-        f5 = (h4 + g5 + d4) * 0.5;
-        return +(+y5(+ +r3(+(+v4(+(f5 * 0.5)) * +v4(+((f5 - h4) * 0.5)) * +v4(+((f5 - g5) * 0.5)) * +v4(+((f5 - d4) * 0.5))))) * 4);
+        f5 = (h4 + g6 + d4) * 0.5;
+        return +(+y5(+ +r3(+(+v4(+(f5 * 0.5)) * +v4(+((f5 - h4) * 0.5)) * +v4(+((f5 - g6) * 0.5)) * +v4(+((f5 - d4) * 0.5))))) * 4);
       }
       function uc2(a6, c4, d4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = T3;
         T3 = T3 + 192 | 0;
         h4 = j4 + 168 | 0;
         i3 = j4;
-        g5 = Xb2(a6, c4, h4) | 0;
-        if (g5 | 0) {
-          d4 = g5;
+        g6 = Xb2(a6, c4, h4) | 0;
+        if (g6 | 0) {
+          d4 = g6;
           T3 = j4;
           return d4 | 0;
         }
@@ -88049,9 +91494,9 @@ var libh3 = (function(libh32) {
           if ((c4 | 0) != 1) {
             a6 = 1;
             do {
-              g5 = a6;
+              g6 = a6;
               a6 = a6 + 1 | 0;
-              f5 = f5 + +tc2(i3 + 8 + (g5 << 4) | 0, i3 + 8 + (((a6 | 0) % (c4 | 0) | 0) << 4) | 0, h4);
+              f5 = f5 + +tc2(i3 + 8 + (g6 << 4) | 0, i3 + 8 + (((a6 | 0) % (c4 | 0) | 0) << 4) | 0, h4);
             } while ((a6 | 0) < (c4 | 0));
           }
         } else {
@@ -88088,7 +91533,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         j4 = T3;
         T3 = T3 + 176 | 0;
         i3 = j4;
@@ -88108,16 +91553,16 @@ var libh3 = (function(libh32) {
         c4 = a6 + -1 | 0;
         a6 = 0;
         f5 = +e67[i3 + 8 >> 3];
-        g5 = +e67[i3 + 16 >> 3];
+        g6 = +e67[i3 + 16 >> 3];
         h4 = 0;
         do {
           a6 = a6 + 1 | 0;
           l3 = f5;
           f5 = +e67[i3 + 8 + (a6 << 4) >> 3];
           m4 = +u3(+((f5 - l3) * 0.5));
-          k5 = g5;
-          g5 = +e67[i3 + 8 + (a6 << 4) + 8 >> 3];
-          k5 = +u3(+((g5 - k5) * 0.5));
+          k5 = g6;
+          g6 = +e67[i3 + 8 + (a6 << 4) + 8 >> 3];
+          k5 = +u3(+((g6 - k5) * 0.5));
           k5 = m4 * m4 + k5 * (+t4(+f5) * +t4(+l3) * k5);
           h4 = h4 + +z4(+ +r3(+k5), + +r3(+(1 - k5))) * 2;
         } while ((a6 | 0) < (c4 | 0));
@@ -88130,7 +91575,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         j4 = T3;
         T3 = T3 + 176 | 0;
         i3 = j4;
@@ -88156,16 +91601,16 @@ var libh3 = (function(libh32) {
         c4 = a6 + -1 | 0;
         a6 = 0;
         f5 = +e67[i3 + 8 >> 3];
-        g5 = +e67[i3 + 16 >> 3];
+        g6 = +e67[i3 + 16 >> 3];
         h4 = 0;
         do {
           a6 = a6 + 1 | 0;
           l3 = f5;
           f5 = +e67[i3 + 8 + (a6 << 4) >> 3];
           m4 = +u3(+((f5 - l3) * 0.5));
-          k5 = g5;
-          g5 = +e67[i3 + 8 + (a6 << 4) + 8 >> 3];
-          k5 = +u3(+((g5 - k5) * 0.5));
+          k5 = g6;
+          g6 = +e67[i3 + 8 + (a6 << 4) + 8 >> 3];
+          k5 = +u3(+((g6 - k5) * 0.5));
           k5 = m4 * m4 + k5 * (+t4(+l3) * +t4(+f5) * k5);
           h4 = h4 + +z4(+ +r3(+k5), + +r3(+(1 - k5))) * 2;
         } while ((a6 | 0) != (c4 | 0));
@@ -88181,7 +91626,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         j4 = T3;
         T3 = T3 + 176 | 0;
         i3 = j4;
@@ -88209,16 +91654,16 @@ var libh3 = (function(libh32) {
         c4 = a6 + -1 | 0;
         a6 = 0;
         f5 = +e67[i3 + 8 >> 3];
-        g5 = +e67[i3 + 16 >> 3];
+        g6 = +e67[i3 + 16 >> 3];
         h4 = 0;
         do {
           a6 = a6 + 1 | 0;
           l3 = f5;
           f5 = +e67[i3 + 8 + (a6 << 4) >> 3];
           m4 = +u3(+((f5 - l3) * 0.5));
-          k5 = g5;
-          g5 = +e67[i3 + 8 + (a6 << 4) + 8 >> 3];
-          k5 = +u3(+((g5 - k5) * 0.5));
+          k5 = g6;
+          g6 = +e67[i3 + 8 + (a6 << 4) + 8 >> 3];
+          k5 = +u3(+((g6 - k5) * 0.5));
           k5 = m4 * m4 + k5 * (+t4(+l3) * +t4(+f5) * k5);
           h4 = h4 + +z4(+ +r3(+k5), + +r3(+(1 - k5))) * 2;
         } while ((a6 | 0) != (c4 | 0));
@@ -88320,9 +91765,9 @@ var libh3 = (function(libh32) {
       }
       function Dc2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0, F4 = 0, G5 = 0, H5 = 0, J5 = 0, K6 = 0;
-        g5 = a6 + 8 | 0;
-        if (b10[g5 >> 2] | 0) {
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0, B6 = 0, C5 = 0, D6 = 0, E6 = 0, F4 = 0, G5 = 0, H5 = 0, J5 = 0, K6 = 0;
+        g6 = a6 + 8 | 0;
+        if (b10[g6 >> 2] | 0) {
           K6 = 1;
           return K6 | 0;
         }
@@ -88352,7 +91797,7 @@ var libh3 = (function(libh32) {
         b10[a6 >> 2] = 0;
         z5 = a6 + 4 | 0;
         b10[z5 >> 2] = 0;
-        b10[g5 >> 2] = 0;
+        b10[g6 >> 2] = 0;
         d4 = 0;
         F4 = 0;
         y6 = 0;
@@ -88367,13 +91812,13 @@ var libh3 = (function(libh32) {
               c4 = i3;
               i3 = b10[i3 + 16 >> 2] | 0;
               l3 = (i3 | 0) == 0;
-              g5 = l3 ? m4 : i3;
-              j4 = +e67[g5 + 8 >> 3];
+              g6 = l3 ? m4 : i3;
+              j4 = +e67[g6 + 8 >> 3];
               if (+q4(+(k5 - j4)) > 3.141592653589793) {
                 K6 = 14;
                 break;
               }
-              h4 = h4 + (j4 - k5) * (+e67[c4 >> 3] + +e67[g5 >> 3]);
+              h4 = h4 + (j4 - k5) * (+e67[c4 >> 3] + +e67[g6 >> 3]);
             } while (!l3);
             if ((K6 | 0) == 14) {
               K6 = 0;
@@ -88392,7 +91837,7 @@ var libh3 = (function(libh32) {
             if (h4 > 0) {
               b10[H5 + (F4 << 2) >> 2] = f5;
               F4 = F4 + 1 | 0;
-              g5 = y6;
+              g6 = y6;
               c4 = n3;
             } else {
               K6 = 19;
@@ -88406,7 +91851,7 @@ var libh3 = (function(libh32) {
               if (!d4) {
                 if (!n3) {
                   if (!(b10[a6 >> 2] | 0)) {
-                    g5 = z5;
+                    g6 = z5;
                     i3 = a6;
                     c4 = f5;
                     d4 = a6;
@@ -88416,7 +91861,7 @@ var libh3 = (function(libh32) {
                     break a;
                   }
                 } else {
-                  g5 = z5;
+                  g6 = z5;
                   i3 = n3 + 8 | 0;
                   c4 = f5;
                   d4 = a6;
@@ -88434,13 +91879,13 @@ var libh3 = (function(libh32) {
                   break a;
                 }
                 b10[c4 >> 2] = d4;
-                g5 = d4 + 4 | 0;
+                g6 = d4 + 4 | 0;
                 i3 = d4;
                 c4 = n3;
               }
             } while (0);
             b10[i3 >> 2] = f5;
-            b10[g5 >> 2] = f5;
+            b10[g6 >> 2] = f5;
             i3 = G5 + (y6 << 5) | 0;
             l3 = b10[f5 >> 2] | 0;
             if (l3) {
@@ -88453,7 +91898,7 @@ var libh3 = (function(libh32) {
               e67[o3 >> 3] = -17976931348623157e292;
               u4 = 17976931348623157e292;
               v5 = -17976931348623157e292;
-              g5 = 0;
+              g6 = 0;
               p5 = l3;
               k5 = 17976931348623157e292;
               s5 = 17976931348623157e292;
@@ -88484,14 +91929,14 @@ var libh3 = (function(libh32) {
                 }
                 u4 = x6 > 0 & x6 < u4 ? x6 : u4;
                 v5 = x6 < 0 & x6 > v5 ? x6 : v5;
-                g5 = g5 | +q4(+(x6 - w5)) > 3.141592653589793;
+                g6 = g6 | +q4(+(x6 - w5)) > 3.141592653589793;
                 if (r4) {
                   break;
                 } else {
                   t5 = h4;
                 }
               }
-              if (g5) {
+              if (g6) {
                 e67[o3 >> 3] = v5;
                 e67[n3 >> 3] = u4;
               }
@@ -88505,7 +91950,7 @@ var libh3 = (function(libh32) {
               b10[i3 + 24 >> 2] = 0;
               b10[i3 + 28 >> 2] = 0;
             }
-            g5 = y6 + 1 | 0;
+            g6 = y6 + 1 | 0;
           }
           E6 = f5 + 8 | 0;
           f5 = b10[E6 >> 2] | 0;
@@ -88514,7 +91959,7 @@ var libh3 = (function(libh32) {
             K6 = 45;
             break;
           } else {
-            y6 = g5;
+            y6 = g6;
             n3 = c4;
           }
         }
@@ -88527,8 +91972,8 @@ var libh3 = (function(libh32) {
         } else if ((K6 | 0) == 45) {
           b: do {
             if ((F4 | 0) > 0) {
-              E6 = (g5 | 0) == 0;
-              C5 = g5 << 2;
+              E6 = (g6 | 0) == 0;
+              C5 = g6 << 2;
               D6 = (a6 | 0) == 0;
               B6 = 0;
               c4 = 0;
@@ -88547,11 +91992,11 @@ var libh3 = (function(libh32) {
                   }
                   c: do {
                     if (!D6) {
-                      g5 = 0;
+                      g6 = 0;
                       d4 = 0;
                       i3 = a6;
                       while (1) {
-                        f5 = G5 + (g5 << 5) | 0;
+                        f5 = G5 + (g6 << 5) | 0;
                         if (Ec2(b10[i3 >> 2] | 0, f5, b10[A6 >> 2] | 0) | 0) {
                           b10[y6 + (d4 << 2) >> 2] = i3;
                           b10[z5 + (d4 << 2) >> 2] = f5;
@@ -88563,7 +92008,7 @@ var libh3 = (function(libh32) {
                         if (!i3) {
                           break;
                         } else {
-                          g5 = g5 + 1 | 0;
+                          g6 = g6 + 1 | 0;
                           d4 = r4;
                         }
                       }
@@ -88581,11 +92026,11 @@ var libh3 = (function(libh32) {
                             f5 = 0;
                             i3 = 0;
                             while (1) {
-                              g5 = b10[b10[y6 + (i3 << 2) >> 2] >> 2] | 0;
-                              if ((g5 | 0) == (l3 | 0)) {
+                              g6 = b10[b10[y6 + (i3 << 2) >> 2] >> 2] | 0;
+                              if ((g6 | 0) == (l3 | 0)) {
                                 m4 = f5;
                               } else {
-                                m4 = f5 + ((Ec2(g5, b10[z5 + (i3 << 2) >> 2] | 0, b10[l3 >> 2] | 0) | 0) & 1) | 0;
+                                m4 = f5 + ((Ec2(g6, b10[z5 + (i3 << 2) >> 2] | 0, b10[l3 >> 2] | 0) | 0) & 1) | 0;
                               }
                               i3 = i3 + 1 | 0;
                               if ((i3 | 0) == (r4 | 0)) {
@@ -88594,14 +92039,14 @@ var libh3 = (function(libh32) {
                                 f5 = m4;
                               }
                             }
-                            g5 = (m4 | 0) > (p5 | 0);
-                            d4 = g5 ? n3 : d4;
+                            g6 = (m4 | 0) > (p5 | 0);
+                            d4 = g6 ? n3 : d4;
                             f5 = o3 + 1 | 0;
                             if ((f5 | 0) == (r4 | 0)) {
                               break c;
                             }
                             o3 = f5;
-                            p5 = g5 ? m4 : p5;
+                            p5 = g6 ? m4 : p5;
                             n3 = b10[y6 + (f5 << 2) >> 2] | 0;
                           }
                         }
@@ -88615,8 +92060,8 @@ var libh3 = (function(libh32) {
                   Cd2(y6);
                   Cd2(z5);
                   if (d4) {
-                    g5 = d4 + 4 | 0;
-                    f5 = b10[g5 >> 2] | 0;
+                    g6 = d4 + 4 | 0;
+                    f5 = b10[g6 >> 2] | 0;
                     if (!f5) {
                       if (b10[d4 >> 2] | 0) {
                         K6 = 70;
@@ -88626,7 +92071,7 @@ var libh3 = (function(libh32) {
                       d4 = f5 + 8 | 0;
                     }
                     b10[d4 >> 2] = A6;
-                    b10[g5 >> 2] = A6;
+                    b10[g6 >> 2] = A6;
                   } else {
                     K6 = 73;
                   }
@@ -88674,15 +92119,15 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         if (!(Aa2(c4, d4) | 0)) {
           a6 = 0;
           return a6 | 0;
         }
         c4 = ya2(c4) | 0;
         f5 = +e67[d4 >> 3];
-        g5 = +e67[d4 + 8 >> 3];
-        g5 = c4 & g5 < 0 ? g5 + 6.283185307179586 : g5;
+        g6 = +e67[d4 + 8 >> 3];
+        g6 = c4 & g6 < 0 ? g6 + 6.283185307179586 : g6;
         a6 = b10[a6 >> 2] | 0;
         if (!a6) {
           a6 = 0;
@@ -88690,12 +92135,12 @@ var libh3 = (function(libh32) {
         }
         if (c4) {
           c4 = 0;
-          l3 = g5;
+          l3 = g6;
           d4 = a6;
           a: while (1) {
             while (1) {
               i3 = +e67[d4 >> 3];
-              g5 = +e67[d4 + 8 >> 3];
+              g6 = +e67[d4 + 8 >> 3];
               d4 = d4 + 16 | 0;
               m4 = b10[d4 >> 2] | 0;
               m4 = (m4 | 0) == 0 ? a6 : m4;
@@ -88707,8 +92152,8 @@ var libh3 = (function(libh32) {
               } else {
                 k5 = h4;
                 h4 = i3;
-                i3 = g5;
-                g5 = j4;
+                i3 = g6;
+                g6 = j4;
               }
               f5 = f5 == h4 | f5 == k5 ? f5 + 2220446049250313e-31 : f5;
               if (!(f5 < h4 | f5 > k5)) {
@@ -88721,7 +92166,7 @@ var libh3 = (function(libh32) {
               }
             }
             j4 = i3 < 0 ? i3 + 6.283185307179586 : i3;
-            i3 = g5 < 0 ? g5 + 6.283185307179586 : g5;
+            i3 = g6 < 0 ? g6 + 6.283185307179586 : g6;
             l3 = j4 == l3 | i3 == l3 ? l3 + -2220446049250313e-31 : l3;
             k5 = j4 + (i3 - j4) * ((f5 - h4) / (k5 - h4));
             if ((k5 < 0 ? k5 + 6.283185307179586 : k5) > l3) {
@@ -88738,12 +92183,12 @@ var libh3 = (function(libh32) {
           }
         } else {
           c4 = 0;
-          l3 = g5;
+          l3 = g6;
           d4 = a6;
           b: while (1) {
             while (1) {
               i3 = +e67[d4 >> 3];
-              g5 = +e67[d4 + 8 >> 3];
+              g6 = +e67[d4 + 8 >> 3];
               d4 = d4 + 16 | 0;
               m4 = b10[d4 >> 2] | 0;
               m4 = (m4 | 0) == 0 ? a6 : m4;
@@ -88755,8 +92200,8 @@ var libh3 = (function(libh32) {
               } else {
                 k5 = h4;
                 h4 = i3;
-                i3 = g5;
-                g5 = j4;
+                i3 = g6;
+                g6 = j4;
               }
               f5 = f5 == h4 | f5 == k5 ? f5 + 2220446049250313e-31 : f5;
               if (!(f5 < h4 | f5 > k5)) {
@@ -88768,8 +92213,8 @@ var libh3 = (function(libh32) {
                 break b;
               }
             }
-            l3 = i3 == l3 | g5 == l3 ? l3 + -2220446049250313e-31 : l3;
-            if (i3 + (g5 - i3) * ((f5 - h4) / (k5 - h4)) > l3) {
+            l3 = i3 == l3 | g6 == l3 ? l3 + -2220446049250313e-31 : l3;
+            if (i3 + (g6 - i3) * ((f5 - h4) / (k5 - h4)) > l3) {
               c4 = c4 ^ 1;
             }
             d4 = b10[d4 >> 2] | 0;
@@ -88784,12 +92229,12 @@ var libh3 = (function(libh32) {
         }
         return 0;
       }
-      function Fc2(c4, d4, e68, f5, g5) {
+      function Fc2(c4, d4, e68, f5, g6) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0;
         u4 = T3;
         T3 = T3 + 32 | 0;
@@ -89000,9 +92445,9 @@ var libh3 = (function(libh32) {
         } while (0);
         if ((r4 | 0) == 51) {
           h4 = t5 + 4 | 0;
-          b10[g5 >> 2] = b10[h4 >> 2];
-          b10[g5 + 4 >> 2] = b10[h4 + 4 >> 2];
-          b10[g5 + 8 >> 2] = b10[h4 + 8 >> 2];
+          b10[g6 >> 2] = b10[h4 >> 2];
+          b10[g6 + 4 >> 2] = b10[h4 + 4 >> 2];
+          b10[g6 + 8 >> 2] = b10[h4 + 8 >> 2];
           h4 = 0;
         }
         t5 = h4;
@@ -89014,7 +92459,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0;
         q5 = T3;
         T3 = T3 + 48 | 0;
         k5 = q5 + 36 | 0;
@@ -89035,9 +92480,9 @@ var libh3 = (function(libh32) {
         l3 = ma2(n3) | 0;
         Pd2(f5 | 0, 0, 52) | 0;
         r4 = H4() | 0 | 134225919;
-        g5 = e68;
-        b10[g5 >> 2] = -1;
-        b10[g5 + 4 >> 2] = r4;
+        g6 = e68;
+        b10[g6 >> 2] = -1;
+        b10[g6 + 4 >> 2] = r4;
         if (!f5) {
           f5 = Pa2(d4) | 0;
           if ((f5 | 0) == 7) {
@@ -89067,12 +92512,12 @@ var libh3 = (function(libh32) {
         b10[k5 + 8 >> 2] = b10[d4 + 8 >> 2];
         d4 = f5;
         while (1) {
-          g5 = d4;
+          g6 = d4;
           d4 = d4 + -1 | 0;
           b10[h4 >> 2] = b10[k5 >> 2];
           b10[h4 + 4 >> 2] = b10[k5 + 4 >> 2];
           b10[h4 + 8 >> 2] = b10[k5 + 8 >> 2];
-          if (!(Tb2(g5) | 0)) {
+          if (!(Tb2(g6) | 0)) {
             f5 = Ra2(k5) | 0;
             if (f5 | 0) {
               d4 = 13;
@@ -89098,7 +92543,7 @@ var libh3 = (function(libh32) {
           f5 = e68;
           t5 = b10[f5 >> 2] | 0;
           f5 = b10[f5 + 4 >> 2] | 0;
-          u4 = (15 - g5 | 0) * 3 | 0;
+          u4 = (15 - g6 | 0) * 3 | 0;
           s5 = Pd2(7, 0, u4 | 0) | 0;
           f5 = f5 & ~(H4() | 0);
           u4 = Pd2(Pa2(j4) | 0, 0, u4 | 0) | 0;
@@ -89106,7 +92551,7 @@ var libh3 = (function(libh32) {
           r4 = e68;
           b10[r4 >> 2] = u4 | t5 & ~s5;
           b10[r4 + 4 >> 2] = f5;
-          if ((g5 | 0) <= 1) {
+          if ((g6 | 0) <= 1) {
             d4 = 14;
             break;
           }
@@ -89126,18 +92571,18 @@ var libh3 = (function(libh32) {
                   if (!d4) {
                     if ((l3 | 0) != 0 & (j4 | 0) != 0) {
                       d4 = Nb2(a6, c4) | 0;
-                      g5 = e68;
-                      g5 = Nb2(b10[g5 >> 2] | 0, b10[g5 + 4 >> 2] | 0) | 0;
-                      if ((d4 | 0) == 7 | (g5 | 0) == 7) {
+                      g6 = e68;
+                      g6 = Nb2(b10[g6 >> 2] | 0, b10[g6 + 4 >> 2] | 0) | 0;
+                      if ((d4 | 0) == 7 | (g6 | 0) == 7) {
                         f5 = 5;
                         break a;
                       }
-                      g5 = b10[21376 + (d4 * 28 | 0) + (g5 << 2) >> 2] | 0;
-                      if ((g5 | 0) < 0) {
+                      g6 = b10[21376 + (d4 * 28 | 0) + (g6 << 2) >> 2] | 0;
+                      if ((g6 | 0) < 0) {
                         f5 = 5;
                         break a;
                       }
-                      if (!g5) {
+                      if (!g6) {
                         d4 = 59;
                       } else {
                         i3 = e68;
@@ -89151,7 +92596,7 @@ var libh3 = (function(libh32) {
                           b10[u4 >> 2] = h4;
                           b10[u4 + 4 >> 2] = i3;
                           d4 = d4 + 1 | 0;
-                        } while ((d4 | 0) < (g5 | 0));
+                        } while ((d4 | 0) < (g6 | 0));
                         d4 = 58;
                       }
                     } else {
@@ -89164,14 +92609,14 @@ var libh3 = (function(libh32) {
                         f5 = 5;
                         break a;
                       }
-                      g5 = b10[21376 + (f5 * 28 | 0) + (d4 << 2) >> 2] | 0;
-                      if ((g5 | 0) > 0) {
+                      g6 = b10[21376 + (f5 * 28 | 0) + (d4 << 2) >> 2] | 0;
+                      if ((g6 | 0) > 0) {
                         f5 = d4;
                         d4 = 0;
                         do {
                           f5 = Za2(f5) | 0;
                           d4 = d4 + 1 | 0;
-                        } while ((d4 | 0) != (g5 | 0));
+                        } while ((d4 | 0) != (g6 | 0));
                       } else {
                         f5 = d4;
                       }
@@ -89185,7 +92630,7 @@ var libh3 = (function(libh32) {
                       }
                       if (!(ma2(d4) | 0)) {
                         p5 = d4;
-                        o3 = g5;
+                        o3 = g6;
                         m4 = f5;
                       } else {
                         I4(27693, 27538, 412, 27678);
@@ -89205,16 +92650,16 @@ var libh3 = (function(libh32) {
                         break a;
                       }
                       if (o3 | 0) {
-                        g5 = e68;
+                        g6 = e68;
                         f5 = 0;
-                        d4 = b10[g5 >> 2] | 0;
-                        g5 = b10[g5 + 4 >> 2] | 0;
+                        d4 = b10[g6 >> 2] | 0;
+                        g6 = b10[g6 + 4 >> 2] | 0;
                         do {
-                          d4 = Pb2(d4, g5) | 0;
-                          g5 = H4() | 0;
+                          d4 = Pb2(d4, g6) | 0;
+                          g6 = H4() | 0;
                           u4 = e68;
                           b10[u4 >> 2] = d4;
-                          b10[u4 + 4 >> 2] = g5;
+                          b10[u4 + 4 >> 2] = g6;
                           f5 = f5 + 1 | 0;
                         } while ((f5 | 0) < (o3 | 0));
                       }
@@ -89223,16 +92668,16 @@ var libh3 = (function(libh32) {
                         d4 = 58;
                         break;
                       }
-                      g5 = e68;
+                      g6 = e68;
                       f5 = 0;
-                      d4 = b10[g5 >> 2] | 0;
-                      g5 = b10[g5 + 4 >> 2] | 0;
+                      d4 = b10[g6 >> 2] | 0;
+                      g6 = b10[g6 + 4 >> 2] | 0;
                       while (1) {
-                        d4 = Pb2(d4, g5) | 0;
-                        g5 = H4() | 0;
+                        d4 = Pb2(d4, g6) | 0;
+                        g6 = H4() | 0;
                         u4 = e68;
                         b10[u4 >> 2] = d4;
-                        b10[u4 + 4 >> 2] = g5;
+                        b10[u4 + 4 >> 2] = g6;
                         f5 = f5 + 1 | 0;
                         if ((f5 | 0) == (i3 | 0)) {
                           f5 = p5;
@@ -89249,15 +92694,15 @@ var libh3 = (function(libh32) {
                     d4 = b10[f5 >> 2] | 0;
                     f5 = b10[f5 + 4 >> 2] | 0;
                     if ((i3 | 0) > 0) {
-                      g5 = 0;
+                      g6 = 0;
                       do {
                         d4 = Pb2(d4, f5) | 0;
                         f5 = H4() | 0;
                         u4 = e68;
                         b10[u4 >> 2] = d4;
                         b10[u4 + 4 >> 2] = f5;
-                        g5 = g5 + 1 | 0;
-                      } while ((g5 | 0) != (i3 | 0));
+                        g6 = g6 + 1 | 0;
+                      } while ((g6 | 0) != (i3 | 0));
                     }
                     f5 = Nb2(d4, f5) | 0;
                     if ((f5 | 0) == 7) {
@@ -89274,13 +92719,13 @@ var libh3 = (function(libh32) {
                     } else {
                       h4 = e68;
                       f5 = 0;
-                      g5 = b10[h4 >> 2] | 0;
+                      g6 = b10[h4 >> 2] | 0;
                       h4 = b10[h4 + 4 >> 2] | 0;
                       do {
-                        g5 = Ob2(g5, h4) | 0;
+                        g6 = Ob2(g6, h4) | 0;
                         h4 = H4() | 0;
                         u4 = e68;
-                        b10[u4 >> 2] = g5;
+                        b10[u4 >> 2] = g6;
                         b10[u4 + 4 >> 2] = h4;
                         f5 = f5 + 1 | 0;
                       } while ((f5 | 0) < (d4 | 0));
@@ -89327,14 +92772,14 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0;
+        var g6 = 0, h4 = 0;
         h4 = T3;
         T3 = T3 + 16 | 0;
-        g5 = h4;
+        g6 = h4;
         if (!e68) {
-          a6 = Fc2(a6, b11, c4, d4, g5) | 0;
+          a6 = Fc2(a6, b11, c4, d4, g6) | 0;
           if (!a6) {
-            cb2(g5, f5);
+            cb2(g6, f5);
             a6 = 0;
           }
         } else {
@@ -89349,10 +92794,10 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0;
-        g5 = T3;
+        var f5 = 0, g6 = 0;
+        g6 = T3;
         T3 = T3 + 16 | 0;
-        f5 = g5;
+        f5 = g6;
         if (!d4) {
           c4 = db2(c4, f5) | 0;
           if (!c4) {
@@ -89361,7 +92806,7 @@ var libh3 = (function(libh32) {
         } else {
           c4 = 15;
         }
-        T3 = g5;
+        T3 = g6;
         return c4 | 0;
       }
       function Jc2(a6, c4, d4, e68, f5) {
@@ -89370,14 +92815,14 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = T3;
         T3 = T3 + 32 | 0;
         h4 = j4 + 12 | 0;
         i3 = j4;
-        g5 = Fc2(a6, c4, a6, c4, h4) | 0;
-        if (g5 | 0) {
-          i3 = g5;
+        g6 = Fc2(a6, c4, a6, c4, h4) | 0;
+        if (g6 | 0) {
+          i3 = g6;
           T3 = j4;
           return i3 | 0;
         }
@@ -89401,15 +92846,15 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = T3;
         T3 = T3 + 32 | 0;
         h4 = j4 + 12 | 0;
         i3 = j4;
-        g5 = Fc2(a6, c4, a6, c4, h4) | 0;
-        if (!g5) {
-          g5 = Fc2(a6, c4, d4, e68, i3) | 0;
-          if (!g5) {
+        g6 = Fc2(a6, c4, a6, c4, h4) | 0;
+        if (!g6) {
+          g6 = Fc2(a6, c4, d4, e68, i3) | 0;
+          if (!g6) {
             e68 = bb2(h4, i3) | 0;
             e68 = Ed2(e68 | 0, ((e68 | 0) < 0) << 31 >> 31 | 0, 1, 0) | 0;
             h4 = H4() | 0;
@@ -89421,7 +92866,7 @@ var libh3 = (function(libh32) {
             return i3 | 0;
           }
         }
-        i3 = g5;
+        i3 = g6;
         T3 = j4;
         return i3 | 0;
       }
@@ -89431,16 +92876,16 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0;
         z5 = T3;
         T3 = T3 + 48 | 0;
         x6 = z5 + 24 | 0;
         h4 = z5 + 12 | 0;
         y6 = z5;
-        g5 = Fc2(a6, c4, a6, c4, x6) | 0;
-        if (!g5) {
-          g5 = Fc2(a6, c4, d4, e68, h4) | 0;
-          if (!g5) {
+        g6 = Fc2(a6, c4, a6, c4, x6) | 0;
+        if (!g6) {
+          g6 = Fc2(a6, c4, d4, e68, h4) | 0;
+          if (!g6) {
             v5 = bb2(x6, h4) | 0;
             w5 = ((v5 | 0) < 0) << 31 >> 31;
             b10[x6 >> 2] = 0;
@@ -89464,16 +92909,16 @@ var libh3 = (function(libh32) {
             e68 = b10[s5 >> 2] | 0;
             t5 = l3 * +((b10[h4 + 4 >> 2] | 0) - e68 | 0);
             u4 = x6 + 8 | 0;
-            g5 = b10[u4 >> 2] | 0;
-            l3 = l3 * +((b10[h4 + 8 >> 2] | 0) - g5 | 0);
+            g6 = b10[u4 >> 2] | 0;
+            l3 = l3 * +((b10[h4 + 8 >> 2] | 0) - g6 | 0);
             b10[y6 >> 2] = d4;
             m4 = y6 + 4 | 0;
             b10[m4 >> 2] = e68;
             n3 = y6 + 8 | 0;
-            b10[n3 >> 2] = g5;
+            b10[n3 >> 2] = g6;
             a: do {
               if ((v5 | 0) < 0) {
-                g5 = 0;
+                g6 = 0;
               } else {
                 o3 = 0;
                 p5 = 0;
@@ -89481,39 +92926,39 @@ var libh3 = (function(libh32) {
                   j4 = +(p5 >>> 0) + 4294967296 * +(o3 | 0);
                   A6 = r4 * j4 + +(d4 | 0);
                   i3 = t5 * j4 + +(e68 | 0);
-                  j4 = l3 * j4 + +(g5 | 0);
+                  j4 = l3 * j4 + +(g6 | 0);
                   d4 = ~~+Td2(+A6);
                   h4 = ~~+Td2(+i3);
-                  g5 = ~~+Td2(+j4);
+                  g6 = ~~+Td2(+j4);
                   A6 = +q4(+(+(d4 | 0) - A6));
                   i3 = +q4(+(+(h4 | 0) - i3));
-                  j4 = +q4(+(+(g5 | 0) - j4));
+                  j4 = +q4(+(+(g6 | 0) - j4));
                   do {
                     if (!(A6 > i3 & A6 > j4)) {
                       k5 = 0 - d4 | 0;
                       if (i3 > j4) {
-                        e68 = k5 - g5 | 0;
+                        e68 = k5 - g6 | 0;
                         break;
                       } else {
                         e68 = h4;
-                        g5 = k5 - h4 | 0;
+                        g6 = k5 - h4 | 0;
                         break;
                       }
                     } else {
-                      d4 = 0 - (h4 + g5) | 0;
+                      d4 = 0 - (h4 + g6) | 0;
                       e68 = h4;
                     }
                   } while (0);
                   b10[y6 >> 2] = d4;
                   b10[m4 >> 2] = e68;
-                  b10[n3 >> 2] = g5;
+                  b10[n3 >> 2] = g6;
                   fb2(y6);
-                  g5 = Gc2(a6, c4, y6, f5 + (p5 << 3) | 0) | 0;
-                  if (g5 | 0) {
+                  g6 = Gc2(a6, c4, y6, f5 + (p5 << 3) | 0) | 0;
+                  if (g6 | 0) {
                     break a;
                   }
                   if (!((o3 | 0) < (w5 | 0) | (o3 | 0) == (w5 | 0) & p5 >>> 0 < v5 >>> 0)) {
-                    g5 = 0;
+                    g6 = 0;
                     break a;
                   }
                   d4 = Ed2(p5 | 0, o3 | 0, 1, 0) | 0;
@@ -89522,16 +92967,16 @@ var libh3 = (function(libh32) {
                   p5 = d4;
                   d4 = b10[x6 >> 2] | 0;
                   e68 = b10[s5 >> 2] | 0;
-                  g5 = b10[u4 >> 2] | 0;
+                  g6 = b10[u4 >> 2] | 0;
                 }
               }
             } while (0);
-            y6 = g5;
+            y6 = g6;
             T3 = z5;
             return y6 | 0;
           }
         }
-        y6 = g5;
+        y6 = g6;
         T3 = z5;
         return y6 | 0;
       }
@@ -89540,7 +92985,7 @@ var libh3 = (function(libh32) {
         b11 = b11 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0;
+        var e68 = 0, f5 = 0, g6 = 0;
         if ((c4 | 0) == 0 & (d4 | 0) == 0) {
           e68 = 0;
           f5 = 1;
@@ -89552,8 +92997,8 @@ var libh3 = (function(libh32) {
         a6 = 1;
         b11 = 0;
         do {
-          g5 = (c4 & 1 | 0) == 0 & true;
-          a6 = Kd2((g5 ? 1 : f5) | 0, (g5 ? 0 : e68) | 0, a6 | 0, b11 | 0) | 0;
+          g6 = (c4 & 1 | 0) == 0 & true;
+          a6 = Kd2((g6 ? 1 : f5) | 0, (g6 ? 0 : e68) | 0, a6 | 0, b11 | 0) | 0;
           b11 = H4() | 0;
           c4 = Nd2(c4 | 0, d4 | 0, 1) | 0;
           d4 = H4() | 0;
@@ -89568,7 +93013,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         j4 = T3;
         T3 = T3 + 16 | 0;
         h4 = j4;
@@ -89577,15 +93022,15 @@ var libh3 = (function(libh32) {
         i3 = i3 & 15;
         do {
           if (!i3) {
-            g5 = Od2(a6 | 0, c4 | 0, 45) | 0;
+            g6 = Od2(a6 | 0, c4 | 0, 45) | 0;
             H4() | 0;
-            g5 = g5 & 127;
-            if (g5 >>> 0 > 121) {
+            g6 = g6 & 127;
+            if (g6 >>> 0 > 121) {
               i3 = 5;
               T3 = j4;
               return i3 | 0;
             } else {
-              h4 = 22064 + (g5 << 5) | 0;
+              h4 = 22064 + (g6 << 5) | 0;
               b10[d4 >> 2] = b10[h4 >> 2];
               b10[d4 + 4 >> 2] = b10[h4 + 4 >> 2];
               b10[d4 + 8 >> 2] = b10[h4 + 8 >> 2];
@@ -89597,8 +93042,8 @@ var libh3 = (function(libh32) {
               break;
             }
           } else {
-            g5 = Xb2(a6, c4, h4) | 0;
-            if (!g5) {
+            g6 = Xb2(a6, c4, h4) | 0;
+            if (!g6) {
               l3 = +e67[h4 >> 3];
               k5 = 1 / +t4(+l3);
               m4 = +e67[25968 + (i3 << 3) >> 3];
@@ -89610,7 +93055,7 @@ var libh3 = (function(libh32) {
               e67[d4 + 24 >> 3] = l3 - k5;
               break;
             }
-            i3 = g5;
+            i3 = g6;
             T3 = j4;
             return i3 | 0;
           }
@@ -89640,7 +93085,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         l3 = T3;
         T3 = T3 + 48 | 0;
         i3 = l3 + 32 | 0;
@@ -89651,12 +93096,12 @@ var libh3 = (function(libh32) {
         i3 = b10[i3 + 4 >> 2] | 0;
         do {
           if (e68 >>> 0 <= 15) {
-            g5 = Vc2(f5) | 0;
-            if (g5 | 0) {
+            g6 = Vc2(f5) | 0;
+            if (g6 | 0) {
               f5 = j4;
               b10[f5 >> 2] = 0;
               b10[f5 + 4 >> 2] = 0;
-              b10[j4 + 8 >> 2] = g5;
+              b10[j4 + 8 >> 2] = g6;
               b10[j4 + 12 >> 2] = -1;
               f5 = j4 + 16 | 0;
               k5 = j4 + 29 | 0;
@@ -89669,8 +93114,8 @@ var libh3 = (function(libh32) {
               a5[k5 + 2 >> 0] = a5[h4 + 2 >> 0] | 0;
               break;
             }
-            g5 = Dd2((b10[d4 + 8 >> 2] | 0) + 1 | 0, 32) | 0;
-            if (!g5) {
+            g6 = Dd2((b10[d4 + 8 >> 2] | 0) + 1 | 0, 32) | 0;
+            if (!g6) {
               f5 = j4;
               b10[f5 >> 2] = 0;
               b10[f5 + 4 >> 2] = 0;
@@ -89687,7 +93132,7 @@ var libh3 = (function(libh32) {
               a5[k5 + 2 >> 0] = a5[h4 + 2 >> 0] | 0;
               break;
             } else {
-              Wc2(d4, g5);
+              Wc2(d4, g6);
               m4 = j4;
               b10[m4 >> 2] = k5;
               b10[m4 + 4 >> 2] = i3;
@@ -89695,7 +93140,7 @@ var libh3 = (function(libh32) {
               b10[j4 + 12 >> 2] = e68;
               b10[j4 + 16 >> 2] = f5;
               b10[j4 + 20 >> 2] = d4;
-              b10[j4 + 24 >> 2] = g5;
+              b10[j4 + 24 >> 2] = g6;
               a5[j4 + 28 >> 0] = 0;
               k5 = j4 + 29 | 0;
               a5[k5 >> 0] = a5[h4 >> 0] | 0;
@@ -89734,7 +93179,7 @@ var libh3 = (function(libh32) {
       }
       function Pc2(c4) {
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0;
         w5 = T3;
         T3 = T3 + 336 | 0;
         p5 = w5 + 168 | 0;
@@ -89773,16 +93218,16 @@ var libh3 = (function(libh32) {
         }
         u4 = c4 + 16 | 0;
         d4 = b10[u4 >> 2] | 0;
-        g5 = d4 & 15;
+        g6 = d4 & 15;
         a: do {
           if (!((e68 | 0) == 0 & (f5 | 0) == 0)) {
             r4 = c4 + 12 | 0;
-            n3 = (g5 | 0) == 3;
+            n3 = (g6 | 0) == 3;
             m4 = d4 & 255;
-            k5 = (g5 | 1 | 0) == 3;
+            k5 = (g6 | 1 | 0) == 3;
             o3 = c4 + 24 | 0;
-            l3 = (g5 + -1 | 0) >>> 0 < 3;
-            i3 = (g5 | 2 | 0) == 3;
+            l3 = (g6 + -1 | 0) >>> 0 < 3;
+            i3 = (g6 | 2 | 0) == 3;
             j4 = q5 + 8 | 0;
             b: while (1) {
               h4 = Od2(e68 | 0, f5 | 0, 52) | 0;
@@ -89793,8 +93238,8 @@ var libh3 = (function(libh32) {
                   case 0:
                   case 2:
                   case 3: {
-                    g5 = Xb2(e68, f5, p5) | 0;
-                    if (g5 | 0) {
+                    g6 = Xb2(e68, f5, p5) | 0;
+                    if (g6 | 0) {
                       s5 = 15;
                       break b;
                     }
@@ -89806,20 +93251,20 @@ var libh3 = (function(libh32) {
                   }
                   default:
                 }
-                if (k5 ? (g5 = b10[(b10[v5 >> 2] | 0) + 4 >> 2] | 0, b10[p5 >> 2] = b10[g5 >> 2], b10[p5 + 4 >> 2] = b10[g5 + 4 >> 2], b10[p5 + 8 >> 2] = b10[g5 + 8 >> 2], b10[p5 + 12 >> 2] = b10[g5 + 12 >> 2], Aa2(26832, p5) | 0) : 0) {
+                if (k5 ? (g6 = b10[(b10[v5 >> 2] | 0) + 4 >> 2] | 0, b10[p5 >> 2] = b10[g6 >> 2], b10[p5 + 4 >> 2] = b10[g6 + 4 >> 2], b10[p5 + 8 >> 2] = b10[g6 + 8 >> 2], b10[p5 + 12 >> 2] = b10[g6 + 12 >> 2], Aa2(26832, p5) | 0) : 0) {
                   if (Ub2(b10[(b10[v5 >> 2] | 0) + 4 >> 2] | 0, h4, q5) | 0) {
                     s5 = 25;
                     break;
                   }
-                  g5 = q5;
-                  if ((b10[g5 >> 2] | 0) == (e68 | 0) ? (b10[g5 + 4 >> 2] | 0) == (f5 | 0) : 0) {
+                  g6 = q5;
+                  if ((b10[g6 >> 2] | 0) == (e68 | 0) ? (b10[g6 + 4 >> 2] | 0) == (f5 | 0) : 0) {
                     s5 = 29;
                     break;
                   }
                 }
                 if (l3) {
-                  g5 = Yb2(e68, f5, p5) | 0;
-                  if (g5 | 0) {
+                  g6 = Yb2(e68, f5, p5) | 0;
+                  if (g6 | 0) {
                     s5 = 32;
                     break;
                   }
@@ -89838,12 +93283,12 @@ var libh3 = (function(libh32) {
                 }
                 if (n3) {
                   d4 = Nc2(e68, f5, p5, 1) | 0;
-                  g5 = b10[o3 >> 2] | 0;
+                  g6 = b10[o3 >> 2] | 0;
                   if (d4 | 0) {
                     s5 = 45;
                     break;
                   }
-                  if (Ba2(g5, p5) | 0) {
+                  if (Ba2(g6, p5) | 0) {
                     Ea2(q5, p5);
                     if (Da2(p5, b10[o3 >> 2] | 0) | 0) {
                       s5 = 53;
@@ -89863,12 +93308,12 @@ var libh3 = (function(libh32) {
               do {
                 if ((h4 | 0) < (b10[r4 >> 2] | 0)) {
                   d4 = Nc2(e68, f5, p5, 1) | 0;
-                  g5 = b10[o3 >> 2] | 0;
+                  g6 = b10[o3 >> 2] | 0;
                   if (d4 | 0) {
                     s5 = 58;
                     break b;
                   }
-                  if (!(Ba2(g5, p5) | 0)) {
+                  if (!(Ba2(g6, p5) | 0)) {
                     s5 = 73;
                     break;
                   }
@@ -89911,7 +93356,7 @@ var libh3 = (function(libh32) {
                 b10[r4 >> 2] = -1;
                 b10[u4 >> 2] = 0;
                 b10[o3 >> 2] = 0;
-                b10[c4 + 8 >> 2] = g5;
+                b10[c4 + 8 >> 2] = g6;
                 s5 = 20;
                 break;
               }
@@ -89943,7 +93388,7 @@ var libh3 = (function(libh32) {
                 b10[r4 >> 2] = -1;
                 b10[u4 >> 2] = 0;
                 b10[o3 >> 2] = 0;
-                b10[c4 + 8 >> 2] = g5;
+                b10[c4 + 8 >> 2] = g6;
                 T3 = w5;
                 return;
               }
@@ -89958,8 +93403,8 @@ var libh3 = (function(libh32) {
                 return;
               }
               case 45: {
-                if (g5 | 0) {
-                  Cd2(g5);
+                if (g6 | 0) {
+                  Cd2(g6);
                 }
                 s5 = c4;
                 b10[s5 >> 2] = 0;
@@ -89979,8 +93424,8 @@ var libh3 = (function(libh32) {
                 break;
               }
               case 58: {
-                if (g5 | 0) {
-                  Cd2(g5);
+                if (g6 | 0) {
+                  Cd2(g6);
                 }
                 s5 = c4;
                 b10[s5 >> 2] = 0;
@@ -90048,7 +93493,7 @@ var libh3 = (function(libh32) {
       function Qc2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0;
         m4 = T3;
         T3 = T3 + 16 | 0;
         l3 = m4;
@@ -90062,12 +93507,12 @@ var libh3 = (function(libh32) {
             while (1) {
               d4 = Pd2(e68 + 4095 | 0, 0, 52) | 0;
               f5 = H4() | 0 | c4 & -15728641;
-              g5 = (15 - e68 | 0) * 3 | 0;
-              h4 = Pd2(7, 0, g5 | 0) | 0;
+              g6 = (15 - e68 | 0) * 3 | 0;
+              h4 = Pd2(7, 0, g6 | 0) | 0;
               i3 = H4() | 0;
               d4 = d4 | a6 | h4;
               f5 = f5 | i3;
-              j4 = Od2(a6 | 0, c4 | 0, g5 | 0) | 0;
+              j4 = Od2(a6 | 0, c4 | 0, g6 | 0) | 0;
               H4() | 0;
               j4 = j4 & 7;
               e68 = e68 + -1 | 0;
@@ -90088,7 +93533,7 @@ var libh3 = (function(libh32) {
               break;
             }
             l3 = (j4 | 0) == 0 & (Fb2(d4, f5) | 0) != 0;
-            l3 = Pd2((l3 ? 2 : 1) + j4 | 0, 0, g5 | 0) | 0;
+            l3 = Pd2((l3 ? 2 : 1) + j4 | 0, 0, g6 | 0) | 0;
             k5 = H4() | 0 | c4 & ~i3;
             l3 = l3 | a6 & ~h4;
             G4(k5 | 0);
@@ -90111,13 +93556,13 @@ var libh3 = (function(libh32) {
         T3 = m4;
         return l3 | 0;
       }
-      function Rc2(a6, c4, d4, e68, f5, g5) {
+      function Rc2(a6, c4, d4, e68, f5, g6) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0;
         r4 = T3;
         T3 = T3 + 160 | 0;
@@ -90179,7 +93624,7 @@ var libh3 = (function(libh32) {
           k5 = i3;
           i3 = Ed2(i3 | 0, h4 | 0, 1, 0) | 0;
           h4 = H4() | 0;
-          k5 = g5 + (k5 << 3) | 0;
+          k5 = g6 + (k5 << 3) | 0;
           b10[k5 >> 2] = c4;
           b10[k5 + 4 >> 2] = a6;
           fc2(n3);
@@ -90234,11 +93679,11 @@ var libh3 = (function(libh32) {
         T3 = r4;
         return q5 | 0;
       }
-      function Sc2(c4, d4, f5, g5) {
+      function Sc2(c4, d4, f5, g6) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        g5 = g5 | 0;
+        g6 = g6 | 0;
         var h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0;
         o3 = T3;
         T3 = T3 + 48 | 0;
@@ -90246,7 +93691,7 @@ var libh3 = (function(libh32) {
         k5 = o3 + 40 | 0;
         m4 = o3;
         if (!(b10[c4 >> 2] | 0)) {
-          n3 = g5;
+          n3 = g6;
           b10[n3 >> 2] = 0;
           b10[n3 + 4 >> 2] = 0;
           n3 = 0;
@@ -90350,7 +93795,7 @@ var libh3 = (function(libh32) {
               }
             } while (0);
             Pc2(m4);
-            h4 = g5;
+            h4 = g6;
             b10[h4 >> 2] = 0;
             b10[h4 + 4 >> 2] = 0;
             h4 = m4;
@@ -90360,10 +93805,10 @@ var libh3 = (function(libh32) {
               do {
                 Eb2(f5, h4, d4, l3) | 0;
                 k5 = l3;
-                c4 = g5;
+                c4 = g6;
                 k5 = Ed2(b10[c4 >> 2] | 0, b10[c4 + 4 >> 2] | 0, b10[k5 >> 2] | 0, b10[k5 + 4 >> 2] | 0) | 0;
                 c4 = H4() | 0;
-                r4 = g5;
+                r4 = g6;
                 b10[r4 >> 2] = k5;
                 b10[r4 + 4 >> 2] = c4;
                 Pc2(m4);
@@ -90383,15 +93828,15 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0;
         if (!(Aa2(c4, d4) | 0)) {
           o3 = 0;
           return o3 | 0;
         }
         c4 = ya2(c4) | 0;
         f5 = +e67[d4 >> 3];
-        g5 = +e67[d4 + 8 >> 3];
-        g5 = c4 & g5 < 0 ? g5 + 6.283185307179586 : g5;
+        g6 = +e67[d4 + 8 >> 3];
+        g6 = c4 & g6 < 0 ? g6 + 6.283185307179586 : g6;
         o3 = b10[a6 >> 2] | 0;
         if ((o3 | 0) <= 0) {
           o3 = 0;
@@ -90400,14 +93845,14 @@ var libh3 = (function(libh32) {
         n3 = b10[a6 + 4 >> 2] | 0;
         if (c4) {
           c4 = 0;
-          m4 = g5;
+          m4 = g6;
           d4 = -1;
           a6 = 0;
           a: while (1) {
             l3 = a6;
             while (1) {
               i3 = +e67[n3 + (l3 << 4) >> 3];
-              g5 = +e67[n3 + (l3 << 4) + 8 >> 3];
+              g6 = +e67[n3 + (l3 << 4) + 8 >> 3];
               a6 = (d4 + 2 | 0) % (o3 | 0) | 0;
               h4 = +e67[n3 + (a6 << 4) >> 3];
               j4 = +e67[n3 + (a6 << 4) + 8 >> 3];
@@ -90417,8 +93862,8 @@ var libh3 = (function(libh32) {
               } else {
                 k5 = h4;
                 h4 = i3;
-                i3 = g5;
-                g5 = j4;
+                i3 = g6;
+                g6 = j4;
               }
               f5 = f5 == h4 | f5 == k5 ? f5 + 2220446049250313e-31 : f5;
               if (!(f5 < h4 | f5 > k5)) {
@@ -90435,7 +93880,7 @@ var libh3 = (function(libh32) {
               }
             }
             j4 = i3 < 0 ? i3 + 6.283185307179586 : i3;
-            i3 = g5 < 0 ? g5 + 6.283185307179586 : g5;
+            i3 = g6 < 0 ? g6 + 6.283185307179586 : g6;
             m4 = j4 == m4 | i3 == m4 ? m4 + -2220446049250313e-31 : m4;
             k5 = j4 + (i3 - j4) * ((f5 - h4) / (k5 - h4));
             if ((k5 < 0 ? k5 + 6.283185307179586 : k5) > m4) {
@@ -90454,14 +93899,14 @@ var libh3 = (function(libh32) {
           }
         } else {
           c4 = 0;
-          m4 = g5;
+          m4 = g6;
           d4 = -1;
           a6 = 0;
           b: while (1) {
             l3 = a6;
             while (1) {
               i3 = +e67[n3 + (l3 << 4) >> 3];
-              g5 = +e67[n3 + (l3 << 4) + 8 >> 3];
+              g6 = +e67[n3 + (l3 << 4) + 8 >> 3];
               a6 = (d4 + 2 | 0) % (o3 | 0) | 0;
               h4 = +e67[n3 + (a6 << 4) >> 3];
               j4 = +e67[n3 + (a6 << 4) + 8 >> 3];
@@ -90471,8 +93916,8 @@ var libh3 = (function(libh32) {
               } else {
                 k5 = h4;
                 h4 = i3;
-                i3 = g5;
-                g5 = j4;
+                i3 = g6;
+                g6 = j4;
               }
               f5 = f5 == h4 | f5 == k5 ? f5 + 2220446049250313e-31 : f5;
               if (!(f5 < h4 | f5 > k5)) {
@@ -90488,8 +93933,8 @@ var libh3 = (function(libh32) {
                 d4 = a6;
               }
             }
-            m4 = i3 == m4 | g5 == m4 ? m4 + -2220446049250313e-31 : m4;
-            if (i3 + (g5 - i3) * ((f5 - h4) / (k5 - h4)) > m4) {
+            m4 = i3 == m4 | g6 == m4 ? m4 + -2220446049250313e-31 : m4;
+            if (i3 + (g6 - i3) * ((f5 - h4) / (k5 - h4)) > m4) {
               c4 = c4 ^ 1;
             }
             a6 = l3 + 1 | 0;
@@ -90509,7 +93954,7 @@ var libh3 = (function(libh32) {
       function Uc2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0;
+        var d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0;
         r4 = b10[a6 >> 2] | 0;
         if (!r4) {
           b10[c4 >> 2] = 0;
@@ -90546,7 +93991,7 @@ var libh3 = (function(libh32) {
           d4 = +e67[o3 + (p5 << 4) >> 3];
           j4 = +e67[o3 + (p5 << 4) + 8 >> 3];
           a6 = a6 + 2 | 0;
-          g5 = +e67[o3 + (((a6 | 0) == (r4 | 0) ? 0 : a6) << 4) + 8 >> 3];
+          g6 = +e67[o3 + (((a6 | 0) == (r4 | 0) ? 0 : a6) << 4) + 8 >> 3];
           if (d4 < h4) {
             e67[s5 >> 3] = d4;
             h4 = d4;
@@ -90566,7 +94011,7 @@ var libh3 = (function(libh32) {
           }
           l3 = j4 > 0 & j4 < l3 ? j4 : l3;
           m4 = j4 < 0 & j4 > m4 ? j4 : m4;
-          n3 = n3 | +q4(+(j4 - g5)) > 3.141592653589793;
+          n3 = n3 | +q4(+(j4 - g6)) > 3.141592653589793;
           a6 = p5 + 1 | 0;
           if ((a6 | 0) == (r4 | 0)) {
             break;
@@ -90591,7 +94036,7 @@ var libh3 = (function(libh32) {
       function Wc2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0;
+        var d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0;
         r4 = b10[a6 >> 2] | 0;
         if (r4) {
           s5 = c4 + 8 | 0;
@@ -90602,7 +94047,7 @@ var libh3 = (function(libh32) {
           u4 = c4 + 16 | 0;
           e67[u4 >> 3] = -17976931348623157e292;
           if ((r4 | 0) > 0) {
-            g5 = b10[a6 + 4 >> 2] | 0;
+            g6 = b10[a6 + 4 >> 2] | 0;
             o3 = 17976931348623157e292;
             p5 = -17976931348623157e292;
             f5 = 0;
@@ -90613,10 +94058,10 @@ var libh3 = (function(libh32) {
             i3 = -17976931348623157e292;
             v5 = 0;
             while (1) {
-              h4 = +e67[g5 + (v5 << 4) >> 3];
-              m4 = +e67[g5 + (v5 << 4) + 8 >> 3];
+              h4 = +e67[g6 + (v5 << 4) >> 3];
+              m4 = +e67[g6 + (v5 << 4) + 8 >> 3];
               z5 = d4 + 2 | 0;
-              j4 = +e67[g5 + (((z5 | 0) == (r4 | 0) ? 0 : z5) << 4) + 8 >> 3];
+              j4 = +e67[g6 + (((z5 | 0) == (r4 | 0) ? 0 : z5) << 4) + 8 >> 3];
               if (h4 < k5) {
                 e67[s5 >> 3] = h4;
                 k5 = h4;
@@ -90670,11 +94115,11 @@ var libh3 = (function(libh32) {
         y6 = a6 + 12 | 0;
         x6 = 0;
         do {
-          g5 = b10[y6 >> 2] | 0;
+          g6 = b10[y6 >> 2] | 0;
           f5 = x6;
           x6 = x6 + 1 | 0;
           t5 = c4 + (x6 << 5) | 0;
-          u4 = b10[g5 + (f5 << 3) >> 2] | 0;
+          u4 = b10[g6 + (f5 << 3) >> 2] | 0;
           if (u4) {
             v5 = c4 + (x6 << 5) + 8 | 0;
             e67[v5 >> 3] = 17976931348623157e292;
@@ -90684,10 +94129,10 @@ var libh3 = (function(libh32) {
             w5 = c4 + (x6 << 5) + 16 | 0;
             e67[w5 >> 3] = -17976931348623157e292;
             if ((u4 | 0) > 0) {
-              r4 = b10[g5 + (f5 << 3) + 4 >> 2] | 0;
+              r4 = b10[g6 + (f5 << 3) + 4 >> 2] | 0;
               o3 = 17976931348623157e292;
               p5 = -17976931348623157e292;
-              g5 = 0;
+              g6 = 0;
               f5 = -1;
               s5 = 0;
               k5 = 17976931348623157e292;
@@ -90718,7 +94163,7 @@ var libh3 = (function(libh32) {
                 }
                 o3 = n3 > 0 & n3 < o3 ? n3 : o3;
                 p5 = n3 < 0 & n3 > p5 ? n3 : p5;
-                g5 = g5 | +q4(+(n3 - j4)) > 3.141592653589793;
+                g6 = g6 | +q4(+(n3 - j4)) > 3.141592653589793;
                 f5 = s5 + 1 | 0;
                 if ((f5 | 0) == (u4 | 0)) {
                   break;
@@ -90729,7 +94174,7 @@ var libh3 = (function(libh32) {
                   f5 = A6;
                 }
               }
-              if (g5) {
+              if (g6) {
                 e67[w5 >> 3] = p5;
                 e67[a6 >> 3] = o3;
               }
@@ -90752,7 +94197,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0;
+        var e68 = 0, f5 = 0, g6 = 0;
         if (!(Tc2(a6, c4, d4) | 0)) {
           f5 = 0;
           return f5 | 0;
@@ -90765,9 +94210,9 @@ var libh3 = (function(libh32) {
         e68 = a6 + 12 | 0;
         a6 = 0;
         while (1) {
-          g5 = a6;
+          g6 = a6;
           a6 = a6 + 1 | 0;
-          if (Tc2((b10[e68 >> 2] | 0) + (g5 << 3) | 0, c4 + (a6 << 5) | 0, d4) | 0) {
+          if (Tc2((b10[e68 >> 2] | 0) + (g6 << 3) | 0, c4 + (a6 << 5) | 0, d4) | 0) {
             a6 = 0;
             e68 = 6;
             break;
@@ -90788,7 +94233,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0;
         k5 = T3;
         T3 = T3 + 16 | 0;
         i3 = k5;
@@ -90801,12 +94246,12 @@ var libh3 = (function(libh32) {
         j4 = a6 + 8 | 0;
         a: do {
           if ((b10[j4 >> 2] | 0) > 0) {
-            g5 = a6 + 12 | 0;
+            g6 = a6 + 12 | 0;
             f5 = 0;
             while (1) {
               l3 = f5;
               f5 = f5 + 1 | 0;
-              if (Tc2((b10[g5 >> 2] | 0) + (l3 << 3) | 0, c4 + (f5 << 5) | 0, h4) | 0) {
+              if (Tc2((b10[g6 >> 2] | 0) + (l3 << 3) | 0, c4 + (f5 << 5) | 0, h4) | 0) {
                 f5 = 0;
                 break;
               }
@@ -90830,7 +94275,7 @@ var libh3 = (function(libh32) {
           if ((f5 | 0) > 0) {
             a6 = a6 + 12 | 0;
             h4 = 0;
-            g5 = f5;
+            g6 = f5;
             while (1) {
               f5 = b10[a6 >> 2] | 0;
               if ((b10[f5 + (h4 << 3) >> 2] | 0) > 0) {
@@ -90843,11 +94288,11 @@ var libh3 = (function(libh32) {
                   f5 = 0;
                   break b;
                 }
-                g5 = b10[j4 >> 2] | 0;
+                g6 = b10[j4 >> 2] | 0;
               } else {
                 f5 = h4 + 1 | 0;
               }
-              if ((f5 | 0) < (g5 | 0)) {
+              if ((f5 | 0) < (g6 | 0)) {
                 h4 = f5;
               } else {
                 f5 = 1;
@@ -90867,37 +94312,37 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0, x6 = 0, y6 = 0, z5 = 0, A6 = 0;
         y6 = T3;
         T3 = T3 + 176 | 0;
         u4 = y6 + 172 | 0;
-        g5 = y6 + 168 | 0;
+        g6 = y6 + 168 | 0;
         v5 = y6;
         if (!(Ba2(c4, f5) | 0)) {
           a6 = 0;
           T3 = y6;
           return a6 | 0;
         }
-        Ca2(c4, f5, u4, g5);
+        Ca2(c4, f5, u4, g6);
         Ud2(v5 | 0, d4 | 0, 168) | 0;
         if ((b10[d4 >> 2] | 0) > 0) {
           c4 = 0;
           do {
             z5 = v5 + 8 + (c4 << 4) + 8 | 0;
-            t5 = +ic2(+e67[z5 >> 3], b10[g5 >> 2] | 0);
+            t5 = +ic2(+e67[z5 >> 3], b10[g6 >> 2] | 0);
             e67[z5 >> 3] = t5;
             c4 = c4 + 1 | 0;
           } while ((c4 | 0) < (b10[d4 >> 2] | 0));
         }
         r4 = +e67[f5 >> 3];
         s5 = +e67[f5 + 8 >> 3];
-        t5 = +ic2(+e67[f5 + 16 >> 3], b10[g5 >> 2] | 0);
-        p5 = +ic2(+e67[f5 + 24 >> 3], b10[g5 >> 2] | 0);
+        t5 = +ic2(+e67[f5 + 16 >> 3], b10[g6 >> 2] | 0);
+        p5 = +ic2(+e67[f5 + 24 >> 3], b10[g6 >> 2] | 0);
         a: do {
           if ((b10[a6 >> 2] | 0) > 0) {
             f5 = a6 + 4 | 0;
-            g5 = b10[v5 >> 2] | 0;
-            if ((g5 | 0) <= 0) {
+            g6 = b10[v5 >> 2] | 0;
+            if ((g6 | 0) <= 0) {
               c4 = 0;
               while (1) {
                 c4 = c4 + 1 | 0;
@@ -90924,7 +94369,7 @@ var libh3 = (function(libh32) {
                 do {
                   A6 = c4;
                   c4 = c4 + 1 | 0;
-                  z5 = (c4 | 0) == (g5 | 0) ? 0 : c4;
+                  z5 = (c4 | 0) == (g6 | 0) ? 0 : c4;
                   h4 = +e67[v5 + 8 + (A6 << 4) + 8 >> 3];
                   i3 = +e67[v5 + 8 + (z5 << 4) + 8 >> 3] - h4;
                   j4 = +e67[v5 + 8 + (A6 << 4) >> 3];
@@ -90934,7 +94379,7 @@ var libh3 = (function(libh32) {
                     c4 = 1;
                     break a;
                   }
-                } while ((c4 | 0) < (g5 | 0));
+                } while ((c4 | 0) < (g6 | 0));
               }
               if ((d4 | 0) >= (b10[a6 >> 2] | 0)) {
                 c4 = 0;
@@ -90954,15 +94399,15 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0;
         if (Zc2(a6, c4, d4, e68) | 0) {
-          g5 = 1;
-          return g5 | 0;
+          g6 = 1;
+          return g6 | 0;
         }
-        g5 = a6 + 8 | 0;
-        if ((b10[g5 >> 2] | 0) <= 0) {
-          g5 = 0;
-          return g5 | 0;
+        g6 = a6 + 8 | 0;
+        if ((b10[g6 >> 2] | 0) <= 0) {
+          g6 = 0;
+          return g6 | 0;
         }
         f5 = a6 + 12 | 0;
         a6 = 0;
@@ -90974,7 +94419,7 @@ var libh3 = (function(libh32) {
             f5 = 6;
             break;
           }
-          if ((a6 | 0) >= (b10[g5 >> 2] | 0)) {
+          if ((a6 | 0) >= (b10[g6 >> 2] | 0)) {
             a6 = 0;
             f5 = 6;
             break;
@@ -91023,18 +94468,18 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0;
         k5 = +e67[a6 >> 3];
         j4 = +e67[b11 >> 3] - k5;
         i3 = +e67[a6 + 8 >> 3];
         h4 = +e67[b11 + 8 >> 3] - i3;
         m4 = +e67[c4 >> 3];
-        g5 = +e67[d4 >> 3] - m4;
+        g6 = +e67[d4 >> 3] - m4;
         n3 = +e67[c4 + 8 >> 3];
         l3 = +e67[d4 + 8 >> 3] - n3;
-        g5 = (g5 * (i3 - n3) - (k5 - m4) * l3) / (j4 * l3 - h4 * g5);
-        e67[f5 >> 3] = k5 + j4 * g5;
-        e67[f5 + 8 >> 3] = i3 + h4 * g5;
+        g6 = (g6 * (i3 - n3) - (k5 - m4) * l3) / (j4 * l3 - h4 * g6);
+        e67[f5 >> 3] = k5 + j4 * g6;
+        e67[f5 + 8 >> 3] = i3 + h4 * g6;
         return;
       }
       function jd2(a6, b11) {
@@ -91075,20 +94520,20 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0;
-        g5 = T3;
+        var e68 = 0, f5 = 0, g6 = 0;
+        g6 = T3;
         T3 = T3 + 16 | 0;
-        f5 = g5;
+        f5 = g6;
         e68 = Fb2(a6, c4) | 0;
         if ((d4 + -1 | 0) >>> 0 > 5) {
           f5 = -1;
-          T3 = g5;
+          T3 = g6;
           return f5 | 0;
         }
         e68 = (e68 | 0) != 0;
         if ((d4 | 0) == 1 & e68) {
           f5 = -1;
-          T3 = g5;
+          T3 = g6;
           return f5 | 0;
         }
         do {
@@ -91105,14 +94550,14 @@ var libh3 = (function(libh32) {
           }
         } while (0);
         f5 = e68;
-        T3 = g5;
+        T3 = g6;
         return f5 | 0;
       }
       function nd2(a6, c4, d4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         k5 = T3;
         T3 = T3 + 32 | 0;
         h4 = k5 + 16 | 0;
@@ -91123,14 +94568,14 @@ var libh3 = (function(libh32) {
           T3 = k5;
           return d4 | 0;
         }
-        g5 = Ab2(a6, c4) | 0;
+        g6 = Ab2(a6, c4) | 0;
         j4 = Nb2(a6, c4) | 0;
-        qa2(g5, i3);
-        e68 = ra2(g5, b10[h4 >> 2] | 0) | 0;
+        qa2(g6, i3);
+        e68 = ra2(g6, b10[h4 >> 2] | 0) | 0;
         a: do {
-          if (ma2(g5) | 0) {
+          if (ma2(g6) | 0) {
             do {
-              switch (g5 | 0) {
+              switch (g6 | 0) {
                 case 4: {
                   a6 = 0;
                   break;
@@ -91189,7 +94634,7 @@ var libh3 = (function(libh32) {
             c4 = b10[26416 + (a6 * 24 | 0) + 16 >> 2] | 0;
             a6 = b10[h4 >> 2] | 0;
             if ((a6 | 0) != (b10[i3 >> 2] | 0)) {
-              i3 = na2(g5) | 0;
+              i3 = na2(g6) | 0;
               a6 = b10[h4 >> 2] | 0;
               if (i3 | (a6 | 0) == (c4 | 0)) {
                 e68 = (e68 + 1 | 0) % 6 | 0;
@@ -91223,7 +94668,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0;
         u4 = T3;
         T3 = T3 + 32 | 0;
         t5 = u4 + 24 | 0;
@@ -91245,10 +94690,10 @@ var libh3 = (function(libh32) {
         if (!m4 ? (q5 = Pd2(7, 0, (l3 ^ 15) * 3 | 0) | 0, (q5 & a6 | 0) == 0 & ((H4() | 0) & c4 | 0) == 0) : 0) {
           f5 = d4;
         } else {
-          g5 = 4;
+          g6 = 4;
         }
         a: do {
-          if ((g5 | 0) == 4) {
+          if ((g6 | 0) == 4) {
             f5 = (Fb2(a6, c4) | 0) != 0;
             if (((f5 ? 4 : 5) | 0) < (d4 | 0)) {
               e68 = 1;
@@ -91260,11 +94705,11 @@ var libh3 = (function(libh32) {
               T3 = u4;
               return e68 | 0;
             }
-            g5 = (b10[t5 >> 2] | 0) + d4 | 0;
+            g6 = (b10[t5 >> 2] | 0) + d4 | 0;
             if (f5) {
-              f5 = 26704 + (((g5 | 0) % 5 | 0) << 2) | 0;
+              f5 = 26704 + (((g6 | 0) % 5 | 0) << 2) | 0;
             } else {
-              f5 = 26736 + (((g5 | 0) % 6 | 0) << 2) | 0;
+              f5 = 26736 + (((g6 | 0) % 6 | 0) << 2) | 0;
             }
             q5 = b10[f5 >> 2] | 0;
             if ((q5 | 0) == 7) {
@@ -91280,7 +94725,7 @@ var libh3 = (function(libh32) {
                 k5 = b10[i3 >> 2] | 0;
                 i3 = b10[i3 + 4 >> 2] | 0;
                 h4 = i3 >>> 0 < c4 >>> 0 | (i3 | 0) == (c4 | 0) & k5 >>> 0 < a6 >>> 0;
-                g5 = h4 ? k5 : a6;
+                g6 = h4 ? k5 : a6;
                 h4 = h4 ? i3 : c4;
                 if (!m4 ? (m4 = Pd2(7, 0, (l3 ^ 15) * 3 | 0) | 0, (k5 & m4 | 0) == 0 & (i3 & (H4() | 0) | 0) == 0) : 0) {
                   f5 = d4;
@@ -91316,40 +94761,40 @@ var libh3 = (function(libh32) {
                   j4 = b10[k5 >> 2] | 0;
                   k5 = b10[k5 + 4 >> 2] | 0;
                   do {
-                    if (k5 >>> 0 < h4 >>> 0 | (k5 | 0) == (h4 | 0) & j4 >>> 0 < g5 >>> 0) {
+                    if (k5 >>> 0 < h4 >>> 0 | (k5 | 0) == (h4 | 0) & j4 >>> 0 < g6 >>> 0) {
                       if (!(Fb2(j4, k5) | 0)) {
-                        g5 = b10[26800 + ((((b10[o3 >> 2] | 0) + (b10[26768 + (i3 << 2) >> 2] | 0) | 0) % 6 | 0) << 2) >> 2] | 0;
+                        g6 = b10[26800 + ((((b10[o3 >> 2] | 0) + (b10[26768 + (i3 << 2) >> 2] | 0) | 0) % 6 | 0) << 2) >> 2] | 0;
                       } else {
-                        g5 = fa2(j4, k5, a6, c4) | 0;
+                        g6 = fa2(j4, k5, a6, c4) | 0;
                       }
                       f5 = Fb2(j4, k5) | 0;
-                      if ((g5 + -1 | 0) >>> 0 > 5) {
+                      if ((g6 + -1 | 0) >>> 0 > 5) {
                         f5 = -1;
-                        g5 = j4;
+                        g6 = j4;
                         h4 = k5;
                         break;
                       }
                       f5 = (f5 | 0) != 0;
-                      if ((g5 | 0) == 1 & f5) {
+                      if ((g6 | 0) == 1 & f5) {
                         f5 = -1;
-                        g5 = j4;
+                        g6 = j4;
                         h4 = k5;
                         break;
                       }
                       do {
                         if (!(nd2(j4, k5, t5) | 0)) {
                           if (f5) {
-                            f5 = ((b10[26352 + (g5 << 2) >> 2] | 0) + 5 - (b10[t5 >> 2] | 0) | 0) % 5 | 0;
+                            f5 = ((b10[26352 + (g6 << 2) >> 2] | 0) + 5 - (b10[t5 >> 2] | 0) | 0) % 5 | 0;
                             break;
                           } else {
-                            f5 = ((b10[26384 + (g5 << 2) >> 2] | 0) + 6 - (b10[t5 >> 2] | 0) | 0) % 6 | 0;
+                            f5 = ((b10[26384 + (g6 << 2) >> 2] | 0) + 6 - (b10[t5 >> 2] | 0) | 0) % 6 | 0;
                             break;
                           }
                         } else {
                           f5 = -1;
                         }
                       } while (0);
-                      g5 = j4;
+                      g6 = j4;
                       h4 = k5;
                     } else {
                       f5 = d4;
@@ -91359,7 +94804,7 @@ var libh3 = (function(libh32) {
                   k5 = b10[i3 >> 2] | 0;
                   i3 = b10[i3 + 4 >> 2] | 0;
                 }
-                if ((g5 | 0) == (k5 | 0) & (h4 | 0) == (i3 | 0)) {
+                if ((g6 | 0) == (k5 | 0) & (h4 | 0) == (i3 | 0)) {
                   j4 = (Fb2(k5, i3) | 0) != 0;
                   if (j4) {
                     a6 = fa2(k5, i3, a6, c4) | 0;
@@ -91388,7 +94833,7 @@ var libh3 = (function(libh32) {
                   f5 = (f5 | 0) == 6 | j4 & (f5 | 0) == 5 ? 0 : f5;
                 }
                 c4 = h4;
-                a6 = g5;
+                a6 = g6;
                 break a;
               }
             } while (0);
@@ -91409,82 +94854,82 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0;
-        g5 = (Fb2(a6, c4) | 0) == 0;
+        var e68 = 0, f5 = 0, g6 = 0;
+        g6 = (Fb2(a6, c4) | 0) == 0;
         e68 = od2(a6, c4, 0, d4) | 0;
         f5 = (e68 | 0) == 0;
-        if (g5) {
+        if (g6) {
           if (!f5) {
-            g5 = e68;
-            return g5 | 0;
+            g6 = e68;
+            return g6 | 0;
           }
           e68 = od2(a6, c4, 1, d4 + 8 | 0) | 0;
           if (e68 | 0) {
-            g5 = e68;
-            return g5 | 0;
+            g6 = e68;
+            return g6 | 0;
           }
           e68 = od2(a6, c4, 2, d4 + 16 | 0) | 0;
           if (e68 | 0) {
-            g5 = e68;
-            return g5 | 0;
+            g6 = e68;
+            return g6 | 0;
           }
           e68 = od2(a6, c4, 3, d4 + 24 | 0) | 0;
           if (e68 | 0) {
-            g5 = e68;
-            return g5 | 0;
+            g6 = e68;
+            return g6 | 0;
           }
           e68 = od2(a6, c4, 4, d4 + 32 | 0) | 0;
           if (!e68) {
             return od2(a6, c4, 5, d4 + 40 | 0) | 0;
           } else {
-            g5 = e68;
-            return g5 | 0;
+            g6 = e68;
+            return g6 | 0;
           }
         }
         if (!f5) {
-          g5 = e68;
-          return g5 | 0;
+          g6 = e68;
+          return g6 | 0;
         }
         e68 = od2(a6, c4, 1, d4 + 8 | 0) | 0;
         if (e68 | 0) {
-          g5 = e68;
-          return g5 | 0;
+          g6 = e68;
+          return g6 | 0;
         }
         e68 = od2(a6, c4, 2, d4 + 16 | 0) | 0;
         if (e68 | 0) {
-          g5 = e68;
-          return g5 | 0;
+          g6 = e68;
+          return g6 | 0;
         }
         e68 = od2(a6, c4, 3, d4 + 24 | 0) | 0;
         if (e68 | 0) {
-          g5 = e68;
-          return g5 | 0;
+          g6 = e68;
+          return g6 | 0;
         }
         e68 = od2(a6, c4, 4, d4 + 32 | 0) | 0;
         if (e68 | 0) {
-          g5 = e68;
-          return g5 | 0;
+          g6 = e68;
+          return g6 | 0;
         }
-        g5 = d4 + 40 | 0;
-        b10[g5 >> 2] = 0;
-        b10[g5 + 4 >> 2] = 0;
-        g5 = 0;
-        return g5 | 0;
+        g6 = d4 + 40 | 0;
+        b10[g6 >> 2] = 0;
+        b10[g6 + 4 >> 2] = 0;
+        g6 = 0;
+        return g6 | 0;
       }
       function qd2(a6, c4, d4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = T3;
         T3 = T3 + 192 | 0;
         f5 = j4;
-        g5 = j4 + 168 | 0;
+        g6 = j4 + 168 | 0;
         h4 = Od2(a6 | 0, c4 | 0, 56) | 0;
         H4() | 0;
         h4 = h4 & 7;
         i3 = c4 & -2130706433 | 134217728;
-        e68 = Wb2(a6, i3, g5) | 0;
+        e68 = Wb2(a6, i3, g6) | 0;
         if (e68 | 0) {
           i3 = e68;
           T3 = j4;
@@ -91494,9 +94939,9 @@ var libh3 = (function(libh32) {
         H4() | 0;
         c4 = c4 & 15;
         if (!(Fb2(a6, i3) | 0)) {
-          xb2(g5, c4, h4, 1, f5);
+          xb2(g6, c4, h4, 1, f5);
         } else {
-          tb2(g5, c4, h4, 1, f5);
+          tb2(g6, c4, h4, 1, f5);
         }
         i3 = f5 + 8 | 0;
         b10[d4 >> 2] = b10[i3 >> 2];
@@ -91510,7 +94955,7 @@ var libh3 = (function(libh32) {
       function rd2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, e68 = 0, f5 = 0, g5 = 0;
+        var d4 = 0, e68 = 0, f5 = 0, g6 = 0;
         f5 = T3;
         T3 = T3 + 16 | 0;
         d4 = f5;
@@ -91525,11 +94970,11 @@ var libh3 = (function(libh32) {
           T3 = f5;
           return e68 | 0;
         }
-        g5 = Od2(a6 | 0, c4 | 0, 56) | 0;
+        g6 = Od2(a6 | 0, c4 | 0, 56) | 0;
         H4() | 0;
-        g5 = (od2(a6, e68, g5 & 7, d4) | 0) == 0;
+        g6 = (od2(a6, e68, g6 & 7, d4) | 0) == 0;
         e68 = d4;
-        e68 = g5 & ((b10[e68 >> 2] | 0) == (a6 | 0) ? (b10[e68 + 4 >> 2] | 0) == (c4 | 0) : 0) & 1;
+        e68 = g6 & ((b10[e68 >> 2] | 0) == (a6 | 0) ? (b10[e68 + 4 >> 2] | 0) == (c4 | 0) : 0) & 1;
         T3 = f5;
         return e68 | 0;
       }
@@ -91554,12 +94999,12 @@ var libh3 = (function(libh32) {
       }
       function td2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
-        g5 = a6 + 4 | 0;
+        var c4 = 0, d4 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
+        g6 = a6 + 4 | 0;
         h4 = a6 + 12 | 0;
         i3 = a6 + 8 | 0;
         a: while (1) {
-          d4 = b10[g5 >> 2] | 0;
+          d4 = b10[g6 >> 2] | 0;
           c4 = 0;
           while (1) {
             if ((c4 | 0) >= (d4 | 0)) {
@@ -91633,7 +95078,7 @@ var libh3 = (function(libh32) {
       function vd2(a6, c4) {
         a6 = a6 | 0;
         c4 = c4 | 0;
-        var d4 = 0, f5 = 0, g5 = 0, h4 = 0;
+        var d4 = 0, f5 = 0, g6 = 0, h4 = 0;
         d4 = ~~(+q4(+(+s4(10, + +(15 - (b10[a6 + 12 >> 2] | 0) | 0)) * (+e67[c4 >> 3] + +e67[c4 + 8 >> 3]))) % +(b10[a6 + 4 >> 2] | 0)) >>> 0;
         d4 = (b10[a6 >> 2] | 0) + (d4 << 2) | 0;
         f5 = b10[d4 >> 2] | 0;
@@ -91649,26 +95094,26 @@ var libh3 = (function(libh32) {
               h4 = 1;
               return h4 | 0;
             }
-            g5 = d4;
+            g6 = d4;
             while (1) {
-              if ((g5 | 0) == (c4 | 0)) {
-                g5 = 8;
+              if ((g6 | 0) == (c4 | 0)) {
+                g6 = 8;
                 break;
               }
-              d4 = b10[g5 + 32 >> 2] | 0;
+              d4 = b10[g6 + 32 >> 2] | 0;
               if (!d4) {
                 d4 = 1;
-                g5 = 10;
+                g6 = 10;
                 break;
               } else {
-                f5 = g5;
-                g5 = d4;
+                f5 = g6;
+                g6 = d4;
               }
             }
-            if ((g5 | 0) == 8) {
+            if ((g6 | 0) == 8) {
               b10[f5 + 32 >> 2] = b10[h4 >> 2];
               break;
-            } else if ((g5 | 0) == 10) {
+            } else if ((g6 | 0) == 10) {
               return d4 | 0;
             }
           } else {
@@ -91685,7 +95130,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = Bd2(40) | 0;
         if (!h4) {
           I4(27872, 27842, 98, 27885);
@@ -91694,25 +95139,25 @@ var libh3 = (function(libh32) {
         b10[h4 + 4 >> 2] = b10[c4 + 4 >> 2];
         b10[h4 + 8 >> 2] = b10[c4 + 8 >> 2];
         b10[h4 + 12 >> 2] = b10[c4 + 12 >> 2];
-        g5 = h4 + 16 | 0;
-        b10[g5 >> 2] = b10[d4 >> 2];
-        b10[g5 + 4 >> 2] = b10[d4 + 4 >> 2];
-        b10[g5 + 8 >> 2] = b10[d4 + 8 >> 2];
-        b10[g5 + 12 >> 2] = b10[d4 + 12 >> 2];
+        g6 = h4 + 16 | 0;
+        b10[g6 >> 2] = b10[d4 >> 2];
+        b10[g6 + 4 >> 2] = b10[d4 + 4 >> 2];
+        b10[g6 + 8 >> 2] = b10[d4 + 8 >> 2];
+        b10[g6 + 12 >> 2] = b10[d4 + 12 >> 2];
         b10[h4 + 32 >> 2] = 0;
-        g5 = ~~(+q4(+(+s4(10, + +(15 - (b10[a6 + 12 >> 2] | 0) | 0)) * (+e67[c4 >> 3] + +e67[c4 + 8 >> 3]))) % +(b10[a6 + 4 >> 2] | 0)) >>> 0;
-        g5 = (b10[a6 >> 2] | 0) + (g5 << 2) | 0;
-        f5 = b10[g5 >> 2] | 0;
+        g6 = ~~(+q4(+(+s4(10, + +(15 - (b10[a6 + 12 >> 2] | 0) | 0)) * (+e67[c4 >> 3] + +e67[c4 + 8 >> 3]))) % +(b10[a6 + 4 >> 2] | 0)) >>> 0;
+        g6 = (b10[a6 >> 2] | 0) + (g6 << 2) | 0;
+        f5 = b10[g6 >> 2] | 0;
         do {
           if (!f5) {
-            b10[g5 >> 2] = h4;
+            b10[g6 >> 2] = h4;
           } else {
             while (1) {
               if (hc2(f5, c4) | 0 ? hc2(f5 + 16 | 0, d4) | 0 : 0) {
                 break;
               }
-              g5 = b10[f5 + 32 >> 2] | 0;
-              f5 = (g5 | 0) == 0 ? f5 : g5;
+              g6 = b10[f5 + 32 >> 2] | 0;
+              f5 = (g6 | 0) == 0 ? f5 : g6;
               if (!(b10[f5 + 32 >> 2] | 0)) {
                 i3 = 10;
                 break;
@@ -91736,15 +95181,15 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var f5 = 0, g5 = 0;
-        g5 = ~~(+q4(+(+s4(10, + +(15 - (b10[a6 + 12 >> 2] | 0) | 0)) * (+e67[c4 >> 3] + +e67[c4 + 8 >> 3]))) % +(b10[a6 + 4 >> 2] | 0)) >>> 0;
-        g5 = b10[(b10[a6 >> 2] | 0) + (g5 << 2) >> 2] | 0;
-        if (!g5) {
+        var f5 = 0, g6 = 0;
+        g6 = ~~(+q4(+(+s4(10, + +(15 - (b10[a6 + 12 >> 2] | 0) | 0)) * (+e67[c4 >> 3] + +e67[c4 + 8 >> 3]))) % +(b10[a6 + 4 >> 2] | 0)) >>> 0;
+        g6 = b10[(b10[a6 >> 2] | 0) + (g6 << 2) >> 2] | 0;
+        if (!g6) {
           d4 = 0;
           return d4 | 0;
         }
         if (!d4) {
-          a6 = g5;
+          a6 = g6;
           while (1) {
             if (hc2(a6, c4) | 0) {
               f5 = 10;
@@ -91761,7 +95206,7 @@ var libh3 = (function(libh32) {
             return a6 | 0;
           }
         }
-        a6 = g5;
+        a6 = g6;
         while (1) {
           if (hc2(a6, c4) | 0 ? hc2(a6 + 16 | 0, d4) | 0 : 0) {
             f5 = 10;
@@ -91815,7 +95260,7 @@ var libh3 = (function(libh32) {
       }
       function Bd2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0, q5 = 0, r4 = 0, s5 = 0, t5 = 0, u4 = 0, v5 = 0, w5 = 0;
         w5 = T3;
         T3 = T3 + 16 | 0;
         n3 = w5;
@@ -91831,12 +95276,12 @@ var libh3 = (function(libh32) {
               d4 = a6 + 8 | 0;
               e68 = b10[d4 >> 2] | 0;
               f5 = e68 + 8 | 0;
-              g5 = b10[f5 >> 2] | 0;
-              if ((g5 | 0) == (a6 | 0)) {
+              g6 = b10[f5 >> 2] | 0;
+              if ((g6 | 0) == (a6 | 0)) {
                 b10[6977] = m4 & ~(1 << c4);
               } else {
-                b10[g5 + 12 >> 2] = a6;
-                b10[d4 >> 2] = g5;
+                b10[g6 + 12 >> 2] = a6;
+                b10[d4 >> 2] = g6;
               }
               v5 = c4 << 3;
               b10[e68 + 4 >> 2] = v5 | 3;
@@ -91856,16 +95301,16 @@ var libh3 = (function(libh32) {
                 c4 = c4 >>> i3;
                 d4 = c4 >>> 5 & 8;
                 c4 = c4 >>> d4;
-                g5 = c4 >>> 2 & 4;
-                c4 = c4 >>> g5;
+                g6 = c4 >>> 2 & 4;
+                c4 = c4 >>> g6;
                 a6 = c4 >>> 1 & 2;
                 c4 = c4 >>> a6;
                 e68 = c4 >>> 1 & 1;
-                e68 = (d4 | i3 | g5 | a6 | e68) + (c4 >>> e68) | 0;
+                e68 = (d4 | i3 | g6 | a6 | e68) + (c4 >>> e68) | 0;
                 c4 = 27948 + (e68 << 1 << 2) | 0;
                 a6 = c4 + 8 | 0;
-                g5 = b10[a6 >> 2] | 0;
-                i3 = g5 + 8 | 0;
+                g6 = b10[a6 >> 2] | 0;
+                i3 = g6 + 8 | 0;
                 d4 = b10[i3 >> 2] | 0;
                 if ((d4 | 0) == (c4 | 0)) {
                   a6 = m4 & ~(1 << e68);
@@ -91877,10 +95322,10 @@ var libh3 = (function(libh32) {
                 }
                 v5 = e68 << 3;
                 h4 = v5 - k5 | 0;
-                b10[g5 + 4 >> 2] = k5 | 3;
-                f5 = g5 + k5 | 0;
+                b10[g6 + 4 >> 2] = k5 | 3;
+                f5 = g6 + k5 | 0;
                 b10[f5 + 4 >> 2] = h4 | 1;
-                b10[g5 + v5 >> 2] = h4;
+                b10[g6 + v5 >> 2] = h4;
                 if (l3 | 0) {
                   e68 = b10[6982] | 0;
                   c4 = l3 >>> 3;
@@ -91905,9 +95350,9 @@ var libh3 = (function(libh32) {
                 T3 = w5;
                 return v5 | 0;
               }
-              g5 = b10[6978] | 0;
-              if (g5) {
-                d4 = (g5 & 0 - g5) + -1 | 0;
+              g6 = b10[6978] | 0;
+              if (g6) {
+                d4 = (g6 & 0 - g6) + -1 | 0;
                 f5 = d4 >>> 12 & 16;
                 d4 = d4 >>> f5;
                 e68 = d4 >>> 5 & 8;
@@ -91984,7 +95429,7 @@ var libh3 = (function(libh32) {
                       if ((i3 | 0) == (b10[a6 >> 2] | 0)) {
                         b10[a6 >> 2] = d4;
                         if (!d4) {
-                          b10[6978] = g5 & ~(1 << c4);
+                          b10[6978] = g6 & ~(1 << c4);
                           break;
                         }
                       } else {
@@ -92080,7 +95525,7 @@ var libh3 = (function(libh32) {
                 } else {
                   a6 = 0;
                   i3 = k5 << ((j4 | 0) == 31 ? 0 : 25 - (j4 >>> 1) | 0);
-                  g5 = 0;
+                  g6 = 0;
                   while (1) {
                     h4 = (b10[d4 + 4 >> 2] & -8) - k5 | 0;
                     if (h4 >>> 0 < f5 >>> 0) {
@@ -92096,9 +95541,9 @@ var libh3 = (function(libh32) {
                     }
                     q5 = b10[d4 + 20 >> 2] | 0;
                     d4 = b10[d4 + 16 + (i3 >>> 31 << 2) >> 2] | 0;
-                    g5 = (q5 | 0) == 0 | (q5 | 0) == (d4 | 0) ? g5 : q5;
+                    g6 = (q5 | 0) == 0 | (q5 | 0) == (d4 | 0) ? g6 : q5;
                     if (!d4) {
-                      d4 = g5;
+                      d4 = g6;
                       q5 = 61;
                       break;
                     } else {
@@ -92118,15 +95563,15 @@ var libh3 = (function(libh32) {
                   m4 = (a6 & 0 - a6) + -1 | 0;
                   h4 = m4 >>> 12 & 16;
                   m4 = m4 >>> h4;
-                  g5 = m4 >>> 5 & 8;
-                  m4 = m4 >>> g5;
+                  g6 = m4 >>> 5 & 8;
+                  m4 = m4 >>> g6;
                   i3 = m4 >>> 2 & 4;
                   m4 = m4 >>> i3;
                   j4 = m4 >>> 1 & 2;
                   m4 = m4 >>> j4;
                   d4 = m4 >>> 1 & 1;
                   a6 = 0;
-                  d4 = b10[28212 + ((g5 | h4 | i3 | j4 | d4) + (m4 >>> d4) << 2) >> 2] | 0;
+                  d4 = b10[28212 + ((g6 | h4 | i3 | j4 | d4) + (m4 >>> d4) << 2) >> 2] | 0;
                 }
                 if (!d4) {
                   i3 = a6;
@@ -92136,27 +95581,27 @@ var libh3 = (function(libh32) {
                 }
               }
               if ((q5 | 0) == 65) {
-                g5 = d4;
+                g6 = d4;
                 while (1) {
-                  m4 = (b10[g5 + 4 >> 2] & -8) - k5 | 0;
+                  m4 = (b10[g6 + 4 >> 2] & -8) - k5 | 0;
                   d4 = m4 >>> 0 < f5 >>> 0;
                   f5 = d4 ? m4 : f5;
-                  a6 = d4 ? g5 : a6;
-                  d4 = b10[g5 + 16 >> 2] | 0;
+                  a6 = d4 ? g6 : a6;
+                  d4 = b10[g6 + 16 >> 2] | 0;
                   if (!d4) {
-                    d4 = b10[g5 + 20 >> 2] | 0;
+                    d4 = b10[g6 + 20 >> 2] | 0;
                   }
                   if (!d4) {
                     i3 = a6;
                     h4 = f5;
                     break;
                   } else {
-                    g5 = d4;
+                    g6 = d4;
                   }
                 }
               }
               if (((i3 | 0) != 0 ? h4 >>> 0 < ((b10[6979] | 0) - k5 | 0) >>> 0 : 0) ? (l3 = i3 + k5 | 0, l3 >>> 0 > i3 >>> 0) : 0) {
-                g5 = b10[i3 + 24 >> 2] | 0;
+                g6 = b10[i3 + 24 >> 2] | 0;
                 c4 = b10[i3 + 12 >> 2] | 0;
                 do {
                   if ((c4 | 0) == (i3 | 0)) {
@@ -92195,7 +95640,7 @@ var libh3 = (function(libh32) {
                   }
                 } while (0);
                 do {
-                  if (g5) {
+                  if (g6) {
                     a6 = b10[i3 + 28 >> 2] | 0;
                     d4 = 28212 + (a6 << 2) | 0;
                     if ((i3 | 0) == (b10[d4 >> 2] | 0)) {
@@ -92206,13 +95651,13 @@ var libh3 = (function(libh32) {
                         break;
                       }
                     } else {
-                      v5 = g5 + 16 | 0;
-                      b10[((b10[v5 >> 2] | 0) == (i3 | 0) ? v5 : g5 + 20 | 0) >> 2] = c4;
+                      v5 = g6 + 16 | 0;
+                      b10[((b10[v5 >> 2] | 0) == (i3 | 0) ? v5 : g6 + 20 | 0) >> 2] = c4;
                       if (!c4) {
                         break;
                       }
                     }
-                    b10[c4 + 24 >> 2] = g5;
+                    b10[c4 + 24 >> 2] = g6;
                     a6 = b10[i3 + 16 >> 2] | 0;
                     if (a6 | 0) {
                       b10[c4 + 16 >> 2] = a6;
@@ -92380,9 +95825,9 @@ var libh3 = (function(libh32) {
         }
         i3 = m4 + 48 | 0;
         j4 = m4 + 47 | 0;
-        g5 = a6 + j4 | 0;
+        g6 = a6 + j4 | 0;
         f5 = 0 - a6 | 0;
-        k5 = g5 & f5;
+        k5 = g6 & f5;
         if (k5 >>> 0 <= m4 >>> 0) {
           v5 = 0;
           T3 = w5;
@@ -92413,13 +95858,13 @@ var libh3 = (function(libh32) {
                     e68 = a6;
                   }
                 }
-                c4 = g5 - h4 & f5;
+                c4 = g6 - h4 & f5;
                 if (c4 >>> 0 < 2147483647) {
                   a6 = Xd2(c4 | 0) | 0;
                   if ((a6 | 0) == ((b10[e68 >> 2] | 0) + (b10[e68 + 4 >> 2] | 0) | 0)) {
                     if ((a6 | 0) != (-1 | 0)) {
                       h4 = c4;
-                      g5 = a6;
+                      g6 = a6;
                       q5 = 145;
                       break d;
                     }
@@ -92446,7 +95891,7 @@ var libh3 = (function(libh32) {
                   a6 = Xd2(c4 | 0) | 0;
                   if ((a6 | 0) == (d4 | 0)) {
                     h4 = c4;
-                    g5 = d4;
+                    g6 = d4;
                     q5 = 145;
                     break d;
                   } else {
@@ -92467,7 +95912,7 @@ var libh3 = (function(libh32) {
                     break;
                   } else {
                     h4 = c4;
-                    g5 = e68;
+                    g6 = e68;
                     q5 = 145;
                     break d;
                   }
@@ -92476,7 +95921,7 @@ var libh3 = (function(libh32) {
                 a6 = j4 - c4 + a6 & 0 - a6;
                 if (a6 >>> 0 >= 2147483647) {
                   h4 = c4;
-                  g5 = e68;
+                  g6 = e68;
                   q5 = 145;
                   break d;
                 }
@@ -92486,7 +95931,7 @@ var libh3 = (function(libh32) {
                   break;
                 } else {
                   h4 = a6 + c4 | 0;
-                  g5 = e68;
+                  g6 = e68;
                   q5 = 145;
                   break d;
                 }
@@ -92501,7 +95946,7 @@ var libh3 = (function(libh32) {
         } while (0);
         if (((q5 | 0) == 143 ? k5 >>> 0 < 2147483647 : 0) ? (t5 = Xd2(k5 | 0) | 0, p5 = Xd2(0) | 0, r4 = p5 - t5 | 0, s5 = r4 >>> 0 > (m4 + 40 | 0) >>> 0, !((t5 | 0) == (-1 | 0) | s5 ^ 1 | t5 >>> 0 < p5 >>> 0 & ((t5 | 0) != (-1 | 0) & (p5 | 0) != (-1 | 0)) ^ 1)) : 0) {
           h4 = s5 ? r4 : c4;
-          g5 = t5;
+          g6 = t5;
           q5 = 145;
         }
         if ((q5 | 0) == 145) {
@@ -92517,7 +95962,7 @@ var libh3 = (function(libh32) {
               while (1) {
                 a6 = b10[c4 >> 2] | 0;
                 d4 = b10[c4 + 4 >> 2] | 0;
-                if ((g5 | 0) == (a6 + d4 | 0)) {
+                if ((g6 | 0) == (a6 + d4 | 0)) {
                   q5 = 154;
                   break;
                 }
@@ -92528,7 +95973,7 @@ var libh3 = (function(libh32) {
                   c4 = e68;
                 }
               }
-              if (((q5 | 0) == 154 ? (u4 = c4 + 4 | 0, (b10[c4 + 12 >> 2] & 8 | 0) == 0) : 0) ? g5 >>> 0 > j4 >>> 0 & a6 >>> 0 <= j4 >>> 0 : 0) {
+              if (((q5 | 0) == 154 ? (u4 = c4 + 4 | 0, (b10[c4 + 12 >> 2] & 8 | 0) == 0) : 0) ? g6 >>> 0 > j4 >>> 0 & a6 >>> 0 <= j4 >>> 0 : 0) {
                 b10[u4 >> 2] = d4 + h4;
                 v5 = (b10[6980] | 0) + h4 | 0;
                 t5 = j4 + 8 | 0;
@@ -92542,10 +95987,10 @@ var libh3 = (function(libh32) {
                 b10[6984] = b10[7099];
                 break;
               }
-              if (g5 >>> 0 < (b10[6981] | 0) >>> 0) {
-                b10[6981] = g5;
+              if (g6 >>> 0 < (b10[6981] | 0) >>> 0) {
+                b10[6981] = g6;
               }
-              d4 = g5 + h4 | 0;
+              d4 = g6 + h4 | 0;
               c4 = 28356;
               while (1) {
                 if ((b10[c4 >> 2] | 0) == (d4 | 0)) {
@@ -92560,11 +96005,11 @@ var libh3 = (function(libh32) {
                 }
               }
               if ((q5 | 0) == 162 ? (b10[c4 + 12 >> 2] & 8 | 0) == 0 : 0) {
-                b10[c4 >> 2] = g5;
+                b10[c4 >> 2] = g6;
                 l3 = c4 + 4 | 0;
                 b10[l3 >> 2] = (b10[l3 >> 2] | 0) + h4;
-                l3 = g5 + 8 | 0;
-                l3 = g5 + ((l3 & 7 | 0) == 0 ? 0 : 0 - l3 & 7) | 0;
+                l3 = g6 + 8 | 0;
+                l3 = g6 + ((l3 & 7 | 0) == 0 ? 0 : 0 - l3 & 7) | 0;
                 c4 = d4 + 8 | 0;
                 c4 = d4 + ((c4 & 7 | 0) == 0 ? 0 : 0 - c4 & 7) | 0;
                 k5 = l3 + m4 | 0;
@@ -92602,7 +96047,7 @@ var libh3 = (function(libh32) {
                             break;
                           }
                         } else {
-                          g5 = b10[c4 + 24 >> 2] | 0;
+                          g6 = b10[c4 + 24 >> 2] | 0;
                           a6 = b10[c4 + 12 >> 2] | 0;
                           do {
                             if ((a6 | 0) == (c4 | 0)) {
@@ -92642,15 +96087,15 @@ var libh3 = (function(libh32) {
                               b10[a6 + 8 >> 2] = v5;
                             }
                           } while (0);
-                          if (!g5) {
+                          if (!g6) {
                             break;
                           }
                           d4 = b10[c4 + 28 >> 2] | 0;
                           e68 = 28212 + (d4 << 2) | 0;
                           do {
                             if ((b10[e68 >> 2] | 0) != (c4 | 0)) {
-                              v5 = g5 + 16 | 0;
-                              b10[((b10[v5 >> 2] | 0) == (c4 | 0) ? v5 : g5 + 20 | 0) >> 2] = a6;
+                              v5 = g6 + 16 | 0;
+                              b10[((b10[v5 >> 2] | 0) == (c4 | 0) ? v5 : g6 + 20 | 0) >> 2] = a6;
                               if (!a6) {
                                 break h;
                               }
@@ -92663,7 +96108,7 @@ var libh3 = (function(libh32) {
                               break h;
                             }
                           } while (0);
-                          b10[a6 + 24 >> 2] = g5;
+                          b10[a6 + 24 >> 2] = g6;
                           d4 = c4 + 16 | 0;
                           e68 = b10[d4 >> 2] | 0;
                           if (e68 | 0) {
@@ -92792,14 +96237,14 @@ var libh3 = (function(libh32) {
               a6 = a6 >>> 0 < f5 >>> 0 ? j4 : a6;
               c4 = a6 + 8 | 0;
               d4 = h4 + -40 | 0;
-              t5 = g5 + 8 | 0;
+              t5 = g6 + 8 | 0;
               t5 = (t5 & 7 | 0) == 0 ? 0 : 0 - t5 & 7;
-              u4 = g5 + t5 | 0;
+              u4 = g6 + t5 | 0;
               t5 = d4 - t5 | 0;
               b10[6983] = u4;
               b10[6980] = t5;
               b10[u4 + 4 >> 2] = t5 | 1;
-              b10[g5 + d4 + 4 >> 2] = 40;
+              b10[g6 + d4 + 4 >> 2] = 40;
               b10[6984] = b10[7099];
               d4 = a6 + 4 | 0;
               b10[d4 >> 2] = 27;
@@ -92807,7 +96252,7 @@ var libh3 = (function(libh32) {
               b10[c4 + 4 >> 2] = b10[7090];
               b10[c4 + 8 >> 2] = b10[7091];
               b10[c4 + 12 >> 2] = b10[7092];
-              b10[7089] = g5;
+              b10[7089] = g6;
               b10[7090] = h4;
               b10[7092] = 0;
               b10[7091] = c4;
@@ -92818,12 +96263,12 @@ var libh3 = (function(libh32) {
                 b10[c4 >> 2] = 7;
               } while ((u4 + 8 | 0) >>> 0 < v5 >>> 0);
               if ((a6 | 0) != (j4 | 0)) {
-                g5 = a6 - j4 | 0;
+                g6 = a6 - j4 | 0;
                 b10[d4 >> 2] = b10[d4 >> 2] & -2;
-                b10[j4 + 4 >> 2] = g5 | 1;
-                b10[a6 >> 2] = g5;
-                c4 = g5 >>> 3;
-                if (g5 >>> 0 < 256) {
+                b10[j4 + 4 >> 2] = g6 | 1;
+                b10[a6 >> 2] = g6;
+                c4 = g6 >>> 3;
+                if (g6 >>> 0 < 256) {
                   d4 = 27948 + (c4 << 1 << 2) | 0;
                   a6 = b10[6977] | 0;
                   c4 = 1 << c4;
@@ -92841,9 +96286,9 @@ var libh3 = (function(libh32) {
                   b10[j4 + 12 >> 2] = d4;
                   break;
                 }
-                c4 = g5 >>> 8;
+                c4 = g6 >>> 8;
                 if (c4) {
-                  if (g5 >>> 0 > 16777215) {
+                  if (g6 >>> 0 > 16777215) {
                     e68 = 31;
                   } else {
                     u4 = (c4 + 1048320 | 0) >>> 16 & 8;
@@ -92852,7 +96297,7 @@ var libh3 = (function(libh32) {
                     v5 = v5 << t5;
                     e68 = (v5 + 245760 | 0) >>> 16 & 2;
                     e68 = 14 - (t5 | u4 | e68) + (v5 << e68 >>> 15) | 0;
-                    e68 = g5 >>> (e68 + 7 | 0) & 1 | e68 << 1;
+                    e68 = g6 >>> (e68 + 7 | 0) & 1 | e68 << 1;
                   }
                 } else {
                   e68 = 0;
@@ -92873,15 +96318,15 @@ var libh3 = (function(libh32) {
                 }
                 c4 = b10[d4 >> 2] | 0;
                 j: do {
-                  if ((b10[c4 + 4 >> 2] & -8 | 0) != (g5 | 0)) {
-                    e68 = g5 << ((e68 | 0) == 31 ? 0 : 25 - (e68 >>> 1) | 0);
+                  if ((b10[c4 + 4 >> 2] & -8 | 0) != (g6 | 0)) {
+                    e68 = g6 << ((e68 | 0) == 31 ? 0 : 25 - (e68 >>> 1) | 0);
                     while (1) {
                       d4 = c4 + 16 + (e68 >>> 31 << 2) | 0;
                       a6 = b10[d4 >> 2] | 0;
                       if (!a6) {
                         break;
                       }
-                      if ((b10[a6 + 4 >> 2] & -8 | 0) == (g5 | 0)) {
+                      if ((b10[a6 + 4 >> 2] & -8 | 0) == (g6 | 0)) {
                         c4 = a6;
                         break j;
                       } else {
@@ -92906,10 +96351,10 @@ var libh3 = (function(libh32) {
               }
             } else {
               v5 = b10[6981] | 0;
-              if ((v5 | 0) == 0 | g5 >>> 0 < v5 >>> 0) {
-                b10[6981] = g5;
+              if ((v5 | 0) == 0 | g6 >>> 0 < v5 >>> 0) {
+                b10[6981] = g6;
               }
-              b10[7089] = g5;
+              b10[7089] = g6;
               b10[7090] = h4;
               b10[7092] = 0;
               b10[6986] = b10[7095];
@@ -92979,14 +96424,14 @@ var libh3 = (function(libh32) {
               b10[7052] = 28196;
               b10[7051] = 28196;
               v5 = h4 + -40 | 0;
-              t5 = g5 + 8 | 0;
+              t5 = g6 + 8 | 0;
               t5 = (t5 & 7 | 0) == 0 ? 0 : 0 - t5 & 7;
-              u4 = g5 + t5 | 0;
+              u4 = g6 + t5 | 0;
               t5 = v5 - t5 | 0;
               b10[6983] = u4;
               b10[6980] = t5;
               b10[u4 + 4 >> 2] = t5 | 1;
-              b10[g5 + v5 + 4 >> 2] = 40;
+              b10[g6 + v5 + 4 >> 2] = 40;
               b10[6984] = b10[7099];
             }
           } while (0);
@@ -93012,7 +96457,7 @@ var libh3 = (function(libh32) {
       }
       function Cd2(a6) {
         a6 = a6 | 0;
-        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var c4 = 0, d4 = 0, e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         if (!a6) {
           return;
         }
@@ -93028,7 +96473,7 @@ var libh3 = (function(libh32) {
               return;
             }
             h4 = d4 + (0 - e68) | 0;
-            g5 = e68 + c4 | 0;
+            g6 = e68 + c4 | 0;
             if (h4 >>> 0 < f5 >>> 0) {
               return;
             }
@@ -93037,13 +96482,13 @@ var libh3 = (function(libh32) {
               c4 = b10[a6 >> 2] | 0;
               if ((c4 & 3 | 0) != 3) {
                 i3 = h4;
-                c4 = g5;
+                c4 = g6;
                 break;
               }
-              b10[6979] = g5;
+              b10[6979] = g6;
               b10[a6 >> 2] = c4 & -2;
-              b10[h4 + 4 >> 2] = g5 | 1;
-              b10[h4 + g5 >> 2] = g5;
+              b10[h4 + 4 >> 2] = g6 | 1;
+              b10[h4 + g6 >> 2] = g6;
               return;
             }
             d4 = e68 >>> 3;
@@ -93053,13 +96498,13 @@ var libh3 = (function(libh32) {
               if ((c4 | 0) == (a6 | 0)) {
                 b10[6977] = b10[6977] & ~(1 << d4);
                 i3 = h4;
-                c4 = g5;
+                c4 = g6;
                 break;
               } else {
                 b10[a6 + 12 >> 2] = c4;
                 b10[c4 + 8 >> 2] = a6;
                 i3 = h4;
-                c4 = g5;
+                c4 = g6;
                 break;
               }
             }
@@ -93111,7 +96556,7 @@ var libh3 = (function(libh32) {
                 if (!a6) {
                   b10[6978] = b10[6978] & ~(1 << c4);
                   i3 = h4;
-                  c4 = g5;
+                  c4 = g6;
                   break;
                 }
               } else {
@@ -93119,7 +96564,7 @@ var libh3 = (function(libh32) {
                 b10[((b10[i3 >> 2] | 0) == (h4 | 0) ? i3 : f5 + 20 | 0) >> 2] = a6;
                 if (!a6) {
                   i3 = h4;
-                  c4 = g5;
+                  c4 = g6;
                   break;
                 }
               }
@@ -93135,14 +96580,14 @@ var libh3 = (function(libh32) {
                 b10[a6 + 20 >> 2] = c4;
                 b10[c4 + 24 >> 2] = a6;
                 i3 = h4;
-                c4 = g5;
+                c4 = g6;
               } else {
                 i3 = h4;
-                c4 = g5;
+                c4 = g6;
               }
             } else {
               i3 = h4;
-              c4 = g5;
+              c4 = g6;
             }
           } else {
             i3 = d4;
@@ -93193,7 +96638,7 @@ var libh3 = (function(libh32) {
                 break;
               }
             } else {
-              g5 = b10[j4 + 24 >> 2] | 0;
+              g6 = b10[j4 + 24 >> 2] | 0;
               a6 = b10[j4 + 12 >> 2] | 0;
               do {
                 if ((a6 | 0) == (j4 | 0)) {
@@ -93235,7 +96680,7 @@ var libh3 = (function(libh32) {
                   d4 = a6;
                 }
               } while (0);
-              if (g5 | 0) {
+              if (g6 | 0) {
                 a6 = b10[j4 + 28 >> 2] | 0;
                 c4 = 28212 + (a6 << 2) | 0;
                 if ((b10[c4 >> 2] | 0) == (j4 | 0)) {
@@ -93245,13 +96690,13 @@ var libh3 = (function(libh32) {
                     break;
                   }
                 } else {
-                  e68 = g5 + 16 | 0;
-                  b10[((b10[e68 >> 2] | 0) == (j4 | 0) ? e68 : g5 + 20 | 0) >> 2] = d4;
+                  e68 = g6 + 16 | 0;
+                  b10[((b10[e68 >> 2] | 0) == (j4 | 0) ? e68 : g6 + 20 | 0) >> 2] = d4;
                   if (!d4) {
                     break;
                   }
                 }
-                b10[d4 + 24 >> 2] = g5;
+                b10[d4 + 24 >> 2] = g6;
                 a6 = j4 + 16 | 0;
                 c4 = b10[a6 >> 2] | 0;
                 if (c4 | 0) {
@@ -93304,10 +96749,10 @@ var libh3 = (function(libh32) {
           } else {
             h4 = (a6 + 1048320 | 0) >>> 16 & 8;
             j4 = a6 << h4;
-            g5 = (j4 + 520192 | 0) >>> 16 & 4;
-            j4 = j4 << g5;
+            g6 = (j4 + 520192 | 0) >>> 16 & 4;
+            j4 = j4 << g6;
             e68 = (j4 + 245760 | 0) >>> 16 & 2;
-            e68 = 14 - (g5 | h4 | e68) + (j4 << e68 >>> 15) | 0;
+            e68 = 14 - (g6 | h4 | e68) + (j4 << e68 >>> 15) | 0;
             e68 = f5 >>> (e68 + 7 | 0) & 1 | e68 << 1;
           }
         } else {
@@ -93426,7 +96871,7 @@ var libh3 = (function(libh32) {
         d4 = d4 | 0;
         e68 = e68 | 0;
         f5 = f5 | 0;
-        var g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
+        var g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0, l3 = 0, m4 = 0, n3 = 0, o3 = 0, p5 = 0;
         l3 = a6;
         j4 = c4;
         k5 = j4;
@@ -93434,9 +96879,9 @@ var libh3 = (function(libh32) {
         n3 = e68;
         i3 = n3;
         if (!k5) {
-          g5 = (f5 | 0) != 0;
+          g6 = (f5 | 0) != 0;
           if (!i3) {
-            if (g5) {
+            if (g6) {
               b10[f5 >> 2] = (l3 >>> 0) % (h4 >>> 0);
               b10[f5 + 4 >> 2] = 0;
             }
@@ -93444,7 +96889,7 @@ var libh3 = (function(libh32) {
             f5 = (l3 >>> 0) / (h4 >>> 0) >>> 0;
             return (G4(n3 | 0), f5) | 0;
           } else {
-            if (!g5) {
+            if (!g6) {
               n3 = 0;
               f5 = 0;
               return (G4(n3 | 0), f5) | 0;
@@ -93456,19 +96901,19 @@ var libh3 = (function(libh32) {
             return (G4(n3 | 0), f5) | 0;
           }
         }
-        g5 = (i3 | 0) == 0;
+        g6 = (i3 | 0) == 0;
         do {
           if (h4) {
-            if (!g5) {
-              g5 = (E5(i3 | 0) | 0) - (E5(k5 | 0) | 0) | 0;
-              if (g5 >>> 0 <= 31) {
-                m4 = g5 + 1 | 0;
-                i3 = 31 - g5 | 0;
-                c4 = g5 - 31 >> 31;
+            if (!g6) {
+              g6 = (E5(i3 | 0) | 0) - (E5(k5 | 0) | 0) | 0;
+              if (g6 >>> 0 <= 31) {
+                m4 = g6 + 1 | 0;
+                i3 = 31 - g6 | 0;
+                c4 = g6 - 31 >> 31;
                 h4 = m4;
                 a6 = l3 >>> (m4 >>> 0) & c4 | k5 << i3;
                 c4 = k5 >>> (m4 >>> 0) & c4;
-                g5 = 0;
+                g6 = 0;
                 i3 = l3 << i3;
                 break;
               }
@@ -93483,8 +96928,8 @@ var libh3 = (function(libh32) {
               f5 = 0;
               return (G4(n3 | 0), f5) | 0;
             }
-            g5 = h4 - 1 | 0;
-            if (g5 & h4 | 0) {
+            g6 = h4 - 1 | 0;
+            if (g6 & h4 | 0) {
               i3 = (E5(h4 | 0) | 0) + 33 - (E5(k5 | 0) | 0) | 0;
               p5 = 64 - i3 | 0;
               m4 = 32 - i3 | 0;
@@ -93494,12 +96939,12 @@ var libh3 = (function(libh32) {
               h4 = i3;
               a6 = m4 - 1 >> 31 & k5 >>> (o3 >>> 0) | (k5 << m4 | l3 >>> (i3 >>> 0)) & c4;
               c4 = c4 & k5 >>> (i3 >>> 0);
-              g5 = l3 << p5 & j4;
+              g6 = l3 << p5 & j4;
               i3 = (k5 << p5 | l3 >>> (o3 >>> 0)) & j4 | l3 << m4 & i3 - 33 >> 31;
               break;
             }
             if (f5 | 0) {
-              b10[f5 >> 2] = g5 & l3;
+              b10[f5 >> 2] = g6 & l3;
               b10[f5 + 4 >> 2] = 0;
             }
             if ((h4 | 0) == 1) {
@@ -93513,7 +96958,7 @@ var libh3 = (function(libh32) {
               return (G4(o3 | 0), p5) | 0;
             }
           } else {
-            if (g5) {
+            if (g6) {
               if (f5 | 0) {
                 b10[f5 >> 2] = (k5 >>> 0) % (h4 >>> 0);
                 b10[f5 + 4 >> 2] = 0;
@@ -93531,24 +96976,24 @@ var libh3 = (function(libh32) {
               p5 = (k5 >>> 0) / (i3 >>> 0) >>> 0;
               return (G4(o3 | 0), p5) | 0;
             }
-            g5 = i3 - 1 | 0;
-            if (!(g5 & i3)) {
+            g6 = i3 - 1 | 0;
+            if (!(g6 & i3)) {
               if (f5 | 0) {
                 b10[f5 >> 2] = a6 | 0;
-                b10[f5 + 4 >> 2] = g5 & k5 | c4 & 0;
+                b10[f5 + 4 >> 2] = g6 & k5 | c4 & 0;
               }
               o3 = 0;
               p5 = k5 >>> ((Gd2(i3 | 0) | 0) >>> 0);
               return (G4(o3 | 0), p5) | 0;
             }
-            g5 = (E5(i3 | 0) | 0) - (E5(k5 | 0) | 0) | 0;
-            if (g5 >>> 0 <= 30) {
-              c4 = g5 + 1 | 0;
-              i3 = 31 - g5 | 0;
+            g6 = (E5(i3 | 0) | 0) - (E5(k5 | 0) | 0) | 0;
+            if (g6 >>> 0 <= 30) {
+              c4 = g6 + 1 | 0;
+              i3 = 31 - g6 | 0;
               h4 = c4;
               a6 = k5 << i3 | l3 >>> (c4 >>> 0);
               c4 = k5 >>> (c4 >>> 0);
-              g5 = 0;
+              g6 = 0;
               i3 = l3 << i3;
               break;
             }
@@ -93577,8 +97022,8 @@ var libh3 = (function(libh32) {
           i3 = 0;
           do {
             e68 = j4;
-            j4 = g5 >>> 31 | j4 << 1;
-            g5 = i3 | g5 << 1;
+            j4 = g6 >>> 31 | j4 << 1;
+            g6 = i3 | g6 << 1;
             e68 = a6 << 1 | e68 >>> 31 | 0;
             n3 = a6 >>> 31 | c4 << 1 | 0;
             Fd2(k5 | 0, d4 | 0, e68 | 0, n3 | 0) | 0;
@@ -93597,8 +97042,8 @@ var libh3 = (function(libh32) {
           b10[f5 >> 2] = a6;
           b10[f5 + 4 >> 2] = c4;
         }
-        o3 = (g5 | 0) >>> 31 | (k5 | h4) << 1 | (h4 << 1 | g5 >>> 31) & 0 | j4;
-        p5 = (g5 << 1 | 0 >>> 31) & -2 | i3;
+        o3 = (g6 | 0) >>> 31 | (k5 | h4) << 1 | (h4 << 1 | g6 >>> 31) & 0 | j4;
+        p5 = (g6 << 1 | 0 >>> 31) & -2 | i3;
         return (G4(o3 | 0), p5) | 0;
       }
       function Id2(a6, b11, c4, d4) {
@@ -93606,16 +97051,16 @@ var libh3 = (function(libh32) {
         b11 = b11 | 0;
         c4 = c4 | 0;
         d4 = d4 | 0;
-        var e68 = 0, f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0;
+        var e68 = 0, f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0;
         j4 = b11 >> 31 | ((b11 | 0) < 0 ? -1 : 0) << 1;
         i3 = ((b11 | 0) < 0 ? -1 : 0) >> 31 | ((b11 | 0) < 0 ? -1 : 0) << 1;
         f5 = d4 >> 31 | ((d4 | 0) < 0 ? -1 : 0) << 1;
         e68 = ((d4 | 0) < 0 ? -1 : 0) >> 31 | ((d4 | 0) < 0 ? -1 : 0) << 1;
         h4 = Fd2(j4 ^ a6 | 0, i3 ^ b11 | 0, j4 | 0, i3 | 0) | 0;
-        g5 = H4() | 0;
+        g6 = H4() | 0;
         a6 = f5 ^ j4;
         b11 = e68 ^ i3;
-        return Fd2((Hd2(h4, g5, Fd2(f5 ^ c4 | 0, e68 ^ d4 | 0, f5 | 0, e68 | 0) | 0, H4() | 0, 0) | 0) ^ a6 | 0, (H4() | 0) ^ b11 | 0, a6 | 0, b11 | 0) | 0;
+        return Fd2((Hd2(h4, g6, Fd2(f5 ^ c4 | 0, e68 ^ d4 | 0, f5 | 0, e68 | 0) | 0, H4() | 0, 0) | 0) ^ a6 | 0, (H4() | 0) ^ b11 | 0, a6 | 0, b11 | 0) | 0;
       }
       function Jd2(a6, b11) {
         a6 = a6 | 0;
@@ -93647,18 +97092,18 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0, j4 = 0, k5 = 0;
         f5 = T3;
         T3 = T3 + 16 | 0;
         i3 = f5 | 0;
         h4 = c4 >> 31 | ((c4 | 0) < 0 ? -1 : 0) << 1;
-        g5 = ((c4 | 0) < 0 ? -1 : 0) >> 31 | ((c4 | 0) < 0 ? -1 : 0) << 1;
+        g6 = ((c4 | 0) < 0 ? -1 : 0) >> 31 | ((c4 | 0) < 0 ? -1 : 0) << 1;
         k5 = e68 >> 31 | ((e68 | 0) < 0 ? -1 : 0) << 1;
         j4 = ((e68 | 0) < 0 ? -1 : 0) >> 31 | ((e68 | 0) < 0 ? -1 : 0) << 1;
-        a6 = Fd2(h4 ^ a6 | 0, g5 ^ c4 | 0, h4 | 0, g5 | 0) | 0;
+        a6 = Fd2(h4 ^ a6 | 0, g6 ^ c4 | 0, h4 | 0, g6 | 0) | 0;
         c4 = H4() | 0;
         Hd2(a6, c4, Fd2(k5 ^ d4 | 0, j4 ^ e68 | 0, k5 | 0, j4 | 0) | 0, H4() | 0, i3) | 0;
-        e68 = Fd2(b10[i3 >> 2] ^ h4 | 0, b10[i3 + 4 >> 2] ^ g5 | 0, h4 | 0, g5 | 0) | 0;
+        e68 = Fd2(b10[i3 >> 2] ^ h4 | 0, b10[i3 + 4 >> 2] ^ g6 | 0, h4 | 0, g6 | 0) | 0;
         d4 = H4() | 0;
         T3 = f5;
         return (G4(d4 | 0), e68) | 0;
@@ -93668,12 +97113,12 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0;
-        g5 = T3;
+        var f5 = 0, g6 = 0;
+        g6 = T3;
         T3 = T3 + 16 | 0;
-        f5 = g5 | 0;
+        f5 = g6 | 0;
         Hd2(a6, c4, d4, e68, f5) | 0;
-        T3 = g5;
+        T3 = g6;
         return (G4(b10[f5 + 4 >> 2] | 0), b10[f5 >> 2] | 0) | 0;
       }
       function Nd2(a6, b11, c4) {
@@ -93750,13 +97195,13 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0;
+        var f5 = 0, g6 = 0, h4 = 0;
         if ((e68 | 0) >= 8192) {
           L4(c4 | 0, d4 | 0, e68 | 0) | 0;
           return c4 | 0;
         }
         h4 = c4 | 0;
-        g5 = c4 + e68 | 0;
+        g6 = c4 + e68 | 0;
         if ((c4 & 3) == (d4 & 3)) {
           while (c4 & 3) {
             if (!e68) {
@@ -93767,7 +97212,7 @@ var libh3 = (function(libh32) {
             d4 = d4 + 1 | 0;
             e68 = e68 - 1 | 0;
           }
-          e68 = g5 & -4 | 0;
+          e68 = g6 & -4 | 0;
           f5 = e68 - 64 | 0;
           while ((c4 | 0) <= (f5 | 0)) {
             b10[c4 >> 2] = b10[d4 >> 2];
@@ -93795,7 +97240,7 @@ var libh3 = (function(libh32) {
             d4 = d4 + 4 | 0;
           }
         } else {
-          e68 = g5 - 4 | 0;
+          e68 = g6 - 4 | 0;
           while ((c4 | 0) < (e68 | 0)) {
             a5[c4 >> 0] = a5[d4 >> 0] | 0;
             a5[c4 + 1 >> 0] = a5[d4 + 1 >> 0] | 0;
@@ -93805,7 +97250,7 @@ var libh3 = (function(libh32) {
             d4 = d4 + 4 | 0;
           }
         }
-        while ((c4 | 0) < (g5 | 0)) {
+        while ((c4 | 0) < (g6 | 0)) {
           a5[c4 >> 0] = a5[d4 >> 0] | 0;
           c4 = c4 + 1 | 0;
           d4 = d4 + 1 | 0;
@@ -93816,7 +97261,7 @@ var libh3 = (function(libh32) {
         c4 = c4 | 0;
         d4 = d4 | 0;
         e68 = e68 | 0;
-        var f5 = 0, g5 = 0, h4 = 0, i3 = 0;
+        var f5 = 0, g6 = 0, h4 = 0, i3 = 0;
         h4 = c4 + e68 | 0;
         d4 = d4 & 255;
         if ((e68 | 0) >= 67) {
@@ -93826,8 +97271,8 @@ var libh3 = (function(libh32) {
           }
           f5 = h4 & -4 | 0;
           i3 = d4 | d4 << 8 | d4 << 16 | d4 << 24;
-          g5 = f5 - 64 | 0;
-          while ((c4 | 0) <= (g5 | 0)) {
+          g6 = f5 - 64 | 0;
+          while ((c4 | 0) <= (g6 | 0)) {
             b10[c4 >> 2] = i3;
             b10[c4 + 4 >> 2] = i3;
             b10[c4 + 8 >> 2] = i3;
@@ -93865,7 +97310,7 @@ var libh3 = (function(libh32) {
         a6 = a6 | 0;
         var c4 = 0, d4 = 0, e68 = 0;
         e68 = K5() | 0;
-        d4 = b10[g4 >> 2] | 0;
+        d4 = b10[g5 >> 2] | 0;
         c4 = d4 + a6 | 0;
         if ((a6 | 0) > 0 & (c4 | 0) < (d4 | 0) | (c4 | 0) < 0) {
           N3(c4 | 0) | 0;
@@ -93878,7 +97323,7 @@ var libh3 = (function(libh32) {
             return -1;
           }
         }
-        b10[g4 >> 2] = c4;
+        b10[g5 >> 2] = c4;
         return d4 | 0;
       }
       return {
@@ -94658,7 +98103,7 @@ function mergeTriggers(getHexagon, coverage) {
   }
   return trigger;
 }
-var defaultProps8 = {
+var defaultProps14 = {
   ...polygon_layer_default.defaultProps,
   highPrecision: "auto",
   coverage: { type: "number", min: 0, max: 1, value: 1 },
@@ -94788,11 +98233,11 @@ var H3HexagonLayer = class _H3HexagonLayer extends composite_layer_default {
   _renderPolygonLayer() {
     const { data, getHexagon, updateTriggers, coverage } = this.props;
     const SubLayerClass = this.getSubLayerClass("hexagon-cell-hifi", polygon_layer_default);
-    const forwardProps = this._getForwardProps();
-    forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, coverage);
-    return new SubLayerClass(forwardProps, this.getSubLayerProps({
+    const forwardProps2 = this._getForwardProps();
+    forwardProps2.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, coverage);
+    return new SubLayerClass(forwardProps2, this.getSubLayerProps({
       id: "hexagon-cell-hifi",
-      updateTriggers: forwardProps.updateTriggers
+      updateTriggers: forwardProps2.updateTriggers
     }), {
       data,
       _normalize: false,
@@ -94807,12 +98252,12 @@ var H3HexagonLayer = class _H3HexagonLayer extends composite_layer_default {
   _renderColumnLayer() {
     const { data, getHexagon, updateTriggers } = this.props;
     const SubLayerClass = this.getSubLayerClass("hexagon-cell", column_layer_default);
-    const forwardProps = this._getForwardProps();
-    forwardProps.updateTriggers.getPosition = updateTriggers.getHexagon;
-    return new SubLayerClass(forwardProps, this.getSubLayerProps({
+    const forwardProps2 = this._getForwardProps();
+    forwardProps2.updateTriggers.getPosition = updateTriggers.getHexagon;
+    return new SubLayerClass(forwardProps2, this.getSubLayerProps({
       id: "hexagon-cell",
       flatShading: true,
-      updateTriggers: forwardProps.updateTriggers
+      updateTriggers: forwardProps2.updateTriggers
     }), {
       data,
       diskResolution: 6,
@@ -94823,14 +98268,14 @@ var H3HexagonLayer = class _H3HexagonLayer extends composite_layer_default {
     });
   }
 };
-H3HexagonLayer.defaultProps = defaultProps8;
+H3HexagonLayer.defaultProps = defaultProps14;
 H3HexagonLayer.layerName = "H3HexagonLayer";
 H3HexagonLayer._checkH3Lib = () => {
 };
 var h3_hexagon_layer_default = H3HexagonLayer;
 
 // node_modules/@deck.gl/geo-layers/dist/h3-layers/h3-cluster-layer.js
-var defaultProps9 = {
+var defaultProps15 = {
   getHexagons: { type: "accessor", value: (d3) => d3.hexagons }
 };
 var H3ClusterLayer = class extends GeoCellLayer_default {
@@ -94869,8 +98314,228 @@ var H3ClusterLayer = class extends GeoCellLayer_default {
   }
 };
 H3ClusterLayer.layerName = "H3ClusterLayer";
-H3ClusterLayer.defaultProps = defaultProps9;
+H3ClusterLayer.defaultProps = defaultProps15;
 var h3_cluster_layer_default = H3ClusterLayer;
+
+// node_modules/@deck.gl/extensions/dist/fill-style/shader-module.js
+var uniformBlock11 = (
+  /* glsl */
+  `uniform fillUniforms {
+  vec2 patternTextureSize;
+  bool patternEnabled;
+  bool patternMask;
+  vec2 uvCoordinateOrigin;
+  vec2 uvCoordinateOrigin64Low;
+} fill;
+`
+);
+var patternVs = (
+  /* glsl */
+  `
+in vec4 fillPatternFrames;
+in float fillPatternScales;
+in vec2 fillPatternOffsets;
+
+out vec2 fill_uv;
+out vec4 fill_patternBounds;
+out vec4 fill_patternPlacement;
+`
+);
+var vs8 = `
+${uniformBlock11}
+${patternVs}
+`;
+var patternFs = (
+  /* glsl */
+  `
+uniform sampler2D fill_patternTexture;
+
+in vec4 fill_patternBounds;
+in vec4 fill_patternPlacement;
+in vec2 fill_uv;
+
+const float FILL_UV_SCALE = 512.0 / 40000000.0;
+`
+);
+var fs6 = `
+${uniformBlock11}
+${patternFs}
+`;
+var inject = {
+  "vs:DECKGL_FILTER_GL_POSITION": (
+    /* glsl */
+    `
+    fill_uv = geometry.position.xy;
+  `
+  ),
+  "vs:DECKGL_FILTER_COLOR": (
+    /* glsl */
+    `
+    if (fill.patternEnabled) {
+      fill_patternBounds = fillPatternFrames / vec4(fill.patternTextureSize, fill.patternTextureSize);
+      fill_patternPlacement.xy = fillPatternOffsets;
+      fill_patternPlacement.zw = fillPatternScales * fillPatternFrames.zw;
+    }
+  `
+  ),
+  "fs:DECKGL_FILTER_COLOR": (
+    /* glsl */
+    `
+    if (fill.patternEnabled) {
+      vec2 scale = FILL_UV_SCALE * fill_patternPlacement.zw;
+      vec2 patternUV = mod(mod(fill.uvCoordinateOrigin, scale) + fill.uvCoordinateOrigin64Low + fill_uv, scale) / scale;
+      patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
+
+      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
+
+      vec4 patternColor = texture(fill_patternTexture, texCoords);
+      color.a *= patternColor.a;
+      if (!fill.patternMask) {
+        color.rgb = patternColor.rgb;
+      }
+    }
+  `
+  )
+};
+function getPatternUniforms(opts) {
+  if (!opts) {
+    return {};
+  }
+  const uniforms = {};
+  if ("fillPatternTexture" in opts) {
+    const { fillPatternTexture } = opts;
+    uniforms.fill_patternTexture = fillPatternTexture;
+    uniforms.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
+  }
+  if ("project" in opts) {
+    const { fillPatternMask = true, fillPatternEnabled = true } = opts;
+    const projectUniforms = project_default.getUniforms(opts.project);
+    const { commonOrigin: coordinateOriginCommon } = projectUniforms;
+    const coordinateOriginCommon64Low = [
+      fp64LowPart2(coordinateOriginCommon[0]),
+      fp64LowPart2(coordinateOriginCommon[1])
+    ];
+    uniforms.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
+    uniforms.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
+    uniforms.patternMask = fillPatternMask;
+    uniforms.patternEnabled = fillPatternEnabled;
+  }
+  return uniforms;
+}
+var patternShaders = {
+  name: "fill",
+  vs: vs8,
+  fs: fs6,
+  inject,
+  dependencies: [project_default],
+  getUniforms: getPatternUniforms,
+  uniformTypes: {
+    patternTextureSize: "vec2<f32>",
+    patternEnabled: "i32",
+    patternMask: "i32",
+    uvCoordinateOrigin: "vec2<f32>",
+    uvCoordinateOrigin64Low: "vec2<f32>"
+  }
+};
+
+// node_modules/@deck.gl/extensions/dist/fill-style/fill-style-extension.js
+var defaultProps16 = {
+  fillPatternEnabled: true,
+  fillPatternAtlas: {
+    type: "image",
+    value: null,
+    async: true,
+    parameters: { lodMaxClamp: 0 }
+  },
+  fillPatternMapping: { type: "object", value: {}, async: true },
+  fillPatternMask: true,
+  getFillPattern: { type: "accessor", value: (d3) => d3.pattern },
+  getFillPatternScale: { type: "accessor", value: 1 },
+  getFillPatternOffset: { type: "accessor", value: [0, 0] }
+};
+var FillStyleExtension = class extends layer_extension_default {
+  constructor({ pattern = false } = {}) {
+    super({ pattern });
+  }
+  isEnabled(layer) {
+    return layer.getAttributeManager() !== null && !("pathTesselator" in layer.state);
+  }
+  getShaders(extension) {
+    if (!extension.isEnabled(this)) {
+      return null;
+    }
+    return {
+      modules: [extension.opts.pattern && patternShaders].filter(Boolean)
+    };
+  }
+  initializeState(context, extension) {
+    if (!extension.isEnabled(this)) {
+      return;
+    }
+    const attributeManager = this.getAttributeManager();
+    if (extension.opts.pattern) {
+      attributeManager.add({
+        fillPatternFrames: {
+          size: 4,
+          stepMode: "dynamic",
+          accessor: "getFillPattern",
+          transform: extension.getPatternFrame.bind(this)
+        },
+        fillPatternScales: {
+          size: 1,
+          stepMode: "dynamic",
+          accessor: "getFillPatternScale",
+          defaultValue: 1
+        },
+        fillPatternOffsets: {
+          size: 2,
+          stepMode: "dynamic",
+          accessor: "getFillPatternOffset"
+        }
+      });
+    }
+    this.setState({
+      emptyTexture: this.context.device.createTexture({
+        data: new Uint8Array(4),
+        width: 1,
+        height: 1
+      })
+    });
+  }
+  updateState({ props, oldProps }, extension) {
+    if (!extension.isEnabled(this)) {
+      return;
+    }
+    if (props.fillPatternMapping && props.fillPatternMapping !== oldProps.fillPatternMapping) {
+      this.getAttributeManager().invalidate("getFillPattern");
+    }
+  }
+  draw(params, extension) {
+    if (!extension.isEnabled(this)) {
+      return;
+    }
+    const { fillPatternAtlas, fillPatternEnabled, fillPatternMask } = this.props;
+    const fillProps = {
+      project: params.shaderModuleProps.project,
+      fillPatternEnabled,
+      fillPatternMask,
+      fillPatternTexture: fillPatternAtlas || this.state.emptyTexture
+    };
+    this.setShaderModuleProps({ fill: fillProps });
+  }
+  finalizeState() {
+    const emptyTexture = this.state.emptyTexture;
+    emptyTexture?.delete();
+  }
+  getPatternFrame(name2) {
+    const { fillPatternMapping } = this.getCurrentLayer().props;
+    const def = fillPatternMapping && fillPatternMapping[name2];
+    return def ? [def.x, def.y, def.width, def.height] : [0, 0, 0, 0];
+  }
+};
+FillStyleExtension.defaultProps = defaultProps16;
+FillStyleExtension.extensionName = "FillStyleExtension";
+var fill_style_extension_default = FillStyleExtension;
 
 // node_modules/d3-array/dist/d3-array.mjs
 function ascending(a5, b10) {
@@ -95003,16 +98668,16 @@ function blurf(radius) {
   const w4 = 2 * radius + 1;
   return (T3, S4, start2, stop, step) => {
     if (!((stop -= step) >= start2)) return;
-    let sum = radius0 * S4[start2];
+    let sum2 = radius0 * S4[start2];
     const s0 = step * radius0;
     const s1 = s0 + step;
     for (let i3 = start2, j4 = start2 + s0; i3 < j4; i3 += step) {
-      sum += S4[Math.min(stop, i3)];
+      sum2 += S4[Math.min(stop, i3)];
     }
     for (let i3 = start2, j4 = stop; i3 <= j4; i3 += step) {
-      sum += S4[Math.min(stop, i3 + s0)];
-      T3[i3] = (sum + t4 * (S4[Math.max(start2, i3 - s1)] + S4[Math.min(stop, i3 + s1)])) / w4;
-      sum -= S4[Math.max(start2, i3 - s0)];
+      sum2 += S4[Math.min(stop, i3 + s0)];
+      T3[i3] = (sum2 + t4 * (S4[Math.max(start2, i3 - s1)] + S4[Math.min(stop, i3 + s1)])) / w4;
+      sum2 -= S4[Math.max(start2, i3 - s0)];
     }
   };
 }
@@ -95020,15 +98685,15 @@ function bluri(radius) {
   const w4 = 2 * radius + 1;
   return (T3, S4, start2, stop, step) => {
     if (!((stop -= step) >= start2)) return;
-    let sum = radius * S4[start2];
+    let sum2 = radius * S4[start2];
     const s4 = step * radius;
     for (let i3 = start2, j4 = start2 + s4; i3 < j4; i3 += step) {
-      sum += S4[Math.min(stop, i3)];
+      sum2 += S4[Math.min(stop, i3)];
     }
     for (let i3 = start2, j4 = stop; i3 <= j4; i3 += step) {
-      sum += S4[Math.min(stop, i3 + s4)];
-      T3[i3] = sum / w4;
-      sum -= S4[Math.max(start2, i3 - s4)];
+      sum2 += S4[Math.min(stop, i3 + s4)];
+      T3[i3] = sum2 / w4;
+      sum2 -= S4[Math.max(start2, i3 - s4)];
     }
   };
 }
@@ -95422,6 +99087,24 @@ function shuffler(random4) {
     return array4;
   };
 }
+function sum(values, valueof) {
+  let sum2 = 0;
+  if (valueof === void 0) {
+    for (let value2 of values) {
+      if (value2 = +value2) {
+        sum2 += value2;
+      }
+    }
+  } else {
+    let index = -1;
+    for (let value2 of values) {
+      if (value2 = +valueof(value2, ++index, values)) {
+        sum2 += value2;
+      }
+    }
+  }
+  return sum2;
+}
 
 // node_modules/d3-axis/dist/d3-axis.mjs
 function identity3(x5) {
@@ -95522,7 +99205,7 @@ function axisLeft(scale5) {
 }
 
 // node_modules/d3-dispatch/dist/d3-dispatch.mjs
-var noop4 = { value: () => {
+var noop5 = { value: () => {
 } };
 function dispatch() {
   for (var i3 = 0, n3 = arguments.length, _4 = {}, t4; i3 < n3; ++i3) {
@@ -95582,7 +99265,7 @@ function get(type2, name2) {
 function set5(type2, name2, callback) {
   for (var i3 = 0, n3 = type2.length; i3 < n3; ++i3) {
     if (type2[i3].name === name2) {
-      type2[i3] = noop4, type2 = type2.slice(0, i3).concat(type2.slice(i3 + 1));
+      type2[i3] = noop5, type2 = type2.slice(0, i3).concat(type2.slice(i3 + 1));
       break;
     }
   }
@@ -96313,6 +99996,29 @@ Local.prototype = local.prototype = {
     return this._;
   }
 };
+function sourceEvent(event) {
+  let sourceEvent2;
+  while (sourceEvent2 = event.sourceEvent) event = sourceEvent2;
+  return event;
+}
+function pointer(event, node) {
+  event = sourceEvent(event);
+  if (node === void 0) node = event.currentTarget;
+  if (node) {
+    var svg = node.ownerSVGElement || node;
+    if (svg.createSVGPoint) {
+      var point3 = svg.createSVGPoint();
+      point3.x = event.clientX, point3.y = event.clientY;
+      point3 = point3.matrixTransform(node.getScreenCTM().inverse());
+      return [point3.x, point3.y];
+    }
+    if (node.getBoundingClientRect) {
+      var rect = node.getBoundingClientRect();
+      return [event.clientX - rect.left - node.clientLeft, event.clientY - rect.top - node.clientTop];
+    }
+  }
+  return [event.pageX, event.pageY];
+}
 
 // node_modules/d3-color/dist/d3-color.mjs
 function define(constructor, factory, prototype) {
@@ -96523,9 +100229,9 @@ function color(format2) {
 function rgbn(n3) {
   return new Rgb(n3 >> 16 & 255, n3 >> 8 & 255, n3 & 255, 1);
 }
-function rgba(r3, g4, b10, a5) {
-  if (a5 <= 0) r3 = g4 = b10 = NaN;
-  return new Rgb(r3, g4, b10, a5);
+function rgba(r3, g5, b10, a5) {
+  if (a5 <= 0) r3 = g5 = b10 = NaN;
+  return new Rgb(r3, g5, b10, a5);
 }
 function rgbConvert(o3) {
   if (!(o3 instanceof Color)) o3 = color(o3);
@@ -96533,12 +100239,12 @@ function rgbConvert(o3) {
   o3 = o3.rgb();
   return new Rgb(o3.r, o3.g, o3.b, o3.opacity);
 }
-function rgb(r3, g4, b10, opacity) {
-  return arguments.length === 1 ? rgbConvert(r3) : new Rgb(r3, g4, b10, opacity == null ? 1 : opacity);
+function rgb(r3, g5, b10, opacity) {
+  return arguments.length === 1 ? rgbConvert(r3) : new Rgb(r3, g5, b10, opacity == null ? 1 : opacity);
 }
-function Rgb(r3, g4, b10, opacity) {
+function Rgb(r3, g5, b10, opacity) {
   this.r = +r3;
-  this.g = +g4;
+  this.g = +g5;
   this.b = +b10;
   this.opacity = +opacity;
 }
@@ -96599,11 +100305,11 @@ function hslConvert(o3) {
   if (!o3) return new Hsl();
   if (o3 instanceof Hsl) return o3;
   o3 = o3.rgb();
-  var r3 = o3.r / 255, g4 = o3.g / 255, b10 = o3.b / 255, min6 = Math.min(r3, g4, b10), max6 = Math.max(r3, g4, b10), h4 = NaN, s4 = max6 - min6, l3 = (max6 + min6) / 2;
+  var r3 = o3.r / 255, g5 = o3.g / 255, b10 = o3.b / 255, min6 = Math.min(r3, g5, b10), max6 = Math.max(r3, g5, b10), h4 = NaN, s4 = max6 - min6, l3 = (max6 + min6) / 2;
   if (s4) {
-    if (r3 === max6) h4 = (g4 - b10) / s4 + (g4 < b10) * 6;
-    else if (g4 === max6) h4 = (b10 - r3) / s4 + 2;
-    else h4 = (r3 - g4) / s4 + 4;
+    if (r3 === max6) h4 = (g5 - b10) / s4 + (g5 < b10) * 6;
+    else if (g5 === max6) h4 = (b10 - r3) / s4 + 2;
+    else h4 = (r3 - g5) / s4 + 4;
     s4 /= l3 < 0.5 ? max6 + min6 : 2 - max6 - min6;
     h4 *= 60;
   } else {
@@ -96673,11 +100379,11 @@ function labConvert(o3) {
   if (o3 instanceof Lab) return new Lab(o3.l, o3.a, o3.b, o3.opacity);
   if (o3 instanceof Hcl) return hcl2lab(o3);
   if (!(o3 instanceof Rgb)) o3 = rgbConvert(o3);
-  var r3 = rgb2lrgb(o3.r), g4 = rgb2lrgb(o3.g), b10 = rgb2lrgb(o3.b), y5 = xyz2lab((0.2225045 * r3 + 0.7168786 * g4 + 0.0606169 * b10) / Yn2), x5, z4;
-  if (r3 === g4 && g4 === b10) x5 = z4 = y5;
+  var r3 = rgb2lrgb(o3.r), g5 = rgb2lrgb(o3.g), b10 = rgb2lrgb(o3.b), y5 = xyz2lab((0.2225045 * r3 + 0.7168786 * g5 + 0.0606169 * b10) / Yn2), x5, z4;
+  if (r3 === g5 && g5 === b10) x5 = z4 = y5;
   else {
-    x5 = xyz2lab((0.4360747 * r3 + 0.3850649 * g4 + 0.1430804 * b10) / Xn2);
-    z4 = xyz2lab((0.0139322 * r3 + 0.0971045 * g4 + 0.7141733 * b10) / Zn2);
+    x5 = xyz2lab((0.4360747 * r3 + 0.3850649 * g5 + 0.1430804 * b10) / Xn2);
+    z4 = xyz2lab((0.0139322 * r3 + 0.0971045 * g5 + 0.7141733 * b10) / Zn2);
   }
   return new Lab(116 * y5 - 16, 500 * (x5 - y5), 200 * (y5 - z4), o3.opacity);
 }
@@ -96765,7 +100471,7 @@ var BC_DA = B4 * C3 - D4 * A4;
 function cubehelixConvert(o3) {
   if (o3 instanceof Cubehelix) return new Cubehelix(o3.h, o3.s, o3.l, o3.opacity);
   if (!(o3 instanceof Rgb)) o3 = rgbConvert(o3);
-  var r3 = o3.r / 255, g4 = o3.g / 255, b10 = o3.b / 255, l3 = (BC_DA * b10 + ED2 * r3 - EB * g4) / (BC_DA + ED2 - EB), bl2 = b10 - l3, k5 = (E4 * (g4 - l3) - C3 * bl2) / D4, s4 = Math.sqrt(k5 * k5 + bl2 * bl2) / (E4 * l3 * (1 - l3)), h4 = s4 ? Math.atan2(k5, bl2) * degrees2 - 120 : NaN;
+  var r3 = o3.r / 255, g5 = o3.g / 255, b10 = o3.b / 255, l3 = (BC_DA * b10 + ED2 * r3 - EB * g5) / (BC_DA + ED2 - EB), bl2 = b10 - l3, k5 = (E4 * (g5 - l3) - C3 * bl2) / D4, s4 = Math.sqrt(k5 * k5 + bl2 * bl2) / (E4 * l3 * (1 - l3)), h4 = s4 ? Math.atan2(k5, bl2) * degrees2 - 120 : NaN;
   return new Cubehelix(h4 < 0 ? h4 + 360 : h4, s4, l3, o3.opacity);
 }
 function cubehelix(h4, s4, l3, opacity) {
@@ -96843,10 +100549,10 @@ function nogamma(a5, b10) {
 var rgb2 = (function rgbGamma(y5) {
   var color2 = gamma(y5);
   function rgb4(start2, end) {
-    var r3 = color2((start2 = rgb(start2)).r, (end = rgb(end)).r), g4 = color2(start2.g, end.g), b10 = color2(start2.b, end.b), opacity = nogamma(start2.opacity, end.opacity);
+    var r3 = color2((start2 = rgb(start2)).r, (end = rgb(end)).r), g5 = color2(start2.g, end.g), b10 = color2(start2.b, end.b), opacity = nogamma(start2.opacity, end.opacity);
     return function(t4) {
       start2.r = r3(t4);
-      start2.g = g4(t4);
+      start2.g = g5(t4);
       start2.b = b10(t4);
       start2.opacity = opacity(t4);
       return start2 + "";
@@ -96857,20 +100563,20 @@ var rgb2 = (function rgbGamma(y5) {
 })(1);
 function rgbSpline(spline) {
   return function(colors) {
-    var n3 = colors.length, r3 = new Array(n3), g4 = new Array(n3), b10 = new Array(n3), i3, color2;
+    var n3 = colors.length, r3 = new Array(n3), g5 = new Array(n3), b10 = new Array(n3), i3, color2;
     for (i3 = 0; i3 < n3; ++i3) {
       color2 = rgb(colors[i3]);
       r3[i3] = color2.r || 0;
-      g4[i3] = color2.g || 0;
+      g5[i3] = color2.g || 0;
       b10[i3] = color2.b || 0;
     }
     r3 = spline(r3);
-    g4 = spline(g4);
+    g5 = spline(g5);
     b10 = spline(b10);
     color2.opacity = 1;
     return function(t4) {
       color2.r = r3(t4);
-      color2.g = g4(t4);
+      color2.g = g5(t4);
       color2.b = b10(t4);
       return color2 + "";
     };
@@ -98187,12 +101893,12 @@ function exponent2(x5) {
 }
 function formatGroup(grouping, thousands) {
   return function(value2, width) {
-    var i3 = value2.length, t4 = [], j4 = 0, g4 = grouping[0], length4 = 0;
-    while (i3 > 0 && g4 > 0) {
-      if (length4 + g4 + 1 > width) g4 = Math.max(1, width - length4);
-      t4.push(value2.substring(i3 -= g4, i3 + g4));
-      if ((length4 += g4 + 1) > width) break;
-      g4 = grouping[j4 = (j4 + 1) % grouping.length];
+    var i3 = value2.length, t4 = [], j4 = 0, g5 = grouping[0], length4 = 0;
+    while (i3 > 0 && g5 > 0) {
+      if (length4 + g5 + 1 > width) g5 = Math.max(1, width - length4);
+      t4.push(value2.substring(i3 -= g5, i3 + g5));
+      if ((length4 += g5 + 1) > width) break;
+      g5 = grouping[j4 = (j4 + 1) % grouping.length];
     }
     return t4.reverse().join(thousands);
   };
@@ -98847,7 +102553,7 @@ function Symbol2(type2, size) {
   };
   return symbol;
 }
-function noop5() {
+function noop6() {
 }
 function point$3(that, x5, y5) {
   that._context.bezierCurveTo(
@@ -98911,8 +102617,8 @@ function BasisClosed(context) {
   this._context = context;
 }
 BasisClosed.prototype = {
-  areaStart: noop5,
-  areaEnd: noop5,
+  areaStart: noop6,
+  areaEnd: noop6,
   lineStart: function() {
     this._x0 = this._x1 = this._x2 = this._x3 = this._x4 = this._y0 = this._y1 = this._y2 = this._y3 = this._y4 = NaN;
     this._point = 0;
@@ -99117,8 +102823,8 @@ function CardinalClosed(context, tension) {
   this._k = (1 - tension) / 6;
 }
 CardinalClosed.prototype = {
-  areaStart: noop5,
-  areaEnd: noop5,
+  areaStart: noop6,
+  areaEnd: noop6,
   lineStart: function() {
     this._x0 = this._x1 = this._x2 = this._x3 = this._x4 = this._x5 = this._y0 = this._y1 = this._y2 = this._y3 = this._y4 = this._y5 = NaN;
     this._point = 0;
@@ -99309,8 +103015,8 @@ function CatmullRomClosed(context, alpha) {
   this._alpha = alpha;
 }
 CatmullRomClosed.prototype = {
-  areaStart: noop5,
-  areaEnd: noop5,
+  areaStart: noop6,
+  areaEnd: noop6,
   lineStart: function() {
     this._x0 = this._x1 = this._x2 = this._x3 = this._x4 = this._x5 = this._y0 = this._y1 = this._y2 = this._y3 = this._y4 = this._y5 = NaN;
     this._l01_a = this._l12_a = this._l23_a = this._l01_2a = this._l12_2a = this._l23_2a = this._point = 0;
@@ -99435,8 +103141,8 @@ function LinearClosed(context) {
   this._context = context;
 }
 LinearClosed.prototype = {
-  areaStart: noop5,
-  areaEnd: noop5,
+  areaStart: noop6,
+  areaEnd: noop6,
   lineStart: function() {
     this._point = 0;
   },
@@ -99681,21 +103387,11 @@ function transform(node) {
   return node.__zoom;
 }
 
-// src/js/util/formato.js
-var SEM_DADO = "\u2014";
-function formatar(valor, decimais = 0) {
-  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
-  return valor.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimais,
-    maximumFractionDigits: decimais
-  });
-}
-function rotuloCurto(rotulo) {
-  return rotulo.replace(/^Média (\d{2})(\d{2})–/, "M$2\u2013");
-}
-function formatarPercentual(valor, decimais = 1) {
-  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
-  return `${formatar(valor, decimais)} %`;
+// src/js/util/faixas.js
+function valorDentroFaixas(v4, faixas) {
+  if (!faixas?.length) return true;
+  if (v4 == null) return false;
+  return faixas.some(([x0, x1]) => v4 >= x0 && (x1 == null || v4 < x1));
 }
 
 // src/js/mapa/index.js
@@ -99706,6 +103402,30 @@ var ESTILOS_BASE = {
 };
 var RAMPA_DEFICIT = ["#fbf3d5", "#f6dc9b", "#f0b864", "#e48a3f", "#cc5a2c", "#a2361f", "#6e1d16"];
 var RAMPA_QUALIDADE = ["#eef4fb", "#d3e3f2", "#aec9e6", "#84add8", "#5c8fc4", "#3b6ea8", "#1f4c80"];
+var RAMPA_VEZES_TAXA = ["#2f6aa8", "#7fb1dd", "#cfd3cd", "#e48a3f", "#cc5a2c", "#6e1d16"];
+function rampaDeficit(n3) {
+  if (n3 <= 0) return [];
+  return RAMPA_DEFICIT.slice(Math.max(0, RAMPA_DEFICIT.length - n3));
+}
+var atlasHachuraCache = null;
+function atlasHachura() {
+  if (atlasHachuraCache) return atlasHachuraCache;
+  const canvas2 = document.createElement("canvas");
+  canvas2.width = 32;
+  canvas2.height = 32;
+  const ctx2 = canvas2.getContext("2d");
+  ctx2.strokeStyle = "white";
+  ctx2.lineWidth = 1.6;
+  for (let x5 = -32; x5 < 64; x5 += 7) {
+    ctx2.beginPath();
+    ctx2.moveTo(x5, 32);
+    ctx2.lineTo(x5 + 32, 0);
+    ctx2.stroke();
+  }
+  atlasHachuraCache = canvas2;
+  return canvas2;
+}
+var MAPEAMENTO_HACHURA = { linhas: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
@@ -99713,14 +103433,39 @@ function rgb3(hex2) {
   const c3 = color(hex2);
   return c3 ? [c3.r, c3.g, c3.b] : [128, 128, 128];
 }
+function acinzentarEstilo(mapa) {
+  const estilo = mapa.getStyle?.();
+  if (!estilo?.layers) return;
+  const c3 = { terra: "#e3e3e3", agua: "#c9c9c9", via: "#f7f7f7", limite: "#a8a8a8", texto: "#666666", halo: "#e3e3e3" };
+  const pintar = (id3, prop, valor) => {
+    try {
+      mapa.setPaintProperty(id3, prop, valor);
+    } catch {
+    }
+  };
+  for (const l3 of estilo.layers) {
+    const agua = /water|ocean|sea/i.test(l3.id);
+    if (l3.type === "background") pintar(l3.id, "background-color", c3.terra);
+    else if (l3.type === "fill") {
+      pintar(l3.id, "fill-color", agua ? c3.agua : c3.terra);
+      pintar(l3.id, "fill-outline-color", agua ? c3.agua : c3.terra);
+    } else if (l3.type === "line") pintar(l3.id, "line-color", agua ? c3.agua : /boundary|admin/i.test(l3.id) ? c3.limite : c3.via);
+    else if (l3.type === "symbol") {
+      pintar(l3.id, "text-color", c3.texto);
+      pintar(l3.id, "text-halo-color", c3.halo);
+    }
+  }
+}
 function temaEscuro() {
   const t4 = document.documentElement.getAttribute("data-theme");
   return t4 ? t4 === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
 }
-function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu }) {
+function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes }) {
   const linhasArr = [...linhas.values()];
   const apGrupos = [];
   for (const [, idsPorAp] of agruparPorAp(linhasArr)) apGrupos.push({ ids: idsPorAp });
+  const escalasAbsolutas = calcularEscalasAbsolutas(linhasArr, manifesto);
+  const escalasRelativas = calcularEscalasRelativas(linhasArr, manifesto);
   let faixaEscala = [];
   let baseFalhou = false;
   let pronto = false;
@@ -99733,6 +103478,35 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
     b: criarInstancia(elementos.deckB, null, () => {
     })
   };
+  (function sincronizarCameras(mapaA, mapaB) {
+    let sincronizando = false;
+    function copiar(origem, destino) {
+      if (sincronizando) return;
+      sincronizando = true;
+      destino.jumpTo({ center: origem.getCenter(), zoom: origem.getZoom(), bearing: origem.getBearing(), pitch: origem.getPitch() });
+      sincronizando = false;
+    }
+    mapaA.on("move", () => copiar(mapaA, mapaB));
+    mapaB.on("move", () => copiar(mapaB, mapaA));
+  })(instancias.a.mapa, instancias.b.mapa);
+  let baseCinza = false;
+  let camadasRecolhidas = false;
+  function urlEstilo() {
+    return baseCinza || !temaEscuro() ? ESTILOS_BASE.claro : ESTILOS_BASE.escuro;
+  }
+  function aplicarEstiloBase() {
+    for (const { mapa } of Object.values(instancias)) {
+      mapa.setStyle(urlEstilo(), { diff: false });
+      mapa.once("style.load", () => {
+        if (baseCinza) acinzentarEstilo(mapa);
+      });
+    }
+  }
+  function definirBaseCinza(ligado) {
+    if (ligado === baseCinza) return;
+    baseCinza = ligado;
+    aplicarEstiloBase();
+  }
   function criarInstancia(container, elBasefail, aoFalhar) {
     const mapa = new GF({
       container,
@@ -99747,12 +103521,12 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
     return { mapa, overlay };
   }
   function agruparPorAp(arr) {
-    const g4 = /* @__PURE__ */ new Map();
+    const g5 = /* @__PURE__ */ new Map();
     for (const l3 of arr) {
-      if (!g4.has(l3.apCod)) g4.set(l3.apCod, []);
-      g4.get(l3.apCod).push(l3.h3);
+      if (!g5.has(l3.apCod)) g5.set(l3.apCod, []);
+      g5.get(l3.apCod).push(l3.h3);
     }
-    return g4;
+    return g5;
   }
   function corPara(valor, qualidade) {
     if (valor == null) return null;
@@ -99771,23 +103545,61 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
     novo: "--crit",
     existente: "--ok"
   };
-  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida) {
-    if (tipoMedida === "categorica") {
-      faixaEscala = [];
+  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado) {
+    if (tipoMedida === "categorica" || estado?.tema === "deficit") {
+      if (estado?.tema !== "deficit") faixaEscala = [];
       return;
     }
-    const vs8 = [];
+    const vs9 = [];
     for (const l3 of linhasArr) {
       for (const p4 of [periodo, periodoComparar]) {
         if (!p4) continue;
         const v4 = obterValor(l3, p4);
-        if (v4 != null && v4 > 0) vs8.push(v4);
+        if (v4 != null && v4 > 0) vs9.push(v4);
       }
     }
-    vs8.sort(ascending);
-    faixaEscala = vs8.length ? [1, 2, 3, 4, 5, 6].map((i3) => quantileSorted(vs8, i3 / 7)) : [];
+    vs9.sort(ascending);
+    faixaEscala = vs9.length ? [1, 2, 3, 4, 5, 6].map((i3) => quantileSorted(vs9, i3 / 7)) : [];
   }
-  function corHex(l3, periodo, estado, obterValor, tipoMedida) {
+  function contextoCorDeficit(estado, periodo) {
+    if (estado.medida === "absoluto") {
+      return { tipo: "absoluto", quebras: escalasAbsolutas.get(estado.componente) ?? [] };
+    }
+    if (estado.relativo_modo === "vezes_taxa") {
+      return { tipo: "vezes_taxa", taxa: totais ? taxaDominio(totais, estado.componente, periodo) : null };
+    }
+    return { tipo: "relativo_quebras", quebras: escalasRelativas.get(estado.componente) ?? [] };
+  }
+  function alfasPara(estado) {
+    const base = Math.round(255 * (estado.opacidade ?? 0.8));
+    return { base, apagado: Math.round(base * 0.21) };
+  }
+  function corHexDeficit(l3, periodo, estado, v4, contexto) {
+    const dom = l3.dom[periodo];
+    const bruto = brutoHex(l3, estado.componente, periodo);
+    const classe = classeHex(dom, bruto);
+    const { base, apagado } = alfasPara(estado);
+    let alfa = base;
+    if (!valorDentroFaixas(v4, estado.faixa_hist)) alfa = apagado;
+    if (classe === "sem_dado") return [...rgb3(css("--muted")), 110];
+    if (classe === "hachura") return [...rgb3(css("--muted")), alfa];
+    if (classe === "menos_de_1") return [...rgb3(css("--line")), Math.max(alfa, 160)];
+    let idx = null;
+    let rampa = RAMPA_DEFICIT;
+    if (contexto.tipo === "vezes_taxa") {
+      const relativoPct = dom > 0.5 ? 100 * bruto / dom : null;
+      const vezes = contexto.taxa && relativoPct != null ? relativoPct / contexto.taxa : null;
+      idx = vezes == null ? null : indiceClasseVezesTaxa(vezes);
+      rampa = RAMPA_VEZES_TAXA;
+    } else {
+      const valorClasse = contexto.tipo === "absoluto" ? bruto : dom > 0.5 ? 100 * bruto / dom : null;
+      idx = valorClasse == null || !contexto.quebras.length ? null : indiceClasse(valorClasse, contexto.quebras);
+      rampa = rampaDeficit(contexto.quebras.length);
+    }
+    if (idx == null || !rampa.length) return [...rgb3(css("--line")), 70];
+    return [...rgb3(rampa[Math.min(idx, rampa.length - 1)]), alfa];
+  }
+  function corHex(l3, periodo, estado, obterValor, tipoMedida, contexto) {
     const v4 = obterValor(l3, periodo);
     const qualidade = estado.tema === "qualidade";
     if (l3.dom[periodo] == null && !qualidade) return [...rgb3(css("--muted")), 110];
@@ -99796,20 +103608,72 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
       const varName = CORES_CATEGORIA[v4] ?? "--muted";
       return [...rgb3(css(varName)), 215];
     }
+    if (estado.tema === "deficit") return corHexDeficit(l3, periodo, estado, v4, contexto);
     const c3 = corPara(v4, qualidade);
     if (!c3) return [...rgb3(css("--line")), 70];
-    let alfa = 215;
-    if (estado.faixa_hist && !(v4 >= estado.faixa_hist[0] && v4 < estado.faixa_hist[1])) alfa = 45;
+    const { base, apagado } = alfasPara(estado);
+    let alfa = base;
+    if (!valorDentroFaixas(v4, estado.faixa_hist)) alfa = apagado;
     return [...rgb3(c3), alfa];
+  }
+  function montarTooltipHtml(l3, periodo, estado, obterValor) {
+    const municipio = l3.municipioNome + (l3.nMunicipios > 1 ? ` (+${l3.nMunicipios - 1})` : "");
+    const apNome = ap2?.get(l3.apCod)?.ap_nome ?? l3.apCod;
+    const linhas2 = [`<b>${municipio}</b>`, `<div class="linha">AP: ${apNome}</div>`];
+    if (estado.tema === "deficit") {
+      const bruto = brutoHex(l3, estado.componente, periodo);
+      const dom = l3.dom[periodo];
+      const relativo = bruto != null && dom > 0.5 ? 100 * bruto / dom : null;
+      linhas2.push(`<div class="linha">Absoluto: ${formatar(bruto, 0)} \xB7 Relativo: ${formatarPercentual(relativo, 1)}</div>`);
+      const faixa = faixaHex(l3, estado.componente, periodo);
+      if (faixa) linhas2.push(`<div class="linha">Faixa de 95%: ${formatar(faixa[0], 1)} a ${formatar(faixa[1], 1)}</div>`);
+      if (bruto != null) {
+        const totalComponente = totalDoMapa(totais, estado.componente, periodo);
+        if (totalComponente?.total) {
+          const peso = 100 * bruto / totalComponente.total;
+          linhas2.push(`<div class="linha">Peso no total do dom\xEDnio: ${formatarPercentual(peso, 2)}</div>`);
+        }
+      }
+      const marcas = marcasHex(l3, estado.componente, periodo);
+      if (marcas.length) linhas2.push(`<div class="linha">${marcas.map((m4) => rotuloMarca(m4)).join("; ")}</div>`);
+    } else {
+      const v4 = obterValor(l3, periodo);
+      linhas2.push(`<div class="linha">Valor: ${v4 == null ? "\u2014" : formatar(v4, 2)}</div>`);
+    }
+    return linhas2.join("");
+  }
+  function criarAoPassarMouse(periodo, estado, obterValor) {
+    return ({ object: object2, x: x5, y: y5 }) => {
+      if (!elementos.tooltip) return;
+      if (!object2) {
+        elementos.tooltip.setAttribute("hidden", "");
+        return;
+      }
+      let html;
+      try {
+        html = montarTooltipHtml(object2, periodo, estado, obterValor);
+      } catch {
+        html = "";
+      }
+      if (!html) {
+        elementos.tooltip.setAttribute("hidden", "");
+        return;
+      }
+      elementos.tooltip.removeAttribute("hidden");
+      elementos.tooltip.style.left = `${x5}px`;
+      elementos.tooltip.style.top = `${y5}px`;
+      elementos.tooltip.innerHTML = html;
+    };
   }
   function camadasPara(periodo, estado, obterValor, lado, tipoMedida) {
     const L4 = [];
+    const contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
     L4.push(
       new h3_hexagon_layer_default({
         id: "hex-" + lado,
         data: linhasArr,
         getHexagon: (l3) => l3.h3,
-        getFillColor: (l3) => corHex(l3, periodo, estado, obterValor, tipoMedida),
+        getFillColor: (l3) => corHex(l3, periodo, estado, obterValor, tipoMedida, contexto),
         updateTriggers: {
           getFillColor: [
             periodo,
@@ -99817,8 +103681,10 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
             estado.medida,
             estado.componente,
             estado.medida_qualidade,
-            estado.faixa_hist,
+            JSON.stringify(estado.faixa_hist),
             tipoMedida,
+            estado.relativo_modo,
+            estado.opacidade,
             faixaEscala.join(",")
           ]
         },
@@ -99830,52 +103696,140 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
         pickable: true,
         onClick: ({ object: object2 }) => {
           if (object2 && elementos.aoSelecionar) elementos.aoSelecionar(object2.h3);
-        }
+        },
+        onHover: criarAoPassarMouse(periodo, estado, obterValor)
       })
     );
-    if (estado.camadas.ap && apGrupos.length) {
+    if (estado.tema === "deficit") {
+      const hachuradas = linhasArr.filter((l3) => classeHex(l3.dom[periodo], brutoHex(l3, estado.componente, periodo)) === "hachura");
+      if (hachuradas.length) {
+        L4.push(
+          new h3_hexagon_layer_default({
+            id: "hex-hachura-" + lado,
+            data: hachuradas,
+            getHexagon: (l3) => l3.h3,
+            getFillColor: [...rgb3(css("--ink")), 190],
+            getFillPatternFrame: () => "linhas",
+            fillPatternAtlas: atlasHachura(),
+            fillPatternMapping: MAPEAMENTO_HACHURA,
+            fillPatternMask: true,
+            extensions: [new fill_style_extension_default({ pattern: true })],
+            extruded: false,
+            highPrecision: true,
+            stroked: false,
+            pickable: false,
+            updateTriggers: { getFillColor: [periodo, estado.componente] }
+          })
+        );
+      }
+    }
+    if (estado.camadas.ap) {
+      if (contornosAp) {
+        L4.push(
+          new geojson_layer_default({
+            id: "ap-" + lado,
+            data: contornosAp,
+            filled: false,
+            stroked: true,
+            getLineColor: [...rgb3(css("--apline")), 200],
+            lineWidthMinPixels: 1.2
+          })
+        );
+      } else if (apGrupos.length) {
+        L4.push(
+          new h3_cluster_layer_default({
+            id: "ap-" + lado,
+            data: apGrupos,
+            getHexagons: (d3) => d3.ids,
+            filled: false,
+            stroked: true,
+            getLineColor: [...rgb3(css("--apline")), 200],
+            lineWidthMinPixels: 1.2
+          })
+        );
+      }
+    }
+    if (estado.camadas.municipios && contornosMunicipios) {
       L4.push(
-        new h3_cluster_layer_default({
-          id: "ap-" + lado,
-          data: apGrupos,
-          getHexagons: (d3) => d3.ids,
+        new geojson_layer_default({
+          id: "municipios-" + lado,
+          data: contornosMunicipios,
           filled: false,
           stroked: true,
-          getLineColor: [...rgb3(css("--apline")), 200],
-          lineWidthMinPixels: 1.2
+          getLineColor: [...rgb3(css("--ink")), 160],
+          lineWidthMinPixels: 1
         })
       );
     }
     if (estado.camadas.fcu) {
-      L4.push(
-        new h3_hexagon_layer_default({
-          id: "fcu-" + lado,
-          data: linhasArr.filter((l3) => l3.fcuFracao > 0),
-          getHexagon: (l3) => l3.h3,
-          extruded: false,
-          highPrecision: true,
-          filled: false,
-          stroked: true,
-          getLineColor: rgb3(css("--fcu")),
-          lineWidthMinPixels: 2.2
-        })
-      );
+      if (contornosFcu) {
+        L4.push(
+          new geojson_layer_default({
+            id: "fcu-" + lado,
+            data: contornosFcu,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--fcu")),
+            lineWidthMinPixels: 2.2
+          })
+        );
+      } else {
+        L4.push(
+          new h3_hexagon_layer_default({
+            id: "fcu-" + lado,
+            data: linhasArr.filter((l3) => l3.fcuFracao > 0),
+            getHexagon: (l3) => l3.h3,
+            extruded: false,
+            highPrecision: true,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--fcu")),
+            lineWidthMinPixels: 2.2
+          })
+        );
+      }
     }
     for (const recorte of manifesto.recortes ?? []) {
       if (!estado.camadas[recorte.id]) continue;
-      const ids = linhasArr.filter((l3) => l3.recortes.includes(recorte.id)).map((l3) => l3.h3);
-      if (!ids.length) continue;
-      L4.push(
-        new h3_cluster_layer_default({
-          id: "recorte-" + recorte.id + "-" + lado,
-          data: [{ ids }],
-          getHexagons: (d3) => d3.ids,
-          filled: false,
-          stroked: true,
-          getLineColor: rgb3(css("--bk")),
-          lineWidthMinPixels: 3
-        })
-      );
+      const featuresDoRecorte = contornosRecortes?.features?.filter((f4) => f4.properties?.id === recorte.id) ?? [];
+      if (featuresDoRecorte.length) {
+        L4.push(
+          new geojson_layer_default({
+            id: "recorte-" + recorte.id + "-" + lado,
+            data: { type: "FeatureCollection", features: featuresDoRecorte },
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--bk")),
+            lineWidthMinPixels: 3,
+            pickable: true,
+            onHover: ({ object: object2, x: x5, y: y5 }) => {
+              if (!elementos.tooltip) return;
+              if (!object2) {
+                elementos.tooltip.setAttribute("hidden", "");
+                return;
+              }
+              elementos.tooltip.removeAttribute("hidden");
+              elementos.tooltip.style.left = `${x5}px`;
+              elementos.tooltip.style.top = `${y5}px`;
+              elementos.tooltip.innerHTML = `<b>${recorte.nome}</b><div class="linha">${recorte.motivo ?? ""}</div>`;
+            }
+          })
+        );
+      } else {
+        const ids = linhasArr.filter((l3) => l3.recortes.includes(recorte.id)).map((l3) => l3.h3);
+        if (!ids.length) continue;
+        L4.push(
+          new h3_cluster_layer_default({
+            id: "recorte-" + recorte.id + "-" + lado,
+            data: [{ ids }],
+            getHexagons: (d3) => d3.ids,
+            filled: false,
+            stroked: true,
+            getLineColor: rgb3(css("--bk")),
+            lineWidthMinPixels: 3
+          })
+        );
+      }
     }
     if (estado.selecionado) {
       const l3 = linhas.get(estado.selecionado);
@@ -99897,10 +103851,91 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
     }
     return L4;
   }
-  function renderizarLegenda(estado, obterValor, rotuloMedida, tipoMedida) {
+  function intervaloLabel(i3, contexto) {
+    if (contexto.tipo === "vezes_taxa") {
+      const cortes = CORTES_VEZES_TAXA;
+      if (i3 === 0) return `< ${formatar(cortes[0], 2)}\xD7`;
+      if (i3 === cortes.length) return `\u2265 ${formatar(cortes[cortes.length - 1], 2)}\xD7`;
+      const txt = `${formatar(cortes[i3 - 1], 2)}\u2013${formatar(cortes[i3], 2)}\xD7`;
+      return cortes[i3 - 1] >= 0.8 && cortes[i3] <= 1.25 ? `${txt} (parecido com o dom\xEDnio)` : txt;
+    }
+    const unidade = contexto.tipo === "relativo_quebras" ? " %" : "";
+    const dec = contexto.tipo === "relativo_quebras" ? 1 : 0;
+    const lo2 = i3 === 0 ? 1 : contexto.quebras[i3 - 1];
+    const hi2 = contexto.quebras[i3];
+    if (i3 === contexto.quebras.length - 1) return `${formatar(lo2, dec)}${unidade} ou mais`;
+    return `${formatar(lo2, dec)}${unidade} \u2013 ${formatar(hi2, dec)}${unidade}`;
+  }
+  function renderizarLegendaDeficit(estado, contexto, rotuloMedida) {
+    const periodo = estado.periodo;
+    const entradasNormais = [];
+    let hachuraCount = 0;
+    let menos1Count = 0;
+    for (const l3 of linhasArr) {
+      const dom = l3.dom[periodo];
+      const bruto = brutoHex(l3, estado.componente, periodo);
+      const classe = classeHex(dom, bruto);
+      if (classe === "hachura") hachuraCount++;
+      else if (classe === "menos_de_1") menos1Count++;
+      else if (classe === "normal") entradasNormais.push({ bruto, dom });
+    }
+    function indiceDe(item) {
+      if (contexto.tipo === "absoluto") return indiceClasse(item.bruto, contexto.quebras);
+      const relativoPct = item.dom > 0.5 ? 100 * item.bruto / item.dom : null;
+      if (relativoPct == null) return null;
+      if (contexto.tipo === "vezes_taxa") {
+        if (!contexto.taxa) return null;
+        return indiceClasseVezesTaxa(relativoPct / contexto.taxa);
+      }
+      return indiceClasse(relativoPct, contexto.quebras);
+    }
+    const nClasses = contexto.tipo === "vezes_taxa" ? 6 : contexto.quebras.length;
+    const grupos = Array.from({ length: nClasses }, () => ({ n: 0, soma: 0 }));
+    let totalDeficit = 0;
+    for (const item of entradasNormais) {
+      const idx = indiceDe(item);
+      if (idx == null) continue;
+      grupos[idx].n++;
+      grupos[idx].soma += item.bruto;
+      totalDeficit += item.bruto;
+    }
+    const rampa = contexto.tipo === "vezes_taxa" ? RAMPA_VEZES_TAXA : rampaDeficit(contexto.quebras.length);
+    if (!nClasses) {
+      elementos.legend.innerHTML = `<b>${rotuloMedida}</b><div class="note">sem faixa</div>`;
+      return;
+    }
+    const seletorHtml = estado.medida === "relativo" ? `<div class="legend-modo" role="group" aria-label="Modo da escala relativa">
+        <label><input type="radio" name="relmodo" value="quebras" ${estado.relativo_modo !== "vezes_taxa" ? "checked" : ""}> quebras naturais (%)</label>
+        <label><input type="radio" name="relmodo" value="vezes_taxa" ${estado.relativo_modo === "vezes_taxa" ? "checked" : ""}> vezes a taxa do dom\xEDnio</label>
+      </div>` : "";
+    const linhasClasses = grupos.map(
+      (g5, i3) => `<div class="legend-row"><span class="sw" style="background:${rampa[i3]}"></span><span class="faixa">${intervaloLabel(
+        i3,
+        contexto
+      )}</span><span class="n">${formatar(g5.n, 0)} hex.</span><span class="pct">${totalDeficit > 0 ? formatarPercentual(100 * g5.soma / totalDeficit, 0) : "\u2014"}</span></div>`
+    ).join("");
+    const notaTaxa = contexto.tipo === "vezes_taxa" && contexto.taxa != null ? `<div class="note">Taxa do dom\xEDnio (d\xE9ficit \xF7 domic\xEDlios): ${formatarPercentual(contexto.taxa, 2)}.</div>` : "";
+    elementos.legend.innerHTML = `<b>${rotuloMedida}</b>${seletorHtml}
+      <div class="legend-classes">${linhasClasses}
+        <div class="legend-row especial"><span class="sw" style="background:${css("--line")}"></span><span class="faixa">menos de 1 (d\xE9ficit)</span><span class="n">${formatar(menos1Count, 0)} hex.</span><span class="pct"></span></div>
+        <div class="legend-row especial"><span class="sw hachura" style="background:${css("--muted")}"></span><span class="faixa">menos de 1 domic\xEDlio</span><span class="n">${formatar(hachuraCount, 0)} hex.</span><span class="pct"></span></div>
+      </div>
+      ${notaTaxa}
+      <div class="note" style="margin-top:4px">Quebras naturais (Jenks, 1967), do menor ao maior d\xE9ficit. Listrado = menos de 1 domic\xEDlio (fora das contas).</div>`;
+    if (estado.medida === "relativo" && elementos.aoMudarRelativoModo) {
+      elementos.legend.querySelectorAll('input[name="relmodo"]').forEach((el2) => {
+        el2.onchange = () => elementos.aoMudarRelativoModo(el2.value);
+      });
+    }
+  }
+  function renderizarLegenda(estado, obterValor, rotuloMedida, tipoMedida, contexto) {
     if (tipoMedida === "categorica") {
       const categorias = [...new Set(linhasArr.map((l3) => obterValor(l3, estado.periodo)).filter((v4) => v4 != null))];
       elementos.legend.innerHTML = `<b>${rotuloMedida}</b><div class="ramp">${categorias.map((v4) => `<span style="background:${css(CORES_CATEGORIA[v4] ?? "--muted")};flex:0 0 14px;margin-right:4px;border-radius:3px" title="${v4}"></span>`).join("")}</div><div class="note" style="margin-top:4px">${categorias.join(" \xB7 ")}</div>`;
+      return;
+    }
+    if (estado.tema === "deficit") {
+      renderizarLegendaDeficit(estado, contexto, rotuloMedida);
       return;
     }
     const qualidade = estado.tema === "qualidade";
@@ -99916,7 +103951,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
       1
     )}${unidade}</span><span>${formatar(t4[6], 1)}${unidade}</span></div><div class="note" style="margin-top:4px">Classes por s\xE9timos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
   }
-  function renderizarCamadasUI(estado, aoMudar) {
+  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBaseCinza) {
     const extras = [];
     extras.push(
       `<label><input type="checkbox" data-camada="ap" ${estado.camadas.ap ? "checked" : ""}> <span class="sw" style="border-color:var(--apline)"></span> \xC1reas de pondera\xE7\xE3o</label>`
@@ -99924,18 +103959,39 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
     extras.push(
       `<label><input type="checkbox" data-camada="fcu" ${estado.camadas.fcu ? "checked" : ""}> <span class="sw" style="border-color:var(--fcu)"></span> Favelas e comunidades (FCU)</label>`
     );
+    if (contornosMunicipios) {
+      extras.push(
+        `<label><input type="checkbox" data-camada="municipios" ${estado.camadas.municipios ? "checked" : ""}> <span class="sw" style="border-color:var(--ink)"></span> Munic\xEDpios</label>`
+      );
+    }
     for (const recorte of manifesto.recortes ?? []) {
       extras.push(
         `<label title="${recorte.motivo ?? ""}"><input type="checkbox" data-camada="${recorte.id}" ${estado.camadas[recorte.id] ? "checked" : ""}> <span class="sw" style="border-color:var(--bk)"></span> ${recorte.nome}</label>`
       );
     }
-    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}`;
+    const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
+    const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
+    elementos.layers.innerHTML = `<button type="button" class="layers-toggle" aria-expanded="${!camadasRecolhidas}" aria-controls="f1-layers-body"><span>Camadas</span><span aria-hidden="true">${camadasRecolhidas ? "\u25B8" : "\u25BE"}</span></button><div class="layers-body" id="f1-layers-body">${extras.join("")}${opacidadeHtml}${cinzaHtml}</div>`;
+    elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
+    elementos.layers.querySelector(".layers-toggle").onclick = () => {
+      camadasRecolhidas = !camadasRecolhidas;
+      elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
+      const t4 = elementos.layers.querySelector(".layers-toggle");
+      t4.setAttribute("aria-expanded", String(!camadasRecolhidas));
+      t4.lastElementChild.textContent = camadasRecolhidas ? "\u25B8" : "\u25BE";
+    };
     elementos.layers.querySelectorAll("input[data-camada]").forEach((el2) => {
       el2.onchange = () => aoMudar(el2.dataset.camada, el2.checked);
     });
+    const opEl = elementos.layers.querySelector("#f1-opacidade");
+    if (opEl && aoMudarOpacidade) opEl.oninput = () => aoMudarOpacidade(Number(opEl.value));
+    const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
+    if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
+    elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
+    definirBaseCinza(!!estado.mapa_base_cinza);
   }
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
-    computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida);
+    computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
     instancias.a.overlay.setProps({ layers: camadasPara(estado.periodo, estado, obterValor, "a", tipoMedida) });
     const ligada = !!estado.comparar;
     elementos.deckB.style.display = ligada ? "block" : "none";
@@ -99950,7 +104006,8 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
       elementos.deckB.style.clipPath = `inset(0 0 0 ${clipPercentual}%)`;
       elementos.divider.style.left = clipPercentual + "%";
     }
-    renderizarLegenda(estado, obterValor, rotuloMedida, tipoMedida);
+    const contextoLegenda = estado.tema === "deficit" ? contextoCorDeficit(estado, estado.periodo) : null;
+    renderizarLegenda(estado, obterValor, rotuloMedida, tipoMedida, contextoLegenda);
     if (!pronto) {
       pronto = true;
       elementos.mapboxEl.dataset.pronto = "true";
@@ -99997,15 +104054,22 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, contornosAp, contorn
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", trocarEstilo);
   new MutationObserver(trocarEstilo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   function trocarEstilo() {
-    const url = temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro;
-    instancias.a.mapa.setStyle(url);
-    instancias.b.mapa.setStyle(url);
+    aplicarEstiloBase();
   }
-  return { renderizar, renderizarCamadasUI, moverPara, agruparPorAp, get baseFalhou() {
-    return baseFalhou;
-  } };
+  return {
+    renderizar,
+    renderizarCamadasUI,
+    moverPara,
+    agruparPorAp,
+    get baseFalhou() {
+      return baseFalhou;
+    },
+    // Seam de teste (Playwright, F6.1-6): instâncias MapLibre dos dois lados
+    // da cortina, para conferir a sincronia de câmera sem depender de pixels.
+    instanciasMapLibre: { a: instancias.a.mapa, b: instancias.b.mapa }
+  };
 }
-function criarMiniMapa({ container, manifesto, linhas }) {
+function criarMiniMapa({ container, manifesto, linhas, ap: ap2, totais, tooltip, aoClicarHexagono }) {
   const linhasArr = [...linhas.values()];
   const periodoRecente = [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano")?.id ?? manifesto.periodos.at(-1).id;
   const mapa = new GF({
@@ -100013,7 +104077,7 @@ function criarMiniMapa({ container, manifesto, linhas }) {
     style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
     center: manifesto.centro ?? [-35.715, -9.585],
     zoom: Math.max((manifesto.zoom_inicial ?? 11) - 1.6, 0),
-    interactive: false,
+    interactive: true,
     attributionControl: false
   });
   const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
@@ -100029,8 +104093,8 @@ function criarMiniMapa({ container, manifesto, linhas }) {
     return dom != null && dom > 0.5 ? 100 * soma / dom : null;
   }
   function render() {
-    const vs8 = linhasArr.map(obterValor).filter((v4) => v4 != null && v4 > 0).sort(ascending);
-    const breaks = vs8.length ? [1, 2, 3, 4, 5, 6].map((i3) => quantileSorted(vs8, i3 / 7)) : [];
+    const vs9 = linhasArr.map(obterValor).filter((v4) => v4 != null && v4 > 0).sort(ascending);
+    const breaks = vs9.length ? [1, 2, 3, 4, 5, 6].map((i3) => quantileSorted(vs9, i3 / 7)) : [];
     function cor(l3) {
       const v4 = obterValor(l3);
       if (v4 == null || v4 <= 0) return [...rgb3(css("--line")), 70];
@@ -100048,7 +104112,42 @@ function criarMiniMapa({ container, manifesto, linhas }) {
           extruded: false,
           highPrecision: true,
           stroked: false,
-          updateTriggers: { getFillColor: [periodoRecente] }
+          pickable: true,
+          updateTriggers: { getFillColor: [periodoRecente] },
+          onClick: ({ object: object2 }) => {
+            if (object2 && aoClicarHexagono) aoClicarHexagono(object2.h3);
+          },
+          onHover: ({ object: object2, x: x5, y: y5 }) => {
+            if (!tooltip) return;
+            if (!object2) {
+              tooltip.setAttribute("hidden", "");
+              return;
+            }
+            let html = "";
+            try {
+              const bruto = brutoHex(object2, "total", periodoRecente);
+              const dom = object2.dom[periodoRecente];
+              const relativo = bruto != null && dom > 0.5 ? 100 * bruto / dom : null;
+              const municipio = object2.municipioNome + (object2.nMunicipios > 1 ? ` (+${object2.nMunicipios - 1})` : "");
+              const apNome = ap2?.get(object2.apCod)?.ap_nome ?? object2.apCod;
+              let pesoHtml = "";
+              if (totais && bruto != null) {
+                const totalComponente = totalDoMapa(totais, "total", periodoRecente);
+                if (totalComponente?.total) pesoHtml = `<div class="linha">Peso no total do dom\xEDnio: ${formatarPercentual(100 * bruto / totalComponente.total, 2)}</div>`;
+              }
+              html = `<b>${municipio}</b><div class="linha">AP: ${apNome}</div><div class="linha">Relativo: ${formatarPercentual(relativo, 1)}</div>${pesoHtml}`;
+            } catch {
+              html = "";
+            }
+            if (!html) {
+              tooltip.setAttribute("hidden", "");
+              return;
+            }
+            tooltip.removeAttribute("hidden");
+            tooltip.style.left = `${x5}px`;
+            tooltip.style.top = `${y5}px`;
+            tooltip.innerHTML = html;
+          }
         })
       ]
     });
@@ -100077,33 +104176,33 @@ var ROTULO_MEDIDA_QUALIDADE = {
 };
 var NOME_MEDIDA_QUALIDADE = {
   incerteza: "Incerteza",
-  qualidade_dado: "Qualidade do dado",
-  ressalva_ap: "Ressalva da AP",
-  cv_ap: "Precis\xE3o da amostra (CV)",
-  imputacao: "Parte imputada",
-  estoque: "Mudan\xE7a do estoque",
-  hex_novo: "Hex\xE1gono novo"
+  qualidade_dado: "Dado",
+  ressalva_ap: "Ressalva AP",
+  cv_ap: "CV da AP",
+  imputacao: "Imputada",
+  estoque: "Estoque",
+  hex_novo: "Novo"
 };
 function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
   elementos.selPeriodo.innerHTML = manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
   elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option>` + manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
-  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id3) => `<option value="${id3}">${NOME_MEDIDA_QUALIDADE[id3]}</option>`).join("");
+  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id3) => `<option value="${id3}" title="${ROTULO_MEDIDA_QUALIDADE[id3]}">${NOME_MEDIDA_QUALIDADE[id3]}</option>`).join("");
   elementos.segTema.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: null });
+    b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
   });
   elementos.segMedida.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: null });
+    b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: [] });
   });
   elementos.segComponente.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: null });
+    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: [] });
   });
   elementos.selPeriodo.onchange = () => {
     const periodo = elementos.selPeriodo.value;
-    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: null });
+    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: [] });
   };
   elementos.selComparar.onchange = () => {
     const comparar = elementos.selComparar.value || null;
-    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: null });
+    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: [] });
   };
   elementos.selMedidaQualidade.onchange = () => loja.definir({ medida_qualidade: elementos.selMedidaQualidade.value });
   function sincronizar(estado) {
@@ -100116,65 +104215,27 @@ function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
     const qualidade = estado.tema === "qualidade";
     elementos.ctlMedida.hidden = qualidade;
     elementos.ctlMedidaQualidade.hidden = !qualidade;
-    elementos.explicacaoMedidaQualidade.textContent = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    const expl = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    elementos.explicacaoMedidaQualidade.textContent = expl;
+    elementos.selMedidaQualidade.title = expl;
     elementos.selMedidaQualidade.querySelectorAll("option").forEach((op2) => {
       const constante = medidaConstante2 ? medidaConstante2(op2.value) : false;
       op2.disabled = constante;
-      op2.title = constante ? "igual em todos os hex\xE1gonos neste per\xEDodo" : "";
+      op2.title = constante ? "igual em todos os hex\xE1gonos neste per\xEDodo" : ROTULO_MEDIDA_QUALIDADE[op2.value] ?? "";
     });
     elementos.question.textContent = textoPergunta(estado, manifesto);
   }
   return { sincronizar };
 }
 
-// src/js/util/marcas.js
-var MARCAS = Object.freeze({
-  total_fragil: "Total fr\xE1gil (CV acima de 15%)",
-  mudanca_no_ruido: "Mudan\xE7a dentro do ru\xEDdo",
-  fonte_estoque_diferente: "Estoque por fonte diferente dos demais anos (Open Buildings); n\xE3o comparar por hex\xE1gono",
-  media_inclui_fonte_diferente: "M\xE9dia inclui ano com estoque por fonte diferente",
-  precariedade_provisoria_sem_faixa: "Precariedade provis\xF3ria, sem faixa",
-  ap_ressalva: "AP com ressalva (CV acima de 30% ou direta zero)",
-  parcial_sigilo: "Parte em sigilo do Censo",
-  sem_dado: "Sem dado (sigilo total)"
-});
-function rotuloMarca(codigo) {
-  if (!(codigo in MARCAS)) {
-    throw new Error(`marca desconhecida (fora do vocabul\xE1rio fechado): "${codigo}"`);
-  }
-  return MARCAS[codigo];
-}
-function classeMarca(codigo) {
-  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
-  if (codigo === "fonte_estoque_diferente") return "crit";
-  return "info";
-}
-var ROTULOS_FONTE_ESTOQUE = Object.freeze({
-  mista: "M\xE9dia de anos com fontes de estoque diferentes"
-});
-function rotuloFonteEstoque(valor) {
-  if (valor == null) return "\u2014";
-  return ROTULOS_FONTE_ESTOQUE[valor] ?? valor;
-}
-var PRIORIDADE_MARCAS = Object.freeze([
-  "total_fragil",
-  "fonte_estoque_diferente",
-  "ap_ressalva",
-  "mudanca_no_ruido",
-  "media_inclui_fonte_diferente",
-  "precariedade_provisoria_sem_faixa",
-  "parcial_sigilo",
-  "sem_dado"
-]);
-
 // src/js/ui/resposta.js
-var CLAB = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var CLAB2 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 function pill(classe, texto) {
   return `<span class="pill ${classe}">${texto}</span>`;
 }
 function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao) {
   const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
-  elementos.lab.textContent = `${CLAB[estado.componente]} \xB7 ${periodoRotulo} \xB7 dom\xEDnio inteiro`;
+  elementos.lab.textContent = `${CLAB2[estado.componente]} \xB7 ${periodoRotulo} \xB7 dom\xEDnio inteiro`;
   const t4 = totalDoMapa(totais, estado.componente, estado.periodo);
   const dom = domiciliosTotal(totais, estado.periodo);
   const isRel = estado.medida === "relativo";
@@ -100194,7 +104255,7 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
         1
       )}%`;
     } else {
-      faixa = estado.componente === "total" ? "sem faixa: percentis dos componentes n\xE3o se somam" : "sem faixa (provis\xF3ria)";
+      faixa = estado.componente === "total" ? "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas." : "sem faixa (provis\xF3ria)";
     }
     if (estado.comparar) {
       const m4 = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
@@ -100202,23 +104263,130 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
         const dlt = m4.delta * (isRel && dom ? k5 : 1);
         let z4 = "";
         if (m4.z != null) z4 = ` \xB7 z = ${formatar(m4.z, 2)} (${m4.z < 1.96 ? "dentro do ru\xEDdo" : "mudan\xE7a afirm\xE1vel"})`;
-        const rotulo = m4.calculado ? " (calculado no site)" : "";
-        faixa += `<br>contra ${manifesto.periodos.find((p4) => p4.id === estado.comparar)?.rotulo}: ${dlt >= 0 ? "+" : "\u2212"}${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}${z4}${rotulo}`;
+        const rotulo2 = m4.calculado ? " (calculado no site)" : "";
+        faixa += `<br>contra ${manifesto.periodos.find((p4) => p4.id === estado.comparar)?.rotulo}: ${dlt >= 0 ? "+" : "\u2212"}${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}${z4}${rotulo2}`;
       }
     }
     elementos.range.innerHTML = faixa;
     const pills = (t4.marcas ?? []).map((m4) => pill(classeMarca(m4), rotuloMarca(m4)));
-    if (estado.componente === "total") pills.push(pill("info", "Total sem faixa: percentis n\xE3o se somam"));
     elementos.pills.innerHTML = pills.join("");
   }
   elementos.cards.innerHTML = COMPONENTES_BASE.map((c3) => {
     const tc2 = totalDoMapa(totais, c3, estado.periodo);
     const v4 = tc2 ? isRel && dom ? 100 * tc2.total / dom : tc2.total : null;
-    return `<button type="button" class="card" data-c="${c3}" aria-pressed="${estado.componente === c3}"><div class="k">${CLAB[c3]}</div><div class="v num">${v4 == null ? "\u2014" : isRel ? formatar(v4, 2) + " %" : formatar(v4, 0)}</div></button>`;
+    return `<button type="button" class="card" data-c="${c3}" aria-pressed="${estado.componente === c3}"><div class="k">${CLAB2[c3]}</div><div class="v num">${v4 == null ? "\u2014" : isRel ? formatar(v4, 2) + " %" : formatar(v4, 0)}</div></button>`;
   }).join("");
   elementos.cards.querySelectorAll(".card").forEach((b10) => {
     b10.onclick = () => aoClicarCartao(estado.componente === b10.dataset.c ? "total" : b10.dataset.c);
   });
+}
+
+// src/js/ui/ajuda.js
+var flutuante = null;
+var popAjuda = null;
+function criarFlutuante(classe) {
+  const el2 = document.createElement("div");
+  el2.className = classe;
+  el2.setAttribute("role", "tooltip");
+  el2.hidden = true;
+  document.body.appendChild(el2);
+  return el2;
+}
+function posicionar(el2, x5, y5) {
+  const margem = 12;
+  el2.style.left = "0px";
+  el2.style.top = "0px";
+  const { width, height } = el2.getBoundingClientRect();
+  let px2 = x5 + margem;
+  let py2 = y5 + margem;
+  if (px2 + width > window.innerWidth - 4) px2 = Math.max(4, x5 - width - margem);
+  if (py2 + height > window.innerHeight - 4) py2 = Math.max(4, y5 - height - margem);
+  el2.style.left = `${px2}px`;
+  el2.style.top = `${py2}px`;
+}
+function mostrarDica(evento, html) {
+  flutuante ??= criarFlutuante("dica-flutuante");
+  flutuante.innerHTML = html;
+  flutuante.hidden = false;
+  posicionar(flutuante, evento.clientX, evento.clientY);
+}
+function esconderDica() {
+  if (flutuante) flutuante.hidden = true;
+}
+function ligarDica(alvos, texto) {
+  const lista = alvos?.nodes ? alvos.nodes() : alvos instanceof Element ? [alvos] : [...alvos ?? []];
+  for (const el2 of lista) {
+    if (el2.classList.contains("dica-alvo")) continue;
+    el2.classList.add("dica-alvo");
+    const dado = () => el2.__data__;
+    const mostrar = (e67) => {
+      const html = texto(dado(), el2);
+      if (html) mostrarDica(e67, html);
+      else esconderDica();
+    };
+    el2.addEventListener("mouseenter", mostrar);
+    el2.addEventListener("mousemove", mostrar);
+    el2.addEventListener("mouseleave", esconderDica);
+  }
+}
+function marcarGrafico(el2, nome) {
+  el2.setAttribute("data-grafico", nome);
+  return el2;
+}
+function fecharAjuda() {
+  if (popAjuda) popAjuda.hidden = true;
+}
+function abrirAjuda(botao) {
+  popAjuda ??= criarFlutuante("ajuda-pop");
+  popAjuda.textContent = botao.dataset.texto;
+  popAjuda.hidden = false;
+  const r3 = botao.getBoundingClientRect();
+  posicionar(popAjuda, r3.left, r3.bottom);
+}
+function criarAjuda(texto) {
+  const b10 = document.createElement("button");
+  b10.type = "button";
+  b10.className = "ajuda";
+  b10.textContent = "?";
+  b10.dataset.texto = texto;
+  b10.setAttribute("aria-label", "O que mede e como ler este gr\xE1fico");
+  b10.addEventListener("mouseenter", () => abrirAjuda(b10));
+  b10.addEventListener("focus", () => abrirAjuda(b10));
+  b10.addEventListener("mouseleave", fecharAjuda);
+  b10.addEventListener("blur", fecharAjuda);
+  b10.addEventListener("click", (e67) => {
+    e67.stopPropagation();
+    if (popAjuda && !popAjuda.hidden && popAjuda.textContent === texto) fecharAjuda();
+    else abrirAjuda(b10);
+  });
+  b10.addEventListener("keydown", (e67) => {
+    if (e67.key === "Escape") fecharAjuda();
+  });
+  return b10;
+}
+function instalarAjudas(raiz = document) {
+  for (const dica2 of raiz.querySelectorAll(".grafico-dica")) {
+    const alvo = dica2.previousElementSibling;
+    const texto = dica2.textContent.trim();
+    if (!alvo || !texto) continue;
+    if (/^(HEADER|H[1-6])$/.test(alvo.tagName)) {
+      alvo.appendChild(criarAjuda(texto));
+      dica2.remove();
+    }
+  }
+}
+var esc = (s4) => String(s4).replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
+function htmlDica({ titulo, valor, faixa, base }) {
+  return `<b>${esc(titulo)}</b>${valor != null ? `<span class="d-v">${esc(valor)}</span>` : ""}${faixa ? `<span class="d-sub">faixa de 95%: ${esc(faixa)}</span>` : ""}${base ? `<span class="d-sub">${esc(base)}</span>` : ""}`;
+}
+function ligarDicaPorAtributos(raiz) {
+  ligarDica(
+    raiz.querySelectorAll("[data-dica-titulo]"),
+    (_d3, el2) => htmlDica({ titulo: el2.dataset.dicaTitulo, valor: el2.dataset.dicaValor, faixa: el2.dataset.dicaFaixa, base: el2.dataset.dicaBase })
+  );
+}
+function attr(v4) {
+  return String(v4 ?? "").replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
 }
 
 // src/js/util/limiares.js
@@ -100229,9 +104397,9 @@ var LIMIARES = Object.freeze({
   fracao_imputada: { atencao: 0.3 }
 });
 var LIMIARES_RASTREIO = Object.freeze({
-  cv_total_fragil: { valor: 15, unidade: "%", rotulo: "CV do total (marca total_fragil)" },
+  cv_total_fragil: { valor: 15, unidade: "%", rotulo: 'CV do total (marca "total fr\xE1gil")' },
   z_significancia: { valor: 1.96, unidade: "", rotulo: "z (mudan\xE7a afirm\xE1vel vs. dentro do ru\xEDdo)" },
-  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: "CV da AP (marca ap_ressalva)" }
+  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: 'CV da AP (marca "AP com ressalva")' }
 });
 function nivelIncerteza(valor) {
   if (valor == null) return "ok";
@@ -100245,22 +104413,24 @@ function nivelFracaoImputada(valor) {
 }
 
 // src/js/ui/hexagono.js
-var CLAB2 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var CLAB3 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 var NIVEL_CLASSE = { ok: "ok", atencao: "warn", critico: "crit" };
 function css2(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 function linhaComponente(linha, componente, periodo) {
+  const dica2 = (v5, faixa2) => `data-dica-titulo="${attr(CLAB3[componente])}" data-dica-valor="${attr(formatar(v5, 1))} domic\xEDlios" ${faixa2 ? `data-dica-faixa="${attr(formatar(faixa2[0], 1))} a ${attr(formatar(faixa2[1], 1))}"` : 'data-dica-base="sem faixa de 95% para este componente"'}`;
   const v4 = brutoHex(linha, componente, periodo);
   const faixa = faixaHex(linha, componente, periodo);
   if (v4 == null) {
-    return `<div class="comp-row"><span>${CLAB2[componente]}</span><span class="empty">sem dado</span><span></span></div>`;
+    return `<div class="comp-row"><span>${CLAB3[componente]}</span><span class="empty">sem dado</span><span></span></div>`;
   }
   const maximoEixo = Math.max(faixa ? faixa[1] : v4, 0.01) * 1.15;
   const pc2 = (x5) => 100 * x5 / maximoEixo;
-  return `<div class="comp-row"><span>${CLAB2[componente]}</span><div class="bar">${faixa ? `<div class="rng" style="left:${pc2(faixa[0])}%;width:${pc2(faixa[1] - faixa[0])}%"></div>` : ""}<div class="pt" style="left:${pc2(v4)}%"></div></div><span class="num" style="text-align:right">${formatar(v4, 1)}</span></div>`;
+  return `<div class="comp-row" ${dica2(v4, faixa)}><span>${CLAB3[componente]}</span><div class="bar">${faixa ? `<div class="rng" style="left:${pc2(faixa[0])}%;width:${pc2(faixa[1] - faixa[0])}%"></div>` : ""}<div class="pt" style="left:${pc2(v4)}%"></div></div><span class="num" style="text-align:right">${formatar(v4, 1)}</span></div>`;
 }
 function sparkline(linha, componente, medida, manifesto) {
+  const isRel = medida === "relativo";
   const periodosAno = manifesto.periodos.filter((p4) => p4.tipo === "ano");
   const serie = periodosAno.map((p4) => valorHex(linha, componente, p4.id, medida));
   const ok2 = serie.filter((v4) => v4 != null);
@@ -100274,11 +104444,11 @@ function sparkline(linha, componente, medida, manifesto) {
     if (v4 == null) return "";
     const p4 = periodosAno[i3];
     const critico = p4.marcas?.includes("fonte_estoque_diferente");
-    return `<circle cx="${x5(p4.id)}" cy="${y5(v4)}" r="3.5" fill="${critico ? css2("--crit") : css2("--accent")}"/><text x="${x5(
+    return `<circle cx="${x5(p4.id)}" cy="${y5(v4)}" r="3.5" fill="${critico ? css2("--crit") : css2("--accent")}"/><circle cx="${x5(p4.id)}" cy="${y5(v4)}" r="9" fill="transparent" data-dica-titulo="${attr(p4.rotulo)}" data-dica-valor="${attr(formatar(v4, isRel ? 2 : 1))}${isRel ? " %" : " domic\xEDlios"}" ${critico ? 'data-dica-base="estoque por fonte diferente \u2014 n\xE3o comparar com outros anos"' : ""}/><text x="${x5(
       p4.id
     )}" y="${H4 - 2}" text-anchor="middle">${p4.rotulo}</text>`;
   }).join("");
-  return `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="S\xE9rie do hex\xE1gono"><path d="${linha2(
+  return `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" data-grafico="serie-hexagono" aria-label="S\xE9rie do hex\xE1gono"><path d="${linha2(
     serie
   )}" fill="none" stroke="${css2("--accent")}" stroke-width="2"/>${pontos}</svg>`;
 }
@@ -100290,7 +104460,8 @@ function blocoQualidade(linha, estado) {
   const piorIncerteza = incertezas.length ? Math.max(...incertezas) : null;
   const nivelInc = nivelIncerteza(piorIncerteza);
   const itens = [];
-  itens.push(`<span class="pill ${qb2 === "ok" ? "ok" : "warn"}">qualidade do dado: ${qb2 ?? "\u2014"}</span>`);
+  const qbTxt = qb2 == null ? "\u2014" : qb2 === "ok" ? "ok" : rotuloMarca(qb2);
+  itens.push(`<span class="pill ${qb2 === "ok" ? "ok" : "warn"}">qualidade do dado: ${qbTxt}</span>`);
   if (piorIncerteza != null) {
     itens.push(`<span class="pill ${NIVEL_CLASSE[nivelInc]}">incerteza: ${formatar(piorIncerteza, 2)}</span>`);
   }
@@ -100305,7 +104476,7 @@ function blocoQualidade(linha, estado) {
   }
   return `<div class="sub" style="margin-top:10px">Qualidade deste hex\xE1gono</div><div class="pills">${itens.join("")}</div>`;
 }
-function renderizarHexagono(el2, estado, linhas, apMap, manifesto) {
+function renderizarHexagono(el2, estado, linhas, apMap, manifesto, totais) {
   const linha = estado.selecionado ? linhas.get(estado.selecionado) : null;
   if (!linha) {
     el2.innerHTML = `<h2>Hex\xE1gono</h2><p class="empty">Clique num hex\xE1gono do mapa ou do ranking para ver a estimativa, a faixa, as marcas e a compara\xE7\xE3o com a amostra na AP.</p>`;
@@ -100323,57 +104494,183 @@ function renderizarHexagono(el2, estado, linhas, apMap, manifesto) {
   const dom = linha.dom[estado.periodo];
   const ap2 = apMap.get(linha.apCod);
   const coab = ap2?.componentes?.coabitacao;
+  let pesoHtml = "";
+  if (totais) {
+    const brutoAtual = brutoHex(linha, estado.componente, estado.periodo);
+    const totalComponente = totalDoMapa(totais, estado.componente, estado.periodo);
+    if (brutoAtual != null && totalComponente?.total) {
+      const peso = 100 * brutoAtual / totalComponente.total;
+      pesoHtml = `<dt>Peso no total do dom\xEDnio</dt><dd>${formatarPercentual(peso, 2)}</dd>`;
+    }
+  }
   el2.innerHTML = `<h2>Hex\xE1gono <span class="num" style="font-family:var(--body);font-size:12px;color:var(--muted)">${linha.h3}</span></h2>
    <div class="pills">${pills.join("")}</div>
-   <dl class="num"><dt>\xC1rea de pondera\xE7\xE3o</dt><dd>${ap2?.ap_nome ?? linha.apCod}</dd><dt>Munic\xEDpio</dt><dd>${linha.municipioNome}</dd><dt>Domic\xEDlios em ${periodoRotulo}</dt><dd>${dom == null ? "sigilo" : formatar(dom, 1)}</dd></dl>
-   <div class="sub">Estimativa e faixa de 95% em ${periodoRotulo} (domic\xEDlios)</div>${COMPONENTES_BASE.map((c3) => linhaComponente(linha, c3, estado.periodo)).join("")}
-   <div class="sub" style="margin-top:10px">${estado.componente === "total" ? "Total" : CLAB2[estado.componente] ?? "Total"} ${estado.medida === "relativo" ? "relativo" : "absoluto"} no tempo</div>${sparkline(
+   <dl class="num"><dt>\xC1rea de pondera\xE7\xE3o</dt><dd>${ap2?.ap_nome ?? linha.apCod}</dd><dt>Munic\xEDpio</dt><dd>${linha.municipioNome}</dd><dt>Domic\xEDlios em ${periodoRotulo}</dt><dd>${dom == null ? "sigilo" : formatar(dom, 1)}</dd>${pesoHtml}</dl>
+   <header class="graf-cab"><span class="sub">Estimativa e faixa de 95% em ${periodoRotulo} (domic\xEDlios)</span></header>
+   <div class="grafico-dica">Cada linha \xE9 um componente do d\xE9ficit neste hex\xE1gono: o ponto \xE9 a estimativa e a barra clara \xE9 a faixa de 95%. Passe o mouse numa linha para ver os valores.</div>
+   <div data-grafico="componentes-hexagono">${COMPONENTES_BASE.map((c3) => linhaComponente(linha, c3, estado.periodo)).join("")}</div>
+   <header class="graf-cab" style="margin-top:10px"><span class="sub">${estado.componente === "total" ? "Total" : CLAB3[estado.componente] ?? "Total"} ${estado.medida === "relativo" ? "relativo" : "absoluto"} no tempo</span></header>
+   <div class="grafico-dica">Valor deste hex\xE1gono em cada ano, na medida escolhida; ponto vermelho = ano com estoque de outra fonte (n\xE3o comparar). Passe o mouse num ponto para ver o valor.</div>${sparkline(
     linha,
     estado.componente,
     estado.medida,
     manifesto
   )}
-   ${coab ? `<div class="sub" style="margin-top:8px">Na AP, coabita\xE7\xE3o 2022: <b>direta da amostra ${coab.sem_direta ? "\u2014" : formatar(coab.direta, 0)}</b> (CV ${coab.direta_cv == null ? "\u2014" : formatar(coab.direta_cv, 1) + "%"}) \xB7 <b>soma do motor ${formatar(
+   ${coab ? `<div class="sub" style="margin-top:8px">Na AP, coabita\xE7\xE3o 2022: <b>direta da amostra ${coab.sem_direta ? "\u2014" : formatar(coab.direta, 0)}</b> (CV ${coab.direta_cv == null ? "\u2014" : formatar(coab.direta_cv, 1) + "%"}) \xB7 <b>soma do modelo nos hex\xE1gonos da AP ${formatar(
     coab.motor_2022,
     0
   )}</b>${coab.ressalva ? ` ${`<span class="pill warn">${rotuloMarca("ap_ressalva")}</span>`}` : ""}. A PNADc n\xE3o existe por hex\xE1gono; a compara\xE7\xE3o honesta \xE9 na AP e no dom\xEDnio.</div>` : ""}
    ${blocoQualidade(linha, estado)}`;
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
 
 // src/js/graficos/deficit.js
+function linhasNormais(linhasArr, componente, periodo) {
+  return linhasArr.filter((l3) => classeHex(l3.dom[periodo], brutoHex(l3, componente, periodo)) === "normal");
+}
 function css3(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
+  const faixaEl = box.parentElement?.querySelector("#f1-hist-faixa");
   const isRel = estado.medida === "relativo";
-  const vs8 = linhasArr.map((l3) => valorHex(l3, estado.componente, estado.periodo, estado.medida)).filter((v4) => v4 != null && v4 > 0);
+  const vs9 = linhasNormais(linhasArr, estado.componente, estado.periodo).map((l3) => valorHex(l3, estado.componente, estado.periodo, estado.medida)).filter((v4) => v4 != null);
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 104;
   const m4 = { l: 34, r: 8, t: 6, b: 22 };
-  if (!vs8.length) {
+  if (!vs9.length) {
     box.innerHTML = `<p class="empty">Nenhum hex\xE1gono acima de zero nesta combina\xE7\xE3o.</p>`;
+    if (faixaEl) faixaEl.innerHTML = "";
     return;
   }
-  const x5 = linear2().domain([0, (quantile(vs8.slice().sort(ascending), 0.99) || vs8[0]) * 1.05]).nice().range([m4.l, W4 - m4.r]);
-  const bins = bin().domain(x5.domain()).thresholds(x5.ticks(28))(vs8.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
+  const p99 = quantile(vs9.slice().sort(ascending), 0.99) || vs9[0];
+  const x5 = linear2().domain([0, p99 * 1.05]).nice().range([m4.l, W4 - m4.r]);
+  const bins = bin().domain(x5.domain()).thresholds(x5.ticks(28))(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
+  const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
+  const faixaAtual = estado.faixa_hist?.[0] ?? null;
+  const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hex\xE1gonos");
+  marcarGrafico(svg.node(), "histograma");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(6).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
-  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => estado.faixa_hist && estado.faixa_hist[0] === b10.x0 ? css3("--ink") : "none").attr("stroke-width", 2).style("cursor", "pointer").attr("opacity", (b10) => estado.faixa_hist && estado.faixa_hist[0] !== b10.x0 ? 0.35 : 1).on("click", (_e4, b10) => aoClicarBarra(estado.faixa_hist && estado.faixa_hist[0] === b10.x0 ? null : [b10.x0, b10.x1])).append("title").text((b10) => `${b10.length} hex\xE1gonos entre ${formatar(b10.x0, 1)} e ${formatar(b10.x1, 1)}`);
+  const g5 = svg.append("g");
+  g5.selectAll("rect.coluna").data(bins).join("rect").attr("class", "coluna").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
+    e67.stopPropagation();
+    aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
+  });
+  ligarDica(g5.selectAll("rect.coluna"), (b10) => htmlDica({
+    titulo: b10 === ultimoBin ? `${formatar(b10.x0, 1)} ou mais (p99 ou mais)` : `${formatar(b10.x0, 1)} a ${formatar(b10.x1, 1)}`,
+    valor: `${formatar(b10.length, 0)} hex\xE1gonos`,
+    base: `de ${formatar(vs9.length, 0)} hex\xE1gonos com d\xE9ficit`
+  }));
+  g5.selectAll("rect.barra").data(bins).join("rect").attr("class", "barra").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css3("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
+  svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("p99 ou mais \u2192");
+  svg.on("click", () => aoClicarBarra([]));
   box.replaceChildren(svg.node());
+  if (faixaEl) renderizarFaixaDupla(faixaEl, x5.domain(), faixaAtual, isRel ? 1 : 0, aoClicarBarra);
+}
+function renderizarFaixaDupla(el2, [dmin, dmax], faixaAtual, decimais, aoMudar) {
+  const passo = Math.max(10 ** -decimais, (dmax - dmin) / 200);
+  const aberto = faixaAtual != null && faixaAtual[1] == null;
+  const lo2 = faixaAtual?.[0] ?? dmin;
+  const hi2 = aberto ? dmax : faixaAtual?.[1] ?? dmax;
+  const assinatura = `${dmin}|${dmax}|${passo}`;
+  function emitir(novoLo, novoHi, novoAberto) {
+    const l3 = Math.max(dmin, Math.min(novoLo, novoHi, dmax));
+    const h4 = Math.max(l3, Math.min(novoHi, dmax));
+    if (l3 <= dmin + passo / 2 && h4 >= dmax - passo / 2 && !novoAberto) aoMudar([]);
+    else aoMudar([[l3, novoAberto ? null : h4]]);
+  }
+  if (el2.dataset.sig !== assinatura) {
+    let lerCampos = function() {
+      let novoLo = Number(elMin2.value);
+      let novoHi = Number(elMax2.value);
+      if (novoLo > novoHi) [novoLo, novoHi] = [novoHi, novoLo];
+      emitir(novoLo, novoHi, chk2.checked);
+    };
+    el2.dataset.sig = assinatura;
+    el2.innerHTML = `
+      <div class="fx-track">
+        <input type="range" class="fx-alca fx-min" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Valor m\xEDnimo da faixa">
+        <input type="range" class="fx-alca fx-max" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Valor m\xE1ximo da faixa">
+      </div>
+      <div class="fx-campos">
+        <input type="number" class="fx-campo fx-campo-min" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Campo do valor m\xEDnimo">
+        <span>\u2013</span>
+        <input type="number" class="fx-campo fx-campo-max" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Campo do valor m\xE1ximo">
+        <label class="fx-oumais"><input type="checkbox" class="fx-chk-oumais"> ou mais</label>
+      </div>`;
+    const elMin2 = el2.querySelector(".fx-min");
+    const elMax2 = el2.querySelector(".fx-max");
+    const campoMin2 = el2.querySelector(".fx-campo-min");
+    const campoMax2 = el2.querySelector(".fx-campo-max");
+    const chk2 = el2.querySelector(".fx-chk-oumais");
+    elMin2.addEventListener("input", () => {
+      campoMin2.value = elMin2.value;
+      lerCampos();
+    });
+    elMax2.addEventListener("input", () => {
+      campoMax2.value = elMax2.value;
+      lerCampos();
+    });
+    campoMin2.addEventListener("change", () => {
+      elMin2.value = campoMin2.value;
+      lerCampos();
+    });
+    campoMax2.addEventListener("change", () => {
+      elMax2.value = campoMax2.value;
+      lerCampos();
+    });
+    chk2.addEventListener("change", () => {
+      elMax2.disabled = chk2.checked;
+      campoMax2.disabled = chk2.checked;
+      lerCampos();
+    });
+  }
+  const elMin = el2.querySelector(".fx-min");
+  const elMax = el2.querySelector(".fx-max");
+  const campoMin = el2.querySelector(".fx-campo-min");
+  const campoMax = el2.querySelector(".fx-campo-max");
+  const chk = el2.querySelector(".fx-chk-oumais");
+  const foco = document.activeElement;
+  if (foco !== elMin) elMin.value = String(lo2);
+  if (foco !== elMax) elMax.value = String(hi2);
+  if (foco !== campoMin) campoMin.value = lo2.toFixed(decimais);
+  if (foco !== campoMax) campoMax.value = hi2.toFixed(decimais);
+  chk.checked = aberto;
+  elMax.disabled = aberto;
+  campoMax.disabled = aberto;
+}
+function codigoCurtoH3(h32) {
+  const semSufixo = h32.replace(/fffff$/, "");
+  return semSufixo.slice(-6);
 }
 function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
   const isRel = estado.medida === "relativo";
   const rs2 = linhasArr.map((l3) => ({ l: l3, v: valorHex(l3, estado.componente, estado.periodo, estado.medida) })).filter((d3) => d3.v != null).sort((a5, b10) => b10.v - a5.v).slice(0, 5);
   const mx2 = rs2[0]?.v || 1;
   box.innerHTML = `<tbody>${rs2.map(
-    (d3, i3) => `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod}${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
-      d3.v,
-      isRel ? 2 : 0
-    )}${isRel ? " %" : ""}</td></tr>`
+    (d3, i3) => (
+      // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
+      `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod} \xB7 <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d3.l.h3)}</span>${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
+        d3.v,
+        isRel ? 2 : 0
+      )}${isRel ? " %" : ""}</td></tr>`
+    )
   ).join("")}</tbody>`;
+  marcarGrafico(box, "ranking");
+  ligarDica(box.querySelectorAll("tr"), (_d3, tr2) => {
+    const d3 = rs2[Number(tr2.rowIndex)];
+    if (!d3) return "";
+    return htmlDica({
+      titulo: `${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod}`,
+      valor: `${formatar(d3.v, isRel ? 2 : 0)}${isRel ? " %" : ""}`,
+      base: `hex\xE1gono ${codigoCurtoH3(d3.l.h3)}`
+    });
+  });
   box.querySelectorAll("tr").forEach((tr2) => {
     const ir2 = () => aoIrPara(tr2.dataset.h3);
     tr2.onclick = ir2;
@@ -100414,35 +104711,118 @@ function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo) {
   svg.append("g").selectAll("text").data(anos).join("text").attr("x", (_p3, i3) => x5(i3)).attr("y", H4 - 8).attr("text-anchor", "middle").text((p4) => p4.rotulo);
   const anosPts = pts.slice(0, nAnos);
   svg.append("path").attr("d", line().x((d3) => x5(xpos(d3.p))).y((d3) => y5(d3.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css3("--muted")).attr("stroke-width", 1.2);
-  const g4 = svg.append("g").selectAll("g").data(pts).join("g").style("cursor", "pointer").on("click", (_e4, d3) => aoClicarPeriodo(d3.id));
-  g4.filter((d3) => d3.lo != null).append("line").attr("x1", (d3) => x5(xpos(d3.p))).attr("x2", (d3) => x5(xpos(d3.p))).attr("y1", (d3) => y5(d3.lo)).attr("y2", (d3) => y5(d3.hi)).attr("stroke", (d3) => d3.media ? css3("--accent") : css3("--ink")).attr("stroke-width", (d3) => d3.media ? 4 : 2).attr("opacity", (d3) => d3.media ? 0.55 : 0.8);
-  g4.filter((d3) => d3.v != null).append("path").attr("transform", (d3) => `translate(${x5(xpos(d3.p))},${y5(d3.v)})`).attr("d", (d3) => Symbol2(d3.media ? diamond : circle, d3.id === estado.periodo ? 130 : 60)()).attr("fill", (d3) => d3.critico ? css3("--crit") : d3.media ? css3("--accent") : css3("--ink")).attr("stroke", (d3) => d3.id === estado.periodo ? css3("--warn") : "none").attr("stroke-width", 3);
-  g4.append("title").text((d3) => `${d3.lab}: ${d3.v == null ? "sem dado" : formatar(d3.v, isRel ? 2 : 0)}${d3.lo != null ? ` (${formatar(d3.lo, isRel ? 2 : 0)} a ${formatar(d3.hi, isRel ? 2 : 0)})` : " (sem faixa)"}`);
+  const g5 = svg.append("g").selectAll("g").data(pts).join("g").style("cursor", "pointer").on("click", (_e4, d3) => aoClicarPeriodo(d3.id));
+  g5.filter((d3) => d3.lo != null).append("line").attr("x1", (d3) => x5(xpos(d3.p))).attr("x2", (d3) => x5(xpos(d3.p))).attr("y1", (d3) => y5(d3.lo)).attr("y2", (d3) => y5(d3.hi)).attr("stroke", (d3) => d3.media ? css3("--accent") : css3("--ink")).attr("stroke-width", (d3) => d3.media ? 4 : 2).attr("opacity", (d3) => d3.media ? 0.55 : 0.8);
+  g5.filter((d3) => d3.v != null).append("path").attr("transform", (d3) => `translate(${x5(xpos(d3.p))},${y5(d3.v)})`).attr("d", (d3) => Symbol2(d3.media ? diamond : circle, d3.id === estado.periodo ? 130 : 60)()).attr("fill", (d3) => d3.critico ? css3("--crit") : d3.media ? css3("--accent") : css3("--ink")).attr("stroke", (d3) => d3.id === estado.periodo ? css3("--warn") : "none").attr("stroke-width", 3);
+  ligarDica(g5, (d3) => htmlDica({
+    titulo: d3.lab + (d3.media ? " (m\xE9dia)" : ""),
+    valor: d3.v == null ? "sem dado" : formatar(d3.v, isRel ? 2 : 0),
+    faixa: d3.lo != null ? `${formatar(d3.lo, isRel ? 2 : 0)} a ${formatar(d3.hi, isRel ? 2 : 0)}` : null,
+    base: d3.lo == null && d3.v != null ? "sem faixa de 95% para este per\xEDodo" : null
+  }));
+  marcarGrafico(svg.node(), "serie");
+  box.replaceChildren(svg.node());
+}
+function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo2) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const medias = manifesto.periodos.filter((p4) => p4.tipo === "media");
+  const pontoDe = (p4) => {
+    const t4 = totalDoMapa(totais, componente, p4.id);
+    return {
+      id: p4.id,
+      lab: p4.rotulo,
+      media: p4.tipo === "media",
+      v: t4 ? t4.total : null,
+      lo: t4?.ep != null ? t4.total - 1.96 * t4.ep : null,
+      hi: t4?.ep != null ? t4.total + 1.96 * t4.ep : null,
+      critico: p4.marcas?.includes("fonte_estoque_diferente"),
+      semFaixaProvisoria: t4?.marcas?.includes("precariedade_provisoria_sem_faixa") ?? false
+    };
+  };
+  const anosPts = anos.map(pontoDe);
+  const mediaPts = medias.map(pontoDe);
+  const W4 = Math.max(220, box.clientWidth || 260);
+  const H4 = 128;
+  const m4 = { l: 44, r: 20, t: 8, b: 20 };
+  const x5 = point().domain(anos.map((p4) => p4.id)).range([m4.l, W4 - m4.r]);
+  const maxV = max4([...anosPts, ...mediaPts], (d3) => d3.hi ?? d3.v ?? 0) || 1;
+  const y5 = linear2().domain([0, maxV * 1.15]).nice().range([H4 - m4.b, m4.t]);
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `S\xE9rie de ${rotulo2}`);
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
+  svg.append("g").selectAll("text").data(anos).join("text").attr("x", (p4) => x5(p4.id)).attr("y", H4 - 4).attr("text-anchor", "middle").text((p4) => rotuloCurto(p4.rotulo));
+  svg.append("path").attr("d", line().defined((d3) => d3.v != null).x((d3) => x5(d3.id)).y((d3) => y5(d3.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css3("--muted")).attr("stroke-width", 1.2);
+  svg.append("g").selectAll("line").data(mediaPts.filter((d3) => d3.v != null)).join("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", (d3) => y5(d3.v)).attr("y2", (d3) => y5(d3.v)).attr("stroke", css3("--accent")).attr("stroke-width", 1.4).attr("stroke-dasharray", "4,3");
+  ligarDica(svg.selectAll("line[stroke-dasharray]"), (d3) => htmlDica({ titulo: `${d3.lab} (m\xE9dia)`, valor: formatar(d3.v, 0) }));
+  marcarGrafico(svg.node(), "serie-detalhe");
+  const g5 = svg.append("g").selectAll("g").data(anosPts).join("g");
+  g5.filter((d3) => d3.lo != null).append("line").attr("x1", (d3) => x5(d3.id)).attr("x2", (d3) => x5(d3.id)).attr("y1", (d3) => y5(d3.lo)).attr("y2", (d3) => y5(d3.hi)).attr("stroke", css3("--ink")).attr("stroke-width", 2).attr("opacity", 0.8);
+  g5.filter((d3) => d3.v != null).append("circle").attr("cx", (d3) => x5(d3.id)).attr("cy", (d3) => y5(d3.v)).attr("r", 4).attr("fill", (d3) => d3.critico ? css3("--crit") : css3("--ink"));
+  ligarDica(g5, (d3) => {
+    if (d3.v == null) return htmlDica({ titulo: d3.lab, valor: "sem dado" });
+    const nota = d3.critico ? "estoque por fonte diferente \u2014 n\xE3o comparar por hex\xE1gono" : d3.semFaixaProvisoria ? "provis\xF3ria, sem faixa" : d3.lo == null ? "sem faixa de 95%" : null;
+    return htmlDica({ titulo: d3.lab, valor: formatar(d3.v, 0), faixa: d3.lo != null && !d3.semFaixaProvisoria ? `${formatar(d3.lo, 0)} a ${formatar(d3.hi, 0)}` : null, base: nota });
+  });
+  box.replaceChildren(svg.node());
+}
+function renderizarCurvaConcentracao(box, linhasArr, componente, periodo) {
+  const conc = curvaConcentracao(linhasArr, componente, periodo);
+  const W4 = Math.max(260, box.clientWidth || 320);
+  const H4 = 140;
+  const m4 = { l: 40, r: 10, t: 8, b: 22 };
+  const x5 = linear2().domain([0, 100]).range([m4.l, W4 - m4.r]);
+  const y5 = linear2().domain([0, 100]).range([H4 - m4.b, m4.t]);
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Curva de concentra\xE7\xE3o do d\xE9ficit");
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(5).tickFormat((v4) => `${v4}%`));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => `${v4}%`));
+  svg.append("path").attr("d", line().x((d3) => x5(d3.pctHex)).y((d3) => y5(d3.pctDeficitAcumulado))([{ pctHex: 0, pctDeficitAcumulado: 0 }, ...conc.pontos])).attr("fill", "none").attr("stroke", css3("--accent")).attr("stroke-width", 2);
+  svg.append("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", y5(50)).attr("y2", y5(50)).attr("stroke", css3("--line")).attr("stroke-dasharray", "3,3");
+  svg.append("circle").attr("cx", x5(conc.pctHexMeio)).attr("cy", y5(50)).attr("r", 4).attr("fill", css3("--crit"));
+  marcarGrafico(svg.node(), "concentracao");
+  const alvo = svg.append("rect").attr("x", m4.l).attr("y", m4.t).attr("width", W4 - m4.l - m4.r).attr("height", H4 - m4.t - m4.b).attr("fill", "transparent");
+  const marcador = svg.append("circle").attr("r", 3.5).attr("fill", css3("--ink")).attr("visibility", "hidden").style("pointer-events", "none");
+  alvo.classed("dica-alvo", true);
+  alvo.on("mousemove.curva", (e67) => {
+    const [px2] = pointer(e67, svg.node());
+    const alvoX = Math.max(0, Math.min(100, x5.invert(px2)));
+    const p4 = conc.pontos.reduce((a5, b10) => Math.abs(b10.pctHex - alvoX) < Math.abs(a5.pctHex - alvoX) ? b10 : a5, conc.pontos[0]);
+    marcador.attr("cx", x5(p4.pctHex)).attr("cy", y5(p4.pctDeficitAcumulado)).attr("visibility", "visible");
+    mostrarDica(e67, htmlDica({ titulo: `${formatar(p4.pctHex, 1)}% dos hex\xE1gonos`, valor: `${formatar(p4.pctDeficitAcumulado, 1)}% do d\xE9ficit`, base: `de ${formatar(conc.n, 0)} hex\xE1gonos com domic\xEDlio` }));
+  });
+  alvo.on("mouseleave.curva", () => {
+    marcador.attr("visibility", "hidden");
+    esconderDica();
+  });
   box.replaceChildren(svg.node());
 }
 function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const isRel = estado.medida === "relativo";
+  const todosValores = [];
   const st3 = manifesto.periodos.map((p4) => {
-    const vs8 = linhasArr.map((l3) => valorHex(l3, estado.componente, p4.id, estado.medida)).filter((v4) => v4 != null && v4 > 0).sort(ascending);
-    const q4 = (f4) => quantileSorted(vs8, f4);
-    return { id: p4.id, lab: p4.rotulo, media: p4.tipo === "media", critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
+    const vs9 = linhasNormais(linhasArr, estado.componente, p4.id).map((l3) => valorHex(l3, estado.componente, p4.id, estado.medida)).filter((v4) => v4 != null).sort(ascending);
+    todosValores.push(...vs9);
+    const q4 = (f4) => quantileSorted(vs9, f4);
+    return { id: p4.id, lab: p4.rotulo, media: p4.tipo === "media", critico: p4.marcas?.includes("fonte_estoque_diferente"), n: vs9.length, q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
   });
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 122;
-  const m4 = { l: 40, r: 6, t: 8, b: 22 };
+  const m4 = { l: 40, r: 6, t: 14, b: 22 };
   const x5 = band().domain(st3.map((s4) => s4.id)).range([m4.l, W4 - m4.r]).padding(0.35);
-  const y5 = linear2().domain([0, max4(st3, (s4) => s4.q90 ?? 0) * 1.1 || 1]).nice().range([H4 - m4.b, m4.t]);
-  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o dos hex\xE1gonos por per\xEDodo");
+  todosValores.sort(ascending);
+  const p99 = todosValores.length ? quantileSorted(todosValores, 0.99) : 1;
+  const y5 = linear2().domain([0, Math.max(p99 * 1.1, max4(st3, (s4) => s4.q90 ?? 0) ?? 0, 1)]).nice().range([H4 - m4.b, m4.t]);
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o dos hex\xE1gonos por per\xEDodo, eixo cortado no p99");
+  svg.append("text").attr("x", W4 - m4.r).attr("y", 9).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("eixo cortado no p99");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(5).tickFormat((v4) => formatar(v4, isRel ? 1 : 1)));
   svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", H4 - 8).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab)).append("title").text((s4) => s4.lab);
-  const g4 = svg.append("g").selectAll("g").data(st3).join("g").style("cursor", "pointer").on("click", (_e4, s4) => aoClicarPeriodo(s4.id));
+  const g5 = svg.append("g").selectAll("g").data(st3).join("g").style("cursor", "pointer").on("click", (_e4, s4) => aoClicarPeriodo(s4.id));
   const cx2 = (s4) => x5(s4.id) + x5.bandwidth() / 2;
   const col = (s4) => s4.critico ? css3("--crit") : s4.media ? css3("--accent") : css3("--ink");
-  g4.filter((s4) => s4.q10 != null).append("line").attr("x1", cx2).attr("x2", cx2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
-  g4.filter((s4) => s4.q25 != null).append("rect").attr("x", (s4) => x5(s4.id)).attr("width", x5.bandwidth()).attr("y", (s4) => y5(s4.q75)).attr("height", (s4) => y5(s4.q25) - y5(s4.q75)).attr("fill", (s4) => s4.id === estado.periodo ? css3("--accent-soft") : css3("--surface")).attr("stroke", col).attr("stroke-width", (s4) => s4.id === estado.periodo ? 2.5 : 1.2).attr("rx", 3);
-  g4.filter((s4) => s4.q50 != null).append("line").attr("x1", (s4) => x5(s4.id)).attr("x2", (s4) => x5(s4.id) + x5.bandwidth()).attr("y1", (s4) => y5(s4.q50)).attr("y2", (s4) => y5(s4.q50)).attr("stroke", col).attr("stroke-width", 2.5);
-  g4.append("title").text((s4) => s4.q50 == null ? `${s4.lab}: sem hex\xE1gono acima de zero` : `${s4.lab}: mediana ${formatar(s4.q50, 2)}; p25\u2013p75 ${formatar(s4.q25, 2)}\u2013${formatar(s4.q75, 2)}`);
+  g5.filter((s4) => s4.q10 != null).append("line").attr("x1", cx2).attr("x2", cx2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
+  g5.filter((s4) => s4.q25 != null).append("rect").attr("x", (s4) => x5(s4.id)).attr("width", x5.bandwidth()).attr("y", (s4) => y5(s4.q75)).attr("height", (s4) => y5(s4.q25) - y5(s4.q75)).attr("fill", (s4) => s4.id === estado.periodo ? css3("--accent-soft") : css3("--surface")).attr("stroke", col).attr("stroke-width", (s4) => s4.id === estado.periodo ? 2.5 : 1.2).attr("rx", 3);
+  g5.filter((s4) => s4.q50 != null).append("line").attr("x1", (s4) => x5(s4.id)).attr("x2", (s4) => x5(s4.id) + x5.bandwidth()).attr("y1", (s4) => y5(s4.q50)).attr("y2", (s4) => y5(s4.q50)).attr("stroke", col).attr("stroke-width", 2.5);
+  ligarDica(g5, (s4) => s4.q50 == null ? htmlDica({ titulo: s4.lab, valor: "sem hex\xE1gono acima de zero" }) : htmlDica({ titulo: s4.lab, valor: `mediana ${formatar(s4.q50, 2)}`, faixa: null, base: `p25\u2013p75: ${formatar(s4.q25, 2)} a ${formatar(s4.q75, 2)} \xB7 p10\u2013p90: ${formatar(s4.q10, 2)} a ${formatar(s4.q90, 2)} \xB7 ${formatar(s4.n, 0)} hex\xE1gonos` }));
+  marcarGrafico(svg.node(), "caixas");
   box.replaceChildren(svg.node());
 }
 
@@ -100467,22 +104847,44 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
     const x6 = band().domain(dados.map((d3) => d3[0])).range([m4.l, W4 - m4.r]).padding(0.25);
     const y6 = linear2().domain([0, max4(dados, (d3) => d3[1]) || 1]).nice().range([H4 - m4.b, m4.t]);
     svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y6).ticks(4));
-    svg.append("g").selectAll("rect").data(dados).join("rect").attr("x", (d3) => x6(d3[0])).attr("width", x6.bandwidth()).attr("y", (d3) => y6(d3[1])).attr("height", (d3) => y6(0) - y6(d3[1])).attr("fill", css4("--accent"));
+    svg.append("g").selectAll("rect").data(dados).join("rect").attr("x", (d3) => x6(d3[0])).attr("width", x6.bandwidth()).attr("y", (d3) => y6(d3[1])).attr("height", (d3) => y6(0) - y6(d3[1])).attr("fill", css4("--accent")).call((sel) => ligarDica(sel, (d3) => htmlDica({ titulo: String(d3[0]), valor: `${formatar(d3[1], 0)} hex\xE1gonos`, base: `de ${formatar(sum(dados, (e67) => e67[1]), 0)} hex\xE1gonos` })));
+    marcarGrafico(svg.node(), "histograma-qualidade");
     svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d3) => x6(d3[0]) + x6.bandwidth() / 2).attr("y", H4 - 10).attr("text-anchor", "middle").text((d3) => d3[0]);
     box.replaceChildren(svg.node());
     return;
   }
-  const vs8 = linhasArr.map((l3) => valorMedidaQualidade(l3, estado.periodo, estado.medida_qualidade, estado.componente, apMap)).filter((v4) => v4 != null);
-  if (!vs8.length) {
+  const vs9 = linhasArr.map((l3) => valorMedidaQualidade(l3, estado.periodo, estado.medida_qualidade, estado.componente, apMap)).filter((v4) => v4 != null);
+  if (!vs9.length) {
     box.innerHTML = `<p class="empty">Sem faixa para esta combina\xE7\xE3o (total ou precariedade provis\xF3ria n\xE3o t\xEAm incerteza).</p>`;
     return;
   }
-  const x5 = linear2().domain(extent(vs8)).nice().range([m4.l, W4 - m4.r]);
-  const bins = bin().domain(x5.domain()).thresholds(20)(vs8);
+  const minimo = min4(vs9);
+  const p99 = quantile(vs9.slice().sort(ascending), 0.99) ?? max4(vs9);
+  const x5 = linear2().domain([minimo, p99]).nice().range([m4.l, W4 - m4.r]);
+  const bins = bin().domain(x5.domain()).thresholds(20)(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
+  const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
+  const faixaAtual = estado.faixa_hist?.[0] ?? null;
+  const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(5).tickFormat((v4) => formatar(v4, 2)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
-  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).style("cursor", "pointer").on("click", (_e4, b10) => aoClicarBarra([b10.x0, b10.x1]));
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
+    e67.stopPropagation();
+    aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
+  }).call(
+    (sel) => ligarDica(
+      sel,
+      (b10) => htmlDica({
+        titulo: b10 === ultimoBin ? `${formatar(b10.x0, 2)} ou mais (p99 ou mais)` : `${formatar(b10.x0, 2)} a ${formatar(b10.x1, 2)}`,
+        valor: `${formatar(b10.length, 0)} hex\xE1gonos`,
+        base: `de ${formatar(vs9.length, 0)} hex\xE1gonos`
+      })
+    )
+  );
+  marcarGrafico(svg.node(), "histograma-qualidade");
+  svg.on("click", () => aoClicarBarra([]));
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css4("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
+  svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text("p99 ou mais \u2192");
   box.replaceChildren(svg.node());
 }
 function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
@@ -100504,13 +104906,20 @@ function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
   svg.append("rect").attr("x", x5(medX)).attr("y", m4.t).attr("width", Math.max(0, W4 - m4.r - x5(medX))).attr("height", Math.max(0, y5(medY) - m4.t)).attr("fill", css4("--warn-soft")).attr("opacity", 0.5);
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 1)));
-  svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.6).attr("fill", css4("--accent")).attr("opacity", 0.6).style("cursor", "pointer").on("click", (_e4, d3) => aoSelecionar(d3.l.h3));
+  svg.append("g").selectAll("circle").data(pontos).join("circle").attr("cx", (d3) => x5(d3.x)).attr("cy", (d3) => y5(d3.y)).attr("r", 2.6).attr("fill", css4("--accent")).attr("opacity", 0.6).style("cursor", "pointer").on("click", (_e4, d3) => aoSelecionar(d3.l.h3)).call(
+    (sel) => ligarDica(
+      sel,
+      (d3) => htmlDica({ titulo: `${d3.l.municipioNome ?? "Hex\xE1gono"} \xB7 ${d3.l.h3.slice(-8)}`, valor: `d\xE9ficit ${formatar(d3.x, 0)}`, base: `incerteza (m\xE1x \u2212 m\xEDn) \xF7 valor: ${formatar(d3.y, 2)} \xB7 ${formatar(pontos.length, 0)} hex\xE1gonos no gr\xE1fico` })
+    )
+  );
+  marcarGrafico(svg.node(), "dispersao");
   svg.append("text").attr("class", "quadrante-contagem").attr("x", W4 - m4.r - 4).attr("y", m4.t + 12).attr("text-anchor", "end").text(`${noQuadrante} no quadrante`);
   box.replaceChildren(svg.node());
 }
 function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const categorias = ["ok", "ressalva", "sigilo", "sem_dado"];
+  const NOME_CAT = { ok: "sem ressalva", ressalva: "com ressalva", sigilo: "em sigilo", sem_dado: "sem dado" };
   const cores = { ok: css4("--ok"), ressalva: css4("--warn"), sigilo: css4("--muted"), sem_dado: css4("--line") };
   const dados = manifesto.periodos.map((p4) => {
     const somas = { ok: 0, ressalva: 0, sigilo: 0, sem_dado: 0 };
@@ -100543,18 +104952,19 @@ function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
     let acum = 0;
     categorias.forEach((cat, i3) => {
       const altura = y5(acum) - y5(acum + d3.fracoes[i3]);
-      svg.append("rect").attr("x", x5(d3.id)).attr("width", x5.bandwidth()).attr("y", y5(acum + d3.fracoes[i3])).attr("height", Math.max(0, altura)).attr("fill", cores[cat]).append("title").text(`${cat}: ${formatar(d3.fracoes[i3] * 100, 1)}%`);
+      svg.append("rect").attr("x", x5(d3.id)).attr("width", x5.bandwidth()).attr("y", y5(acum + d3.fracoes[i3])).attr("height", Math.max(0, altura)).attr("fill", cores[cat]).datum({ lab: d3.lab, cat, fracao: d3.fracoes[i3] }).call((sel) => ligarDica(sel, (e67) => htmlDica({ titulo: e67.lab, valor: `${NOME_CAT[e67.cat]}: ${formatar(e67.fracao * 100, 1)}%`, base: "% dos domic\xEDlios dos hex\xE1gonos" })));
       acum += d3.fracoes[i3];
     });
   }
+  marcarGrafico(svg.node(), "composicao");
   box.replaceChildren(svg.node());
 }
 function renderizarEstoque(box, manifesto, linhasArr) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
   const st3 = manifesto.periodos.map((p4) => {
-    const vs8 = linhasArr.map((l3) => l3.qualidade[p4.id]?.gEstoque).filter((v4) => v4 != null).sort(ascending);
-    const q4 = (f4) => quantileSorted(vs8, f4);
-    return { id: p4.id, lab: p4.rotulo, critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
+    const vs9 = linhasArr.map((l3) => l3.qualidade[p4.id]?.gEstoque).filter((v4) => v4 != null).sort(ascending);
+    const q4 = (f4) => quantileSorted(vs9, f4);
+    return { id: p4.id, lab: p4.rotulo, n: vs9.length, critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
   });
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 122;
@@ -100566,9 +104976,14 @@ function renderizarEstoque(box, manifesto, linhasArr) {
   svg.append("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", y5(1)).attr("y2", y5(1)).attr("stroke", css4("--line")).attr("stroke-dasharray", "2,3");
   svg.append("g").selectAll("text").data(st3).join("text").attr("x", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y", H4 - 8).attr("text-anchor", "middle").text((s4) => rotuloCurto(s4.lab));
   const col = (s4) => s4.critico ? css4("--crit") : css4("--ink");
-  const g4 = svg.append("g").selectAll("g").data(st3).join("g");
-  g4.filter((s4) => s4.q10 != null).append("line").attr("x1", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("x2", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
-  g4.filter((s4) => s4.q25 != null).append("rect").attr("x", (s4) => x5(s4.id)).attr("width", x5.bandwidth()).attr("y", (s4) => y5(s4.q75)).attr("height", (s4) => y5(s4.q25) - y5(s4.q75)).attr("fill", css4("--surface")).attr("stroke", col).attr("rx", 3);
+  const g5 = svg.append("g").selectAll("g").data(st3).join("g");
+  g5.filter((s4) => s4.q10 != null).append("line").attr("x1", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("x2", (s4) => x5(s4.id) + x5.bandwidth() / 2).attr("y1", (s4) => y5(s4.q10)).attr("y2", (s4) => y5(s4.q90)).attr("stroke", col);
+  g5.filter((s4) => s4.q25 != null).append("rect").attr("x", (s4) => x5(s4.id)).attr("width", x5.bandwidth()).attr("y", (s4) => y5(s4.q75)).attr("height", (s4) => y5(s4.q25) - y5(s4.q75)).attr("fill", css4("--surface")).attr("stroke", col).attr("rx", 3);
+  ligarDica(
+    g5,
+    (s4) => s4.q50 == null ? htmlDica({ titulo: s4.lab, valor: "sem dado" }) : htmlDica({ titulo: s4.lab, valor: `mediana ${formatar(s4.q50, 2)} \xD7 o estoque de 2022`, base: `p25\u2013p75: ${formatar(s4.q25, 2)} a ${formatar(s4.q75, 2)} \xB7 ${formatar(s4.n, 0)} hex\xE1gonos` })
+  );
+  marcarGrafico(svg.node(), "estoque");
   box.replaceChildren(svg.node());
 }
 
@@ -100582,7 +104997,7 @@ var NOME_MEDIDA_QUALIDADE2 = {
   estoque: "Mudan\xE7a do estoque",
   hex_novo: "Hex\xE1gono novo"
 };
-var CLAB3 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var CLAB4 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 function $4(id3) {
   return document.getElementById(id3);
 }
@@ -100596,6 +105011,7 @@ async function iniciarExplorador() {
   const linhasArr = [...linhas.values()];
   const loja = criarLoja(estadoInicial(manifesto));
   window.__moradinhaSelecionarHex = (h32) => loja.definir({ selecionado: h32 });
+  window.__moradinhaEstado = () => loja.obter();
   const elementosPergunta = {
     question: $4("f1-question"),
     segTema: $4("f1-seg-tema"),
@@ -100622,17 +105038,22 @@ async function iniciarExplorador() {
     basefail: $4("f1-basefail"),
     layers: $4("f1-layers"),
     mapboxEl: $4("f1-mapbox"),
-    aoSelecionar: (h32) => loja.definir({ selecionado: h32 })
+    tooltip: $4("f1-tooltip"),
+    aoSelecionar: (h32) => loja.definir({ selecionado: h32 }),
+    aoMudarRelativoModo: (relativo_modo) => loja.definir({ relativo_modo })
   };
   const mapa = criarMapa({
     elementos: elementosMapa,
     manifesto,
     linhas,
     ap: ap2,
+    totais,
     contornosAp: dados.contornosAp,
     contornosMunicipios: dados.contornosMunicipios,
-    contornosFcu: dados.contornosFcu
+    contornosFcu: dados.contornosFcu,
+    contornosRecortes: dados.contornosRecortes
   });
+  window.__moradinhaMapas = mapa.instanciasMapLibre;
   const elementosResposta = { lab: $4("f1-ans-lab"), big: $4("f1-ans-big"), range: $4("f1-ans-range"), pills: $4("f1-ans-pills"), cards: $4("f1-cards") };
   const elDetail = $4("f1-detail");
   function obterValorMapa(estado) {
@@ -100642,9 +105063,9 @@ async function iniciarExplorador() {
     return { fn: (l3, periodo) => valorHex(l3, estado.componente, periodo, estado.medida), tipo: "deficit" };
   }
   function rotuloLegenda(estado) {
-    if (estado.tema === "qualidade") return `${NOME_MEDIDA_QUALIDADE2[estado.medida_qualidade]} \xB7 ${CLAB3[estado.componente]}`;
+    if (estado.tema === "qualidade") return `${NOME_MEDIDA_QUALIDADE2[estado.medida_qualidade]} \xB7 ${CLAB4[estado.componente]}`;
     const unidade = estado.medida === "relativo" ? "relativo (% dos domic\xEDlios)" : "absoluto (domic\xEDlios)";
-    return `${CLAB3[estado.componente]} \xB7 ${unidade}`;
+    return `${CLAB4[estado.componente]} \xB7 ${unidade}`;
   }
   function renderizarGraficos(estado) {
     const dock2 = $4("f1-dock");
@@ -100652,8 +105073,8 @@ async function iniciarExplorador() {
     if (estado.conjunto_graficos === 0) {
       renderizarHistograma($4("f1-hist"), estado, linhasArr, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarRanking($4("f1-rank"), estado, linhasArr, ap2, (h32) => loja.definir({ selecionado: h32 }));
-      renderizarSerie($4("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: null }));
-      renderizarCaixas($4("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: null }));
+      renderizarSerie($4("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
+      renderizarCaixas($4("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($4("f1-qhist"), estado, linhasArr, ap2, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarDispersao($4("f1-disp"), estado, linhasArr, (h32) => loja.definir({ selecionado: h32 }));
@@ -100661,16 +105082,50 @@ async function iniciarExplorador() {
       renderizarEstoque($4("f1-estoque"), manifesto, linhasArr);
     }
   }
+  function renderizarRecorteAtivo(estado) {
+    const el2 = $4("f1-recorte-ativo");
+    const faixa = estado.faixa_hist?.[0];
+    if (!faixa) {
+      el2.setAttribute("hidden", "");
+      return;
+    }
+    const isRel = estado.medida === "relativo";
+    const dec = isRel ? 1 : 0;
+    const unidade = isRel ? " %" : "";
+    const [lo2, hi2] = faixa;
+    el2.textContent = `Filtro ativo: hex\xE1gonos entre ${lo2.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade} e ${hi2 == null ? "ou mais" : `${hi2.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade}`}. Clique fora das barras do histograma ou em "Limpar" para remover.`;
+    el2.removeAttribute("hidden");
+  }
+  function renderizarAvisoMapa(estado) {
+    const el2 = $4("f1-aviso-mapa");
+    const semFaixa = estado.tema === "qualidade" && estado.medida_qualidade === "incerteza" && estado.componente === "total";
+    el2.hidden = !semFaixa;
+    if (!semFaixa) return;
+    const alvo = componenteMaior(totais, estado.periodo) ?? "coabitacao";
+    $4("f1-aviso-mapa-txt").textContent = "O total n\xE3o tem faixa de incerteza; escolha um componente.";
+    const btn = $4("f1-aviso-mapa-btn");
+    btn.textContent = `Ver ${CLAB4[alvo]}`;
+    btn.onclick = () => loja.definir({ componente: alvo, faixa_hist: [] });
+  }
   function renderTudo(estado) {
     sincronizarPergunta(estado);
+    renderizarAvisoMapa(estado);
+    renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
-    mapa.renderizarCamadasUI(estado, (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }));
-    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: null }));
-    renderizarHexagono(elDetail, estado, linhas, ap2, manifesto);
+    mapa.renderizarCamadasUI(
+      estado,
+      (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }),
+      (opacidade) => loja.definir({ opacidade }),
+      (mapa_base_cinza) => loja.definir({ mapa_base_cinza })
+    );
+    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: [] }));
+    renderizarHexagono(elDetail, estado, linhas, ap2, manifesto, totais);
     renderizarGraficos(estado);
     salvarLocalStorage(estado);
   }
+  $4("f1-hist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
+  $4("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
   const dock = $4("f1-dock");
   const dockToggle = $4("f1-dock-toggle");
   const corpoDeficit = $4("f1-dock-body-deficit");
@@ -100695,7 +105150,7 @@ async function iniciarExplorador() {
     dockToggle.setAttribute("aria-expanded", String(!colapsado));
     if (!colapsado) renderizarGraficos(loja.obter());
   };
-  document.querySelectorAll(".dcard header .iconbtn").forEach((b10) => {
+  document.querySelectorAll(".dcard header .iconbtn[aria-label^='Minimizar']").forEach((b10) => {
     b10.onclick = () => {
       const card = b10.closest(".dcard");
       const min6 = card.classList.toggle("min");
@@ -100736,93 +105191,28 @@ async function iniciarExplorador() {
   renderTudo(loja.obter());
 }
 
-// src/js/dados/visaoGeral.js
-var NOME_COMPONENTE2 = { total: "total", coabitacao: "coabita\xE7\xE3o", onus: "\xF4nus", precariedade: "precariedade" };
-var CLAB4 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
-function periodoRecenteAno(manifesto) {
-  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano") ?? manifesto.periodos.at(-1);
-}
-function periodoRecenteMedia(manifesto) {
-  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "media") ?? null;
-}
-function componenteMaior(totais, periodoId) {
-  let maior = null;
-  for (const c3 of COMPONENTES_BASE) {
-    const t4 = totalDoMapa(totais, c3, periodoId);
-    if (t4 && (!maior || t4.total > maior.total)) maior = { componente: c3, total: t4.total };
-  }
-  return maior?.componente ?? null;
-}
-function marcaMaisImportante(totais, periodoId) {
-  for (const codigo of PRIORIDADE_MARCAS) {
-    for (const c3 of COMPONENTES_BASE) {
-      const t4 = totalDoMapa(totais, c3, periodoId);
-      if (t4?.marcas?.includes(codigo)) {
-        return { componente: c3, codigo };
-      }
-    }
-  }
-  return null;
-}
-function dadosCartoesBI(manifesto, totais) {
-  const ano = periodoRecenteAno(manifesto);
-  const media = periodoRecenteMedia(manifesto);
-  const anosTipo = manifesto.periodos.filter((p4) => p4.tipo === "ano");
-  const dom = domiciliosTotal(totais, ano.id);
-  const domMedia = media ? domiciliosTotal(totais, media.id) : null;
-  return ["total", ...COMPONENTES_BASE].map((componente) => {
-    const tAno = totalDoMapa(totais, componente, ano.id);
-    const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
-    const serie = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id)?.total ?? null);
-    return {
-      componente,
-      rotulo: CLAB4[componente],
-      absolutoAno: tAno?.total ?? null,
-      relativoAno: tAno && dom ? 100 * tAno.total / dom : null,
-      absolutoMedia: tMedia?.total ?? null,
-      relativoMedia: tMedia && domMedia ? 100 * tMedia.total / domMedia : null,
-      marcas: tAno?.marcas ?? [],
-      serie,
-      anos: anosTipo.map((p4) => p4.rotulo),
-      periodoAno: ano.id,
-      periodoMedia: media?.id ?? null
-    };
-  });
-}
-function marcasDoDominio(totais) {
-  const vistas = /* @__PURE__ */ new Map();
-  const registrar = (codigo, componente) => {
-    if (!vistas.has(codigo)) vistas.set(codigo, /* @__PURE__ */ new Set());
-    vistas.get(codigo).add(componente);
-  };
-  for (const t4 of totais.totais) for (const m4 of t4.marcas ?? []) registrar(m4, t4.componente);
-  for (const mu2 of totais.mudancas ?? []) for (const m4 of mu2.marcas ?? []) registrar(m4, mu2.componente);
-  return [...vistas.entries()].map(([codigo, componentes]) => ({ codigo, componentes: [...componentes] }));
-}
-function linhasParaCitar(manifesto, totais) {
-  const ano = periodoRecenteAno(manifesto);
-  const media = periodoRecenteMedia(manifesto);
-  const data = manifesto.data_execucao.slice(0, 10).split("-").reverse().join("/");
-  const linhas = [];
-  for (const periodo of [ano, media].filter(Boolean)) {
-    for (const componente of ["total", ...COMPONENTES_BASE]) {
-      const t4 = totalDoMapa(totais, componente, periodo.id);
-      if (!t4) continue;
-      const rotulo = componente === "total" ? "D\xE9ficit total" : `D\xE9ficit de ${NOME_COMPONENTE2[componente]}`;
-      linhas.push({
-        componente,
-        periodo: periodo.id,
-        periodoRotulo: periodo.rotulo,
-        total: t4.total,
-        ep: t4.ep,
-        texto: `${rotulo}, ${manifesto.nome}, ${periodo.rotulo}: ${Math.round(t4.total).toLocaleString("pt-BR")} domic\xEDlios (moradinha, edi\xE7\xE3o ${manifesto.edicao}, ${data}).`
-      });
-    }
-  }
-  return linhas;
+// src/js/util/rotulos.js
+var ROTULOS = Object.freeze({
+  rusticos: "r\xFAsticos",
+  improvisados: "improvisados (Cad\xDAnico)",
+  comodos: "c\xF4modos",
+  unidade_convivente: "fam\xEDlias conviventes",
+  pnadc: "domic\xEDlios na PNADc",
+  habitacao_precaria: "habita\xE7\xE3o prec\xE1ria",
+  atencao_basica: "aten\xE7\xE3o b\xE1sica (equipamentos)",
+  contagem_edificios: "contagem de edifica\xE7\xF5es",
+  escolas_pub: "escolas p\xFAblicas",
+  fracao_fcu: "fra\xE7\xE3o em FCU (favelas e comunidades urbanas)",
+  fracao_urbanizada: "fra\xE7\xE3o urbanizada",
+  luz_allangle: "luz noturna",
+  estoque: "estoque de domic\xEDlios"
+});
+function rotulo(chave) {
+  if (chave == null) return chave;
+  return ROTULOS[chave] ?? chave;
 }
 
-// src/js/visaoGeral.js
+// src/js/ui/fjp.js
 var NOME_INDICADOR = {
   total: "Total",
   habitacao_precaria: "Habita\xE7\xE3o prec\xE1ria",
@@ -100830,6 +105220,49 @@ var NOME_INDICADOR = {
   onus: "\xD4nus excessivo com aluguel",
   domicilios: "Domic\xEDlios"
 };
+var AJUDA = "Cada linha compara um indicador do d\xE9ficit em tr\xEAs n\xFAmeros: o que a FJP publica sem a parte do Cad\xDAnico (que a PNADc n\xE3o capta), o que o moradinha reconstr\xF3i na PNADc com a faixa de 95%, e o total que ficou no mapa. Passe o mouse num n\xFAmero para ver de onde vem.";
+function renderizarFjp(el2, referenciaFjp, { titulo = "h3" } = {}) {
+  const itens = fjpTresValores(referenciaFjp ?? []);
+  if (!itens.length) {
+    el2.innerHTML = `<p class="empty">Sem refer\xEAncia da FJP neste pacote.</p>`;
+    return;
+  }
+  const anoRef = itens[0]?.ano_ref;
+  const texto = `Compara\xE7\xE3o com a FJP${anoRef != null ? `, ${anoRef}` : ""}`;
+  const num = (v4) => v4 == null ? "\u2014" : formatar(v4, 0);
+  const cab = titulo === "h3" ? `<h3>${texto}</h3>` : `<header class="graf-cab"><span class="sub">${texto}</span></header>`;
+  const linhas = itens.map((item) => {
+    const nome = NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador);
+    const faixaTxt = item.faixa ? `faixa de 95%: ${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : "sem faixa de 95%";
+    const dentro = item.dentro == null ? "" : ` \xB7 o valor da FJP sem Cad\xDAnico cai ${item.dentro ? "dentro" : "fora"} da faixa`;
+    const obs = item.cadUnico > 0 && item.fjp_publicado != null && ["total", "habitacao_precaria"].includes(item.indicador) ? `<div class="fjp-sub fjp-obs">A FJP publica ${formatar(item.fjp_publicado, 0)}, dos quais ${formatar(item.cadUnico, 0)} s\xE3o improvisados do Cad\xDAnico, que a PNADc n\xE3o capta.</div>` : "";
+    const fonte = item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : "";
+    const dica2 = (coluna, valor, faixa, base) => `data-dica-titulo="${attr(nome)} \xB7 ${attr(coluna)}" data-dica-valor="${attr(valor)}"${faixa ? ` data-dica-faixa="${attr(faixa)}"` : ""}${base ? ` data-dica-base="${attr(base)}"` : ""}`;
+    return `<div class="fjp-linha">
+        <h4>${nome}</h4>
+        <div class="fjp-colunas">
+          <div class="fjp-col" ${dica2("FJP compar\xE1vel", item.semCadUnico == null ? "a preencher" : num(item.semCadUnico), null, item.fjp_fonte)}><div class="k">FJP compar\xE1vel (sem Cad\xDAnico)</div>
+            <div class="v ${item.semCadUnico == null ? "a-preencher" : ""}" data-num="${item.semCadUnico ?? ""}">${item.semCadUnico == null ? "a preencher" : num(item.semCadUnico)}</div>
+          </div>
+          <div class="fjp-col" ${dica2("reconstru\xE7\xE3o na PNADc", num(item.reconstrucao_pnadc), item.faixa ? `${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : null, item.faixa ? null : "sem faixa de 95%")}><div class="k">Reconstru\xE7\xE3o do moradinha na PNADc</div>
+            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${num(item.reconstrucao_pnadc)}</div>
+            <div class="fjp-sub">${faixaTxt}${dentro}</div>
+          </div>
+          <div class="fjp-col" ${dica2("total do mapa", num(item.mapa), null, "soma dos hex\xE1gonos")}><div class="k">Total do mapa</div>
+            <div class="v" data-num="${item.mapa ?? ""}">${num(item.mapa)}</div>
+          </div>
+        </div>
+        ${obs}
+        <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
+        ${fonte}
+      </div>`;
+  }).join("");
+  el2.innerHTML = `${cab}<div class="grafico-dica">${AJUDA}</div><div data-grafico="tabela-fjp">${linhas}</div>`;
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
+}
+
+// src/js/visaoGeral.js
 var GRAVIDADE_ORDEM = ["crit", "warn", "info"];
 var NOME_GRAVIDADE = { crit: "Cr\xEDtico", warn: "Aten\xE7\xE3o", info: "Informativo" };
 function $5(id3) {
@@ -100838,15 +105271,38 @@ function $5(id3) {
 function css5(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
-function sparkline2(serie) {
+function primeiraMinuscula(texto) {
+  return texto ? texto[0].toLowerCase() + texto.slice(1) : texto;
+}
+function sparkline2(c3) {
+  const serie = c3.serie;
   const ok2 = serie.filter((v4) => v4 != null);
-  if (!ok2.length) return "";
-  const W4 = 120;
-  const H4 = 32;
-  const x5 = point().domain(serie.map((_v3, i3) => i3)).range([4, W4 - 4]);
-  const y5 = linear2().domain([0, max4(ok2) * 1.15 || 1]).range([H4 - 4, 4]);
+  if (!ok2.length) return null;
+  const W4 = 150;
+  const H4 = 30;
+  const m4 = { l: 40, r: 4, t: 4, b: 10 };
+  const lo2 = min4(ok2);
+  const hi2 = max4(ok2);
+  const x5 = point().domain(serie.map((_v3, i3) => i3)).range([m4.l, W4 - m4.r]);
+  const y5 = linear2().domain([lo2 === hi2 ? 0 : lo2, hi2]).range([H4 - m4.b, m4.t]);
   const linha = line().defined((v4) => v4 != null).x((_v3, i3) => x5(i3)).y((v4) => y5(v4));
-  return `<svg class="spark" viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="S\xE9rie de anos"><path d="${linha(serie)}" fill="none" stroke="${css5("--accent")}" stroke-width="1.6"/></svg>`;
+  const svg = create5("svg").attr("class", "spark").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", W4).attr("height", H4).attr("role", "img").attr("aria-label", `S\xE9rie de ${c3.rotulo}, ${c3.anos[0]} a ${c3.anos.at(-1)}`);
+  svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css5("--accent")).attr("stroke-width", 1.6);
+  const rot = (txt, px2, py2, anchor) => svg.append("text").attr("x", px2).attr("y", py2).attr("text-anchor", anchor).attr("font-size", 7.5).attr("fill", css5("--muted")).text(txt);
+  rot(formatar(hi2, 0), m4.l - 4, m4.t + 3, "end");
+  rot(formatar(lo2, 0), m4.l - 4, H4 - m4.b + 1, "end");
+  rot(c3.anos[0], m4.l, H4 - 1, "start");
+  rot(c3.anos.at(-1), W4 - m4.r, H4 - 1, "end");
+  const pts = serie.map((v4, i3) => ({ v: v4, i: i3, ano: c3.anos[i3], faixa: c3.faixas?.[i3] ?? null })).filter((d3) => d3.v != null);
+  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d3) => x5(d3.i)).attr("cy", (d3) => y5(d3.v)).attr("r", 2.4).attr("fill", css5("--accent"));
+  svg.append("g").selectAll("rect").data(pts).join("rect").attr("x", (d3) => x5(d3.i) - 9).attr("width", 18).attr("y", 0).attr("height", H4).attr("fill", "transparent");
+  ligarDica(
+    svg.selectAll("rect"),
+    (d3) => htmlDica({ titulo: d3.ano, valor: `${formatar(d3.v, 0)} domic\xEDlios`, faixa: d3.faixa ? `${formatar(d3.faixa[0], 0)} a ${formatar(d3.faixa[1], 0)}` : null, base: d3.faixa ? null : "sem faixa de 95% para este indicador" })
+  );
+  marcarGrafico(svg.node(), "mini-serie");
+  void bolas;
+  return svg.node();
 }
 function renderizarMensagem(el2, manifesto, totais) {
   const ano = periodoRecenteAno(manifesto);
@@ -100857,59 +105313,36 @@ function renderizarMensagem(el2, manifesto, totais) {
   const marca = marcaMaisImportante(totais, ano.id);
   const linha1 = `O d\xE9ficit habitacional total na ${manifesto.nome} \xE9 de <b data-num="${total.absolutoAno}">${formatar(total.absolutoAno, 0)}</b> domic\xEDlios (<span data-num="${total.relativoAno}">${formatarPercentual(total.relativoAno, 2)}</span>) em ${ano.rotulo}${media ? `, e de ${formatar(total.absolutoMedia, 0)} (${formatarPercentual(total.relativoMedia, 2)}) na ${media.rotulo.toLowerCase()}` : ""}.`;
   const linha2 = maior ? `O maior componente \xE9 ${NOME_COMPONENTE2[maior]}.` : "";
-  const linha3 = marca ? `${CLAB4[marca.componente]} com ${rotuloMarca(marca.codigo).toLowerCase()}.` : "";
+  const linha3 = marca ? `${CLAB[marca.componente]} com ${primeiraMinuscula(rotuloMarca(marca.codigo))}.` : "";
   el2.innerHTML = [linha1, linha2, linha3].filter(Boolean).join("<br>");
 }
 function renderizarCartoes(el2, manifesto, totais) {
   const cartoes = dadosCartoesBI(manifesto, totais);
-  el2.innerHTML = cartoes.map(
-    (c3) => `<button type="button" class="cartao-bi" data-componente="${c3.componente}">
-        <span class="k">${c3.rotulo}</span>
-        <span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
+  el2.innerHTML = "";
+  for (const c3 of cartoes) {
+    const card = document.createElement("article");
+    card.className = "cartao-bi";
+    card.dataset.componente = c3.componente;
+    card.innerHTML = `<header><span class="k">${c3.rotulo}</span></header>
+      <button type="button" class="cartao-corpo">
+        <span class="cb-vr"><span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
         <span class="r" data-num="${c3.relativoAno ?? ""}">${formatarPercentual(c3.relativoAno, 2)}</span>
-        ${sparkline2(c3.serie)}
-        <span class="pills">${(c3.marcas ?? []).map((m4) => `<span class="pill ${classeMarca(m4)}">${rotuloMarca(m4)}</span>`).join("")}</span>
-      </button>`
-  ).join("");
-  el2.querySelectorAll(".cartao-bi").forEach((b10) => {
-    b10.onclick = () => {
-      const componente = b10.dataset.componente;
+        <span class="pills">${(c3.marcas ?? []).map((m4) => `<span class="pill marca-ico ${classeMarca(m4)}" role="img" aria-label="${rotuloMarca(m4)}" title="${rotuloMarca(m4)}">${classeMarca(m4) === "info" ? "i" : "!"}</span>`).join("")}</span></span>
+        <span class="spark-slot"></span>
+      </button>`;
+    card.querySelector("header").appendChild(
+      criarAjuda("Evolu\xE7\xE3o do total do indicador por ano. O eixo vertical vai do menor ao maior valor da s\xE9rie; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
+    );
+    const svg = sparkline2(c3);
+    if (svg) card.querySelector(".spark-slot").appendChild(svg);
+    card.onclick = (e67) => {
+      if (e67.target.closest(".ajuda")) return;
       const ano = periodoRecenteAno(manifesto);
-      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente, periodo: ano.id });
+      prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente: c3.componente, periodo: ano.id });
       window.location.href = "resultados.html";
     };
-  });
-}
-function dentroDaFaixa(publicado, reconstrucao, ep2) {
-  if (publicado == null || reconstrucao == null || ep2 == null) return null;
-  const lo2 = reconstrucao - 1.96 * ep2;
-  const hi2 = reconstrucao + 1.96 * ep2;
-  return publicado >= lo2 && publicado <= hi2;
-}
-function renderizarFjp(el2, referenciaFjp) {
-  el2.innerHTML = referenciaFjp.map((item) => {
-    const dentro = dentroDaFaixa(item.fjp_publicado, item.reconstrucao_pnadc, item.reconstrucao_ep);
-    const faixaTxt = item.reconstrucao_ep != null ? `faixa de 95%: ${formatar(item.reconstrucao_pnadc - 1.96 * item.reconstrucao_ep, 1)} a ${formatar(item.reconstrucao_pnadc + 1.96 * item.reconstrucao_ep, 1)}${dentro != null ? ` \xB7 o n\xFAmero da FJP cai ${dentro ? "dentro" : "fora"} da faixa da reconstru\xE7\xE3o` : ""}` : "";
-    const subcomponentes = (item.fjp_subcomponentes ?? []).map((s4) => `<div class="fjp-sub">${s4.nome}: ${formatar(s4.valor, 0)}</div>`).join("");
-    return `<div class="fjp-linha">
-        <h3>${NOME_INDICADOR[item.indicador] ?? item.indicador}</h3>
-        <div class="fjp-colunas">
-          <div class="fjp-col"><div class="k">FJP (publicado)</div>
-            <div class="v ${item.fjp_publicado == null ? "a-preencher" : ""}" data-num="${item.fjp_publicado ?? ""}">${item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)}</div>
-            ${subcomponentes}
-            ${item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : ""}
-          </div>
-          <div class="fjp-col"><div class="k">Reconstru\xE7\xE3o na PNADc</div>
-            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${formatar(item.reconstrucao_pnadc, 1)}</div>
-            <div class="fjp-sub">${faixaTxt}</div>
-          </div>
-          <div class="fjp-col"><div class="k">Total do mapa</div>
-            <div class="v" data-num="${item.mapa ?? ""}">${formatar(item.mapa, 1)}</div>
-          </div>
-        </div>
-        <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
-      </div>`;
-  }).join("");
+    el2.appendChild(card);
+  }
 }
 function renderizarMarcas(el2, totais) {
   const marcas = marcasDoDominio(totais);
@@ -100919,8 +105352,8 @@ function renderizarMarcas(el2, totais) {
     if (!grupos.has(grav)) grupos.set(grav, []);
     grupos.get(grav).push(m4);
   }
-  el2.innerHTML = GRAVIDADE_ORDEM.filter((g4) => grupos.has(g4)).map(
-    (g4) => `<div class="marca-grupo"><h3>${NOME_GRAVIDADE[g4]}</h3>${grupos.get(g4).map((m4) => `<div class="marca-item"><span class="pill ${g4}">${rotuloMarca(m4.codigo)}</span> \u2014 ${m4.componentes.map((c3) => CLAB4[c3] ?? c3).join(", ")}</div>`).join("")}</div>`
+  el2.innerHTML = GRAVIDADE_ORDEM.filter((g5) => grupos.has(g5)).map(
+    (g5) => `<div class="marca-grupo"><h3>${NOME_GRAVIDADE[g5]}</h3>${grupos.get(g5).map((m4) => `<div class="marca-item"><span class="pill ${g5}">${rotuloMarca(m4.codigo)}</span> \u2014 ${m4.componentes.map((c3) => CLAB[c3] ?? c3).join(", ")}</div>`).join("")}</div>`
   ).join("");
 }
 function renderizarCitar(el2, manifesto, totais) {
@@ -100955,19 +105388,129 @@ async function iniciarVisaoGeral() {
     carregarPacoteCompleto(edicao.origem),
     carregarJSON(edicao.origem, "referencia_fjp.json")
   ]);
-  const { manifesto, totais, linhas } = dados;
+  const { manifesto, totais, linhas, ap: ap2 } = dados;
+  const linhasArr = [...linhas.values()];
   renderizarMensagem($5("f2-mensagem"), manifesto, totais);
   renderizarCartoes($5("f2-cartoes"), manifesto, totais);
   renderizarFjp($5("f2-fjp"), referenciaFjp);
   renderizarMarcas($5("f2-marcas"), totais);
   renderizarCitar($5("f2-citar"), manifesto, totais);
-  const { periodoRecente } = criarMiniMapa({ container: $5("f2-minimapa"), manifesto, linhas });
+  const { periodoRecente } = criarMiniMapa({
+    container: $5("f2-minimapa"),
+    manifesto,
+    linhas,
+    ap: ap2,
+    totais,
+    tooltip: $5("f2-minimapa-tooltip"),
+    aoClicarHexagono: (h32) => {
+      prepararNavegacaoResultados({ tema: "deficit", medida: "relativo", componente: "total", periodo: periodoRecente, selecionado: h32 });
+      window.location.href = "resultados.html";
+    }
+  });
   const periodo = manifesto.periodos.find((p4) => p4.id === periodoRecente);
   $5("f2-minimapa-sub").textContent = `D\xE9ficit relativo total, ${periodo?.rotulo ?? periodoRecente}.`;
+  const anoRecente = periodoRecenteAno(manifesto);
+  $5("f2-ressalva-relativo").textContent = fraseRessalvaRelativo(linhasArr, totais, "total", anoRecente.id);
+  const backdrop = $5("f2-detalhes-backdrop");
+  let detalhesRenderizados = false;
+  function renderizarDetalhes() {
+    if (detalhesRenderizados) return;
+    detalhesRenderizados = true;
+    renderizarPainelDetalhe($5("f2-det-total"), manifesto, totais, "total", "Total");
+    renderizarPainelDetalhe($5("f2-det-coabitacao"), manifesto, totais, "coabitacao", "Coabita\xE7\xE3o");
+    renderizarPainelDetalhe($5("f2-det-onus"), manifesto, totais, "onus", "\xD4nus");
+    renderizarPainelDetalhe($5("f2-det-precariedade"), manifesto, totais, "precariedade", "Precariedade");
+    $5("f2-det-frase-ruido").textContent = fraseRuidoAnual(manifesto, totais);
+    $5("f2-det-concentracao-titulo").firstChild.textContent = `Curva de concentra\xE7\xE3o \u2014 Total, ${anoRecente.rotulo}`;
+    renderizarCurvaConcentracao($5("f2-det-concentracao"), linhasArr, "total", anoRecente.id);
+  }
+  function abrirDetalhes() {
+    backdrop.removeAttribute("hidden");
+    renderizarDetalhes();
+    $5("f2-detalhes-fechar").focus();
+  }
+  function fecharDetalhes() {
+    backdrop.setAttribute("hidden", "");
+    $5("f2-detalhes-btn").focus();
+  }
+  $5("f2-detalhes-btn").onclick = abrirDetalhes;
+  $5("f2-detalhes-fechar").onclick = fecharDetalhes;
+  backdrop.addEventListener("click", (e67) => {
+    if (e67.target === backdrop) fecharDetalhes();
+  });
+  document.addEventListener("keydown", (e67) => {
+    if (e67.key === "Escape" && !backdrop.hasAttribute("hidden")) fecharDetalhes();
+  });
 }
 
 // src/js/dados/confiabilidade.js
 var CLAB5 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var INDICADOR_FJP_POR_COMPONENTE = { coabitacao: "coabitacao", onus: "onus", precariedade: "habitacao_precaria" };
+function veredictoPergunta1(qualidade, referenciaFjp, componente) {
+  const pontePonto = (qualidade.ponte ?? []).find((p4) => p4.indicador === componente);
+  const numero = pontePonto?.razao ?? null;
+  const indicadorFjp = INDICADOR_FJP_POR_COMPONENTE[componente];
+  const item = fjpTresValores(referenciaFjp ?? []).find((i3) => i3.indicador === indicadorFjp);
+  const fjpDentro = item?.dentro ?? null;
+  const ponteDentro = numero == null ? null : numero >= 0.8 && numero <= 1.25;
+  let veredicto = null;
+  if (fjpDentro != null && ponteDentro != null) {
+    const nOk = (fjpDentro ? 1 : 0) + (ponteDentro ? 1 : 0);
+    veredicto = nOk === 2 ? "bate" : nOk === 1 ? "em parte" : "n\xE3o bate";
+  }
+  return { veredicto, numero };
+}
+function veredictoPergunta2(modeloComponente) {
+  if (!modeloComponente) return { veredicto: null, numero: null, motivo: null, usado: null };
+  const numero = modeloComponente.ganho?.razao != null ? 100 * modeloComponente.ganho.razao : null;
+  const a5 = modeloComponente.ganho?.razao != null && modeloComponente.ganho.razao <= 0.9;
+  const ordem = modeloComponente.ordem;
+  const b10 = ordem != null && ordem.spearman_modelo > ordem.spearman_base && ordem.spearman_modelo > 0.6;
+  const c3 = ordem != null && ordem.top20_modelo > ordem.top20_base;
+  const cobertura = modeloComponente.confianca?.cobertura_d;
+  const d3 = cobertura != null && cobertura.modelo > cobertura.base;
+  const viesAp = (modeloComponente.vies ?? []).filter((v4) => v4.grupo_tipo === "tipo de AP");
+  const e67 = viesAp.length > 0 && viesAp.every((v4) => v4.razao_somas >= 0.9 && v4.razao_somas <= 1.1);
+  let veredicto;
+  if (!a5) veredicto = "n\xE3o";
+  else veredicto = a5 && b10 && c3 && d3 && e67 ? "sim" : "em parte";
+  return { veredicto, numero, motivo: modeloComponente.motivo ?? null, usado: modeloComponente.usado };
+}
+var MARCAS_COMPARABILIDADE = /* @__PURE__ */ new Set([
+  "fonte_estoque_diferente",
+  "media_inclui_fonte_diferente",
+  "mudanca_no_ruido",
+  "precariedade_provisoria_sem_faixa"
+]);
+function veredictoPergunta3(manifesto, totais, componente) {
+  const linhasPorPeriodo = new Map(totais.totais.filter((t4) => t4.componente === componente && t4.no_mapa === true).map((t4) => [t4.periodo, t4]));
+  const mudancasComponente = (totais.mudancas ?? []).filter((m4) => m4.componente === componente);
+  let marcados = 0;
+  for (const p4 of manifesto.periodos) {
+    const marcasPeriodo = p4.marcas ?? [];
+    const marcasLinha = linhasPorPeriodo.get(p4.id)?.marcas ?? [];
+    const mudancaAqui = mudancasComponente.some((m4) => m4.para === p4.id && (m4.marcas ?? []).includes("mudanca_no_ruido"));
+    const temMarca = [...marcasPeriodo, ...marcasLinha].some((m4) => MARCAS_COMPARABILIDADE.has(m4)) || mudancaAqui;
+    if (temMarca) marcados++;
+  }
+  const total = manifesto.periodos.length;
+  return { veredicto: marcados === 0 ? "sim" : "em parte", numero: total > 0 ? marcados / total : null, marcados, total };
+}
+function veredictoPergunta4(achados) {
+  return { veredicto: null, numero: achadosPublicos(achados).reduce((s4, g5) => s4 + g5.itens.length, 0) };
+}
+function rotuloUso(uso) {
+  if (uso == null) return "sem dado";
+  if (uso === "do ano") return "do pr\xF3prio ano";
+  return uso;
+}
+function matrizOqueFalta(qualidade, manifesto) {
+  const fontes = qualidade.fontes ?? [];
+  return fontes.map((f4) => ({
+    variavel: f4.variavel,
+    celulas: manifesto.periodos.map((p4) => ({ periodo: p4.id, uso: rotuloUso(f4.uso_por_periodo?.[p4.id]) }))
+  }));
+}
 var BLOCOS_MODELO = [
   {
     chave: "ganho",
@@ -100992,12 +105535,11 @@ var BLOCOS_MODELO = [
   {
     chave: "curvas",
     titulo: "Por qu\xEA?",
-    significado: "O modelo (EBM, Explainable Boosting Machine) soma uma contribui\xE7\xE3o por caracter\xEDstica do domic\xEDlio ou do territ\xF3rio. A curva mostra quanto cada categoria aumenta ou diminui a chance de d\xE9ficit; a import\xE2ncia, quanto cada vari\xE1vel pesa no total."
+    significado: "O modelo (EBM, Explainable Boosting Machine) soma uma contribui\xE7\xE3o por caracter\xEDstica do domic\xEDlio ou do territ\xF3rio; a import\xE2ncia diz quanto cada vari\xE1vel pesa no total. As curvas ficam recolhidas nesta edi\xE7\xE3o."
   },
   {
     chave: "confianca",
     titulo: "Quanto confiar nesses n\xFAmeros?",
-    recolhido: true,
     significado: "Com poucas \xE1reas (53 no piloto), cada m\xE9trica oscila; os intervalos mostram quanto. O Moran dos res\xEDduos diz se os erros se agrupam no mapa (se sim, falta ao modelo alguma informa\xE7\xE3o espacial). A cobertura diz em quantas \xE1reas o modelo cai dentro do intervalo de 95% da amostra \u2014 um teste exigente, porque pede ao modelo a precis\xE3o da pr\xF3pria amostra."
   }
 ];
@@ -101015,55 +105557,224 @@ function achadosPublicos(achados) {
   return [...grupos.entries()].map(([situacao, itens]) => ({ situacao, itens }));
 }
 function limiteEixoP99(valores) {
-  const vs8 = valores.filter((v4) => v4 != null).sort(ascending);
-  if (!vs8.length) return 1;
-  return quantileSorted(vs8, 0.99) || vs8.at(-1) || 1;
+  const vs9 = valores.filter((v4) => v4 != null).sort(ascending);
+  if (!vs9.length) return 1;
+  return quantileSorted(vs9, 0.99) || vs9.at(-1) || 1;
+}
+var ESCALA_SPEARMAN = { min: 0.8, max: 1 };
+function posicaoSpearman(v4) {
+  if (v4 == null) return null;
+  return Math.max(0, Math.min(1, (v4 - ESCALA_SPEARMAN.min) / (ESCALA_SPEARMAN.max - ESCALA_SPEARMAN.min)));
+}
+function periodoMenosParecido(spearman, manifesto) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const somas = new Map(anos.map((p4) => [p4.id, { soma: 0, n: 0 }]));
+  for (const { periodos, matriz } of Object.values(spearman ?? {})) {
+    periodos.forEach((pi5, i3) => {
+      if (!somas.has(pi5)) return;
+      periodos.forEach((pj2, j4) => {
+        if (i3 === j4 || !somas.has(pj2) || matriz[i3][j4] == null) return;
+        const acc = somas.get(pi5);
+        acc.soma += matriz[i3][j4];
+        acc.n += 1;
+      });
+    });
+  }
+  let pior = null;
+  for (const p4 of anos) {
+    const { soma, n: n3 } = somas.get(p4.id);
+    if (!n3) continue;
+    const media = soma / n3;
+    if (!pior || media < pior.media) pior = { periodo: p4, media };
+  }
+  if (!pior) return null;
+  return { ...pior, fonteDiferente: pior.periodo.marcas?.includes("fonte_estoque_diferente") ?? false };
+}
+function fraseAnoMenosParecido(spearman, manifesto) {
+  const r3 = periodoMenosParecido(spearman, manifesto);
+  if (!r3) return "";
+  return `${r3.periodo.rotulo} \xE9 o ano que menos se parece com os outros: a ordem dos hex\xE1gonos muda${r3.fonteDiferente ? " porque o estoque vem de outra fonte" : ""}.`;
+}
+function spearmanContraBase(spearman, manifesto) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const base = anos[0]?.id;
+  return Object.entries(spearman ?? {}).map(([componente, { periodos, matriz }]) => {
+    const ib2 = periodos.indexOf(base);
+    const pontos = anos.filter((p4) => p4.id !== base).map((p4) => ({ periodo: p4, valor: ib2 < 0 || periodos.indexOf(p4.id) < 0 ? null : matriz[ib2][periodos.indexOf(p4.id)] })).filter((d3) => d3.valor != null);
+    return { componente, base: anos[0], pontos };
+  });
 }
 
 // src/js/confiabilidade.js
+var NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habita\xE7\xE3o prec\xE1ria", precariedade: "Precariedade", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus excessivo com aluguel", domicilios: "Domic\xEDlios" };
+function dica(titulo, valor, base) {
+  return `data-dica-titulo="${attr(titulo)}" data-dica-valor="${attr(valor)}"${base ? ` data-dica-base="${attr(base)}"` : ""}`;
+}
 function $6(id3) {
   return document.getElementById(id3);
 }
 function css6(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
-function renderizarFontes(el2, qualidade, manifesto) {
-  const fontes = qualidade.fontes?.[0];
-  if (!fontes) {
-    el2.innerHTML = `<p class="empty">Sem dados de fonte.</p>`;
-    return;
-  }
+function renderizarFontes(el2, manifesto) {
   el2.innerHTML = `<div class="timeline-fontes">${manifesto.periodos.map((p4) => {
-    const uso = fontes.uso_por_periodo?.[p4.id] ?? "\u2014";
-    const troca = p4.marcas?.includes("fonte_estoque_diferente");
-    return `<span class="passo${troca ? " troca" : ""}" title="${p4.rotulo}: ${uso}">${p4.rotulo}: ${uso}</span>`;
-  }).join("")}</div><div class="sub" style="margin-top:6px">${fontes.variavel} \u2014 fonte: ${fontes.fonte}. ${(fontes.marcas ?? []).map((m4) => rotuloMarca(m4)).join("; ")}</div>`;
+    const fonte = rotuloFonteEstoque(p4.fonte_estoque);
+    const troca = p4.marcas?.includes("fonte_estoque_diferente") || p4.marcas?.includes("media_inclui_fonte_diferente");
+    const marcasTxt = (p4.marcas ?? []).map((m4) => rotuloMarca(m4)).join("; ");
+    return `<span class="passo${troca ? " troca" : ""}" ${dica(p4.rotulo, fonte, marcasTxt || null)}>${p4.rotulo}: ${fonte}</span>`;
+  }).join("")}</div>`;
+  marcarGrafico(el2, "tabela-fontes");
 }
 function renderizarSigilo(el2, sigilo) {
   el2.innerHTML = `
-    <div class="cartao-f3"><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos</div></div>
-    <div class="cartao-f3"><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos</div></div>`;
+    <div class="cartao-f3" ${dica("Sem dado (sigilo total)", `${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos`, "hex\xE1gonos sem nenhum dado public\xE1vel")}><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos</div></div>
+    <div class="cartao-f3" ${dica("Parte em sigilo", `${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos`, "hex\xE1gonos com alguma parte em sigilo")}><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos</div></div>`;
+  marcarGrafico(el2, "cartoes-sigilo");
 }
 function renderizarAps(el2, aps) {
   el2.innerHTML = aps.map(
-    (a5) => `<div class="cartao-f3"><div class="k">${CLAB5[a5.componente] ?? a5.componente}</div>
+    (a5) => `<div class="cartao-f3" ${dica(CLAB5[a5.componente] ?? a5.componente, `${formatar(a5.n_aps, 0)} APs`, `${formatar(a5.n_ressalva, 0)} com ressalva \xB7 ${formatar(a5.n_sem_direta, 0)} sem amostra direta`)}><div class="k">${CLAB5[a5.componente] ?? a5.componente}</div>
         <div class="v" data-num="${a5.n_aps}">${formatar(a5.n_aps, 0)} APs</div>
         <div class="sub">${formatar(a5.n_ressalva, 0)} com ressalva \xB7 ${formatar(a5.n_sem_direta, 0)} sem amostra direta</div></div>`
   ).join("");
+  marcarGrafico(el2, "cartoes-aps");
 }
 function renderizarPonte(el2, ponte) {
   el2.innerHTML = `<table class="ponte"><thead><tr><th>Indicador</th><th>PNADc</th><th>Censo</th><th>Raz\xE3o</th><th>Leitura</th></tr></thead><tbody>${ponte.map(
-    (p4) => `<tr>
-        <td>${p4.indicador}</td>
+    (p4) => `<tr ${dica(NOME_INDICADOR_FJP[p4.indicador] ?? rotulo(p4.indicador), `PNADc ${p4.pnadc == null ? "\u2014" : formatar(p4.pnadc, 1)} \xB7 Censo ${p4.censo == null ? "\u2014" : formatar(p4.censo, 1)} \xB7 raz\xE3o ${p4.razao == null ? "\u2014" : formatar(p4.razao, 2)}`, p4.leitura)}>
+        <td>${NOME_INDICADOR_FJP[p4.indicador] ?? rotulo(p4.indicador)}</td>
         <td data-num="${p4.pnadc ?? ""}">${p4.pnadc == null ? "\u2014" : `${formatar(p4.pnadc, 1)} (EP ${formatar(p4.pnadc_ep, 1)})`}</td>
         <td data-num="${p4.censo ?? ""}">${p4.censo == null ? "\u2014" : formatar(p4.censo, 1)}</td>
         <td data-num="${p4.razao ?? ""}">${p4.razao == null ? "\u2014" : formatar(p4.razao, 2)}</td>
         <td class="sub">${p4.leitura}</td>
       </tr>`
   ).join("")}</tbody></table>`;
+  marcarGrafico(el2, "tabela-ponte");
 }
-function renderizarLacunas(el2, lacunas) {
-  el2.innerHTML = lacunas.map((l3) => `<li><b>${l3.item}</b> \u2014 ${l3.efeito}</li>`).join("");
+function renderizarCnefe(el2, cnefe) {
+  if (!cnefe) {
+    el2.innerHTML = `<p class="empty">Sem dado de CNEFE neste pacote.</p>`;
+    return;
+  }
+  el2.innerHTML = `
+    <div class="cartao-f3" ${dica("Endere\xE7os", formatar(cnefe.enderecos, 0), "endere\xE7os do CNEFE no dom\xEDnio")}><div class="k">Endere\xE7os</div><div class="v" data-num="${cnefe.enderecos}">${formatar(cnefe.enderecos, 0)}</div></div>
+    <div class="cartao-f3" ${dica("Hex\xE1gonos sem endere\xE7o", formatar(cnefe.hex_sem_endereco, 0), `${formatar(cnefe.domicilios_nesses_hex, 0)} domic\xEDlios nesses hex\xE1gonos`)}><div class="k">Hex\xE1gonos sem endere\xE7o</div><div class="v" data-num="${cnefe.hex_sem_endereco}">${formatar(cnefe.hex_sem_endereco, 0)}</div>
+      <div class="sub">${formatar(cnefe.domicilios_nesses_hex, 0)} domic\xEDlios nesses hex\xE1gonos</div></div>
+    <div class="cartao-f3" ${dica("Correla\xE7\xE3o com o hex\xE1gono", formatar(cnefe.correlacao_hex, 2), "correla\xE7\xE3o entre endere\xE7os e domic\xEDlios por hex\xE1gono")}><div class="k">Correla\xE7\xE3o com o hex\xE1gono</div><div class="v" data-num="${cnefe.correlacao_hex}">${formatar(cnefe.correlacao_hex, 2)}</div></div>`;
+  marcarGrafico(el2, "cartoes-cnefe");
+}
+function renderizarOqueFalta(el2, qualidade, manifesto) {
+  const matriz = matrizOqueFalta(qualidade, manifesto);
+  if (!matriz.length) {
+    el2.innerHTML = `<p class="empty">Sem lacunas registradas neste pacote.</p>`;
+    return;
+  }
+  el2.innerHTML = `<table class="grade-oquefalta"><thead><tr><th>Vari\xE1vel</th>${manifesto.periodos.map((p4) => `<th>${p4.rotulo}</th>`).join("")}</tr></thead><tbody>${matriz.map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c3, i3) => `<td ${dica(`${rotulo(linha.variavel)} \xB7 ${manifesto.periodos[i3]?.rotulo ?? ""}`, c3.uso)}>${c3.uso}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  marcarGrafico(el2, "tabela-oquefalta");
+}
+var SECOES_VEREDITOS = ["f3-secao-dados", "f3-secao-modelo", "f3-secao-consistencia", "f3-secao-achados"];
+var secaoAtual = 0;
+var celulaAtual = null;
+function sincronizarSecoes() {
+  SECOES_VEREDITOS.forEach((id3, i3) => {
+    const el2 = $6(id3);
+    if (!el2) return;
+    el2.hidden = i3 !== secaoAtual;
+  });
+  const botoes = [...document.querySelectorAll("button[data-secao]")];
+  const daSecao = botoes.filter((b10) => Number(b10.dataset.secao) === secaoAtual);
+  const escolhida = daSecao.includes(celulaAtual) ? celulaAtual : daSecao[0] ?? null;
+  botoes.forEach((b10) => {
+    b10.setAttribute("aria-expanded", String(b10 === escolhida));
+    if (b10 === escolhida) b10.setAttribute("aria-current", "true");
+    else b10.removeAttribute("aria-current");
+  });
+  document.querySelectorAll(".nav-lateral a").forEach((a5) => {
+    if (SECOES_VEREDITOS[secaoAtual] && a5.hash === `#${SECOES_VEREDITOS[secaoAtual]}`) a5.setAttribute("aria-current", "true");
+    else a5.removeAttribute("aria-current");
+  });
+}
+function irParaSecao(indice, { celula = null, rolar = true } = {}) {
+  const i3 = Math.max(0, Math.min(SECOES_VEREDITOS.length - 1, indice));
+  secaoAtual = i3;
+  celulaAtual = celula;
+  sincronizarSecoes();
+  const el2 = $6(SECOES_VEREDITOS[i3]);
+  if (rolar) el2?.scrollIntoView({ behavior: "smooth", block: "start" });
+  el2?.focus({ preventScroll: true });
+}
+function fecharSecao() {
+  secaoAtual = null;
+  celulaAtual = null;
+  sincronizarSecoes();
+}
+function classeVeredicto(v4) {
+  if (v4 === "sim" || v4 === "bate") return "ok";
+  if (v4 === "em parte") return "warn";
+  if (v4 === "n\xE3o" || v4 === "n\xE3o bate") return "crit";
+  return "";
+}
+function renderizarVereditos(el2, { qualidade, referenciaFjp, modelo, manifesto, totais, achados }) {
+  const componentes = ["coabitacao", "onus", "precariedade"];
+  const linhas = [
+    { pergunta: "1. Os n\xFAmeros de partida batem?", secaoIdx: 0, cels: componentes.map((c3) => ({ c: c3, ...veredictoPergunta1(qualidade, referenciaFjp, c3) })), fmt: (n3) => n3 == null ? "\u2014" : formatar(n3, 2) },
+    { pergunta: "2. O modelo p\xF5e o d\xE9ficit no lugar certo?", secaoIdx: 1, cels: componentes.map((c3) => ({ c: c3, ...veredictoPergunta2(modelo[c3]) })), fmt: (n3) => n3 == null ? "\u2014" : formatarPercentual(n3, 0) },
+    { pergunta: "3. A s\xE9rie \xE9 compar\xE1vel entre anos?", secaoIdx: 2, cels: componentes.map((c3) => ({ c: c3, ...veredictoPergunta3(manifesto, totais, c3) })), fmt: (_n2, cel) => cel.marcados == null ? "\u2014" : `${cel.marcados}/${cel.total}` }
+  ];
+  const p4 = veredictoPergunta4(achados);
+  const linhasHtml = linhas.map(
+    (l3) => `<tr><th scope="row">${l3.pergunta}</th>${l3.cels.map(
+      (cel) => `<td><button type="button" class="vereditocel ${classeVeredicto(cel.veredicto)}" data-secao="${l3.secaoIdx}" ${cel.usado === false && cel.motivo ? `title="N\xE3o adotado: ${cel.motivo}"` : ""}>
+            <span class="palavra">${cel.veredicto ?? "\u2014"}</span>
+            <span class="numero">${l3.fmt(cel.numero, cel)}</span>
+          </button></td>`
+    ).join("")}</tr>`
+  ).join("");
+  el2.innerHTML = `<table class="grade-vereditos"><thead><tr><th></th>${componentes.map((c3) => `<th>${CLAB5[c3]}</th>`).join("")}</tr></thead>
+    <tbody>${linhasHtml}
+      <tr><th scope="row">4. O que ainda n\xE3o sabemos</th><td colspan="${componentes.length}"><button type="button" class="vereditocel" data-secao="3"><span class="numero">${formatar(p4.numero, 0)} achados p\xFAblicos</span></button></td></tr>
+    </tbody></table>`;
+  el2.querySelectorAll("button[data-secao]").forEach((b10) => {
+    b10.onclick = () => irParaSecao(Number(b10.dataset.secao), { celula: b10 });
+  });
+  return { veredictoPergunta1Cels: linhas[0].cels, veredictoPergunta2Cels: linhas[1].cels, veredictoPergunta3Cels: linhas[2].cels };
+}
+function ligarNavegacaoSecoes() {
+  document.addEventListener("keydown", (e67) => {
+    if (secaoAtual == null || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName ?? "")) return;
+    if (e67.key === "ArrowRight") irParaSecao(secaoAtual + 1);
+    else if (e67.key === "ArrowLeft") irParaSecao(secaoAtual - 1);
+  });
+  document.querySelectorAll(".nav-lateral a").forEach((a5) => {
+    a5.addEventListener("click", (e67) => {
+      const i3 = SECOES_VEREDITOS.indexOf(a5.hash.slice(1));
+      if (i3 < 0) return;
+      e67.preventDefault();
+      irParaSecao(i3);
+    });
+  });
+  SECOES_VEREDITOS.forEach((id3) => {
+    const h22 = $6(id3)?.querySelector("h2");
+    if (!h22) return;
+    h22.style.cursor = "pointer";
+    h22.title = "Clique no t\xEDtulo para fechar esta se\xE7\xE3o";
+    h22.onclick = (e67) => {
+      if (e67.target.closest("a")) return;
+      fecharSecao();
+    };
+    const fechar = document.createElement("button");
+    fechar.type = "button";
+    fechar.className = "iconbtn secao-fechar";
+    fechar.textContent = "Fechar se\xE7\xE3o \xD7";
+    fechar.onclick = fecharSecao;
+    h22.insertAdjacentElement("afterend", fechar);
+  });
+  const hash = SECOES_VEREDITOS.indexOf(window.location.hash.slice(1));
+  irParaSecao(hash >= 0 ? hash : 0, { rolar: hash >= 0 });
+}
+function fraseResposta(cels, rotuloVerbo) {
+  const partes = cels.map((c3) => `${CLAB5[c3.c]} ${c3.veredicto ?? "\u2014"}`);
+  return `${rotuloVerbo}: ${partes.join("; ")}.`;
 }
 function linhaPergunta(titulo, respostaHtml, significado, { recolhido = false } = {}) {
   const corpo = `<div class="resposta">${respostaHtml}</div><div class="significado">${significado}</div>`;
@@ -101072,6 +105783,48 @@ function linhaPergunta(titulo, respostaHtml, significado, { recolhido = false } 
   }
   return `<div class="pergunta-bloco"><h4>${titulo}</h4>${corpo}</div>`;
 }
+function renderizarCalibracaoDecis(decis) {
+  if (!decis?.length) return "";
+  const W4 = 180;
+  const H4 = 180;
+  const m4 = { l: 32, r: 8, t: 8, b: 24 };
+  const max6 = max4(decis, (d3) => Math.max(d3.previsto, d3.observado)) || 1;
+  const x5 = linear2().domain([0, max6 * 1.05]).range([m4.l, W4 - m4.r]);
+  const y5 = linear2().domain([0, max6 * 1.05]).range([H4 - m4.b, m4.t]);
+  const pontos = decis.map((d3) => `<circle cx="${x5(d3.previsto)}" cy="${y5(d3.observado)}" r="3.5" fill="${css6("--accent")}"/><circle cx="${x5(d3.previsto)}" cy="${y5(d3.observado)}" r="9" fill="transparent" data-dica-titulo="decil ${attr(d3.decil)}" data-dica-valor="previsto ${attr(formatar(d3.previsto, 1))} \xB7 observado ${attr(formatar(d3.observado, 1))}"/>`).join("");
+  const ticks2 = ticks(0, max6, 4);
+  const eixoY = ticks2.map((t4) => `<text x="${m4.l - 4}" y="${y5(t4)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t4, 0)}</text>`).join("");
+  return `<header class="graf-cab" style="margin-top:6px"><span class="sub">Previsto \xD7 observado, por decil</span></header><div class="grafico-dica">Cada ponto \xE9 um d\xE9cimo das \xE1reas, do que o modelo prev\xEA menos ao que prev\xEA mais: o eixo horizontal \xE9 o previsto e o vertical, o observado na amostra. Pontos sobre a linha tracejada = o modelo acerta o tamanho. Passe o mouse num ponto.</div><svg data-grafico="calibracao" viewBox="0 0 ${W4} ${H4}" width="180" height="180" role="img" aria-label="Calibra\xE7\xE3o por decis: previsto contra observado">
+    <line x1="${x5(0)}" y1="${y5(0)}" x2="${x5(max6)}" y2="${y5(max6)}" stroke="${css6("--line")}" stroke-dasharray="3,3"/>
+    ${eixoY}
+    ${pontos}
+  </svg>`;
+}
+function renderizarViesComDestaque(vies) {
+  if (!vies?.length) return "<span class='empty'>Sem grupos de vi\xE9s registrados.</span>";
+  return vies.map((v4) => {
+    const fora = v4.razao_somas < 0.9 || v4.razao_somas > 1.1;
+    return `<span class="vies-pill${fora ? " fora" : ""}" title="${v4.grupo_tipo}">${v4.grupo}: ${formatar(v4.razao_somas, 2)}</span>`;
+  }).join(" ");
+}
+function graficoDobras(dobras) {
+  if (!dobras?.length) return "";
+  const W4 = 150;
+  const H4 = 96;
+  const m4 = { l: 30, r: 6, t: 8, b: 20 };
+  const x5 = point().domain(dobras.map((d3) => d3.dobra)).range([m4.l + 8, W4 - m4.r - 8]);
+  const painel = (titulo, chave, dominio, fmt) => {
+    const y5 = linear2().domain(dominio).nice().range([H4 - m4.b, m4.t]);
+    const ticks2 = y5.ticks(3);
+    const eixo = ticks2.map((v4) => `<line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(v4)}" y2="${y5(v4)}" stroke="${css6("--line")}" stroke-width="0.5"/><text x="${m4.l - 4}" y="${y5(v4)}" text-anchor="end" dominant-baseline="middle" font-size="9">${fmt(v4)}</text>`).join("");
+    const eixoX = dobras.map((d3) => `<text x="${x5(d3.dobra)}" y="${H4 - 6}" text-anchor="middle" font-size="9">${d3.dobra}</text>`).join("");
+    const pontos = dobras.map((d3) => `<circle cx="${x5(d3.dobra)}" cy="${y5(d3[chave])}" r="3.5" fill="${css6("--accent")}"/><rect x="${x5(d3.dobra) - 11}" y="${m4.t}" width="22" height="${H4 - m4.b - m4.t}" fill="transparent" data-dica-titulo="dobra ${attr(d3.dobra)}" data-dica-valor="erro ${attr(formatar(d3.razao_erro, 2))} \xB7 Spearman ${attr(formatar(d3.spearman, 2))}" data-dica-base="1 = o erro do modelo \xE9 igual ao da linha de base; abaixo de 1, o modelo erra menos"/>`).join("");
+    return `<div class="dobras-painel"><div class="sub">${titulo}</div><svg viewBox="0 0 ${W4} ${H4}" width="${W4}" height="${H4}" role="img" aria-label="${titulo} por dobra">${eixo}${eixoX}${pontos}</svg></div>`;
+  };
+  const erros = dobras.map((d3) => d3.razao_erro);
+  const sps = dobras.map((d3) => d3.spearman);
+  return `<header class="graf-cab"><span class="sub">Erro e Spearman por dobra</span></header><div class="grafico-dica">Cada ponto \xE9 uma dobra da valida\xE7\xE3o (uma parte das \xE1reas deixada de fora do treino). \xC0 esquerda, a raz\xE3o do erro do modelo contra a linha de base (abaixo de 1, o modelo erra menos); \xE0 direita, o Spearman entre o previsto e o observado (quanto mais perto de 1, melhor a ordem). Passe o mouse num ponto.</div><div class="dobras-graficos" data-grafico="dobras">${painel("Raz\xE3o do erro", "razao_erro", [Math.min(0, ...erros), Math.max(1, ...erros)], (v4) => formatar(v4, 1))}${painel("Spearman", "spearman", [Math.min(...sps), 1], (v4) => formatar(v4, 2))}</div>`;
+}
 function montarModeloHtml(modeloComponenteBruto) {
   const m4 = blocoModelo(modeloComponenteBruto);
   if (!m4.usado) {
@@ -101079,69 +105832,111 @@ function montarModeloHtml(modeloComponenteBruto) {
   }
   const ganhoResp = `raz\xE3o ${formatar(m4.ganho.razao, 2)} (IC ${formatar(m4.ganho.ic?.[0], 2)}\u2013${formatar(m4.ganho.ic?.[1], 2)})`;
   const ordemResp = `Spearman modelo ${formatar(m4.ordem.spearman_modelo, 2)} \xB7 linha de base ${formatar(m4.ordem.spearman_base, 2)} \xB7 top 20% ${formatarPercentual(m4.ordem.top20_modelo * 100, 0)}`;
-  const calibResp = `inclina\xE7\xE3o ${formatar(m4.calibracao.inclinacao, 2)} (IC ${formatar(m4.calibracao.ic_inclinacao?.[0], 2)}\u2013${formatar(m4.calibracao.ic_inclinacao?.[1], 2)})`;
-  const viesResp = (m4.vies ?? []).map((v4) => `${v4.grupo} (${v4.grupo_tipo}): ${formatar(v4.razao_somas, 2)}`).join(" \xB7 ");
-  const curvasResp = renderizarCurvas(m4.curvas, m4.importancia);
-  const confiancaResp = `Moran dos res\xEDduos I=${formatar(m4.confianca.moran_residuos?.I, 2)} (p=${formatar(m4.confianca.moran_residuos?.p, 2)}) \xB7 cobertura (d): modelo ${formatarPercentual(m4.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m4.confianca.cobertura_d?.base * 100, 0)}`;
+  const calibResp = `inclina\xE7\xE3o ${formatar(m4.calibracao.inclinacao, 2)} (IC ${formatar(m4.calibracao.ic_inclinacao?.[0], 2)}\u2013${formatar(m4.calibracao.ic_inclinacao?.[1], 2)})${renderizarCalibracaoDecis(m4.calibracao.decis)}`;
+  const viesResp = renderizarViesComDestaque(m4.vies);
+  const curvasResp = `<div class="sub">Os nomes das categorias entram na pr\xF3xima edi\xE7\xE3o (pend\xEAncia F7).</div><div class="sub" style="margin-top:6px">Import\xE2ncia: ${formatarListaImportancia(m4.importancia)}</div>`;
+  const confiancaResp = `${graficoDobras(m4.confianca.dobras)}Moran dos res\xEDduos I=${formatar(m4.confianca.moran_residuos?.I, 2)} (p=${formatar(m4.confianca.moran_residuos?.p, 2)}) \xB7 cobertura (d): modelo ${formatarPercentual(m4.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m4.confianca.cobertura_d?.base * 100, 0)}`;
   const respostas = { ganho: ganhoResp, ordem: ordemResp, calibracao: calibResp, vies: viesResp, curvas: curvasResp, confianca: confiancaResp };
   return BLOCOS_MODELO.map((b10) => linhaPergunta(b10.titulo, respostas[b10.chave], b10.significado, { recolhido: b10.recolhido })).join("");
 }
 function renderizarModelo(el2, modeloComponenteBruto) {
   el2.innerHTML = montarModeloHtml(modeloComponenteBruto);
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
-function renderizarCurvas(curvas, importancia) {
-  if (!curvas?.length) return "<span class='empty'>Sem curvas registradas.</span>";
-  const W4 = 220;
-  const H4 = 70;
-  const m4 = { l: 8, r: 8, t: 8, b: 18 };
-  return curvas.map((c3) => {
-    const semFaixa = c3.desvio == null;
-    const y5 = linear2().domain(extent([c3.escore - (c3.desvio ?? 0), c3.escore + (c3.desvio ?? 0)])).nice().range([H4 - m4.b, m4.t]);
-    const cy2 = y5(c3.escore);
-    const svg = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Curva de forma: ${c3.rotulo}">
-        <line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(0)}" y2="${y5(0)}" stroke="${css6("--line")}" stroke-dasharray="2,3"/>
-        ${!semFaixa ? `<line x1="${W4 / 2}" x2="${W4 / 2}" y1="${y5(c3.escore - c3.desvio)}" y2="${y5(c3.escore + c3.desvio)}" stroke="${css6("--accent")}" stroke-width="3" opacity="0.5"/>` : ""}
-        <circle cx="${W4 / 2}" cy="${cy2}" r="4" fill="${css6("--ink")}"/>
-      </svg>`;
-    return `<div class="comp-row" style="grid-template-columns:120px 1fr 60px"><span>${c3.rotulo} <span class="sub">(${c3.nivel})</span></span>${svg}<span class="num" style="text-align:right">${formatar(c3.escore, 2)}</span></div>${semFaixa ? `<div class="sub">faixa de oscila\xE7\xE3o n\xE3o calculada nesta edi\xE7\xE3o</div>` : ""}`;
-  }).join("") + `<div class="sub" style="margin-top:6px">Import\xE2ncia: ${(importancia ?? []).map((i3) => `${i3.rotulo} (${formatar(i3.valor, 2)})`).join(" \xB7 ")}</div>`;
+function formatarImportancia(valor, soma) {
+  if (valor == null || !soma) return formatar(null);
+  const pct = 100 * valor / soma;
+  return pct < 0.1 ? "< 0,1%" : `${formatar(pct, 1)}%`;
 }
-function renderizarHeatmap(el2, spearman) {
-  el2.innerHTML = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
+function formatarListaImportancia(importancia) {
+  const lista = importancia ?? [];
+  const soma = lista.reduce((s4, i3) => s4 + (i3.valor ?? 0), 0);
+  return lista.map((i3) => `${i3.rotulo} (${formatarImportancia(i3.valor, soma)})`).join(" \xB7 ");
+}
+function renderizarHeatmap(el2, spearman, manifesto) {
+  const rotuloPeriodo2 = (id3) => manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3;
+  const destaque = new Set(manifesto.periodos.filter((p4) => p4.marcas?.includes("fonte_estoque_diferente")).map((p4) => p4.id));
+  const cor = (v4) => v4 == null ? css6("--line") : rgb2(css6("--warn-soft"), css6("--accent"))(posicaoSpearman(v4));
+  const matrizes = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
     const cel = (i3, j4) => {
       const v4 = matriz[i3][j4];
-      const cor = v4 == null ? css6("--line") : rgb2(css6("--warn-soft"), css6("--accent"))(Math.max(0, v4));
-      return `<td style="background:${cor};text-align:center;padding:4px;font-size:11px" data-num="${v4 ?? ""}">${v4 == null ? "\u2014" : formatar(v4, 2)}</td>`;
+      const dest = destaque.has(periodos[i3]) || destaque.has(periodos[j4]) ? " destaque-periodo" : "";
+      return `<td class="hm-cel${dest}" style="background:${cor(v4)} !important;color:var(--ink) !important" data-num="${v4 ?? ""}" data-dica-titulo="${attr(CLAB5[comp] ?? comp)}: ${attr(rotuloPeriodo2(periodos[i3]))} \xD7 ${attr(rotuloPeriodo2(periodos[j4]))}" data-dica-valor="Spearman ${v4 == null ? "sem dado" : attr(formatar(v4, 3))}" ${v4 != null && v4 < ESCALA_SPEARMAN.min ? 'data-dica-base="abaixo de 0,8 (fora da escala de cor)"' : ""}>${v4 == null ? "\u2014" : formatar(v4, 2)}</td>`;
     };
-    return `<div class="sub" style="margin-top:8px">${CLAB5[comp] ?? comp}</div>
-        <table class="ponte"><thead><tr><th></th>${periodos.map((p4) => `<th>${p4}</th>`).join("")}</tr></thead>
-        <tbody>${periodos.map((p4, i3) => `<tr><th>${p4}</th>${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table>`;
+    const th2 = (p4) => `<th class="${destaque.has(p4) ? "destaque-periodo" : ""}">${rotuloCurto(rotuloPeriodo2(p4))}</th>`;
+    return `<div class="hm-bloco"><header class="graf-cab"><h4>${CLAB5[comp] ?? comp}</h4></header>
+        <div class="grafico-dica">Cada c\xE9lula compara dois per\xEDodos: o quanto a ordem dos hex\xE1gonos (quem tem mais ou menos d\xE9ficit) se mant\xE9m entre eles. 1 = mesma ordem; cor mais forte = mais parecida. A escala de cor vai de 0,8 a 1,0. Os per\xEDodos com estoque de outra fonte est\xE3o destacados.</div>
+        <table class="ponte hm" data-grafico="heatmap"><thead><tr><th></th>${periodos.map(th2).join("")}</tr></thead>
+        <tbody>${periodos.map((p4, i3) => `<tr>${th2(p4)}${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table></div>`;
   }).join("");
+  const legenda = `<div class="hm-legenda" aria-label="Escala de cor do Spearman, de 0,8 a 1,0"><span>0,8 ou menos</span><span class="hm-rampa" style="background:linear-gradient(to right, ${css6("--warn-soft")}, ${css6("--accent")})"></span><span>1,0</span></div>`;
+  const frase = fraseAnoMenosParecido(spearman, manifesto);
+  el2.innerHTML = `${frase ? `<p class="sub" id="f3-frase-spearman">${frase}</p>` : ""}${legenda}
+    <div class="spearman-layout"><div class="hm-matrizes">${matrizes}</div><div class="hm-linhas" id="f3-spearman-linhas"></div></div>`;
+  renderizarSpearmanLinhas($6("f3-spearman-linhas"), spearman, manifesto);
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
-function renderizarRazoes(el2, razoes) {
+var COR_COMPONENTE = { coabitacao: "--accent", onus: "--warn", precariedade: "--ink" };
+function renderizarSpearmanLinhas(el2, spearman, manifesto) {
+  const series = spearmanContraBase(spearman, manifesto);
+  const todos = series.flatMap((sr2) => sr2.pontos.map((p4) => p4.valor));
+  if (!todos.length) {
+    el2.innerHTML = "";
+    return;
+  }
+  const base = series[0].base;
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano" && p4.id !== base.id);
+  const W4 = 300;
+  const H4 = 190;
+  const m4 = { l: 38, r: 10, t: 10, b: 24 };
+  const x5 = point().domain(anos.map((p4) => p4.id)).range([m4.l + 8, W4 - m4.r - 8]);
+  const y5 = linear2().domain([Math.min(ESCALA_SPEARMAN.min, Math.floor((min4(todos) - 0.01) * 20) / 20), 1]).range([H4 - m4.b, m4.t]);
+  const eixoY = ticks(y5.domain()[0], 1, 4).map((t4) => `<line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(t4)}" y2="${y5(t4)}" stroke="${css6("--line")}" stroke-width="0.5"/><text x="${m4.l - 4}" y="${y5(t4)}" text-anchor="end" dominant-baseline="middle" font-size="9" fill="${css6("--muted")}">${formatar(t4, 2)}</text>`).join("");
+  const eixoX = anos.map((p4) => `<text x="${x5(p4.id)}" y="${H4 - 8}" text-anchor="middle" font-size="9" fill="${css6("--muted")}">${p4.rotulo}</text>`).join("");
+  const linhas = series.map((sr2) => {
+    const cor = css6(COR_COMPONENTE[sr2.componente] ?? "--accent");
+    const caminho = line().x((p4) => x5(p4.periodo.id)).y((p4) => y5(p4.valor))(sr2.pontos);
+    const pontos = sr2.pontos.map((p4) => `<circle cx="${x5(p4.periodo.id)}" cy="${y5(p4.valor)}" r="3.5" fill="${cor}"/><circle cx="${x5(p4.periodo.id)}" cy="${y5(p4.valor)}" r="9" fill="transparent" data-dica-titulo="${attr(CLAB5[sr2.componente] ?? sr2.componente)}: ${attr(p4.periodo.rotulo)} contra ${attr(base.rotulo)}" data-dica-valor="Spearman ${attr(formatar(p4.valor, 3))}"/>`).join("");
+    return `<path d="${caminho}" fill="none" stroke="${cor}" stroke-width="1.8"/>${pontos}`;
+  }).join("");
+  const chaves = series.map((sr2) => `<span class="hm-chave"><span class="sw" style="background:${css6(COR_COMPONENTE[sr2.componente] ?? "--accent")}"></span>${CLAB5[sr2.componente] ?? sr2.componente}</span>`).join("");
+  el2.innerHTML = `<header class="graf-cab"><h4>Cada ano contra ${base.rotulo}</h4></header>
+    <div class="grafico-dica">Spearman de cada ano contra ${base.rotulo}, uma linha por componente: quanto mais baixa a linha, menos a ordem dos hex\xE1gonos se parece com a de ${base.rotulo}. Passe o mouse num ponto para ver o valor.</div>
+    <svg data-grafico="spearman-linhas" viewBox="0 0 ${W4} ${H4}" width="100%" role="img" aria-label="Spearman de cada ano contra ${base.rotulo}, por componente">${eixoY}${eixoX}${linhas}</svg>
+    <div class="hm-chaves">${chaves}</div>`;
+}
+function renderizarRazoes(el2, razoes, manifesto) {
+  const rotuloPeriodo2 = (id3) => rotuloCurto(manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3);
   const porComponente = group(razoes, (r3) => r3.componente);
   el2.innerHTML = [...porComponente.entries()].map(([comp, linhas]) => {
     const limite = limiteEixoP99(linhas.flatMap((l3) => [l3.p95, l3.razao_total]));
-    const W4 = 200;
-    const H4 = 90;
-    const m4 = { l: 28, r: 6, t: 6, b: 16 };
-    const x5 = band().domain(linhas.map((l3) => l3.periodo)).range([m4.l, W4 - m4.r]).padding(0.3);
-    const y5 = linear2().domain([0, Math.max(limite * 1.1, 1)]).range([H4 - m4.b, m4.t]);
-    const svg = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Raz\xE3o do total por hex\xE1gono, ${CLAB5[comp]}">
+    const W4 = 260;
+    const H4 = 120;
+    const m4 = { l: 34, r: 8, t: 6, b: 28 };
+    const x5 = band().domain(linhas.map((l3) => l3.periodo)).range([m4.l, W4 - m4.r]).padding(0.35);
+    const y5 = linear2().domain([0, Math.max(limite * 1.1, 1)]).nice().range([H4 - m4.b, m4.t]);
+    const ticksY = ticks(0, y5.domain()[1], 4);
+    const eixoY = ticksY.map((t4) => `<text x="${m4.l - 4}" y="${y5(t4)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t4, 1)}</text>`).join("");
+    const svg = `<svg data-grafico="razoes" viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Raz\xE3o do total por hex\xE1gono, ${CLAB5[comp]}">
+        ${eixoY}
         <line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(1)}" y2="${y5(1)}" stroke="${css6("--line")}" stroke-dasharray="2,3"/>
         ${linhas.map(
       (l3) => `<line x1="${x5(l3.periodo) + x5.bandwidth() / 2}" x2="${x5(l3.periodo) + x5.bandwidth() / 2}" y1="${y5(Math.min(l3.p95, limite))}" y2="${y5(Math.min(l3.p5, limite))}" stroke="${css6("--ink")}" stroke-width="2"/>
-                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"><title>${l3.periodo}: mediana ${formatar(l3.mediana, 2)}, raz\xE3o dos totais ${formatar(l3.razao_total, 2)}, n=${l3.n_hexagonos}</title></circle>`
+                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"/><rect x="${x5(l3.periodo)}" y="${m4.t}" width="${x5.bandwidth()}" height="${H4 - m4.b - m4.t}" fill="transparent" data-dica-titulo="${attr(CLAB5[comp] ?? comp)}: ${attr(rotuloPeriodo2(l3.periodo))} \xF7 2022" data-dica-valor="mediana ${attr(formatar(l3.mediana, 2))} \xB7 raz\xE3o dos totais ${attr(formatar(l3.razao_total, 2))}" data-dica-faixa="${attr(formatar(l3.p5, 2))} a ${attr(formatar(l3.p95, 2))} (p5\u2013p95)" data-dica-base="${attr(formatar(l3.n_hexagonos, 0))} hex\xE1gonos"/>`
     ).join("")}
-        ${linhas.map((l3) => `<text x="${x5(l3.periodo) + x5.bandwidth() / 2}" y="${H4 - 4}" text-anchor="middle" font-size="9">${l3.periodo}</text>`).join("")}
+        ${linhas.map((l3, i3) => `<text x="${x5(l3.periodo) + x5.bandwidth() / 2}" y="${H4 - 6}" text-anchor="middle" font-size="9" transform="${linhas.length > 4 ? `rotate(-30, ${x5(l3.periodo) + x5.bandwidth() / 2}, ${H4 - 6})` : ""}">${rotuloPeriodo2(l3.periodo)}</text>`).join("")}
       </svg>`;
-    return `<div class="mini"><h4>${CLAB5[comp] ?? comp}</h4>${svg}</div>`;
+    return `<div class="mini"><header class="graf-cab"><h4>${CLAB5[comp] ?? comp}</h4></header><div class="grafico-dica">Ponto = mediana da raz\xE3o (ano \xF7 2022) do total por hex\xE1gono; haste = p5\u2013p95; linha pontilhada = sem mudan\xE7a (raz\xE3o 1). Passe o mouse numa coluna para ver os valores.</div>${svg}</div>`;
   }).join("");
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
 function renderizarAchados(el2, achados) {
   const grupos = achadosPublicos(achados);
   el2.innerHTML = grupos.map(
-    (g4) => `<div class="achados-grupo"><h3>${g4.situacao}</h3>${g4.itens.map((a5) => `<div class="achado-item">${a5.texto}<div class="efeito">${a5.efeito}</div></div>`).join("")}</div>`
+    (g5) => `<div class="achados-grupo"><h3>${g5.situacao}</h3>${g5.itens.map((a5) => `<div class="achado-item">${a5.texto}<div class="efeito">${a5.efeito}</div></div>`).join("")}</div>`
   ).join("");
 }
 async function iniciarConfiabilidade() {
@@ -101149,21 +105944,40 @@ async function iniciarConfiabilidade() {
   if (!painel) return;
   const catalogo = await carregarJSON(".", "catalogo.json");
   const { edicao } = escolherDominioEEdicao(catalogo);
-  const [manifesto, qualidade, modelo, consistencia, achados] = await Promise.all([
+  const [manifesto, qualidade, modelo, consistencia, achados, totais, referenciaFjp] = await Promise.all([
     carregarJSON(edicao.origem, "manifesto.json"),
     carregarJSON(edicao.origem, "qualidade.json"),
     carregarJSON(edicao.origem, "modelo.json"),
     carregarJSON(edicao.origem, "consistencia.json"),
-    carregarJSON(edicao.origem, "achados.json")
+    carregarJSON(edicao.origem, "achados.json"),
+    carregarJSON(edicao.origem, "totais.json"),
+    carregarJSON(edicao.origem, "referencia_fjp.json")
   ]);
-  renderizarFontes($6("f3-fontes-timeline"), qualidade, manifesto);
-  renderizarSigilo($6("f3-sigilo-cartoes"), qualidade.sigilo);
-  renderizarAps($6("f3-aps-cartoes"), qualidade.aps);
+  renderizarFjp($6("f3-fjp"), referenciaFjp, { titulo: "sub" });
   renderizarPonte($6("f3-ponte-tabela"), qualidade.ponte);
-  renderizarLacunas($6("f3-lacunas"), qualidade.lacunas);
-  renderizarHeatmap($6("f3-heatmap"), consistencia.spearman);
-  renderizarRazoes($6("f3-razoes"), consistencia.razoes);
+  renderizarFontes($6("f3-fontes-timeline"), manifesto);
+  renderizarSigilo($6("f3-sigilo-cartoes"), qualidade.sigilo);
+  renderizarCnefe($6("f3-cnefe-cartoes"), qualidade.cnefe);
+  renderizarAps($6("f3-aps-cartoes"), qualidade.aps);
+  renderizarHeatmap($6("f3-heatmap"), consistencia.spearman, manifesto);
+  renderizarRazoes($6("f3-razoes"), consistencia.razoes, manifesto);
   renderizarAchados($6("f3-achados"), achados);
+  renderizarOqueFalta($6("f3-oquefalta"), qualidade, manifesto);
+  const { veredictoPergunta1Cels, veredictoPergunta2Cels, veredictoPergunta3Cels } = renderizarVereditos($6("f3-grade-vereditos"), {
+    qualidade,
+    referenciaFjp,
+    modelo,
+    manifesto,
+    totais,
+    achados
+  });
+  $6("f3-resposta-1").textContent = fraseResposta(veredictoPergunta1Cels, "Batem");
+  $6("f3-resposta-2").textContent = fraseResposta(veredictoPergunta2Cels, "Lugar certo");
+  $6("f3-resposta-3").textContent = fraseResposta(veredictoPergunta3Cels, "Compar\xE1vel");
+  $6("f3-resposta-4").textContent = `${veredictoPergunta4(achados).numero} achado(s) p\xFAblico(s) registrado(s).`;
+  instalarAjudas(painel);
+  ligarDicaPorAtributos(painel);
+  ligarNavegacaoSecoes();
   const segComp = $6("f3-seg-comp");
   function atualizarModelo(componente) {
     segComp.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === componente)));
@@ -101176,15 +105990,98 @@ async function iniciarConfiabilidade() {
 // src/js/dados/metodologia.js
 var COMPONENTES_MODELO = ["coabitacao", "onus", "precariedade"];
 var CLAB6 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function resolverEtapa(etapas, chave) {
+  if (etapas.some((e67) => e67.id === chave)) return [chave];
+  return etapas.filter((e67) => e67.saidas?.includes(chave)).map((e67) => e67.id);
+}
+var ID_NO_EXPORTACAO = "__exportacao__";
+function grupoDaTabela(nomeTabela, config2) {
+  if (config2.excecoes?.[nomeTabela]) return config2.excecoes[nomeTabela];
+  const esquema = nomeTabela.includes(".") ? nomeTabela.split(".")[0] : nomeTabela;
+  return config2.esquemas?.[esquema] ?? "Outras";
+}
+function agruparPipeline(pipeline, manifesto, config2) {
+  const grupos = /* @__PURE__ */ new Map();
+  const grupoPorEtapaId = /* @__PURE__ */ new Map();
+  for (const etapa of pipeline.etapas) {
+    const tabela = etapa.saidas?.[0] ?? etapa.id;
+    const nomeGrupo = grupoDaTabela(tabela, config2);
+    grupoPorEtapaId.set(etapa.id, nomeGrupo);
+    if (!grupos.has(nomeGrupo)) grupos.set(nomeGrupo, { nome: nomeGrupo, etapas: [] });
+    grupos.get(nomeGrupo).etapas.push(etapa);
+  }
+  const noExportacao = {
+    id: ID_NO_EXPORTACAO,
+    nome: `Pacote ${manifesto.edicao}`,
+    descricao: "Manifesto, hashes e a edi\xE7\xE3o exata do pacote de publica\xE7\xE3o.",
+    commit: manifesto.commit_completo ?? manifesto.edicao,
+    data: manifesto.data_execucao?.slice(0, 10) ?? "",
+    saidas: []
+  };
+  if (!grupos.has("Exporta\xE7\xE3o")) grupos.set("Exporta\xE7\xE3o", { nome: "Exporta\xE7\xE3o", etapas: [] });
+  grupos.get("Exporta\xE7\xE3o").etapas.push(noExportacao);
+  const ordemFinal = [...config2.ordem ?? [], ...[...grupos.keys()].filter((k5) => !(config2.ordem ?? []).includes(k5))];
+  return {
+    grupos: ordemFinal.map((nome) => grupos.get(nome)).filter((g5) => g5?.etapas.length),
+    grupoPorEtapaId,
+    tabelasSemGrupo: pipeline.etapas.filter((e67) => grupoPorEtapaId.get(e67.id) === "Outras").map((e67) => e67.saidas?.[0] ?? e67.id)
+  };
+}
+function arestasEntreGrupos(pipeline, grupoPorEtapaId) {
+  const vistos = /* @__PURE__ */ new Set();
+  const arestas = [];
+  for (const l3 of pipeline.ligacoes) {
+    for (const deId of resolverEtapa(pipeline.etapas, l3.de)) {
+      for (const paraId of resolverEtapa(pipeline.etapas, l3.para)) {
+        const g1 = grupoPorEtapaId.get(deId);
+        const g22 = grupoPorEtapaId.get(paraId);
+        if (!g1 || !g22 || g1 === g22) continue;
+        const chave = `${g1}>>${g22}`;
+        if (vistos.has(chave)) continue;
+        vistos.add(chave);
+        arestas.push({ de: g1, para: g22 });
+      }
+    }
+  }
+  for (const g5 of new Set(grupoPorEtapaId.values())) {
+    if (g5 === "Exporta\xE7\xE3o") continue;
+    const chave = `${g5}>>Exporta\xE7\xE3o`;
+    if (!vistos.has(chave)) {
+      vistos.add(chave);
+      arestas.push({ de: g5, para: "Exporta\xE7\xE3o" });
+    }
+  }
+  return arestas;
+}
+function pipelineDoGrupo(pipeline, grupo) {
+  const idsDoGrupo = new Set(grupo.etapas.map((e67) => e67.id));
+  const ligacoes = pipeline.ligacoes.filter((l3) => {
+    const deIds = resolverEtapa(pipeline.etapas, l3.de);
+    const paraIds = resolverEtapa(pipeline.etapas, l3.para);
+    return deIds.some((id3) => idsDoGrupo.has(id3)) && paraIds.some((id3) => idsDoGrupo.has(id3));
+  });
+  return { etapas: grupo.etapas, ligacoes };
+}
 function camadasPipeline(pipeline) {
   const { etapas, ligacoes } = pipeline;
   const predecessores = new Map(etapas.map((e67) => [e67.id, []]));
-  for (const l3 of ligacoes) predecessores.get(l3.para)?.push(l3.de);
+  const arestas = [];
+  for (const l3 of ligacoes) {
+    for (const paraId of resolverEtapa(etapas, l3.para)) {
+      for (const deId of resolverEtapa(etapas, l3.de)) {
+        if (deId === paraId) continue;
+        predecessores.get(paraId)?.push(deId);
+        arestas.push({ de: deId, para: paraId });
+      }
+    }
+  }
   const camadaPorId = /* @__PURE__ */ new Map();
-  function camadaDe(id3) {
+  function camadaDe(id3, emProgresso = /* @__PURE__ */ new Set()) {
     if (camadaPorId.has(id3)) return camadaPorId.get(id3);
+    if (emProgresso.has(id3)) return 0;
+    emProgresso.add(id3);
     const preds = predecessores.get(id3) ?? [];
-    const c3 = preds.length ? 1 + Math.max(...preds.map(camadaDe)) : 0;
+    const c3 = preds.length ? 1 + Math.max(...preds.map((p4) => camadaDe(p4, emProgresso))) : 0;
     camadaPorId.set(id3, c3);
     return c3;
   }
@@ -101202,7 +106099,50 @@ function camadasPipeline(pipeline) {
   }));
   const nCamadas = Math.max(...[...camadaPorId.values()]) + 1;
   const maiorCamada = Math.max(...[...porCamada.values()].map((v4) => v4.length));
-  return { nos, arestas: ligacoes, nCamadas, maiorCamada };
+  return { nos, arestas, nCamadas, maiorCamada };
+}
+function layoutCamadasEmColunas(pipeline, maxPorColuna = 6) {
+  const base = camadasPipeline(pipeline);
+  const preds = new Map(base.nos.map((n3) => [n3.id, []]));
+  for (const a5 of base.arestas) preds.get(a5.para)?.push(a5.de);
+  const porCamada = /* @__PURE__ */ new Map();
+  for (const n3 of base.nos) {
+    if (!porCamada.has(n3.camada)) porCamada.set(n3.camada, []);
+    porCamada.get(n3.camada).push(n3);
+  }
+  const yNorm = /* @__PURE__ */ new Map();
+  const colunaDe = /* @__PURE__ */ new Map();
+  const linhaDe = /* @__PURE__ */ new Map();
+  let colunaAtual = 0;
+  for (const camada of [...porCamada.keys()].sort((a5, b10) => a5 - b10)) {
+    const nos2 = porCamada.get(camada);
+    const origem = new Map(nos2.map((n3, i3) => [n3.id, i3]));
+    const media = (n3) => {
+      const ys2 = (preds.get(n3.id) ?? []).map((p4) => yNorm.get(p4)).filter((v4) => v4 != null);
+      return ys2.length ? ys2.reduce((x5, y5) => x5 + y5, 0) / ys2.length : null;
+    };
+    const ordenados = [...nos2].sort((a5, b10) => {
+      const ma2 = media(a5);
+      const mb2 = media(b10);
+      if (ma2 != null && mb2 != null && ma2 !== mb2) return ma2 - mb2;
+      return origem.get(a5.id) - origem.get(b10.id);
+    });
+    const nCols = Math.max(1, Math.ceil(ordenados.length / maxPorColuna));
+    const porCol = Math.ceil(ordenados.length / nCols);
+    ordenados.forEach((n3, i3) => {
+      colunaDe.set(n3.id, colunaAtual + Math.floor(i3 / porCol));
+      linhaDe.set(n3.id, i3 % porCol);
+      yNorm.set(n3.id, i3 / Math.max(1, ordenados.length));
+    });
+    colunaAtual += nCols;
+  }
+  const nos = base.nos.map((n3) => ({ ...n3, camada: colunaDe.get(n3.id), posicao: linhaDe.get(n3.id), camadaLogica: n3.camada }));
+  return {
+    nos,
+    arestas: base.arestas,
+    nColunas: colunaAtual,
+    maiorColuna: Math.max(1, ...nos.map((n3) => n3.posicao + 1))
+  };
 }
 function parametrosDominio(manifesto) {
   return {
@@ -101210,6 +106150,7 @@ function parametrosDominio(manifesto) {
       id: p4.id,
       rotulo: p4.rotulo,
       tipo: p4.tipo,
+      tipoRotulo: p4.tipo === "media" ? `M\xE9dia de ${p4.anos?.length ?? "v\xE1rios"} anos` : p4.tipo === "ano" ? "Ano" : p4.tipo,
       fonteEstoque: rotuloFonteEstoque(p4.fonte_estoque)
     })),
     limiares: LIMIARES_RASTREIO
@@ -101225,6 +106166,70 @@ function linhasRastreio(manifesto) {
   };
 }
 
+// src/js/util/yamlSimples.js
+function desaspar(valor) {
+  const t4 = valor.trim();
+  if (t4.startsWith('"') && t4.endsWith('"') || t4.startsWith("'") && t4.endsWith("'")) return t4.slice(1, -1);
+  return t4;
+}
+var RE_CHAVE_VALOR = /^([\w./-]+):\s*(.*)$/;
+function analisarYamlSimples(texto) {
+  const raiz = {};
+  let chaveAtual = null;
+  let modoAtual = null;
+  let indentFilho = null;
+  for (const linhaCrua of texto.split("\n")) {
+    const semComentario = linhaCrua.split("#")[0];
+    if (!semComentario.trim()) continue;
+    const indent = semComentario.match(/^ */)[0].length;
+    const linha = semComentario.trim();
+    if (indent > 0 && indentFilho != null && indent !== indentFilho) {
+      throw new Error(`grupos_pipeline.yml: aninhamento fora do subconjunto suportado em "${chaveAtual}" (s\xF3 1 n\xEDvel): "${linha}"`);
+    }
+    if (indent === 0) {
+      indentFilho = null;
+      const m4 = RE_CHAVE_VALOR.exec(linha);
+      if (!m4) throw new Error(`grupos_pipeline.yml: linha de n\xEDvel 0 n\xE3o reconhecida: "${linha}"`);
+      const [, chave, valor] = m4;
+      chaveAtual = chave;
+      if (valor === "{}") {
+        raiz[chave] = {};
+        modoAtual = null;
+      } else if (valor === "[]") {
+        raiz[chave] = [];
+        modoAtual = null;
+      } else if (valor === "") {
+        raiz[chave] = null;
+        modoAtual = "indef";
+      } else {
+        raiz[chave] = desaspar(valor);
+        modoAtual = null;
+      }
+      continue;
+    }
+    if (chaveAtual == null) throw new Error(`grupos_pipeline.yml: linha indentada sem chave de n\xEDvel 0: "${linha}"`);
+    if (indentFilho == null) indentFilho = indent;
+    if (linha.startsWith("- ")) {
+      if (modoAtual === "indef") {
+        raiz[chaveAtual] = [];
+        modoAtual = "lista";
+      }
+      if (modoAtual !== "lista") throw new Error(`grupos_pipeline.yml: item de lista inesperado em "${chaveAtual}"`);
+      raiz[chaveAtual].push(desaspar(linha.slice(2)));
+      continue;
+    }
+    const m22 = RE_CHAVE_VALOR.exec(linha);
+    if (!m22) throw new Error(`grupos_pipeline.yml: linha indentada n\xE3o reconhecida: "${linha}"`);
+    if (modoAtual === "indef") {
+      raiz[chaveAtual] = {};
+      modoAtual = "mapa";
+    }
+    if (modoAtual !== "mapa") throw new Error(`grupos_pipeline.yml: entrada de mapa inesperada em "${chaveAtual}"`);
+    raiz[chaveAtual][m22[1]] = desaspar(m22[2]);
+  }
+  return raiz;
+}
+
 // src/js/util/hash.js
 async function sha256Hex(buffer) {
   const digest = await crypto.subtle.digest("SHA-256", buffer);
@@ -101232,61 +106237,207 @@ async function sha256Hex(buffer) {
 }
 
 // src/js/metodologia.js
+var GRUPO_PARA_TEXTO_ID = {
+  Coleta: "coleta",
+  Grade: "grade",
+  Classifica\u00E7\u00E3o: "classificacao",
+  Treino: "treino",
+  "Montagem 2022": "montagem2022",
+  "Anos t": "anost",
+  Exporta\u00E7\u00E3o: "exportacao"
+};
 function $7(id3) {
   return document.getElementById(id3);
 }
 function css7(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
-var LARGURA_NO = 150;
-var ALTURA_NO = 46;
-var ESPACO_X = 60;
-var ESPACO_Y = 14;
-function renderizarPipeline(el2, pipeline) {
-  const { nos, arestas, nCamadas, maiorCamada } = camadasPipeline(pipeline);
-  const W4 = nCamadas * (LARGURA_NO + ESPACO_X) - ESPACO_X;
-  const H4 = maiorCamada * (ALTURA_NO + ESPACO_Y) - ESPACO_Y;
+var ESPACO_X = 44;
+var ESPACO_Y = 12;
+var LARG_GRUPO = 122;
+var ALT_GRUPO = 50;
+var ESPACO_GRUPO = 22;
+var LARGURA_NO_SUB = 178;
+var ALTURA_NO_SUB = 46;
+var MAX_CHARS_LINHA_SUB = 26;
+var MAX_POR_COLUNA = 6;
+function quebrarNomeDuasLinhas(nome, maxCharsPorLinha) {
+  if (nome.length <= maxCharsPorLinha) return [nome];
+  const palavras = nome.split(" ");
+  let linha1 = "";
+  let i3 = 0;
+  while (i3 < palavras.length) {
+    const tentativa = linha1 ? `${linha1} ${palavras[i3]}` : palavras[i3];
+    if (tentativa.length > maxCharsPorLinha && linha1) break;
+    linha1 = tentativa;
+    i3++;
+  }
+  let linha2 = palavras.slice(i3).join(" ");
+  if (!linha2) return [linha1];
+  if (linha2.length > maxCharsPorLinha) linha2 = `${linha2.slice(0, maxCharsPorLinha - 1)}\u2026`;
+  return [linha1, linha2];
+}
+function desenharLigacoes(nos, arestas, larguraNo, alturaNo) {
   const porId = new Map(nos.map((n3) => [n3.id, n3]));
-  const xy2 = (n3) => ({
-    x: n3.camada * (LARGURA_NO + ESPACO_X),
-    y: n3.posicao * (ALTURA_NO + ESPACO_Y)
-  });
-  const linhas = arestas.map((a5) => {
-    const de4 = xy2(porId.get(a5.de));
-    const para = xy2(porId.get(a5.para));
-    const x1 = de4.x + LARGURA_NO;
-    const y1 = de4.y + ALTURA_NO / 2;
-    const x22 = para.x;
-    const y22 = para.y + ALTURA_NO / 2;
-    return `<path d="M${x1},${y1} C${x1 + ESPACO_X / 2},${y1} ${x22 - ESPACO_X / 2},${y22} ${x22},${y22}" fill="none" stroke="${css7("--line")}" stroke-width="2"/>`;
+  const xy2 = (n3) => ({ x: n3.camada * (larguraNo + ESPACO_X), y: n3.posicao * (alturaNo + ESPACO_Y) });
+  return arestas.map((a5) => {
+    const de4 = porId.get(a5.de);
+    const para = porId.get(a5.para);
+    if (!de4 || !para) return "";
+    const p1 = xy2(de4);
+    const p22 = xy2(para);
+    const x1 = p1.x + larguraNo;
+    const y1 = p1.y + alturaNo / 2;
+    const x22 = p22.x;
+    const y22 = p22.y + alturaNo / 2;
+    const dx2 = Math.max(ESPACO_X / 2, (x22 - x1) / 2);
+    return `<path d="M${x1},${y1} C${x1 + dx2},${y1} ${x22 - dx2},${y22} ${x22},${y22}" fill="none" stroke="${css7("--muted")}" stroke-width="1.4" opacity="0.7" marker-end="url(#met-seta)"/>`;
   }).join("");
-  const caixas = nos.map((n3) => {
-    const { x: x5, y: y5 } = xy2(n3);
-    const dataCommit = `${n3.commit.slice(0, 7)} \xB7 ${n3.data}`;
-    return `<g class="no-pipeline" tabindex="0" role="button" data-etapa="${n3.id}" transform="translate(${x5},${y5})" aria-label="${n3.nome} ${dataCommit} \u2014 ir para o texto desta etapa">
-        <rect width="${LARGURA_NO}" height="${ALTURA_NO}" rx="8" fill="${css7("--surface")}" stroke="${css7("--accent")}" stroke-width="1.5"/>
-        <text x="10" y="18" font-size="13" font-weight="650" fill="${css7("--ink")}">${n3.nome}</text>
-        <text x="10" y="34" font-size="10" fill="${css7("--muted")}">${dataCommit}</text>
+}
+var DEFS_SETA = `<defs><marker id="met-seta" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${"currentColor"}"/></marker></defs>`;
+function textoDoGrupo(nomeGrupo) {
+  const secao = $7(`met-texto-${GRUPO_PARA_TEXTO_ID[nomeGrupo]}`);
+  if (!secao) return { sintese: "", explicacao: "" };
+  return {
+    sintese: secao.querySelector(".sintese")?.innerHTML ?? "",
+    explicacao: secao.querySelector(".explicacao")?.innerHTML ?? ""
+  };
+}
+function renderizarPipeline(el2, pipeline, manifesto, config2) {
+  const { grupos, grupoPorEtapaId } = agruparPipeline(pipeline, manifesto, config2);
+  const arestasGrupos = arestasEntreGrupos(pipeline, grupoPorEtapaId);
+  const nomesPresentes = grupos.map((g5) => g5.nome);
+  const estado = { grupo: -1, tabela: null };
+  const nosGrupo = grupos.map((g5, i3) => ({ id: g5.nome, camada: i3, posicao: 0, grupo: g5 }));
+  const WG = nosGrupo.length * (LARG_GRUPO + ESPACO_GRUPO) - ESPACO_GRUPO;
+  const xGrupo = (i3) => i3 * (LARG_GRUPO + ESPACO_GRUPO);
+  const ligacoesGrupos = arestasGrupos.filter((a5) => nomesPresentes.indexOf(a5.para) === nomesPresentes.indexOf(a5.de) + 1).map((a5) => {
+    const i3 = nomesPresentes.indexOf(a5.de);
+    const x1 = xGrupo(i3) + LARG_GRUPO;
+    const x22 = xGrupo(i3 + 1);
+    const y5 = ALT_GRUPO / 2;
+    return `<path d="M${x1},${y5} L${x22},${y5}" stroke="${css7("--muted")}" stroke-width="1.4" marker-end="url(#met-seta)"/>`;
+  }).join("");
+  const caixas = nosGrupo.map((n3) => {
+    const g5 = n3.grupo;
+    const nEtapas = g5.etapas.filter((e67) => e67.id !== ID_NO_EXPORTACAO).length;
+    const sub5 = g5.nome === "Exporta\xE7\xE3o" ? "pacote" : `${nEtapas} tabela${nEtapas === 1 ? "" : "s"}`;
+    return `<g class="no-pipeline" tabindex="0" role="button" aria-expanded="false" data-grupo="${g5.nome}" transform="translate(${xGrupo(n3.camada)},0)" aria-label="${g5.nome}: ${sub5} \u2014 abrir o texto da etapa">
+        <rect width="${LARG_GRUPO}" height="${ALT_GRUPO}" rx="8" fill="${css7("--surface")}" stroke="${css7("--accent")}" stroke-width="1.5"/>
+        <text x="10" y="21" font-size="13" font-weight="650" fill="${css7("--ink")}">${g5.nome}</text>
+        <text x="10" y="38" font-size="10" fill="${css7("--muted")}">${sub5}</text>
       </g>`;
   }).join("");
-  el2.innerHTML = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="group" aria-label="Pipeline do moradinha, da coleta \xE0 exporta\xE7\xE3o">${linhas}${caixas}</svg>`;
+  el2.innerHTML = `<div class="met-layout">
+      <div class="met-grafo">
+        <svg viewBox="0 0 ${WG} ${ALT_GRUPO}" width="100%" role="group" aria-label="Pipeline do moradinha por etapa do m\xE9todo, da coleta \xE0 exporta\xE7\xE3o" style="color:${css7("--muted")}">${DEFS_SETA}${ligacoesGrupos}${caixas}</svg>
+        <div id="met-pipeline-expandido"></div>
+      </div>
+      <div class="met-painel" id="met-painel" role="region" aria-label="Texto da etapa" aria-live="polite"><p class="sub">Clique numa etapa do m\xE9todo para ler o texto dela; depois, numa tabela, para ver o nome.</p></div>
+    </div>`;
+  const painel = $7("met-painel");
+  function setas() {
+    return `<span class="met-setas"><button type="button" class="iconbtn" data-seta="-1" aria-label="Anterior">\u2190</button><button type="button" class="iconbtn" data-seta="1" aria-label="Pr\xF3ximo">\u2192</button></span>`;
+  }
+  function desenharPainelGrupo(grupo) {
+    const { sintese, explicacao } = textoDoGrupo(grupo.nome);
+    painel.innerHTML = `<div class="met-painel-cab"><h4>${grupo.nome}</h4>${setas()}</div>
+      <div class="met-sintese">${sintese}</div><div class="met-explicacao">${explicacao}</div>`;
+  }
+  function desenharPainelTabela(grupo, no2) {
+    painel.innerHTML = `<div class="met-painel-cab"><h4>Tabela</h4>${setas()}</div>
+      <div class="met-tabela-nome">${no2.nome}</div>
+      <div class="sub">Etapa do m\xE9todo: ${grupo.nome}</div>
+      <p><button type="button" class="iconbtn" id="met-voltar-grupo">Ver o texto da etapa ${grupo.nome}</button></p>`;
+    $7("met-voltar-grupo").onclick = () => selecionarGrupo(nomesPresentes.indexOf(grupo.nome));
+  }
+  function ligarSetas(aoMover) {
+    painel.querySelectorAll("[data-seta]").forEach((b10) => b10.onclick = () => aoMover(Number(b10.dataset.seta)));
+  }
+  let nosTabela = [];
+  function selecionarTabela(grupo, idx) {
+    const i3 = Math.max(0, Math.min(nosTabela.length - 1, idx));
+    estado.tabela = i3;
+    const no2 = nosTabela[i3];
+    document.querySelectorAll("#met-pipeline-expandido .no-tabela").forEach((g5) => {
+      const sel = g5.dataset.id === no2.id;
+      g5.classList.toggle("selecionado", sel);
+      if (sel) g5.setAttribute("aria-current", "true");
+      else g5.removeAttribute("aria-current");
+    });
+    desenharPainelTabela(grupo, no2);
+    ligarSetas((d3) => selecionarTabela(grupo, estado.tabela + d3));
+  }
+  function selecionarGrupo(idx) {
+    const i3 = Math.max(0, Math.min(nomesPresentes.length - 1, idx));
+    estado.grupo = i3;
+    estado.tabela = null;
+    const grupo = grupos[i3];
+    el2.querySelectorAll(".no-pipeline").forEach((n3) => {
+      const sel = n3.dataset.grupo === grupo.nome;
+      n3.setAttribute("aria-expanded", String(sel));
+      if (sel) n3.setAttribute("aria-current", "true");
+      else n3.removeAttribute("aria-current");
+    });
+    const expandidoEl = $7("met-pipeline-expandido");
+    nosTabela = [];
+    if (grupo.nome === "Exporta\xE7\xE3o" && grupo.etapas.length === 1 && grupo.etapas[0].id === ID_NO_EXPORTACAO) {
+      expandidoEl.innerHTML = "";
+    } else {
+      const sub5 = pipelineDoGrupo(pipeline, grupo);
+      const { nos, arestas, nColunas, maiorColuna } = layoutCamadasEmColunas(sub5, MAX_POR_COLUNA);
+      nosTabela = [...nos].sort((x5, y5) => x5.camada - y5.camada || x5.posicao - y5.posicao);
+      const We3 = nColunas * (LARGURA_NO_SUB + ESPACO_X) - ESPACO_X;
+      const He4 = maiorColuna * (ALTURA_NO_SUB + ESPACO_Y) - ESPACO_Y;
+      const caixasE = nosTabela.map((n3) => {
+        const x5 = n3.camada * (LARGURA_NO_SUB + ESPACO_X);
+        const y5 = n3.posicao * (ALTURA_NO_SUB + ESPACO_Y);
+        const linhasNome = quebrarNomeDuasLinhas(n3.nome, MAX_CHARS_LINHA_SUB);
+        const textoNome = linhasNome.map((l3, i4) => `<text x="8" y="${18 + i4 * 13}" font-size="11" fill="${css7("--ink")}">${l3}</text>`).join("");
+        return `<g class="no-tabela" tabindex="0" role="button" data-id="${n3.id}" transform="translate(${x5},${y5})" aria-label="Tabela ${n3.nome}">
+            <rect width="${LARGURA_NO_SUB}" height="${ALTURA_NO_SUB}" rx="8" fill="${css7("--surface")}" stroke="${css7("--line")}" stroke-width="1.2"/>
+            <title>${n3.nome}</title>
+            ${textoNome}
+          </g>`;
+      }).join("");
+      expandidoEl.innerHTML = `<header class="graf-cab"><h4>Tabelas da etapa ${grupo.nome}</h4></header><div class="grafico-dica">Cada caixa \xE9 uma tabela do pipeline; as linhas mostram de onde cada uma vem, da esquerda para a direita. Clique numa tabela para ver o nome no painel.</div>
+        <svg viewBox="0 0 ${We3} ${He4}" width="100%" style="max-width:${We3}px;color:var(--muted)" role="group" aria-label="Tabelas do grupo ${grupo.nome}">${DEFS_SETA.replace("met-seta", "met-seta2")}${desenharLigacoes(nos, arestas, LARGURA_NO_SUB, ALTURA_NO_SUB).replaceAll("met-seta", "met-seta2")}${caixasE}</svg>`;
+      instalarAjudas(expandidoEl);
+      expandidoEl.querySelectorAll(".no-tabela").forEach((g5) => {
+        const abrir = () => selecionarTabela(grupo, nosTabela.findIndex((n3) => n3.id === g5.dataset.id));
+        g5.addEventListener("click", abrir);
+        g5.addEventListener("keydown", (ev2) => {
+          if (ev2.key === "Enter" || ev2.key === " ") {
+            ev2.preventDefault();
+            abrir();
+          }
+        });
+      });
+    }
+    desenharPainelGrupo(grupo);
+    ligarSetas((d3) => selecionarGrupo(estado.grupo + d3));
+  }
   el2.querySelectorAll(".no-pipeline").forEach((no2) => {
-    const irParaTexto = () => {
-      const destino = $7(`met-texto-${no2.dataset.etapa}`);
-      destino?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-    no2.addEventListener("click", irParaTexto);
+    const abrir = () => selecionarGrupo(nomesPresentes.indexOf(no2.dataset.grupo));
+    no2.addEventListener("click", abrir);
     no2.addEventListener("keydown", (ev2) => {
       if (ev2.key === "Enter" || ev2.key === " ") {
         ev2.preventDefault();
-        irParaTexto();
+        abrir();
       }
     });
+  });
+  document.addEventListener("keydown", (ev2) => {
+    if (ev2.key !== "ArrowRight" && ev2.key !== "ArrowLeft") return;
+    if (estado.grupo === -1 || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName ?? "")) return;
+    const delta = ev2.key === "ArrowRight" ? 1 : -1;
+    if (estado.tabela != null) selecionarTabela(grupos[estado.grupo], estado.tabela + delta);
+    else selecionarGrupo(estado.grupo + delta);
   });
 }
 function renderizarParametros(el2, manifesto) {
   const { periodos, limiares } = parametrosDominio(manifesto);
-  const linhasPeriodos = periodos.map((p4) => `<tr><td>${p4.rotulo}</td><td>${p4.tipo}</td><td>${p4.fonteEstoque}</td></tr>`).join("");
+  const linhasPeriodos = periodos.map((p4) => `<tr><td>${p4.rotulo}</td><td>${p4.tipoRotulo}</td><td>${p4.fonteEstoque}</td></tr>`).join("");
   const linhasLimiares = Object.values(limiares).map((l3) => `<tr><td>${l3.rotulo}</td><td data-num="${l3.valor}">${formatar(l3.valor, l3.valor < 10 ? 2 : 0)}${l3.unidade}</td></tr>`).join("");
   el2.innerHTML = `
     <h4>Per\xEDodos</h4>
@@ -101339,36 +106490,50 @@ async function iniciarMetodologia() {
   if (!painel) return;
   const catalogo = await carregarJSON(".", "catalogo.json");
   const { edicao } = escolherDominioEEdicao(catalogo);
-  const [manifesto, pipeline, modelo] = await Promise.all([
+  const [manifesto, pipeline, modelo, configTexto] = await Promise.all([
     carregarJSON(edicao.origem, "manifesto.json"),
     carregarJSON(edicao.origem, "pipeline.json"),
-    carregarJSON(edicao.origem, "modelo.json")
+    carregarJSON(edicao.origem, "modelo.json"),
+    carregarTexto("textos/metodologia/grupos_pipeline.yml")
   ]);
-  renderizarPipeline(painel, pipeline);
+  const config2 = analisarYamlSimples(configTexto);
+  renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "e0b72229e25847fc879eb20a1f47c8b2f7cd01b3");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "c2eae3c4f8d8695234cd8ca609dc2af8ae9fa532");
   renderizarInterna($7("met-interna"), modelo);
 }
 
 // src/js/main.js
+function navegarPara(dominioId, edicaoId) {
+  const params = new URLSearchParams(window.location.search);
+  params.set("dominio", dominioId);
+  if (edicaoId) params.set("edicao", edicaoId);
+  else params.delete("edicao");
+  window.location.search = params.toString();
+}
 async function preencherCabecalho() {
-  const chipDominio = document.getElementById("chip-dominio");
-  const chipEdicao = document.getElementById("chip-edicao");
+  const selDominio = document.getElementById("sel-dominio");
+  const selEdicao = document.getElementById("sel-edicao");
   const chipFicticio = document.getElementById("chip-ficticio");
-  if (!chipDominio || !chipEdicao) return;
+  const chipData = document.getElementById("chip-data");
+  if (!selDominio || !selEdicao) return;
   try {
     const catalogo = await (await fetch("catalogo.json")).json();
     const { dominio, edicao } = escolherDominioEEdicao(catalogo);
     const manifesto = await carregarJSON(edicao.origem, "manifesto.json");
-    chipDominio.textContent = dominio.nome;
-    chipEdicao.textContent = `edi\xE7\xE3o ${manifesto.edicao} \xB7 ${manifesto.data_execucao.slice(0, 10)}`;
+    selDominio.innerHTML = opcoesDominio(catalogo, dominio).map((d3) => `<option value="${d3.conjunto_id}" ${d3.conjunto_id === dominio.conjunto_id ? "selected" : ""}>${d3.nome}</option>`).join("");
+    selEdicao.innerHTML = opcoesEdicao(dominio, edicao).map((e67) => `<option value="${e67.edicao}" ${e67.edicao === edicao.edicao ? "selected" : ""}>edi\xE7\xE3o ${e67.edicao}</option>`).join("");
+    if (chipData) chipData.textContent = manifesto.data_execucao.slice(0, 10);
     if (manifesto.ficticio && chipFicticio) chipFicticio.hidden = false;
+    selDominio.addEventListener("change", () => navegarPara(selDominio.value, null));
+    selEdicao.addEventListener("change", () => navegarPara(dominio.conjunto_id, selEdicao.value));
   } catch (erro) {
-    chipEdicao.textContent = "pacote indispon\xEDvel";
+    if (chipData) chipData.textContent = "pacote indispon\xEDvel";
     console.error("Falha ao carregar o cat\xE1logo/manifesto:", erro);
   }
 }
 preencherCabecalho();
+instalarAjudas();
 iniciarExplorador().catch((erro) => {
   console.error("Falha ao iniciar o explorador:", erro);
 });

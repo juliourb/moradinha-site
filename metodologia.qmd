@@ -1,5 +1,7 @@
 ---
 title: ""
+suppress-bibliography: true
+link-citations: true
 ---
 
 {{< include textos/_cabecalho.qmd >}}
@@ -12,12 +14,19 @@ Como o número nasce: o pipeline que gerou este pacote, os parâmetros do domín
 commit exato do moradinha e deste site.
 :::
 
+O moradinha usa a definição de déficit habitacional da Fundação João Pinheiro (habitação precária,
+coabitação e ônus excessivo com aluguel) e não a substitui. O que ele muda é a escala. O total que
+a PNADc permite afirmar para a região inteira é repartido em hexágonos de cerca de 0,7 km², com a
+incerteza declarada. Quanto déficit há só se diz para o domínio; o mapa diz onde ele está.
+
 ### O pipeline
 
-<div class="como-ler">Cada caixa é uma etapa, com o commit e a data da execução. Clique numa caixa
-(ou use Tab e Enter) para ir direto ao texto dela.</div>
+<div class="como-ler">Cada caixa é uma etapa do método. Clique numa etapa (ou use Tab e Enter) para ler o texto dela no painel ao lado e ver as tabelas que a compõem; clique numa tabela para ver o nome. As setas ← → passam para o item seguinte.</div>
 <div id="met-pipeline"></div>
 
+<div class="met-download"><button type="button" class="iconbtn" disabled aria-disabled="true">Baixar a metodologia completa</button> <span class="sub">em preparação (documento da tese)</span></div>
+
+<div id="met-textos" hidden>
 <section id="met-texto-coleta">
 {{< include textos/metodologia/coleta.qmd >}}
 </section>
@@ -45,6 +54,7 @@ commit exato do moradinha e deste site.
 <section id="met-texto-exportacao">
 {{< include textos/metodologia/exportacao.qmd >}}
 </section>
+</div>
 
 ### Parâmetros do domínio
 
@@ -53,6 +63,8 @@ commit exato do moradinha e deste site.
 ### Rastreio da execução
 
 <div id="met-rastreio"></div>
+
+{{< include textos/metodologia/_referencias.qmd >}}
 :::
 
 ::: {.content-visible when-profile="interno"}
@@ -67,3 +79,5 @@ inteira é removida do HTML.
 <div id="met-interna"></div>
 :::
 :::
+
+{{< include textos/_rodape.qmd >}}

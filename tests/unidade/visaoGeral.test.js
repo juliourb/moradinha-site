@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   periodoRecenteAno, periodoRecenteMedia, componenteMaior, marcaMaisImportante,
-  dadosCartoesBI, marcasDoDominio, linhasParaCitar,
+  dadosCartoesBI, marcasDoDominio, linhasParaCitar, fjpTresValores,
 } from "../../src/js/dados/visaoGeral.js";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const REFERENCIA_FJP_BD10CBD = JSON.parse(
+  readFileSync(fileURLToPath(new URL("../../pacotes/al_rm_maceio/bd10cbd/referencia_fjp.json", import.meta.url)))
+);
 
 const MANIFESTO = {
   nome: "RM de Maceió",
@@ -65,6 +71,18 @@ describe("dados/visaoGeral.js", () => {
     const marcas = marcasDoDominio(TOTAIS);
     const codigos = marcas.map((m) => m.codigo).sort();
     expect(codigos).toEqual(["mudanca_no_ruido", "precariedade_provisoria_sem_faixa", "total_fragil"].sort());
+  });
+
+  it("fjpTresValores: publicado / CadÚnico / sem CadÚnico (F6.1-2, pacote bd10cbd)", () => {
+    const itens = fjpTresValores(REFERENCIA_FJP_BD10CBD);
+    const porIndicador = Object.fromEntries(itens.map((i) => [i.indicador, i]));
+    expect([porIndicador.total.fjp_publicado, porIndicador.total.cadUnico, porIndicador.total.semCadUnico]).toEqual([50099, 5812, 44287]);
+    expect([porIndicador.habitacao_precaria.fjp_publicado, porIndicador.habitacao_precaria.cadUnico, porIndicador.habitacao_precaria.semCadUnico]).toEqual([11936, 5812, 6124]);
+    expect([porIndicador.domicilios.fjp_publicado, porIndicador.domicilios.cadUnico, porIndicador.domicilios.semCadUnico]).toEqual([462956, 5812, 457144]);
+    expect([porIndicador.coabitacao.fjp_publicado, porIndicador.coabitacao.cadUnico, porIndicador.coabitacao.semCadUnico]).toEqual([5666, 0, 5666]);
+    expect([porIndicador.onus.fjp_publicado, porIndicador.onus.cadUnico, porIndicador.onus.semCadUnico]).toEqual([32498, 0, 32498]);
+    for (const item of itens) expect(item.ano_ref).toBe(2023);
+    for (const item of itens) expect(item.faixa == null || item.faixa.inf >= 0).toBe(true);
   });
 
   it("linhasParaCitar usa o formato exato de citação", () => {

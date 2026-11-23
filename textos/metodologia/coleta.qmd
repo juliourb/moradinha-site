@@ -1,6 +1,7 @@
-## Coleta
+::: {.sintese}
+Reúne o Censo 2022, a PNADc de 2022 a 2025 e fontes do território, cada uma na sua resolução original.
+:::
 
-<span class="pill warn">rascunho</span>
-
-Reúne o Censo, o CNEFE, a PNADc, dados de luz noturna, Open Buildings e MapBiomas, FCU e MDS, cada
-um na sua resolução original [@ibge_censo2022; @ibge_pnadc; @sirko2021openbuildings; @souza2020mapbiomas].
+::: {.explicacao}
+Do Censo 2022 vêm o universo por setor censitário, a amostra, a malha de setores, o CNEFE (cadastro de endereços) e as favelas e comunidades urbanas. Da PNADc vêm os anos de 2022 a 2025. Do território vêm a luz noturna (NASA Black Marble), as edificações do Open Buildings (2022 e 2023), a área urbanizada do MapBiomas, as escolas do INEP e o Mapa Social do MDS. Nada é combinado antes da grade. [@ibge_censo2022; @ibge_pnadc; @sirko2021openbuildings; @souza2020mapbiomas; @ibge_cnefe2022; @ibge_fcu2022; @roman2018blackmarble; @sirko2023openbuildings25d; @mapbiomas_col11; @inep_censoescolar; @mds_mapasocial]
+:::

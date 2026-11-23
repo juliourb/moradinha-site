@@ -4,6 +4,7 @@ import { criarLoja } from "./estado/loja.js";
 import { estadoInicial, salvarLocalStorage } from "./estado/pergunta.js";
 import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
 import { valorHex } from "./dados/calculo.js";
+import { componenteMaior } from "./dados/visaoGeral.js";
 import { valorMedidaQualidade, medidaConstante, TIPO_MEDIDA } from "./dados/qualidade.js";
 import { criarMapa } from "./mapa/index.js";
 import { ligarPergunta } from "./ui/pergunta.js";
@@ -36,6 +37,7 @@ export async function iniciarExplorador() {
   // Seam de teste (Playwright): seleciona um hexágono sem precisar simular o
   // clique no canvas do mapa. Não faz parte da API pública do explorador.
   window.__moradinhaSelecionarHex = (h3) => loja.definir({ selecionado: h3 });
+  window.__moradinhaEstado = () => loja.obter();
 
   const elementosPergunta = {
     question: $("f1-question"),
@@ -58,13 +60,16 @@ export async function iniciarExplorador() {
   const elementosMapa = {
     deckA: $("f1-deckA"), deckB: $("f1-deckB"), divider: $("f1-divider"),
     labA: $("f1-labA"), labB: $("f1-labB"), legend: $("f1-legend"),
-    basefail: $("f1-basefail"), layers: $("f1-layers"), mapboxEl: $("f1-mapbox"),
+    basefail: $("f1-basefail"), layers: $("f1-layers"), mapboxEl: $("f1-mapbox"), tooltip: $("f1-tooltip"),
     aoSelecionar: (h3) => loja.definir({ selecionado: h3 }),
+    aoMudarRelativoModo: (relativo_modo) => loja.definir({ relativo_modo }),
   };
   const mapa = criarMapa({
-    elementos: elementosMapa, manifesto, linhas, ap,
+    elementos: elementosMapa, manifesto, linhas, ap, totais,
     contornosAp: dados.contornosAp, contornosMunicipios: dados.contornosMunicipios, contornosFcu: dados.contornosFcu,
+    contornosRecortes: dados.contornosRecortes,
   });
+  window.__moradinhaMapas = mapa.instanciasMapLibre;
 
   const elementosResposta = { lab: $("f1-ans-lab"), big: $("f1-ans-big"), range: $("f1-ans-range"), pills: $("f1-ans-pills"), cards: $("f1-cards") };
   const elDetail = $("f1-detail");
@@ -88,8 +93,8 @@ export async function iniciarExplorador() {
     if (estado.conjunto_graficos === 0) {
       renderizarHistograma($("f1-hist"), estado, linhasArr, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarRanking($("f1-rank"), estado, linhasArr, ap, (h3) => loja.definir({ selecionado: h3 }));
-      renderizarSerie($("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: null }));
-      renderizarCaixas($("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: null }));
+      renderizarSerie($("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
+      renderizarCaixas($("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($("f1-qhist"), estado, linhasArr, ap, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarDispersao($("f1-disp"), estado, linhasArr, (h3) => loja.definir({ selecionado: h3 }));
@@ -98,16 +103,57 @@ export async function iniciarExplorador() {
     }
   }
 
+  function renderizarRecorteAtivo(estado) {
+    const el = $("f1-recorte-ativo");
+    const faixa = estado.faixa_hist?.[0];
+    if (!faixa) {
+      el.setAttribute("hidden", "");
+      return;
+    }
+    const isRel = estado.medida === "relativo";
+    const dec = isRel ? 1 : 0;
+    const unidade = isRel ? " %" : "";
+    const [lo, hi] = faixa;
+    el.textContent = `Filtro ativo: hexágonos entre ${lo.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade} e ${
+      hi == null ? "ou mais" : `${hi.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade}`
+    }. Clique fora das barras do histograma ou em "Limpar" para remover.`;
+    el.removeAttribute("hidden");
+  }
+
+  // F6.4 2b: "incerteza" do total não existe no pacote (as faixas dos componentes não
+  // se somam): em vez de um mapa em branco, um aviso com o atalho para um componente.
+  function renderizarAvisoMapa(estado) {
+    const el = $("f1-aviso-mapa");
+    const semFaixa = estado.tema === "qualidade" && estado.medida_qualidade === "incerteza" && estado.componente === "total";
+    el.hidden = !semFaixa;
+    if (!semFaixa) return;
+    const alvo = componenteMaior(totais, estado.periodo) ?? "coabitacao";
+    $("f1-aviso-mapa-txt").textContent = "O total não tem faixa de incerteza; escolha um componente.";
+    const btn = $("f1-aviso-mapa-btn");
+    btn.textContent = `Ver ${CLAB[alvo]}`;
+    btn.onclick = () => loja.definir({ componente: alvo, faixa_hist: [] });
+  }
+
   function renderTudo(estado) {
     sincronizarPergunta(estado);
+    renderizarAvisoMapa(estado);
+    renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
-    mapa.renderizarCamadasUI(estado, (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }));
-    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: null }));
-    renderizarHexagono(elDetail, estado, linhas, ap, manifesto);
+    mapa.renderizarCamadasUI(
+      estado,
+      (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }),
+      (opacidade) => loja.definir({ opacidade }),
+      (mapa_base_cinza) => loja.definir({ mapa_base_cinza })
+    );
+    renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: [] }));
+    renderizarHexagono(elDetail, estado, linhas, ap, manifesto, totais);
     renderizarGraficos(estado);
     salvarLocalStorage(estado);
   }
+
+  $("f1-hist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
+  $("f1-qhist-limpar").onclick = () => loja.definir({ faixa_hist: [] });
 
   // Carrossel e dock
   const dock = $("f1-dock");
@@ -138,7 +184,7 @@ export async function iniciarExplorador() {
     dockToggle.setAttribute("aria-expanded", String(!colapsado));
     if (!colapsado) renderizarGraficos(loja.obter());
   };
-  document.querySelectorAll(".dcard header .iconbtn").forEach((b) => {
+  document.querySelectorAll(".dcard header .iconbtn[aria-label^='Minimizar']").forEach((b) => {
     b.onclick = () => {
       const card = b.closest(".dcard");
       const min = card.classList.toggle("min");

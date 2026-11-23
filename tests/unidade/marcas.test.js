@@ -22,8 +22,11 @@ describe("marcas.js", () => {
     expect(rotuloFonteEstoque("mista")).toBe("Média de anos com fontes de estoque diferentes");
   });
 
-  it("rotuloFonteEstoque mostra valor desconhecido cru, sem quebrar", () => {
-    expect(rotuloFonteEstoque("open_buildings")).toBe("open_buildings");
+  it("rotuloFonteEstoque traduz as fontes conhecidas e mostra valor desconhecido cru, sem quebrar", () => {
+    expect(rotuloFonteEstoque("censo")).toBe("Censo 2022");
+    expect(rotuloFonteEstoque("open_buildings")).toBe("Open Buildings");
+    expect(rotuloFonteEstoque("mapbiomas")).toBe("MapBiomas");
+    expect(rotuloFonteEstoque("outra_fonte_fora_do_dicionario")).toBe("outra_fonte_fora_do_dicionario");
     expect(rotuloFonteEstoque(null)).toBe("—");
   });
 });

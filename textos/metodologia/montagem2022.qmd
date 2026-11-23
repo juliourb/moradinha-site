@@ -1,6 +1,7 @@
-## Montagem 2022
+::: {.sintese}
+O mapa de 2022 nasce em três passos: a chance de déficit vira número de domicílios; esse número é alinhado ao que a amostra mediu em cada área de ponderação; e a soma é ajustada ao total da região.
+:::
 
-<span class="pill warn">rascunho</span>
-
-Compõe o total de 2022 por hexágono: taxa do modelo (ou da repartição simples), fator da AP (área
-de ponderação), calibração e faixa de incerteza, ancorados no Censo [@ibge_censo2022].
+::: {.explicacao}
+Primeiro, o modelo dá a chance de déficit dos domicílios de cada pedaço, e chance × domicílios = domicílios em déficit previstos. Depois, as previsões de cada área de ponderação são somadas e comparadas com o que a amostra do Censo mediu ali. Na área 002, por exemplo, a amostra mediu 221 domicílios em coabitação e o modelo previu 201, então cada pedaço da área é multiplicado por 1,1: o modelo decide onde fica o déficit dentro da área, e a amostra decide quanto. Por fim, na coabitação e no ônus, todos os hexágonos são multiplicados por um mesmo número para que a soma bata com o total da PNADc (no ônus de 2022, 1,12); na precariedade de 2022, o total é o da própria amostra do Censo. Esse último ajuste só fecha a conta e não diz se o modelo é bom: quem diz isso é o teste do Treino. A faixa de incerteza vem de refazer a conta com as 200 réplicas da PNADc. [@ibge_censo2022]
+:::

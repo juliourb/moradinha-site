@@ -1,6 +1,7 @@
-## Grade
+::: {.sintese}
+O território vira hexágonos de cerca de 0,7 km², e cada setor censitário é repartido entre os hexágonos que toca, na proporção dos seus domicílios.
+:::
 
-<span class="pill warn">rascunho</span>
-
-Cruza setor censitário e hexágono H3 (resolução 8), gerando o pedaço setor × hexágono que carrega o
-peso de cada fonte até o nível do mapa [@brodsky2018h3].
+::: {.explicacao}
+Os hexágonos são do sistema H3, na resolução 8. Cada setor censitário é cortado pelos hexágonos que ele toca, e cada corte, o "pedaço", recebe a sua parte dos domicílios do setor pela grade estatística do IBGE. É o pedaço que leva cada fonte até o hexágono. [@brodsky2018h3]
+:::

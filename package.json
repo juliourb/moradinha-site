@@ -10,24 +10,27 @@
   "scripts": {
     "dev": "quarto preview",
     "build:js": "node ferramentas/esbuild.mjs",
-    "build": "npm run build:js && quarto render",
+    "build": "npm run validar:catalogo-publico && npm run build:js && quarto render",
     "build:interno": "npm run build:js && quarto render --profile interno --output-dir _site_interno",
     "validar": "node ferramentas/validar.mjs",
     "validar:citacoes": "node ferramentas/validar_citacoes.mjs",
     "validar:build-interno": "node ferramentas/validar_build_interno.mjs",
+    "validar:catalogo-publico": "node ferramentas/validar_catalogo_publico.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:all": "npm run test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@deck.gl/core": "9.1.14",
+    "@deck.gl/extensions": "9.1.14",
     "@deck.gl/mapbox": "9.1.14",
     "@duckdb/duckdb-wasm": "1.32.0",
     "@luma.gl/webgl": "9.1.10",
     "d3": "7.9.0",
     "deck.gl": "9.1.14",
     "h3-js": "4.2.1",
-    "maplibre-gl": "6.17.0"
+    "maplibre-gl": "6.17.0",
+    "simple-statistics": "8.0.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

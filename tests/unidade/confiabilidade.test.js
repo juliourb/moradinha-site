@@ -3,7 +3,7 @@
 // system via getComputedStyle(document.documentElement) (assets/css/tokens.css).
 import { describe, expect, it } from "vitest";
 import { blocoModelo, achadosPublicos, limiteEixoP99, BLOCOS_MODELO } from "../../src/js/dados/confiabilidade.js";
-import { montarModeloHtml, renderizarCurvas } from "../../src/js/confiabilidade.js";
+import { montarModeloHtml, renderizarCurvas, formatarImportancia } from "../../src/js/confiabilidade.js";
 
 const MODELO_BASE = {
   configuracao: "e3", usado: true, motivo: "",
@@ -93,5 +93,71 @@ describe("F3-5 (curvas): desvio nulo mostra a nota, sem inventar faixa", () => {
     const html = renderizarCurvas([{ variavel: "x", rotulo: "X", nivel: "n", escore: 0.5, desvio: 0.1 }], []);
     expect(html).not.toContain("faixa de oscilação não calculada nesta edição");
     expect(html).toContain("<svg");
+  });
+});
+
+describe("N14: importância em % da soma, sem arredondar para 0,00", () => {
+  it("valores pequenos não somem em 0,00 e abaixo de 0,1% mostram '< 0,1%'", () => {
+    expect(formatarImportancia(0.0001, 1)).toBe("< 0,1%");
+    expect(formatarImportancia(0.5, 1)).toBe("50,0%");
+  });
+
+  it("renderizarCurvas mostra a importância como percentual, não o valor cru", () => {
+    const html = renderizarCurvas(
+      [{ variavel: "x", rotulo: "X", nivel: "n", escore: 0.5, desvio: 0.1 }],
+      [
+        { variavel: "a", rotulo: "A", valor: 0.03464566672669605 },
+        { variavel: "b", rotulo: "B", valor: 0.00001 },
+      ]
+    );
+    expect(html).not.toContain("(0,00)");
+    expect(html).toContain("< 0,1%");
+  });
+});
+
+import { posicaoSpearman, periodoMenosParecido, fraseAnoMenosParecido, spearmanContraBase } from "../../src/js/dados/confiabilidade.js";
+
+describe("Spearman (F6.4 3b)", () => {
+  const manifesto = {
+    periodos: [
+      { id: "2022", rotulo: "2022", tipo: "ano", marcas: [] },
+      { id: "2023", rotulo: "2023", tipo: "ano", marcas: ["fonte_estoque_diferente"] },
+      { id: "2024", rotulo: "2024", tipo: "ano", marcas: [] },
+      { id: "m2024", rotulo: "Média 2022–24", tipo: "media", marcas: [] },
+    ],
+  };
+  const spearman = {
+    coabitacao: {
+      periodos: ["2022", "2023", "2024", "m2024"],
+      matriz: [[1, 0.86, 0.97, 0.9], [0.86, 1, 0.86, 0.95], [0.97, 0.86, 1, 0.9], [0.9, 0.95, 0.9, 1]],
+    },
+  };
+
+  it("escala fixa de 0,8 a 1,0, com clamp", () => {
+    expect(posicaoSpearman(0.8)).toBe(0);
+    expect(posicaoSpearman(0.9)).toBeCloseTo(0.5);
+    expect(posicaoSpearman(1)).toBe(1);
+    expect(posicaoSpearman(0.5)).toBe(0);
+    expect(posicaoSpearman(null)).toBeNull();
+  });
+
+  it("acha o ano que menos se parece com os outros (só anos, não médias)", () => {
+    const r = periodoMenosParecido(spearman, manifesto);
+    expect(r.periodo.id).toBe("2023");
+    expect(r.fonteDiferente).toBe(true);
+  });
+
+  it("frase gerada do pacote; sem a causa quando o estoque não vem de outra fonte", () => {
+    expect(fraseAnoMenosParecido(spearman, manifesto)).toBe(
+      "2023 é o ano que menos se parece com os outros: a ordem dos hexágonos muda porque o estoque vem de outra fonte."
+    );
+    const semMarca = { periodos: manifesto.periodos.map((p) => ({ ...p, marcas: [] })) };
+    expect(fraseAnoMenosParecido(spearman, semMarca)).toBe("2023 é o ano que menos se parece com os outros: a ordem dos hexágonos muda.");
+  });
+
+  it("Spearman de cada ano contra o primeiro ano", () => {
+    const [serie] = spearmanContraBase(spearman, manifesto);
+    expect(serie.base.id).toBe("2022");
+    expect(serie.pontos.map((p) => [p.periodo.id, p.valor])).toEqual([["2023", 0.86], ["2024", 0.97]]);
   });
 });

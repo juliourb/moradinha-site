@@ -1,7 +1,8 @@
 ```{=html}
 <div class="chips" id="chips-edicao">
-  <span class="chip" id="chip-dominio">RM de Maceió</span>
+  <select class="chip sel-cabecalho" id="sel-dominio" aria-label="Domínio"></select>
+  <select class="chip sel-cabecalho" id="sel-edicao" aria-label="Edição"></select>
   <span class="chip ficticio" id="chip-ficticio" hidden>dados fictícios</span>
-  <span class="chip" id="chip-edicao"></span>
+  <span class="chip" id="chip-data"></span>
 </div>
 ```
