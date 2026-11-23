@@ -13188,6 +13188,505 @@ function mudanca(totais, componente, periodoDe, periodoPara) {
   return { delta, z: z4, marcas: [], calculado: true };
 }
 
+// src/js/util/marcas.js
+var MARCAS = Object.freeze({
+  total_fragil: "Total fr\xE1gil (CV acima de 15%)",
+  mudanca_no_ruido: "Mudan\xE7a dentro do ru\xEDdo",
+  fonte_estoque_diferente: "Estoque por fonte diferente dos demais anos (Open Buildings); n\xE3o comparar por hex\xE1gono",
+  media_inclui_fonte_diferente: "M\xE9dia inclui ano com estoque por fonte diferente",
+  precariedade_provisoria_sem_faixa: "Precariedade provis\xF3ria, sem faixa",
+  ap_ressalva: "AP com ressalva (CV acima de 30% ou direta zero)",
+  parcial_sigilo: "Parte em sigilo do Censo",
+  sem_dado: "Sem dado (sigilo total)"
+});
+function rotuloMarca(codigo) {
+  if (!(codigo in MARCAS)) {
+    throw new Error(`marca desconhecida (fora do vocabul\xE1rio fechado): "${codigo}"`);
+  }
+  return MARCAS[codigo];
+}
+function classeMarca(codigo) {
+  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
+  if (codigo === "fonte_estoque_diferente") return "crit";
+  return "info";
+}
+var ROTULOS_FONTE_ESTOQUE = Object.freeze({
+  censo: "Censo 2022",
+  open_buildings: "Open Buildings",
+  mapbiomas: "MapBiomas",
+  mista: "M\xE9dia de anos com fontes de estoque diferentes"
+});
+function rotuloFonteEstoque(valor) {
+  if (valor == null) return "\u2014";
+  return ROTULOS_FONTE_ESTOQUE[valor] ?? valor;
+}
+var PRIORIDADE_MARCAS = Object.freeze([
+  "total_fragil",
+  "fonte_estoque_diferente",
+  "ap_ressalva",
+  "mudanca_no_ruido",
+  "media_inclui_fonte_diferente",
+  "precariedade_provisoria_sem_faixa",
+  "parcial_sigilo",
+  "sem_dado"
+]);
+
+// node_modules/simple-statistics/dist/simple-statistics.mjs
+function makeMatrix(columns, rows) {
+  const matrix = [];
+  for (let i3 = 0; i3 < columns; i3++) {
+    const column = [];
+    for (let j4 = 0; j4 < rows; j4++) {
+      column.push(0);
+    }
+    matrix.push(column);
+  }
+  return matrix;
+}
+function numericSort(x5) {
+  return x5.slice().sort(function(a5, b10) {
+    return a5 - b10;
+  });
+}
+function uniqueCountSorted(x5) {
+  let uniqueValueCount = 0;
+  let lastSeenValue;
+  for (let i3 = 0; i3 < x5.length; i3++) {
+    if (i3 === 0 || x5[i3] !== lastSeenValue) {
+      lastSeenValue = x5[i3];
+      uniqueValueCount++;
+    }
+  }
+  return uniqueValueCount;
+}
+function ssq(j4, i3, sums, sumsOfSquares) {
+  let sji;
+  if (j4 > 0) {
+    const muji = (sums[i3] - sums[j4 - 1]) / (i3 - j4 + 1);
+    sji = sumsOfSquares[i3] - sumsOfSquares[j4 - 1] - (i3 - j4 + 1) * muji * muji;
+  } else {
+    sji = sumsOfSquares[i3] - sums[i3] * sums[i3] / (i3 + 1);
+  }
+  if (sji < 0) {
+    return 0;
+  }
+  return sji;
+}
+function fillMatrixColumn(iMin, iMax, cluster, matrix, backtrackMatrix, sums, sumsOfSquares) {
+  if (iMin > iMax) {
+    return;
+  }
+  const i3 = Math.floor((iMin + iMax) / 2);
+  matrix[cluster][i3] = matrix[cluster - 1][i3 - 1];
+  backtrackMatrix[cluster][i3] = i3;
+  let jlow = cluster;
+  if (iMin > cluster) {
+    jlow = Math.max(jlow, backtrackMatrix[cluster][iMin - 1] || 0);
+  }
+  jlow = Math.max(jlow, backtrackMatrix[cluster - 1][i3] || 0);
+  let jhigh = i3 - 1;
+  if (iMax < matrix[0].length - 1) {
+    jhigh = Math.min(jhigh, backtrackMatrix[cluster][iMax + 1] || 0);
+  }
+  let sji;
+  let sjlowi;
+  let ssqjlow;
+  let ssqj;
+  for (let j4 = jhigh; j4 >= jlow; --j4) {
+    sji = ssq(j4, i3, sums, sumsOfSquares);
+    if (sji + matrix[cluster - 1][jlow - 1] >= matrix[cluster][i3]) {
+      break;
+    }
+    sjlowi = ssq(jlow, i3, sums, sumsOfSquares);
+    ssqjlow = sjlowi + matrix[cluster - 1][jlow - 1];
+    if (ssqjlow < matrix[cluster][i3]) {
+      matrix[cluster][i3] = ssqjlow;
+      backtrackMatrix[cluster][i3] = jlow;
+    }
+    jlow++;
+    ssqj = sji + matrix[cluster - 1][j4 - 1];
+    if (ssqj < matrix[cluster][i3]) {
+      matrix[cluster][i3] = ssqj;
+      backtrackMatrix[cluster][i3] = j4;
+    }
+  }
+  fillMatrixColumn(
+    iMin,
+    i3 - 1,
+    cluster,
+    matrix,
+    backtrackMatrix,
+    sums,
+    sumsOfSquares
+  );
+  fillMatrixColumn(
+    i3 + 1,
+    iMax,
+    cluster,
+    matrix,
+    backtrackMatrix,
+    sums,
+    sumsOfSquares
+  );
+}
+function fillMatrices(data, matrix, backtrackMatrix) {
+  const nValues = matrix[0].length;
+  const shift = data[Math.floor(nValues / 2)];
+  const sums = [];
+  const sumsOfSquares = [];
+  for (let i3 = 0, shiftedValue; i3 < nValues; ++i3) {
+    shiftedValue = data[i3] - shift;
+    if (i3 === 0) {
+      sums.push(shiftedValue);
+      sumsOfSquares.push(shiftedValue * shiftedValue);
+    } else {
+      sums.push(sums[i3 - 1] + shiftedValue);
+      sumsOfSquares.push(
+        sumsOfSquares[i3 - 1] + shiftedValue * shiftedValue
+      );
+    }
+    matrix[0][i3] = ssq(0, i3, sums, sumsOfSquares);
+    backtrackMatrix[0][i3] = 0;
+  }
+  let iMin;
+  for (let cluster = 1; cluster < matrix.length; ++cluster) {
+    if (cluster < matrix.length - 1) {
+      iMin = cluster;
+    } else {
+      iMin = nValues - 1;
+    }
+    fillMatrixColumn(
+      iMin,
+      nValues - 1,
+      cluster,
+      matrix,
+      backtrackMatrix,
+      sums,
+      sumsOfSquares
+    );
+  }
+}
+function ckmeans(x5, nClusters) {
+  if (nClusters > x5.length) {
+    throw new Error(
+      "cannot generate more classes than there are data values"
+    );
+  }
+  const sorted = numericSort(x5);
+  const uniqueCount = uniqueCountSorted(sorted);
+  if (uniqueCount === 1) {
+    return [sorted];
+  }
+  const matrix = makeMatrix(nClusters, sorted.length);
+  const backtrackMatrix = makeMatrix(nClusters, sorted.length);
+  fillMatrices(sorted, matrix, backtrackMatrix);
+  const clusters = [];
+  let clusterRight = backtrackMatrix[0].length - 1;
+  for (let cluster = backtrackMatrix.length - 1; cluster >= 0; cluster--) {
+    const clusterLeft = backtrackMatrix[cluster][clusterRight];
+    clusters[cluster] = sorted.slice(clusterLeft, clusterRight + 1);
+    if (cluster > 0) {
+      clusterRight = clusterLeft - 1;
+    }
+  }
+  return clusters;
+}
+var g2 = 607 / 128;
+var LOGSQRT2PI = Math.log(Math.sqrt(2 * Math.PI));
+var SQRT_2PI$1 = Math.sqrt(2 * Math.PI);
+function cumulativeDistribution(z4) {
+  let sum2 = z4;
+  let tmp2 = z4;
+  for (let i3 = 1; i3 < 30; i3++) {
+    tmp2 *= z4 * z4 / (2 * i3 + 1);
+    sum2 += tmp2;
+  }
+  return Math.round((0.5 + sum2 / SQRT_2PI$1 * Math.exp(-z4 * z4 / 2)) * 1e4) / 1e4;
+}
+var standardNormalTable = [];
+for (let z4 = 0; z4 <= 3.09; z4 += 0.01) {
+  standardNormalTable.push(cumulativeDistribution(z4));
+}
+var TWO_OVER_SQRT_PI = 2 / Math.sqrt(Math.PI);
+var SQRT_2PI = Math.sqrt(2 * Math.PI);
+
+// src/js/dados/escalaCor.js
+var COMPONENTES_MAPA = ["total", ...COMPONENTES_BASE];
+var SERIE_ARREDONDAMENTO = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5];
+function arredondarParaSerie(valor) {
+  if (!(valor > 0)) return 0;
+  const expCentral = Math.floor(Math.log10(valor));
+  let melhor = null;
+  let menorDist = Infinity;
+  for (let n3 = Math.max(-1, expCentral - 1); n3 <= expCentral + 1; n3++) {
+    for (const base of SERIE_ARREDONDAMENTO) {
+      const candidato = base * 10 ** n3;
+      const dist4 = Math.abs(candidato - valor);
+      if (dist4 < menorDist) {
+        menorDist = dist4;
+        melhor = candidato;
+      }
+    }
+  }
+  return melhor;
+}
+function classeHex(domicilios, deficitAbsoluto) {
+  if (domicilios == null) return "sem_dado";
+  if (domicilios < 1) return "hachura";
+  if (deficitAbsoluto == null) return "sem_dado";
+  if (deficitAbsoluto < 1) return "menos_de_1";
+  return "normal";
+}
+function quebrasJenks(valores) {
+  const vs9 = [...valores].filter((v4) => v4 != null && v4 >= 1).sort((a5, b10) => a5 - b10);
+  if (!vs9.length) return [];
+  const distintos = new Set(vs9).size;
+  const k5 = Math.min(6, distintos);
+  if (k5 <= 1) return [arredondarParaSerie(vs9[vs9.length - 1])];
+  const clusters = ckmeans(vs9, k5);
+  const brutas = clusters.map((c3) => c3[c3.length - 1]);
+  return [...new Set(brutas.map(arredondarParaSerie))].sort((a5, b10) => a5 - b10);
+}
+function calcularEscalasAbsolutas(linhasArr, manifesto, componentes = COMPONENTES_MAPA) {
+  const escalas = /* @__PURE__ */ new Map();
+  for (const componente of componentes) {
+    const valores = [];
+    for (const linha of linhasArr) {
+      for (const p4 of manifesto.periodos) {
+        const dom = linha.dom[p4.id];
+        const v4 = brutoHex(linha, componente, p4.id);
+        if (classeHex(dom, v4) === "normal") valores.push(v4);
+      }
+    }
+    escalas.set(componente, quebrasJenks(valores));
+  }
+  return escalas;
+}
+function calcularEscalasRelativas(linhasArr, manifesto, componentes = COMPONENTES_MAPA) {
+  const escalas = /* @__PURE__ */ new Map();
+  for (const componente of componentes) {
+    const valores = [];
+    for (const linha of linhasArr) {
+      for (const p4 of manifesto.periodos) {
+        const dom = linha.dom[p4.id];
+        const v4 = brutoHex(linha, componente, p4.id);
+        if (classeHex(dom, v4) === "normal") valores.push(100 * v4 / dom);
+      }
+    }
+    escalas.set(componente, quebrasJenks(valores));
+  }
+  return escalas;
+}
+function taxaDominio(totais, componente, periodoId) {
+  const t4 = totalDoMapa(totais, componente, periodoId);
+  const dom = domiciliosTotal(totais, periodoId);
+  if (t4 == null || dom == null || dom === 0) return null;
+  return 100 * t4.total / dom;
+}
+var CORTES_VEZES_TAXA = [0.5, 0.8, 1.25, 1.5, 2];
+function indiceClasse(valor, quebras) {
+  if (!quebras.length) return 0;
+  let i3 = 0;
+  while (i3 < quebras.length - 1 && valor > quebras[i3]) i3++;
+  return i3;
+}
+function indiceClasseVezesTaxa(vezes) {
+  let i3 = 0;
+  while (i3 < CORTES_VEZES_TAXA.length && vezes >= CORTES_VEZES_TAXA[i3]) i3++;
+  return i3;
+}
+
+// src/js/util/formato.js
+var SEM_DADO = "\u2014";
+function formatar(valor, decimais = 0) {
+  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
+  return valor.toLocaleString("pt-BR", {
+    minimumFractionDigits: decimais,
+    maximumFractionDigits: decimais
+  });
+}
+function rotuloCurto(rotulo2) {
+  return rotulo2.replace(/^Média (\d{2})(\d{2})–/, "M$2\u2013");
+}
+function formatarPercentual(valor, decimais = 1) {
+  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
+  return `${formatar(valor, decimais)} %`;
+}
+
+// src/js/dados/visaoGeral.js
+function parteCadUnico(item, todosItens) {
+  const origem = item.indicador === "total" ? todosItens.find((i3) => i3.indicador === "habitacao_precaria") : item;
+  const sub5 = origem?.fjp_subcomponentes?.find((s4) => s4.nome === "improvisados");
+  return sub5?.valor ?? 0;
+}
+function faixaReconstrucao(reconstrucaoPnadc, reconstrucaoEp) {
+  if (reconstrucaoPnadc == null || reconstrucaoEp == null) return null;
+  return {
+    inf: Math.max(0, reconstrucaoPnadc - 1.96 * reconstrucaoEp),
+    sup: reconstrucaoPnadc + 1.96 * reconstrucaoEp
+  };
+}
+function fjpTresValores(referenciaFjp) {
+  return referenciaFjp.map((item) => {
+    const cadUnico = parteCadUnico(item, referenciaFjp);
+    const semCadUnico = item.fjp_publicado == null ? null : item.fjp_publicado - cadUnico;
+    const faixa = faixaReconstrucao(item.reconstrucao_pnadc, item.reconstrucao_ep);
+    const dentro = semCadUnico != null && faixa != null ? semCadUnico >= faixa.inf && semCadUnico <= faixa.sup : null;
+    return { ...item, cadUnico, semCadUnico, faixa, dentro };
+  });
+}
+var NOME_COMPONENTE2 = { total: "total", coabitacao: "coabita\xE7\xE3o", onus: "\xF4nus", precariedade: "precariedade" };
+var CLAB = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function periodoRecenteAno(manifesto) {
+  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano") ?? manifesto.periodos.at(-1);
+}
+function periodoRecenteMedia(manifesto) {
+  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "media") ?? null;
+}
+function componenteMaior(totais, periodoId) {
+  let maior = null;
+  for (const c3 of COMPONENTES_BASE) {
+    const t4 = totalDoMapa(totais, c3, periodoId);
+    if (t4 && (!maior || t4.total > maior.total)) maior = { componente: c3, total: t4.total };
+  }
+  return maior?.componente ?? null;
+}
+function marcaMaisImportante(totais, periodoId) {
+  for (const codigo of PRIORIDADE_MARCAS) {
+    for (const c3 of COMPONENTES_BASE) {
+      const t4 = totalDoMapa(totais, c3, periodoId);
+      if (t4?.marcas?.includes(codigo)) {
+        return { componente: c3, codigo };
+      }
+    }
+  }
+  return null;
+}
+function dadosCartoesBI(manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const anosTipo = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const dom = domiciliosTotal(totais, ano.id);
+  const domMedia = media ? domiciliosTotal(totais, media.id) : null;
+  return ["total", ...COMPONENTES_BASE].map((componente) => {
+    const tAno = totalDoMapa(totais, componente, ano.id);
+    const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
+    const rowsAno = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id));
+    const serie = rowsAno.map((t4) => t4?.total ?? null);
+    const faixas = rowsAno.map((t4) => componente !== "total" && t4?.ep != null ? [t4.total - 1.96 * t4.ep, t4.total + 1.96 * t4.ep] : null);
+    return {
+      componente,
+      rotulo: CLAB[componente],
+      absolutoAno: tAno?.total ?? null,
+      relativoAno: tAno && dom ? 100 * tAno.total / dom : null,
+      absolutoMedia: tMedia?.total ?? null,
+      relativoMedia: tMedia && domMedia ? 100 * tMedia.total / domMedia : null,
+      marcas: tAno?.marcas ?? [],
+      serie,
+      faixas,
+      anos: anosTipo.map((p4) => p4.rotulo),
+      periodoAno: ano.id,
+      periodoMedia: media?.id ?? null
+    };
+  });
+}
+function marcasDoDominio(totais) {
+  const vistas = /* @__PURE__ */ new Map();
+  const registrar = (codigo, componente) => {
+    if (!vistas.has(codigo)) vistas.set(codigo, /* @__PURE__ */ new Set());
+    vistas.get(codigo).add(componente);
+  };
+  for (const t4 of totais.totais) for (const m4 of t4.marcas ?? []) registrar(m4, t4.componente);
+  for (const mu2 of totais.mudancas ?? []) for (const m4 of mu2.marcas ?? []) registrar(m4, mu2.componente);
+  return [...vistas.entries()].map(([codigo, componentes]) => ({ codigo, componentes: [...componentes] }));
+}
+function linhasParaCitar(manifesto, totais) {
+  const ano = periodoRecenteAno(manifesto);
+  const media = periodoRecenteMedia(manifesto);
+  const data = manifesto.data_execucao.slice(0, 10).split("-").reverse().join("/");
+  const linhas = [];
+  for (const periodo of [ano, media].filter(Boolean)) {
+    for (const componente of ["total", ...COMPONENTES_BASE]) {
+      const t4 = totalDoMapa(totais, componente, periodo.id);
+      if (!t4) continue;
+      const rotulo2 = componente === "total" ? "D\xE9ficit total" : `D\xE9ficit de ${NOME_COMPONENTE2[componente]}`;
+      linhas.push({
+        componente,
+        periodo: periodo.id,
+        periodoRotulo: periodo.rotulo,
+        total: t4.total,
+        ep: t4.ep,
+        texto: `${rotulo2}, ${manifesto.nome}, ${periodo.rotulo}: ${Math.round(t4.total).toLocaleString("pt-BR")} domic\xEDlios (moradinha, edi\xE7\xE3o ${manifesto.edicao}, ${data}).`
+      });
+    }
+  }
+  return linhas;
+}
+function curvaConcentracao(linhasArr, componente, periodo) {
+  const valores = [];
+  for (const l3 of linhasArr) {
+    const dom = l3.dom[periodo];
+    if (dom == null || dom < 1) continue;
+    const v4 = brutoHex(l3, componente, periodo);
+    if (v4 == null) continue;
+    valores.push(v4);
+  }
+  valores.sort((a5, b10) => b10 - a5);
+  const n3 = valores.length;
+  const totalDeficit = valores.reduce((s4, v4) => s4 + v4, 0);
+  const pontos = [];
+  let acumulado = 0;
+  for (let i3 = 0; i3 < n3; i3++) {
+    acumulado += valores[i3];
+    pontos.push({ pctHex: 100 * (i3 + 1) / n3, pctDeficitAcumulado: totalDeficit > 0 ? 100 * acumulado / totalDeficit : 0 });
+  }
+  const idxMeio = pontos.findIndex((p4) => p4.pctDeficitAcumulado >= 50);
+  const nHexMeio = idxMeio === -1 ? n3 : idxMeio + 1;
+  const pctHexMeio = idxMeio === -1 ? 100 : pontos[idxMeio].pctHex;
+  return { pontos, n: n3, nHexMeio, pctHexMeio };
+}
+function maiorRelativo(linhasArr, componente, periodo) {
+  let melhor = null;
+  for (const l3 of linhasArr) {
+    const dom = l3.dom[periodo];
+    if (dom == null || dom < 1) continue;
+    const v4 = brutoHex(l3, componente, periodo);
+    if (v4 == null) continue;
+    const relativo = 100 * v4 / dom;
+    if (melhor == null || relativo > melhor) melhor = relativo;
+  }
+  return melhor;
+}
+function fraseRessalvaRelativo(linhasArr, totais, componente, periodo) {
+  const conc = curvaConcentracao(linhasArr, componente, periodo);
+  const maiorRel = maiorRelativo(linhasArr, componente, periodo);
+  const taxa = taxaDominio(totais, componente, periodo);
+  const vezes = taxa && maiorRel != null ? maiorRel / taxa : null;
+  const frase1 = `${formatar(conc.nHexMeio, 0)} hex\xE1gonos (${formatar(conc.pctHexMeio, 0)}% dos que t\xEAm domic\xEDlio) somam metade do d\xE9ficit absoluto.`;
+  if (vezes == null) return frase1;
+  const frase2 = vezes >= 2 ? `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio.` : `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio: a concentra\xE7\xE3o do mapa absoluto acompanha, em boa parte, onde est\xE3o os domic\xEDlios.`;
+  return `${frase1} ${frase2}`;
+}
+function mudancasAnuaisForaDoRuido(manifesto, totais) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const resultado = [];
+  for (let i3 = 0; i3 < anos.length - 1; i3++) {
+    for (const componente of ["total", ...COMPONENTES_BASE]) {
+      const m4 = mudanca(totais, componente, anos[i3].id, anos[i3 + 1].id);
+      if (m4?.z != null && m4.z > 1.96) {
+        resultado.push({ componente, de: anos[i3], para: anos[i3 + 1], z: m4.z });
+      }
+    }
+  }
+  return resultado;
+}
+function fraseRuidoAnual(manifesto, totais) {
+  const passam = mudancasAnuaisForaDoRuido(manifesto, totais);
+  if (!passam.length) return "Nenhuma mudan\xE7a de um ano para o outro passa do ru\xEDdo da amostra.";
+  const nomes = passam.map((p4) => `${NOME_COMPONENTE2[p4.componente]} de ${p4.de.rotulo} para ${p4.para.rotulo}`);
+  return `Passa(m) do ru\xEDdo da amostra: ${nomes.join("; ")}.`;
+}
+
 // src/js/dados/qualidade.js
 var TIPO_MEDIDA = {
   incerteza: "sequencial",
@@ -13385,10 +13884,10 @@ function h2() {
   }
   return m2 || false;
 }
-var g2 = typeof Float32Array < `u` ? Float32Array : Array;
+var g3 = typeof Float32Array < `u` ? Float32Array : Array;
 function _2() {
-  var e67 = new g2(4);
-  return g2 != Float32Array && (e67[1] = 0, e67[2] = 0), e67[0] = 1, e67[3] = 1, e67;
+  var e67 = new g3(4);
+  return g3 != Float32Array && (e67[1] = 0, e67[2] = 0), e67[0] = 1, e67[3] = 1, e67;
 }
 function v2(e67, t4) {
   var n3 = t4[0], r3 = t4[1], i3 = t4[2], a5 = t4[3], o3 = n3 * a5 - i3 * r3;
@@ -13402,8 +13901,8 @@ function b2(e67, t4, n3) {
   return e67[0] = r3 * c3 + a5 * s4, e67[1] = i3 * c3 + o3 * s4, e67[2] = r3 * -s4 + a5 * c3, e67[3] = i3 * -s4 + o3 * c3, e67;
 }
 function x2() {
-  var e67 = new g2(9);
-  return g2 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[5] = 0, e67[6] = 0, e67[7] = 0), e67[0] = 1, e67[4] = 1, e67[8] = 1, e67;
+  var e67 = new g3(9);
+  return g3 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[5] = 0, e67[6] = 0, e67[7] = 0), e67[0] = 1, e67[4] = 1, e67[8] = 1, e67;
 }
 function S2(e67) {
   var t4 = e67[0], n3 = e67[1], r3 = e67[2], i3 = e67[3], a5 = e67[4], o3 = e67[5], s4 = e67[6], c3 = e67[7], l3 = e67[8];
@@ -13418,11 +13917,11 @@ function w2(e67, t4) {
   return e67[0] = 1 - d3 - m4, e67[3] = u3 - _4, e67[6] = f4 + g5, e67[1] = u3 + _4, e67[4] = 1 - l3 - m4, e67[7] = p4 - h4, e67[2] = f4 - g5, e67[5] = p4 + h4, e67[8] = 1 - l3 - d3, e67;
 }
 function T() {
-  var e67 = new g2(16);
-  return g2 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[4] = 0, e67[6] = 0, e67[7] = 0, e67[8] = 0, e67[9] = 0, e67[11] = 0, e67[12] = 0, e67[13] = 0, e67[14] = 0), e67[0] = 1, e67[5] = 1, e67[10] = 1, e67[15] = 1, e67;
+  var e67 = new g3(16);
+  return g3 != Float32Array && (e67[1] = 0, e67[2] = 0, e67[3] = 0, e67[4] = 0, e67[6] = 0, e67[7] = 0, e67[8] = 0, e67[9] = 0, e67[11] = 0, e67[12] = 0, e67[13] = 0, e67[14] = 0), e67[0] = 1, e67[5] = 1, e67[10] = 1, e67[15] = 1, e67;
 }
 function E2(e67) {
-  var t4 = new g2(16);
+  var t4 = new g3(16);
   return t4[0] = e67[0], t4[1] = e67[1], t4[2] = e67[2], t4[3] = e67[3], t4[4] = e67[4], t4[5] = e67[5], t4[6] = e67[6], t4[7] = e67[7], t4[8] = e67[8], t4[9] = e67[9], t4[10] = e67[10], t4[11] = e67[11], t4[12] = e67[12], t4[13] = e67[13], t4[14] = e67[14], t4[15] = e67[15], t4;
 }
 function D2(e67, t4) {
@@ -13484,11 +13983,11 @@ function ue(e67, t4) {
   return Math.abs(n3 - v4) <= 1e-6 * Math.max(1, Math.abs(n3), Math.abs(v4)) && Math.abs(r3 - y5) <= 1e-6 * Math.max(1, Math.abs(r3), Math.abs(y5)) && Math.abs(i3 - b10) <= 1e-6 * Math.max(1, Math.abs(i3), Math.abs(b10)) && Math.abs(a5 - x5) <= 1e-6 * Math.max(1, Math.abs(a5), Math.abs(x5)) && Math.abs(o3 - S4) <= 1e-6 * Math.max(1, Math.abs(o3), Math.abs(S4)) && Math.abs(s4 - C4) <= 1e-6 * Math.max(1, Math.abs(s4), Math.abs(C4)) && Math.abs(c3 - w4) <= 1e-6 * Math.max(1, Math.abs(c3), Math.abs(w4)) && Math.abs(l3 - T3) <= 1e-6 * Math.max(1, Math.abs(l3), Math.abs(T3)) && Math.abs(u3 - E5) <= 1e-6 * Math.max(1, Math.abs(u3), Math.abs(E5)) && Math.abs(d3 - D5) <= 1e-6 * Math.max(1, Math.abs(d3), Math.abs(D5)) && Math.abs(f4 - O4) <= 1e-6 * Math.max(1, Math.abs(f4), Math.abs(O4)) && Math.abs(p4 - k5) <= 1e-6 * Math.max(1, Math.abs(p4), Math.abs(k5)) && Math.abs(m4 - A5) <= 1e-6 * Math.max(1, Math.abs(m4), Math.abs(A5)) && Math.abs(h4 - j4) <= 1e-6 * Math.max(1, Math.abs(h4), Math.abs(j4)) && Math.abs(g5 - ee4) <= 1e-6 * Math.max(1, Math.abs(g5), Math.abs(ee4)) && Math.abs(_4 - te4) <= 1e-6 * Math.max(1, Math.abs(_4), Math.abs(te4));
 }
 function de2() {
-  var e67 = new g2(3);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67;
+  var e67 = new g3(3);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67;
 }
 function fe(e67) {
-  var t4 = new g2(3);
+  var t4 = new g3(3);
   return t4[0] = e67[0], t4[1] = e67[1], t4[2] = e67[2], t4;
 }
 function pe2(e67) {
@@ -13496,7 +13995,7 @@ function pe2(e67) {
   return Math.sqrt(t4 * t4 + n3 * n3 + r3 * r3);
 }
 function me(e67, t4, n3) {
-  var r3 = new g2(3);
+  var r3 = new g3(3);
   return r3[0] = e67, r3[1] = t4, r3[2] = n3, r3;
 }
 function he(e67, t4, n3) {
@@ -13571,8 +14070,8 @@ var Me = pe2;
   };
 })();
 function Ne() {
-  var e67 = new g2(4);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0, e67[3] = 0), e67;
+  var e67 = new g3(4);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0, e67[3] = 0), e67;
 }
 function Pe(e67, t4, n3, r3, i3) {
   return e67[0] = t4, e67[1] = n3, e67[2] = r3, e67[3] = i3, e67;
@@ -13601,8 +14100,8 @@ var ze = Fe;
   };
 })();
 function Be2() {
-  var e67 = new g2(4);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67[3] = 1, e67;
+  var e67 = new g3(4);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0, e67[2] = 0), e67[3] = 1, e67;
 }
 function Ve(e67) {
   return e67[0] = 0, e67[1] = 0, e67[2] = 0, e67[3] = 1, e67;
@@ -13679,11 +14178,11 @@ var Je = Le;
   };
 })();
 function Ye2() {
-  var e67 = new g2(2);
-  return g2 != Float32Array && (e67[0] = 0, e67[1] = 0), e67;
+  var e67 = new g3(2);
+  return g3 != Float32Array && (e67[0] = 0, e67[1] = 0), e67;
 }
 function Xe2(e67, t4) {
-  var n3 = new g2(2);
+  var n3 = new g3(2);
   return n3[0] = e67, n3[1] = t4, n3;
 }
 function N(e67, t4, n3) {
@@ -45531,7 +46030,7 @@ function getAttributeInfoFromLayouts(shaderLayout, bufferLayout, name2) {
   };
 }
 function getAttributeFromShaderLayout(shaderLayout, name2) {
-  const attribute = shaderLayout.attributes.find((attr) => attr.name === name2);
+  const attribute = shaderLayout.attributes.find((attr2) => attr2.name === name2);
   if (!attribute) {
     log2.warn(`shader layout attribute "${name2}" not present in shader`);
   }
@@ -46095,11 +46594,11 @@ var BufferLayoutHelper = class {
 
 // node_modules/@luma.gl/core/dist/adapter-utils/buffer-layout-order.js
 function sortedBufferLayoutByShaderSourceLocations(shaderLayout, bufferLayout) {
-  const shaderLayoutMap = Object.fromEntries(shaderLayout.attributes.map((attr) => [attr.name, attr.location]));
+  const shaderLayoutMap = Object.fromEntries(shaderLayout.attributes.map((attr2) => [attr2.name, attr2.location]));
   const sortedLayout = bufferLayout.slice();
   sortedLayout.sort((a5, b10) => {
-    const attributeNamesA = a5.attributes ? a5.attributes.map((attr) => attr.attribute) : [a5.name];
-    const attributeNamesB = b10.attributes ? b10.attributes.map((attr) => attr.attribute) : [b10.name];
+    const attributeNamesA = a5.attributes ? a5.attributes.map((attr2) => attr2.attribute) : [a5.name];
+    const attributeNamesB = b10.attributes ? b10.attributes.map((attr2) => attr2.attribute) : [b10.name];
     const minLocationA = Math.min(...attributeNamesA.map((name2) => shaderLayoutMap[name2]));
     const minLocationB = Math.min(...attributeNamesB.map((name2) => shaderLayoutMap[name2]));
     return minLocationA - minLocationB;
@@ -46285,11 +46784,11 @@ function m3(e67) {
   return 0 == n3 ? (t4 ? -1 : 1) * Math.pow(2, -14) * (s4 / Math.pow(2, 10)) : 31 == n3 ? s4 ? NaN : 1 / 0 * (t4 ? -1 : 1) : (t4 ? -1 : 1) * Math.pow(2, n3 - 15) * (1 + s4 / Math.pow(2, 10));
 }
 var _3 = new Float32Array(1);
-var g3 = new Int32Array(_3.buffer);
+var g4 = new Int32Array(_3.buffer);
 var x3 = new Uint16Array(1);
 function y3(e67) {
   _3[0] = e67;
-  const t4 = g3[0], n3 = t4 >> 31 & 1;
+  const t4 = g4[0], n3 = t4 >> 31 & 1;
   let s4 = t4 >> 23 & 255, r3 = 8388607 & t4;
   if (255 === s4) return x3[0] = n3 << 15 | 31744 | (0 !== r3 ? 512 : 0), x3[0];
   if (0 === s4) {
@@ -71590,7 +72089,7 @@ function mergeShaderLayout(baseLayout, overrideLayout) {
     attributes: baseLayout.attributes.map((attribute) => ({ ...attribute }))
   };
   for (const attribute of overrideLayout?.attributes || []) {
-    const baseAttribute = mergedLayout.attributes.find((attr) => attr.name === attribute.name);
+    const baseAttribute = mergedLayout.attributes.find((attr2) => attr2.name === attribute.name);
     if (!baseAttribute) {
       log2.warn(`shader layout attribute ${attribute.name} not present in shader`);
     } else {
@@ -102892,336 +103391,11 @@ function transform(node) {
   return node.__zoom;
 }
 
-// src/js/util/formato.js
-var SEM_DADO = "\u2014";
-function formatar(valor, decimais = 0) {
-  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
-  return valor.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimais,
-    maximumFractionDigits: decimais
-  });
-}
-function rotuloCurto(rotulo2) {
-  return rotulo2.replace(/^Média (\d{2})(\d{2})–/, "M$2\u2013");
-}
-function formatarPercentual(valor, decimais = 1) {
-  if (valor == null || Number.isNaN(valor)) return SEM_DADO;
-  return `${formatar(valor, decimais)} %`;
-}
-
-// src/js/util/marcas.js
-var MARCAS = Object.freeze({
-  total_fragil: "Total fr\xE1gil (CV acima de 15%)",
-  mudanca_no_ruido: "Mudan\xE7a dentro do ru\xEDdo",
-  fonte_estoque_diferente: "Estoque por fonte diferente dos demais anos (Open Buildings); n\xE3o comparar por hex\xE1gono",
-  media_inclui_fonte_diferente: "M\xE9dia inclui ano com estoque por fonte diferente",
-  precariedade_provisoria_sem_faixa: "Precariedade provis\xF3ria, sem faixa",
-  ap_ressalva: "AP com ressalva (CV acima de 30% ou direta zero)",
-  parcial_sigilo: "Parte em sigilo do Censo",
-  sem_dado: "Sem dado (sigilo total)"
-});
-function rotuloMarca(codigo) {
-  if (!(codigo in MARCAS)) {
-    throw new Error(`marca desconhecida (fora do vocabul\xE1rio fechado): "${codigo}"`);
-  }
-  return MARCAS[codigo];
-}
-function classeMarca(codigo) {
-  if (codigo === "total_fragil" || codigo === "ap_ressalva" || codigo === "precariedade_provisoria_sem_faixa") return "warn";
-  if (codigo === "fonte_estoque_diferente") return "crit";
-  return "info";
-}
-var ROTULOS_FONTE_ESTOQUE = Object.freeze({
-  censo: "Censo 2022",
-  open_buildings: "Open Buildings",
-  mapbiomas: "MapBiomas",
-  mista: "M\xE9dia de anos com fontes de estoque diferentes"
-});
-function rotuloFonteEstoque(valor) {
-  if (valor == null) return "\u2014";
-  return ROTULOS_FONTE_ESTOQUE[valor] ?? valor;
-}
-var PRIORIDADE_MARCAS = Object.freeze([
-  "total_fragil",
-  "fonte_estoque_diferente",
-  "ap_ressalva",
-  "mudanca_no_ruido",
-  "media_inclui_fonte_diferente",
-  "precariedade_provisoria_sem_faixa",
-  "parcial_sigilo",
-  "sem_dado"
-]);
-
 // src/js/util/faixas.js
 function valorDentroFaixas(v4, faixas) {
   if (!faixas?.length) return true;
   if (v4 == null) return false;
   return faixas.some(([x0, x1]) => v4 >= x0 && (x1 == null || v4 < x1));
-}
-
-// node_modules/simple-statistics/dist/simple-statistics.mjs
-function makeMatrix(columns, rows) {
-  const matrix = [];
-  for (let i3 = 0; i3 < columns; i3++) {
-    const column = [];
-    for (let j4 = 0; j4 < rows; j4++) {
-      column.push(0);
-    }
-    matrix.push(column);
-  }
-  return matrix;
-}
-function numericSort(x5) {
-  return x5.slice().sort(function(a5, b10) {
-    return a5 - b10;
-  });
-}
-function uniqueCountSorted(x5) {
-  let uniqueValueCount = 0;
-  let lastSeenValue;
-  for (let i3 = 0; i3 < x5.length; i3++) {
-    if (i3 === 0 || x5[i3] !== lastSeenValue) {
-      lastSeenValue = x5[i3];
-      uniqueValueCount++;
-    }
-  }
-  return uniqueValueCount;
-}
-function ssq(j4, i3, sums, sumsOfSquares) {
-  let sji;
-  if (j4 > 0) {
-    const muji = (sums[i3] - sums[j4 - 1]) / (i3 - j4 + 1);
-    sji = sumsOfSquares[i3] - sumsOfSquares[j4 - 1] - (i3 - j4 + 1) * muji * muji;
-  } else {
-    sji = sumsOfSquares[i3] - sums[i3] * sums[i3] / (i3 + 1);
-  }
-  if (sji < 0) {
-    return 0;
-  }
-  return sji;
-}
-function fillMatrixColumn(iMin, iMax, cluster, matrix, backtrackMatrix, sums, sumsOfSquares) {
-  if (iMin > iMax) {
-    return;
-  }
-  const i3 = Math.floor((iMin + iMax) / 2);
-  matrix[cluster][i3] = matrix[cluster - 1][i3 - 1];
-  backtrackMatrix[cluster][i3] = i3;
-  let jlow = cluster;
-  if (iMin > cluster) {
-    jlow = Math.max(jlow, backtrackMatrix[cluster][iMin - 1] || 0);
-  }
-  jlow = Math.max(jlow, backtrackMatrix[cluster - 1][i3] || 0);
-  let jhigh = i3 - 1;
-  if (iMax < matrix[0].length - 1) {
-    jhigh = Math.min(jhigh, backtrackMatrix[cluster][iMax + 1] || 0);
-  }
-  let sji;
-  let sjlowi;
-  let ssqjlow;
-  let ssqj;
-  for (let j4 = jhigh; j4 >= jlow; --j4) {
-    sji = ssq(j4, i3, sums, sumsOfSquares);
-    if (sji + matrix[cluster - 1][jlow - 1] >= matrix[cluster][i3]) {
-      break;
-    }
-    sjlowi = ssq(jlow, i3, sums, sumsOfSquares);
-    ssqjlow = sjlowi + matrix[cluster - 1][jlow - 1];
-    if (ssqjlow < matrix[cluster][i3]) {
-      matrix[cluster][i3] = ssqjlow;
-      backtrackMatrix[cluster][i3] = jlow;
-    }
-    jlow++;
-    ssqj = sji + matrix[cluster - 1][j4 - 1];
-    if (ssqj < matrix[cluster][i3]) {
-      matrix[cluster][i3] = ssqj;
-      backtrackMatrix[cluster][i3] = j4;
-    }
-  }
-  fillMatrixColumn(
-    iMin,
-    i3 - 1,
-    cluster,
-    matrix,
-    backtrackMatrix,
-    sums,
-    sumsOfSquares
-  );
-  fillMatrixColumn(
-    i3 + 1,
-    iMax,
-    cluster,
-    matrix,
-    backtrackMatrix,
-    sums,
-    sumsOfSquares
-  );
-}
-function fillMatrices(data, matrix, backtrackMatrix) {
-  const nValues = matrix[0].length;
-  const shift = data[Math.floor(nValues / 2)];
-  const sums = [];
-  const sumsOfSquares = [];
-  for (let i3 = 0, shiftedValue; i3 < nValues; ++i3) {
-    shiftedValue = data[i3] - shift;
-    if (i3 === 0) {
-      sums.push(shiftedValue);
-      sumsOfSquares.push(shiftedValue * shiftedValue);
-    } else {
-      sums.push(sums[i3 - 1] + shiftedValue);
-      sumsOfSquares.push(
-        sumsOfSquares[i3 - 1] + shiftedValue * shiftedValue
-      );
-    }
-    matrix[0][i3] = ssq(0, i3, sums, sumsOfSquares);
-    backtrackMatrix[0][i3] = 0;
-  }
-  let iMin;
-  for (let cluster = 1; cluster < matrix.length; ++cluster) {
-    if (cluster < matrix.length - 1) {
-      iMin = cluster;
-    } else {
-      iMin = nValues - 1;
-    }
-    fillMatrixColumn(
-      iMin,
-      nValues - 1,
-      cluster,
-      matrix,
-      backtrackMatrix,
-      sums,
-      sumsOfSquares
-    );
-  }
-}
-function ckmeans(x5, nClusters) {
-  if (nClusters > x5.length) {
-    throw new Error(
-      "cannot generate more classes than there are data values"
-    );
-  }
-  const sorted = numericSort(x5);
-  const uniqueCount = uniqueCountSorted(sorted);
-  if (uniqueCount === 1) {
-    return [sorted];
-  }
-  const matrix = makeMatrix(nClusters, sorted.length);
-  const backtrackMatrix = makeMatrix(nClusters, sorted.length);
-  fillMatrices(sorted, matrix, backtrackMatrix);
-  const clusters = [];
-  let clusterRight = backtrackMatrix[0].length - 1;
-  for (let cluster = backtrackMatrix.length - 1; cluster >= 0; cluster--) {
-    const clusterLeft = backtrackMatrix[cluster][clusterRight];
-    clusters[cluster] = sorted.slice(clusterLeft, clusterRight + 1);
-    if (cluster > 0) {
-      clusterRight = clusterLeft - 1;
-    }
-  }
-  return clusters;
-}
-var g4 = 607 / 128;
-var LOGSQRT2PI = Math.log(Math.sqrt(2 * Math.PI));
-var SQRT_2PI$1 = Math.sqrt(2 * Math.PI);
-function cumulativeDistribution(z4) {
-  let sum2 = z4;
-  let tmp2 = z4;
-  for (let i3 = 1; i3 < 30; i3++) {
-    tmp2 *= z4 * z4 / (2 * i3 + 1);
-    sum2 += tmp2;
-  }
-  return Math.round((0.5 + sum2 / SQRT_2PI$1 * Math.exp(-z4 * z4 / 2)) * 1e4) / 1e4;
-}
-var standardNormalTable = [];
-for (let z4 = 0; z4 <= 3.09; z4 += 0.01) {
-  standardNormalTable.push(cumulativeDistribution(z4));
-}
-var TWO_OVER_SQRT_PI = 2 / Math.sqrt(Math.PI);
-var SQRT_2PI = Math.sqrt(2 * Math.PI);
-
-// src/js/dados/escalaCor.js
-var COMPONENTES_MAPA = ["total", ...COMPONENTES_BASE];
-var SERIE_ARREDONDAMENTO = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5];
-function arredondarParaSerie(valor) {
-  if (!(valor > 0)) return 0;
-  const expCentral = Math.floor(Math.log10(valor));
-  let melhor = null;
-  let menorDist = Infinity;
-  for (let n3 = Math.max(-1, expCentral - 1); n3 <= expCentral + 1; n3++) {
-    for (const base of SERIE_ARREDONDAMENTO) {
-      const candidato = base * 10 ** n3;
-      const dist4 = Math.abs(candidato - valor);
-      if (dist4 < menorDist) {
-        menorDist = dist4;
-        melhor = candidato;
-      }
-    }
-  }
-  return melhor;
-}
-function classeHex(domicilios, deficitAbsoluto) {
-  if (domicilios == null) return "sem_dado";
-  if (domicilios < 1) return "hachura";
-  if (deficitAbsoluto == null) return "sem_dado";
-  if (deficitAbsoluto < 1) return "menos_de_1";
-  return "normal";
-}
-function quebrasJenks(valores) {
-  const vs9 = [...valores].filter((v4) => v4 != null && v4 >= 1).sort((a5, b10) => a5 - b10);
-  if (!vs9.length) return [];
-  const distintos = new Set(vs9).size;
-  const k5 = Math.min(6, distintos);
-  if (k5 <= 1) return [arredondarParaSerie(vs9[vs9.length - 1])];
-  const clusters = ckmeans(vs9, k5);
-  const brutas = clusters.map((c3) => c3[c3.length - 1]);
-  return [...new Set(brutas.map(arredondarParaSerie))].sort((a5, b10) => a5 - b10);
-}
-function calcularEscalasAbsolutas(linhasArr, manifesto, componentes = COMPONENTES_MAPA) {
-  const escalas = /* @__PURE__ */ new Map();
-  for (const componente of componentes) {
-    const valores = [];
-    for (const linha of linhasArr) {
-      for (const p4 of manifesto.periodos) {
-        const dom = linha.dom[p4.id];
-        const v4 = brutoHex(linha, componente, p4.id);
-        if (classeHex(dom, v4) === "normal") valores.push(v4);
-      }
-    }
-    escalas.set(componente, quebrasJenks(valores));
-  }
-  return escalas;
-}
-function calcularEscalasRelativas(linhasArr, manifesto, componentes = COMPONENTES_MAPA) {
-  const escalas = /* @__PURE__ */ new Map();
-  for (const componente of componentes) {
-    const valores = [];
-    for (const linha of linhasArr) {
-      for (const p4 of manifesto.periodos) {
-        const dom = linha.dom[p4.id];
-        const v4 = brutoHex(linha, componente, p4.id);
-        if (classeHex(dom, v4) === "normal") valores.push(100 * v4 / dom);
-      }
-    }
-    escalas.set(componente, quebrasJenks(valores));
-  }
-  return escalas;
-}
-function taxaDominio(totais, componente, periodoId) {
-  const t4 = totalDoMapa(totais, componente, periodoId);
-  const dom = domiciliosTotal(totais, periodoId);
-  if (t4 == null || dom == null || dom === 0) return null;
-  return 100 * t4.total / dom;
-}
-var CORTES_VEZES_TAXA = [0.5, 0.8, 1.25, 1.5, 2];
-function indiceClasse(valor, quebras) {
-  if (!quebras.length) return 0;
-  let i3 = 0;
-  while (i3 < quebras.length - 1 && valor > quebras[i3]) i3++;
-  return i3;
-}
-function indiceClasseVezesTaxa(vezes) {
-  let i3 = 0;
-  while (i3 < CORTES_VEZES_TAXA.length && vezes >= CORTES_VEZES_TAXA[i3]) i3++;
-  return i3;
 }
 
 // src/js/mapa/index.js
@@ -103263,6 +103437,29 @@ function rgb3(hex2) {
   const c3 = color(hex2);
   return c3 ? [c3.r, c3.g, c3.b] : [128, 128, 128];
 }
+function acinzentarEstilo(mapa, escuro) {
+  const estilo = mapa.getStyle?.();
+  if (!estilo?.layers) return;
+  const c3 = escuro ? { terra: "#242424", agua: "#171717", via: "#3d3d3d", limite: "#6a6a6a", texto: "#a6a6a6", halo: "#242424" } : { terra: "#e3e3e3", agua: "#c9c9c9", via: "#f7f7f7", limite: "#a8a8a8", texto: "#666666", halo: "#e3e3e3" };
+  const pintar = (id3, prop, valor) => {
+    try {
+      mapa.setPaintProperty(id3, prop, valor);
+    } catch {
+    }
+  };
+  for (const l3 of estilo.layers) {
+    const agua = /water|ocean|sea/i.test(l3.id);
+    if (l3.type === "background") pintar(l3.id, "background-color", c3.terra);
+    else if (l3.type === "fill") {
+      pintar(l3.id, "fill-color", agua ? c3.agua : c3.terra);
+      pintar(l3.id, "fill-outline-color", agua ? c3.agua : c3.terra);
+    } else if (l3.type === "line") pintar(l3.id, "line-color", agua ? c3.agua : /boundary|admin/i.test(l3.id) ? c3.limite : c3.via);
+    else if (l3.type === "symbol") {
+      pintar(l3.id, "text-color", c3.texto);
+      pintar(l3.id, "text-halo-color", c3.halo);
+    }
+  }
+}
 function temaEscuro() {
   const t4 = document.documentElement.getAttribute("data-theme");
   return t4 ? t4 === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -103296,6 +103493,24 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     mapaA.on("move", () => copiar(mapaA, mapaB));
     mapaB.on("move", () => copiar(mapaB, mapaA));
   })(instancias.a.mapa, instancias.b.mapa);
+  let baseCinza = false;
+  let camadasRecolhidas = false;
+  function urlEstilo() {
+    return temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro;
+  }
+  function aplicarEstiloBase() {
+    for (const { mapa } of Object.values(instancias)) {
+      mapa.setStyle(urlEstilo(), { diff: false });
+      mapa.once("style.load", () => {
+        if (baseCinza) acinzentarEstilo(mapa, temaEscuro());
+      });
+    }
+  }
+  function definirBaseCinza(ligado) {
+    if (ligado === baseCinza) return;
+    baseCinza = ligado;
+    aplicarEstiloBase();
+  }
   function criarInstancia(container, elBasefail, aoFalhar) {
     const mapa = new GF({
       container,
@@ -103760,7 +103975,15 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     }
     const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
     const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
-    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}${opacidadeHtml}${cinzaHtml}`;
+    elementos.layers.innerHTML = `<button type="button" class="layers-toggle" aria-expanded="${!camadasRecolhidas}" aria-controls="f1-layers-body"><span>Camadas</span><span aria-hidden="true">${camadasRecolhidas ? "\u25B8" : "\u25BE"}</span></button><div class="layers-body" id="f1-layers-body">${extras.join("")}${opacidadeHtml}${cinzaHtml}</div>`;
+    elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
+    elementos.layers.querySelector(".layers-toggle").onclick = () => {
+      camadasRecolhidas = !camadasRecolhidas;
+      elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
+      const t4 = elementos.layers.querySelector(".layers-toggle");
+      t4.setAttribute("aria-expanded", String(!camadasRecolhidas));
+      t4.lastElementChild.textContent = camadasRecolhidas ? "\u25B8" : "\u25BE";
+    };
     elementos.layers.querySelectorAll("input[data-camada]").forEach((el2) => {
       el2.onchange = () => aoMudar(el2.dataset.camada, el2.checked);
     });
@@ -103769,6 +103992,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
     if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
     elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
+    definirBaseCinza(!!estado.mapa_base_cinza);
   }
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
     computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
@@ -103834,9 +104058,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", trocarEstilo);
   new MutationObserver(trocarEstilo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   function trocarEstilo() {
-    const url = temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro;
-    instancias.a.mapa.setStyle(url);
-    instancias.b.mapa.setStyle(url);
+    aplicarEstiloBase();
   }
   return {
     renderizar,
@@ -104009,13 +104231,13 @@ function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
 }
 
 // src/js/ui/resposta.js
-var CLAB = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var CLAB2 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 function pill(classe, texto) {
   return `<span class="pill ${classe}">${texto}</span>`;
 }
 function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao) {
   const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
-  elementos.lab.textContent = `${CLAB[estado.componente]} \xB7 ${periodoRotulo} \xB7 dom\xEDnio inteiro`;
+  elementos.lab.textContent = `${CLAB2[estado.componente]} \xB7 ${periodoRotulo} \xB7 dom\xEDnio inteiro`;
   const t4 = totalDoMapa(totais, estado.componente, estado.periodo);
   const dom = domiciliosTotal(totais, estado.periodo);
   const isRel = estado.medida === "relativo";
@@ -104055,314 +104277,11 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
   elementos.cards.innerHTML = COMPONENTES_BASE.map((c3) => {
     const tc2 = totalDoMapa(totais, c3, estado.periodo);
     const v4 = tc2 ? isRel && dom ? 100 * tc2.total / dom : tc2.total : null;
-    return `<button type="button" class="card" data-c="${c3}" aria-pressed="${estado.componente === c3}"><div class="k">${CLAB[c3]}</div><div class="v num">${v4 == null ? "\u2014" : isRel ? formatar(v4, 2) + " %" : formatar(v4, 0)}</div></button>`;
+    return `<button type="button" class="card" data-c="${c3}" aria-pressed="${estado.componente === c3}"><div class="k">${CLAB2[c3]}</div><div class="v num">${v4 == null ? "\u2014" : isRel ? formatar(v4, 2) + " %" : formatar(v4, 0)}</div></button>`;
   }).join("");
   elementos.cards.querySelectorAll(".card").forEach((b10) => {
     b10.onclick = () => aoClicarCartao(estado.componente === b10.dataset.c ? "total" : b10.dataset.c);
   });
-}
-
-// src/js/util/limiares.js
-var LIMIARES = Object.freeze({
-  incerteza: { atencao: 0.7, critico: 1 },
-  cv_ap: { critico: 30 },
-  // direta_cv em % (SPEC_00 ap.parquet)
-  fracao_imputada: { atencao: 0.3 }
-});
-var LIMIARES_RASTREIO = Object.freeze({
-  cv_total_fragil: { valor: 15, unidade: "%", rotulo: 'CV do total (marca "total fr\xE1gil")' },
-  z_significancia: { valor: 1.96, unidade: "", rotulo: "z (mudan\xE7a afirm\xE1vel vs. dentro do ru\xEDdo)" },
-  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: 'CV da AP (marca "AP com ressalva")' }
-});
-function nivelIncerteza(valor) {
-  if (valor == null) return "ok";
-  if (valor > LIMIARES.incerteza.critico) return "critico";
-  if (valor > LIMIARES.incerteza.atencao) return "atencao";
-  return "ok";
-}
-function nivelFracaoImputada(valor) {
-  if (valor == null) return "ok";
-  return valor > LIMIARES.fracao_imputada.atencao ? "atencao" : "ok";
-}
-
-// src/js/ui/hexagono.js
-var CLAB2 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
-var NIVEL_CLASSE = { ok: "ok", atencao: "warn", critico: "crit" };
-function css2(nome) {
-  return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
-}
-function linhaComponente(linha, componente, periodo) {
-  const v4 = brutoHex(linha, componente, periodo);
-  const faixa = faixaHex(linha, componente, periodo);
-  if (v4 == null) {
-    return `<div class="comp-row"><span>${CLAB2[componente]}</span><span class="empty">sem dado</span><span></span></div>`;
-  }
-  const maximoEixo = Math.max(faixa ? faixa[1] : v4, 0.01) * 1.15;
-  const pc2 = (x5) => 100 * x5 / maximoEixo;
-  return `<div class="comp-row"><span>${CLAB2[componente]}</span><div class="bar">${faixa ? `<div class="rng" style="left:${pc2(faixa[0])}%;width:${pc2(faixa[1] - faixa[0])}%"></div>` : ""}<div class="pt" style="left:${pc2(v4)}%"></div></div><span class="num" style="text-align:right">${formatar(v4, 1)}</span></div>`;
-}
-function sparkline(linha, componente, medida, manifesto) {
-  const periodosAno = manifesto.periodos.filter((p4) => p4.tipo === "ano");
-  const serie = periodosAno.map((p4) => valorHex(linha, componente, p4.id, medida));
-  const ok2 = serie.filter((v4) => v4 != null);
-  if (!ok2.length) return "";
-  const W4 = 300;
-  const H4 = 54;
-  const x5 = point().domain(periodosAno.map((p4) => p4.id)).range([16, W4 - 16]);
-  const y5 = linear2().domain([0, max4(ok2) * 1.2 || 1]).range([H4 - 16, 6]);
-  const linha2 = line().defined((v4) => v4 != null).x((_v3, i3) => x5(periodosAno[i3].id)).y((v4) => y5(v4));
-  const pontos = serie.map((v4, i3) => {
-    if (v4 == null) return "";
-    const p4 = periodosAno[i3];
-    const critico = p4.marcas?.includes("fonte_estoque_diferente");
-    return `<circle cx="${x5(p4.id)}" cy="${y5(v4)}" r="3.5" fill="${critico ? css2("--crit") : css2("--accent")}"/><text x="${x5(
-      p4.id
-    )}" y="${H4 - 2}" text-anchor="middle">${p4.rotulo}</text>`;
-  }).join("");
-  return `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="S\xE9rie do hex\xE1gono"><path d="${linha2(
-    serie
-  )}" fill="none" stroke="${css2("--accent")}" stroke-width="2"/>${pontos}</svg>`;
-}
-function blocoQualidade(linha, estado) {
-  const periodo = estado.periodo;
-  const qb2 = linha.qualidadeBase[periodo];
-  const qq = linha.qualidade[periodo];
-  const incertezas = COMPONENTES_BASE.map((c3) => incertezaHex(linha, c3, periodo)).filter((v4) => v4 != null);
-  const piorIncerteza = incertezas.length ? Math.max(...incertezas) : null;
-  const nivelInc = nivelIncerteza(piorIncerteza);
-  const itens = [];
-  const qbTxt = qb2 == null ? "\u2014" : qb2 === "ok" ? "ok" : rotuloMarca(qb2);
-  itens.push(`<span class="pill ${qb2 === "ok" ? "ok" : "warn"}">qualidade do dado: ${qbTxt}</span>`);
-  if (piorIncerteza != null) {
-    itens.push(`<span class="pill ${NIVEL_CLASSE[nivelInc]}">incerteza: ${formatar(piorIncerteza, 2)}</span>`);
-  }
-  if (qq) {
-    if (qq.fracaoImputada != null) {
-      const n3 = nivelFracaoImputada(qq.fracaoImputada);
-      itens.push(`<span class="pill ${NIVEL_CLASSE[n3]}">fra\xE7\xE3o imputada: ${formatar(qq.fracaoImputada * 100, 0)}%</span>`);
-    }
-    itens.push(`<span class="pill info">fonte do estoque: ${rotuloFonteEstoque(qq.fonteEstoque)}</span>`);
-    if (qq.gEstoque != null) itens.push(`<span class="pill info">estoque \xF7 2022: ${formatar(qq.gEstoque, 2)}</span>`);
-    if (qq.hexNovo) itens.push(`<span class="pill warn">hex\xE1gono novo neste per\xEDodo</span>`);
-  }
-  return `<div class="sub" style="margin-top:10px">Qualidade deste hex\xE1gono</div><div class="pills">${itens.join("")}</div>`;
-}
-function renderizarHexagono(el2, estado, linhas, apMap, manifesto, totais) {
-  const linha = estado.selecionado ? linhas.get(estado.selecionado) : null;
-  if (!linha) {
-    el2.innerHTML = `<h2>Hex\xE1gono</h2><p class="empty">Clique num hex\xE1gono do mapa ou do ranking para ver a estimativa, a faixa, as marcas e a compara\xE7\xE3o com a amostra na AP.</p>`;
-    return;
-  }
-  const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
-  const pills = [];
-  if (linha.fcuFracao > 0) pills.push('<span class="pill info" style="color:var(--fcu);border-color:var(--fcu)">FCU</span>');
-  for (const recorteId of linha.recortes) {
-    const recorte = (manifesto.recortes ?? []).find((r3) => r3.id === recorteId);
-    pills.push(`<span class="pill crit" style="color:var(--bk);border-color:var(--bk)">${recorte?.nome ?? recorteId}</span>`);
-  }
-  if (linha.nAps > 1) pills.push(`<span class="pill warn">Cruza ${linha.nAps} \xE1reas de pondera\xE7\xE3o; a compara\xE7\xE3o usa a dominante</span>`);
-  if (linha.nMunicipios > 1) pills.push(`<span class="pill warn">Cruza ${linha.nMunicipios} munic\xEDpios; a compara\xE7\xE3o usa o dominante</span>`);
-  const dom = linha.dom[estado.periodo];
-  const ap2 = apMap.get(linha.apCod);
-  const coab = ap2?.componentes?.coabitacao;
-  let pesoHtml = "";
-  if (totais) {
-    const brutoAtual = brutoHex(linha, estado.componente, estado.periodo);
-    const totalComponente = totalDoMapa(totais, estado.componente, estado.periodo);
-    if (brutoAtual != null && totalComponente?.total) {
-      const peso = 100 * brutoAtual / totalComponente.total;
-      pesoHtml = `<dt>Peso no total do dom\xEDnio</dt><dd>${formatarPercentual(peso, 2)}</dd>`;
-    }
-  }
-  el2.innerHTML = `<h2>Hex\xE1gono <span class="num" style="font-family:var(--body);font-size:12px;color:var(--muted)">${linha.h3}</span></h2>
-   <div class="pills">${pills.join("")}</div>
-   <dl class="num"><dt>\xC1rea de pondera\xE7\xE3o</dt><dd>${ap2?.ap_nome ?? linha.apCod}</dd><dt>Munic\xEDpio</dt><dd>${linha.municipioNome}</dd><dt>Domic\xEDlios em ${periodoRotulo}</dt><dd>${dom == null ? "sigilo" : formatar(dom, 1)}</dd>${pesoHtml}</dl>
-   <div class="sub">Estimativa e faixa de 95% em ${periodoRotulo} (domic\xEDlios)</div>${COMPONENTES_BASE.map((c3) => linhaComponente(linha, c3, estado.periodo)).join("")}
-   <div class="sub" style="margin-top:10px">${estado.componente === "total" ? "Total" : CLAB2[estado.componente] ?? "Total"} ${estado.medida === "relativo" ? "relativo" : "absoluto"} no tempo</div>${sparkline(
-    linha,
-    estado.componente,
-    estado.medida,
-    manifesto
-  )}
-   ${coab ? `<div class="sub" style="margin-top:8px">Na AP, coabita\xE7\xE3o 2022: <b>direta da amostra ${coab.sem_direta ? "\u2014" : formatar(coab.direta, 0)}</b> (CV ${coab.direta_cv == null ? "\u2014" : formatar(coab.direta_cv, 1) + "%"}) \xB7 <b>soma do motor ${formatar(
-    coab.motor_2022,
-    0
-  )}</b>${coab.ressalva ? ` ${`<span class="pill warn">${rotuloMarca("ap_ressalva")}</span>`}` : ""}. A PNADc n\xE3o existe por hex\xE1gono; a compara\xE7\xE3o honesta \xE9 na AP e no dom\xEDnio.</div>` : ""}
-   ${blocoQualidade(linha, estado)}`;
-}
-
-// src/js/dados/visaoGeral.js
-function parteCadUnico(item, todosItens) {
-  const origem = item.indicador === "total" ? todosItens.find((i3) => i3.indicador === "habitacao_precaria") : item;
-  const sub5 = origem?.fjp_subcomponentes?.find((s4) => s4.nome === "improvisados");
-  return sub5?.valor ?? 0;
-}
-function faixaReconstrucao(reconstrucaoPnadc, reconstrucaoEp) {
-  if (reconstrucaoPnadc == null || reconstrucaoEp == null) return null;
-  return {
-    inf: Math.max(0, reconstrucaoPnadc - 1.96 * reconstrucaoEp),
-    sup: reconstrucaoPnadc + 1.96 * reconstrucaoEp
-  };
-}
-function fjpTresValores(referenciaFjp) {
-  return referenciaFjp.map((item) => {
-    const cadUnico = parteCadUnico(item, referenciaFjp);
-    const semCadUnico = item.fjp_publicado == null ? null : item.fjp_publicado - cadUnico;
-    const faixa = faixaReconstrucao(item.reconstrucao_pnadc, item.reconstrucao_ep);
-    const dentro = semCadUnico != null && faixa != null ? semCadUnico >= faixa.inf && semCadUnico <= faixa.sup : null;
-    return { ...item, cadUnico, semCadUnico, faixa, dentro };
-  });
-}
-var NOME_COMPONENTE2 = { total: "total", coabitacao: "coabita\xE7\xE3o", onus: "\xF4nus", precariedade: "precariedade" };
-var CLAB3 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
-function periodoRecenteAno(manifesto) {
-  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano") ?? manifesto.periodos.at(-1);
-}
-function periodoRecenteMedia(manifesto) {
-  return [...manifesto.periodos].reverse().find((p4) => p4.tipo === "media") ?? null;
-}
-function componenteMaior(totais, periodoId) {
-  let maior = null;
-  for (const c3 of COMPONENTES_BASE) {
-    const t4 = totalDoMapa(totais, c3, periodoId);
-    if (t4 && (!maior || t4.total > maior.total)) maior = { componente: c3, total: t4.total };
-  }
-  return maior?.componente ?? null;
-}
-function marcaMaisImportante(totais, periodoId) {
-  for (const codigo of PRIORIDADE_MARCAS) {
-    for (const c3 of COMPONENTES_BASE) {
-      const t4 = totalDoMapa(totais, c3, periodoId);
-      if (t4?.marcas?.includes(codigo)) {
-        return { componente: c3, codigo };
-      }
-    }
-  }
-  return null;
-}
-function dadosCartoesBI(manifesto, totais) {
-  const ano = periodoRecenteAno(manifesto);
-  const media = periodoRecenteMedia(manifesto);
-  const anosTipo = manifesto.periodos.filter((p4) => p4.tipo === "ano");
-  const dom = domiciliosTotal(totais, ano.id);
-  const domMedia = media ? domiciliosTotal(totais, media.id) : null;
-  return ["total", ...COMPONENTES_BASE].map((componente) => {
-    const tAno = totalDoMapa(totais, componente, ano.id);
-    const tMedia = media ? totalDoMapa(totais, componente, media.id) : null;
-    const rowsAno = anosTipo.map((p4) => totalDoMapa(totais, componente, p4.id));
-    const serie = rowsAno.map((t4) => t4?.total ?? null);
-    const faixas = rowsAno.map((t4) => componente !== "total" && t4?.ep != null ? [t4.total - 1.96 * t4.ep, t4.total + 1.96 * t4.ep] : null);
-    return {
-      componente,
-      rotulo: CLAB3[componente],
-      absolutoAno: tAno?.total ?? null,
-      relativoAno: tAno && dom ? 100 * tAno.total / dom : null,
-      absolutoMedia: tMedia?.total ?? null,
-      relativoMedia: tMedia && domMedia ? 100 * tMedia.total / domMedia : null,
-      marcas: tAno?.marcas ?? [],
-      serie,
-      faixas,
-      anos: anosTipo.map((p4) => p4.rotulo),
-      periodoAno: ano.id,
-      periodoMedia: media?.id ?? null
-    };
-  });
-}
-function marcasDoDominio(totais) {
-  const vistas = /* @__PURE__ */ new Map();
-  const registrar = (codigo, componente) => {
-    if (!vistas.has(codigo)) vistas.set(codigo, /* @__PURE__ */ new Set());
-    vistas.get(codigo).add(componente);
-  };
-  for (const t4 of totais.totais) for (const m4 of t4.marcas ?? []) registrar(m4, t4.componente);
-  for (const mu2 of totais.mudancas ?? []) for (const m4 of mu2.marcas ?? []) registrar(m4, mu2.componente);
-  return [...vistas.entries()].map(([codigo, componentes]) => ({ codigo, componentes: [...componentes] }));
-}
-function linhasParaCitar(manifesto, totais) {
-  const ano = periodoRecenteAno(manifesto);
-  const media = periodoRecenteMedia(manifesto);
-  const data = manifesto.data_execucao.slice(0, 10).split("-").reverse().join("/");
-  const linhas = [];
-  for (const periodo of [ano, media].filter(Boolean)) {
-    for (const componente of ["total", ...COMPONENTES_BASE]) {
-      const t4 = totalDoMapa(totais, componente, periodo.id);
-      if (!t4) continue;
-      const rotulo2 = componente === "total" ? "D\xE9ficit total" : `D\xE9ficit de ${NOME_COMPONENTE2[componente]}`;
-      linhas.push({
-        componente,
-        periodo: periodo.id,
-        periodoRotulo: periodo.rotulo,
-        total: t4.total,
-        ep: t4.ep,
-        texto: `${rotulo2}, ${manifesto.nome}, ${periodo.rotulo}: ${Math.round(t4.total).toLocaleString("pt-BR")} domic\xEDlios (moradinha, edi\xE7\xE3o ${manifesto.edicao}, ${data}).`
-      });
-    }
-  }
-  return linhas;
-}
-function curvaConcentracao(linhasArr, componente, periodo) {
-  const valores = [];
-  for (const l3 of linhasArr) {
-    const dom = l3.dom[periodo];
-    if (dom == null || dom < 1) continue;
-    const v4 = brutoHex(l3, componente, periodo);
-    if (v4 == null) continue;
-    valores.push(v4);
-  }
-  valores.sort((a5, b10) => b10 - a5);
-  const n3 = valores.length;
-  const totalDeficit = valores.reduce((s4, v4) => s4 + v4, 0);
-  const pontos = [];
-  let acumulado = 0;
-  for (let i3 = 0; i3 < n3; i3++) {
-    acumulado += valores[i3];
-    pontos.push({ pctHex: 100 * (i3 + 1) / n3, pctDeficitAcumulado: totalDeficit > 0 ? 100 * acumulado / totalDeficit : 0 });
-  }
-  const idxMeio = pontos.findIndex((p4) => p4.pctDeficitAcumulado >= 50);
-  const nHexMeio = idxMeio === -1 ? n3 : idxMeio + 1;
-  const pctHexMeio = idxMeio === -1 ? 100 : pontos[idxMeio].pctHex;
-  return { pontos, n: n3, nHexMeio, pctHexMeio };
-}
-function maiorRelativo(linhasArr, componente, periodo) {
-  let melhor = null;
-  for (const l3 of linhasArr) {
-    const dom = l3.dom[periodo];
-    if (dom == null || dom < 1) continue;
-    const v4 = brutoHex(l3, componente, periodo);
-    if (v4 == null) continue;
-    const relativo = 100 * v4 / dom;
-    if (melhor == null || relativo > melhor) melhor = relativo;
-  }
-  return melhor;
-}
-function fraseRessalvaRelativo(linhasArr, totais, componente, periodo) {
-  const conc = curvaConcentracao(linhasArr, componente, periodo);
-  const maiorRel = maiorRelativo(linhasArr, componente, periodo);
-  const taxa = taxaDominio(totais, componente, periodo);
-  const vezes = taxa && maiorRel != null ? maiorRel / taxa : null;
-  const frase1 = `${formatar(conc.nHexMeio, 0)} hex\xE1gonos (${formatar(conc.pctHexMeio, 0)}% dos que t\xEAm domic\xEDlio) somam metade do d\xE9ficit absoluto.`;
-  if (vezes == null) return frase1;
-  const frase2 = vezes >= 2 ? `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio.` : `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio: a concentra\xE7\xE3o do mapa absoluto acompanha, em boa parte, onde est\xE3o os domic\xEDlios.`;
-  return `${frase1} ${frase2}`;
-}
-function mudancasAnuaisForaDoRuido(manifesto, totais) {
-  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
-  const resultado = [];
-  for (let i3 = 0; i3 < anos.length - 1; i3++) {
-    for (const componente of ["total", ...COMPONENTES_BASE]) {
-      const m4 = mudanca(totais, componente, anos[i3].id, anos[i3 + 1].id);
-      if (m4?.z != null && m4.z > 1.96) {
-        resultado.push({ componente, de: anos[i3], para: anos[i3 + 1], z: m4.z });
-      }
-    }
-  }
-  return resultado;
-}
-function fraseRuidoAnual(manifesto, totais) {
-  const passam = mudancasAnuaisForaDoRuido(manifesto, totais);
-  if (!passam.length) return "Nenhuma mudan\xE7a de um ano para o outro passa do ru\xEDdo da amostra.";
-  const nomes = passam.map((p4) => `${NOME_COMPONENTE2[p4.componente]} de ${p4.de.rotulo} para ${p4.para.rotulo}`);
-  return `Passa(m) do ru\xEDdo da amostra: ${nomes.join("; ")}.`;
 }
 
 // src/js/ui/ajuda.js
@@ -104461,6 +104380,151 @@ function instalarAjudas(raiz = document) {
 var esc = (s4) => String(s4).replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
 function htmlDica({ titulo, valor, faixa, base }) {
   return `<b>${esc(titulo)}</b>${valor != null ? `<span class="d-v">${esc(valor)}</span>` : ""}${faixa ? `<span class="d-sub">faixa de 95%: ${esc(faixa)}</span>` : ""}${base ? `<span class="d-sub">${esc(base)}</span>` : ""}`;
+}
+function ligarDicaPorAtributos(raiz) {
+  ligarDica(
+    raiz.querySelectorAll("[data-dica-titulo]"),
+    (_d3, el2) => htmlDica({ titulo: el2.dataset.dicaTitulo, valor: el2.dataset.dicaValor, faixa: el2.dataset.dicaFaixa, base: el2.dataset.dicaBase })
+  );
+}
+function attr(v4) {
+  return String(v4 ?? "").replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
+}
+
+// src/js/util/limiares.js
+var LIMIARES = Object.freeze({
+  incerteza: { atencao: 0.7, critico: 1 },
+  cv_ap: { critico: 30 },
+  // direta_cv em % (SPEC_00 ap.parquet)
+  fracao_imputada: { atencao: 0.3 }
+});
+var LIMIARES_RASTREIO = Object.freeze({
+  cv_total_fragil: { valor: 15, unidade: "%", rotulo: 'CV do total (marca "total fr\xE1gil")' },
+  z_significancia: { valor: 1.96, unidade: "", rotulo: "z (mudan\xE7a afirm\xE1vel vs. dentro do ru\xEDdo)" },
+  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: 'CV da AP (marca "AP com ressalva")' }
+});
+function nivelIncerteza(valor) {
+  if (valor == null) return "ok";
+  if (valor > LIMIARES.incerteza.critico) return "critico";
+  if (valor > LIMIARES.incerteza.atencao) return "atencao";
+  return "ok";
+}
+function nivelFracaoImputada(valor) {
+  if (valor == null) return "ok";
+  return valor > LIMIARES.fracao_imputada.atencao ? "atencao" : "ok";
+}
+
+// src/js/ui/hexagono.js
+var CLAB3 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+var NIVEL_CLASSE = { ok: "ok", atencao: "warn", critico: "crit" };
+function css2(nome) {
+  return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+}
+function linhaComponente(linha, componente, periodo) {
+  const dica = (v5, faixa2) => `data-dica-titulo="${attr(CLAB3[componente])}" data-dica-valor="${attr(formatar(v5, 1))} domic\xEDlios" ${faixa2 ? `data-dica-faixa="${attr(formatar(faixa2[0], 1))} a ${attr(formatar(faixa2[1], 1))}"` : 'data-dica-base="sem faixa de 95% para este componente"'}`;
+  const v4 = brutoHex(linha, componente, periodo);
+  const faixa = faixaHex(linha, componente, periodo);
+  if (v4 == null) {
+    return `<div class="comp-row"><span>${CLAB3[componente]}</span><span class="empty">sem dado</span><span></span></div>`;
+  }
+  const maximoEixo = Math.max(faixa ? faixa[1] : v4, 0.01) * 1.15;
+  const pc2 = (x5) => 100 * x5 / maximoEixo;
+  return `<div class="comp-row" ${dica(v4, faixa)}><span>${CLAB3[componente]}</span><div class="bar">${faixa ? `<div class="rng" style="left:${pc2(faixa[0])}%;width:${pc2(faixa[1] - faixa[0])}%"></div>` : ""}<div class="pt" style="left:${pc2(v4)}%"></div></div><span class="num" style="text-align:right">${formatar(v4, 1)}</span></div>`;
+}
+function sparkline(linha, componente, medida, manifesto) {
+  const isRel = medida === "relativo";
+  const periodosAno = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const serie = periodosAno.map((p4) => valorHex(linha, componente, p4.id, medida));
+  const ok2 = serie.filter((v4) => v4 != null);
+  if (!ok2.length) return "";
+  const W4 = 300;
+  const H4 = 54;
+  const x5 = point().domain(periodosAno.map((p4) => p4.id)).range([16, W4 - 16]);
+  const y5 = linear2().domain([0, max4(ok2) * 1.2 || 1]).range([H4 - 16, 6]);
+  const linha2 = line().defined((v4) => v4 != null).x((_v3, i3) => x5(periodosAno[i3].id)).y((v4) => y5(v4));
+  const pontos = serie.map((v4, i3) => {
+    if (v4 == null) return "";
+    const p4 = periodosAno[i3];
+    const critico = p4.marcas?.includes("fonte_estoque_diferente");
+    return `<circle cx="${x5(p4.id)}" cy="${y5(v4)}" r="3.5" fill="${critico ? css2("--crit") : css2("--accent")}"/><circle cx="${x5(p4.id)}" cy="${y5(v4)}" r="9" fill="transparent" data-dica-titulo="${attr(p4.rotulo)}" data-dica-valor="${attr(formatar(v4, isRel ? 2 : 1))}${isRel ? " %" : " domic\xEDlios"}" ${critico ? 'data-dica-base="estoque por fonte diferente \u2014 n\xE3o comparar com outros anos"' : ""}/><text x="${x5(
+      p4.id
+    )}" y="${H4 - 2}" text-anchor="middle">${p4.rotulo}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" data-grafico="serie-hexagono" aria-label="S\xE9rie do hex\xE1gono"><path d="${linha2(
+    serie
+  )}" fill="none" stroke="${css2("--accent")}" stroke-width="2"/>${pontos}</svg>`;
+}
+function blocoQualidade(linha, estado) {
+  const periodo = estado.periodo;
+  const qb2 = linha.qualidadeBase[periodo];
+  const qq = linha.qualidade[periodo];
+  const incertezas = COMPONENTES_BASE.map((c3) => incertezaHex(linha, c3, periodo)).filter((v4) => v4 != null);
+  const piorIncerteza = incertezas.length ? Math.max(...incertezas) : null;
+  const nivelInc = nivelIncerteza(piorIncerteza);
+  const itens = [];
+  const qbTxt = qb2 == null ? "\u2014" : qb2 === "ok" ? "ok" : rotuloMarca(qb2);
+  itens.push(`<span class="pill ${qb2 === "ok" ? "ok" : "warn"}">qualidade do dado: ${qbTxt}</span>`);
+  if (piorIncerteza != null) {
+    itens.push(`<span class="pill ${NIVEL_CLASSE[nivelInc]}">incerteza: ${formatar(piorIncerteza, 2)}</span>`);
+  }
+  if (qq) {
+    if (qq.fracaoImputada != null) {
+      const n3 = nivelFracaoImputada(qq.fracaoImputada);
+      itens.push(`<span class="pill ${NIVEL_CLASSE[n3]}">fra\xE7\xE3o imputada: ${formatar(qq.fracaoImputada * 100, 0)}%</span>`);
+    }
+    itens.push(`<span class="pill info">fonte do estoque: ${rotuloFonteEstoque(qq.fonteEstoque)}</span>`);
+    if (qq.gEstoque != null) itens.push(`<span class="pill info">estoque \xF7 2022: ${formatar(qq.gEstoque, 2)}</span>`);
+    if (qq.hexNovo) itens.push(`<span class="pill warn">hex\xE1gono novo neste per\xEDodo</span>`);
+  }
+  return `<div class="sub" style="margin-top:10px">Qualidade deste hex\xE1gono</div><div class="pills">${itens.join("")}</div>`;
+}
+function renderizarHexagono(el2, estado, linhas, apMap, manifesto, totais) {
+  const linha = estado.selecionado ? linhas.get(estado.selecionado) : null;
+  if (!linha) {
+    el2.innerHTML = `<h2>Hex\xE1gono</h2><p class="empty">Clique num hex\xE1gono do mapa ou do ranking para ver a estimativa, a faixa, as marcas e a compara\xE7\xE3o com a amostra na AP.</p>`;
+    return;
+  }
+  const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
+  const pills = [];
+  if (linha.fcuFracao > 0) pills.push('<span class="pill info" style="color:var(--fcu);border-color:var(--fcu)">FCU</span>');
+  for (const recorteId of linha.recortes) {
+    const recorte = (manifesto.recortes ?? []).find((r3) => r3.id === recorteId);
+    pills.push(`<span class="pill crit" style="color:var(--bk);border-color:var(--bk)">${recorte?.nome ?? recorteId}</span>`);
+  }
+  if (linha.nAps > 1) pills.push(`<span class="pill warn">Cruza ${linha.nAps} \xE1reas de pondera\xE7\xE3o; a compara\xE7\xE3o usa a dominante</span>`);
+  if (linha.nMunicipios > 1) pills.push(`<span class="pill warn">Cruza ${linha.nMunicipios} munic\xEDpios; a compara\xE7\xE3o usa o dominante</span>`);
+  const dom = linha.dom[estado.periodo];
+  const ap2 = apMap.get(linha.apCod);
+  const coab = ap2?.componentes?.coabitacao;
+  let pesoHtml = "";
+  if (totais) {
+    const brutoAtual = brutoHex(linha, estado.componente, estado.periodo);
+    const totalComponente = totalDoMapa(totais, estado.componente, estado.periodo);
+    if (brutoAtual != null && totalComponente?.total) {
+      const peso = 100 * brutoAtual / totalComponente.total;
+      pesoHtml = `<dt>Peso no total do dom\xEDnio</dt><dd>${formatarPercentual(peso, 2)}</dd>`;
+    }
+  }
+  el2.innerHTML = `<h2>Hex\xE1gono <span class="num" style="font-family:var(--body);font-size:12px;color:var(--muted)">${linha.h3}</span></h2>
+   <div class="pills">${pills.join("")}</div>
+   <dl class="num"><dt>\xC1rea de pondera\xE7\xE3o</dt><dd>${ap2?.ap_nome ?? linha.apCod}</dd><dt>Munic\xEDpio</dt><dd>${linha.municipioNome}</dd><dt>Domic\xEDlios em ${periodoRotulo}</dt><dd>${dom == null ? "sigilo" : formatar(dom, 1)}</dd>${pesoHtml}</dl>
+   <header class="graf-cab"><span class="sub">Estimativa e faixa de 95% em ${periodoRotulo} (domic\xEDlios)</span></header>
+   <div class="grafico-dica">Cada linha \xE9 um componente do d\xE9ficit neste hex\xE1gono: o ponto \xE9 a estimativa e a barra clara \xE9 a faixa de 95%. Passe o mouse numa linha para ver os valores.</div>
+   <div data-grafico="componentes-hexagono">${COMPONENTES_BASE.map((c3) => linhaComponente(linha, c3, estado.periodo)).join("")}</div>
+   <header class="graf-cab" style="margin-top:10px"><span class="sub">${estado.componente === "total" ? "Total" : CLAB3[estado.componente] ?? "Total"} ${estado.medida === "relativo" ? "relativo" : "absoluto"} no tempo</span></header>
+   <div class="grafico-dica">Valor deste hex\xE1gono em cada ano, na medida escolhida; ponto vermelho = ano com estoque de outra fonte (n\xE3o comparar). Passe o mouse num ponto para ver o valor.</div>${sparkline(
+    linha,
+    estado.componente,
+    estado.medida,
+    manifesto
+  )}
+   ${coab ? `<div class="sub" style="margin-top:8px">Na AP, coabita\xE7\xE3o 2022: <b>direta da amostra ${coab.sem_direta ? "\u2014" : formatar(coab.direta, 0)}</b> (CV ${coab.direta_cv == null ? "\u2014" : formatar(coab.direta_cv, 1) + "%"}) \xB7 <b>soma do modelo nos hex\xE1gonos da AP ${formatar(
+    coab.motor_2022,
+    0
+  )}</b>${coab.ressalva ? ` ${`<span class="pill warn">${rotuloMarca("ap_ressalva")}</span>`}` : ""}. A PNADc n\xE3o existe por hex\xE1gono; a compara\xE7\xE3o honesta \xE9 na AP e no dom\xEDnio.</div>` : ""}
+   ${blocoQualidade(linha, estado)}`;
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
 
 // src/js/graficos/deficit.js
@@ -105034,8 +105098,20 @@ async function iniciarExplorador() {
     el2.textContent = `Filtro ativo: hex\xE1gonos entre ${lo2.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade} e ${hi2 == null ? "ou mais" : `${hi2.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade}`}. Clique fora das barras do histograma ou em "Limpar" para remover.`;
     el2.removeAttribute("hidden");
   }
+  function renderizarAvisoMapa(estado) {
+    const el2 = $4("f1-aviso-mapa");
+    const semFaixa = estado.tema === "qualidade" && estado.medida_qualidade === "incerteza" && estado.componente === "total";
+    el2.hidden = !semFaixa;
+    if (!semFaixa) return;
+    const alvo = componenteMaior(totais, estado.periodo) ?? "coabitacao";
+    $4("f1-aviso-mapa-txt").textContent = "O total n\xE3o tem faixa de incerteza; escolha um componente.";
+    const btn = $4("f1-aviso-mapa-btn");
+    btn.textContent = `Ver ${CLAB4[alvo]}`;
+    btn.onclick = () => loja.definir({ componente: alvo, faixa_hist: [] });
+  }
   function renderTudo(estado) {
     sincronizarPergunta(estado);
+    renderizarAvisoMapa(estado);
     renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
@@ -105196,7 +105272,7 @@ function renderizarMensagem(el2, manifesto, totais) {
   const marca = marcaMaisImportante(totais, ano.id);
   const linha1 = `O d\xE9ficit habitacional total na ${manifesto.nome} \xE9 de <b data-num="${total.absolutoAno}">${formatar(total.absolutoAno, 0)}</b> domic\xEDlios (<span data-num="${total.relativoAno}">${formatarPercentual(total.relativoAno, 2)}</span>) em ${ano.rotulo}${media ? `, e de ${formatar(total.absolutoMedia, 0)} (${formatarPercentual(total.relativoMedia, 2)}) na ${media.rotulo.toLowerCase()}` : ""}.`;
   const linha2 = maior ? `O maior componente \xE9 ${NOME_COMPONENTE2[maior]}.` : "";
-  const linha3 = marca ? `${CLAB3[marca.componente]} com ${primeiraMinuscula(rotuloMarca(marca.codigo))}.` : "";
+  const linha3 = marca ? `${CLAB[marca.componente]} com ${primeiraMinuscula(rotuloMarca(marca.codigo))}.` : "";
   el2.innerHTML = [linha1, linha2, linha3].filter(Boolean).join("<br>");
 }
 function renderizarCartoes(el2, manifesto, totais) {
@@ -105207,7 +105283,7 @@ function renderizarCartoes(el2, manifesto, totais) {
     card.className = "cartao-bi";
     card.dataset.componente = c3.componente;
     card.innerHTML = `<header><span class="k">${c3.rotulo}</span></header>
-      <button type="button" class="cartao-corpo" aria-label="Abrir ${c3.rotulo} no mapa de Resultados">
+      <button type="button" class="cartao-corpo">
         <span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
         <span class="r" data-num="${c3.relativoAno ?? ""}">${formatarPercentual(c3.relativoAno, 2)}</span>
         <span class="spark-slot"></span>
@@ -105265,7 +105341,7 @@ function renderizarMarcas(el2, totais) {
     grupos.get(grav).push(m4);
   }
   el2.innerHTML = GRAVIDADE_ORDEM.filter((g5) => grupos.has(g5)).map(
-    (g5) => `<div class="marca-grupo"><h3>${NOME_GRAVIDADE[g5]}</h3>${grupos.get(g5).map((m4) => `<div class="marca-item"><span class="pill ${g5}">${rotuloMarca(m4.codigo)}</span> \u2014 ${m4.componentes.map((c3) => CLAB3[c3] ?? c3).join(", ")}</div>`).join("")}</div>`
+    (g5) => `<div class="marca-grupo"><h3>${NOME_GRAVIDADE[g5]}</h3>${grupos.get(g5).map((m4) => `<div class="marca-item"><span class="pill ${g5}">${rotuloMarca(m4.codigo)}</span> \u2014 ${m4.componentes.map((c3) => CLAB[c3] ?? c3).join(", ")}</div>`).join("")}</div>`
   ).join("");
 }
 function renderizarCitar(el2, manifesto, totais) {
@@ -106162,7 +106238,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "0fa4cb6a3d5d0b49de40fbdf18abcba455f978be");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "e7d07f32745182ffda4e3990695b910cd8645666");
   renderizarInterna($7("met-interna"), modelo);
 }
 

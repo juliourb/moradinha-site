@@ -122,3 +122,15 @@ export function htmlDica({ titulo, valor, faixa, base }) {
     faixa ? `<span class="d-sub">faixa de 95%: ${esc(faixa)}</span>` : ""
   }${base ? `<span class="d-sub">${esc(base)}</span>` : ""}`;
 }
+
+/** Liga a caixa de valor a todo `[data-dica-titulo]` de `raiz` (título, valor, faixa e base em data-*). */
+export function ligarDicaPorAtributos(raiz) {
+  ligarDica(raiz.querySelectorAll("[data-dica-titulo]"), (_d, el) =>
+    htmlDica({ titulo: el.dataset.dicaTitulo, valor: el.dataset.dicaValor, faixa: el.dataset.dicaFaixa, base: el.dataset.dicaBase })
+  );
+}
+
+/** Escapa texto para uso em atributo HTML. */
+export function attr(v) {
+  return String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+}

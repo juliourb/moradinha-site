@@ -223,23 +223,23 @@ button, select, input {
    sempre visíveis). */
 .ask {
   /* A6 (SPEC_F6): nunca rola na lateral — quebra ou recolhe (via menu "Mais") em vez disso. */
-  display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: flex-end;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;
+  display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: flex-end;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 4px 8px;
   overflow-x: hidden;
 }
-.ask .q { font-family: var(--display); font-size: 15px; flex: 1 1 180px; min-width: 120px; }
-.ctl { display: grid; gap: 4px; flex: 0 0 auto; }
+.ask .q { font-family: var(--display); font-size: 14px; flex: 1 1 180px; min-width: 120px; }
+.ctl { display: grid; gap: 1px; flex: 0 0 auto; }
 .ctl label, .ctl .lab {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600;
 }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; background: transparent; padding: 6px 10px; cursor: pointer; border-right: 1px solid var(--line); white-space: nowrap; }
+.seg button { border: 0; background: transparent; padding: 3px 8px; font-size: 12px; cursor: pointer; border-right: 1px solid var(--line); white-space: nowrap; }
 .seg button:last-child { border-right: 0; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); font-weight: 600; }
-select { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+select { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 3px 6px; font-size: 12px; }
 
 .mais-wrap { position: relative; flex: 0 0 auto; }
-.mais-btn { height: 32px; }
+.mais-btn { height: 26px; }
 .mais-menu {
   display: grid; gap: 8px;
 }
@@ -265,9 +265,7 @@ select { background: var(--surface); border: 1px solid var(--line); border-radiu
 @media (max-width: 980px) { .side { max-height: none; } .grid-main { grid-template-columns: 1fr; } }
 
 .mapbox { position: relative; height: var(--maph); border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
-/* C3: fundo "cinza" — dessatura só a base (MapLibre), sem provedor novo; os
-   hexágonos do deck.gl (canvas separado) continuam coloridos. */
-.mapbox.cinza .maplibregl-canvas-container canvas { filter: grayscale(1); }
+/* C3 / F6.4 2a: o fundo "cinza" repinta o estilo da base em JS (acinzentarEstilo). */
 .mapbox .deck { position: absolute; inset: 0; }
 #f1-deckB { display: none; }
 .divider { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--ink); display: none; z-index: 5; }
@@ -286,7 +284,11 @@ select { background: var(--surface); border: 1px solid var(--line); border-radiu
 .legend-row .n, .legend-row .pct { color: var(--muted); white-space: nowrap; }
 .legend-row.especial { opacity: .9; }
 .sw.hachura { background-image: repeating-linear-gradient(45deg, var(--surface) 0 2px, transparent 2px 4px); }
-.layers { position: absolute; right: 10px; bottom: 10px; z-index: 4; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; display: grid; gap: 3px; }
+.layers { position: absolute; right: 10px; bottom: 10px; z-index: 4; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; font-size: 11px; display: grid; gap: 2px; }
+.layers .layers-toggle { all: unset; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.layers .layers-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.layers .layers-body { display: grid; gap: 2px; }
+.layers.recolhido .layers-body { display: none; }
 .layers .t { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .layers label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
 .layers label.off { color: var(--muted); cursor: not-allowed; }
@@ -501,3 +503,7 @@ table.ponte th, table.ponte td { text-align: left; padding: 6px 8px; border-bott
 .dica-flutuante b { font-weight: 700; }
 .dica-flutuante .d-sub { color: var(--muted); display: block; }
 .dica-alvo { cursor: default; }
+
+.aviso-mapa { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); z-index: 6; background: var(--surface); border: 1px solid var(--warn); border-radius: 8px; padding: 6px 10px; font-size: 12px; display: flex; gap: 8px; align-items: center; max-width: 90%; }
+.aviso-mapa[hidden] { display: none; }
+.graf-cab { display: flex; align-items: center; }

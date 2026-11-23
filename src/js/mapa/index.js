@@ -67,6 +67,39 @@ function rgb(hex) {
   const c = d3color(hex);
   return c ? [c.r, c.g, c.b] : [128, 128, 128];
 }
+/**
+ * Fundo "cinza" (F6.4 2a): repinta o estilo do OpenFreeMap numa paleta neutra
+ * (terra, água, vias, limites e rótulos em cinzas), sem pedir tile de provedor
+ * novo. Um filtro CSS `grayscale` não bastava: o estilo claro já é quase cinza
+ * e o ajuste ficava imperceptível.
+ */
+export function acinzentarEstilo(mapa, escuro) {
+  const estilo = mapa.getStyle?.();
+  if (!estilo?.layers) return;
+  const c = escuro
+    ? { terra: "#242424", agua: "#171717", via: "#3d3d3d", limite: "#6a6a6a", texto: "#a6a6a6", halo: "#242424" }
+    : { terra: "#e3e3e3", agua: "#c9c9c9", via: "#f7f7f7", limite: "#a8a8a8", texto: "#666666", halo: "#e3e3e3" };
+  const pintar = (id, prop, valor) => {
+    try {
+      mapa.setPaintProperty(id, prop, valor);
+    } catch {
+      // propriedade inexistente nesta camada: ignora.
+    }
+  };
+  for (const l of estilo.layers) {
+    const agua = /water|ocean|sea/i.test(l.id);
+    if (l.type === "background") pintar(l.id, "background-color", c.terra);
+    else if (l.type === "fill") {
+      pintar(l.id, "fill-color", agua ? c.agua : c.terra);
+      pintar(l.id, "fill-outline-color", agua ? c.agua : c.terra);
+    } else if (l.type === "line") pintar(l.id, "line-color", agua ? c.agua : /boundary|admin/i.test(l.id) ? c.limite : c.via);
+    else if (l.type === "symbol") {
+      pintar(l.id, "text-color", c.texto);
+      pintar(l.id, "text-halo-color", c.halo);
+    }
+  }
+}
+
 function temaEscuro() {
   const t = document.documentElement.getAttribute("data-theme");
   return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -108,6 +141,25 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     mapaA.on("move", () => copiar(mapaA, mapaB));
     mapaB.on("move", () => copiar(mapaB, mapaA));
   })(instancias.a.mapa, instancias.b.mapa);
+
+  let baseCinza = false;
+  let camadasRecolhidas = false;
+  function urlEstilo() {
+    return temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro;
+  }
+  function aplicarEstiloBase() {
+    for (const { mapa } of Object.values(instancias)) {
+      mapa.setStyle(urlEstilo(), { diff: false });
+      mapa.once("style.load", () => {
+        if (baseCinza) acinzentarEstilo(mapa, temaEscuro());
+      });
+    }
+  }
+  function definirBaseCinza(ligado) {
+    if (ligado === baseCinza) return;
+    baseCinza = ligado;
+    aplicarEstiloBase();
+  }
 
   function criarInstancia(container, elBasefail, aoFalhar) {
     const mapa = new MapaMapLibre({
@@ -611,7 +663,15 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     }
     const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
     const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
-    elementos.layers.innerHTML = `<span class="t">Camadas</span>${extras.join("")}${opacidadeHtml}${cinzaHtml}`;
+    elementos.layers.innerHTML = `<button type="button" class="layers-toggle" aria-expanded="${!camadasRecolhidas}" aria-controls="f1-layers-body"><span>Camadas</span><span aria-hidden="true">${camadasRecolhidas ? "▸" : "▾"}</span></button><div class="layers-body" id="f1-layers-body">${extras.join("")}${opacidadeHtml}${cinzaHtml}</div>`;
+    elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
+    elementos.layers.querySelector(".layers-toggle").onclick = () => {
+      camadasRecolhidas = !camadasRecolhidas;
+      elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
+      const t = elementos.layers.querySelector(".layers-toggle");
+      t.setAttribute("aria-expanded", String(!camadasRecolhidas));
+      t.lastElementChild.textContent = camadasRecolhidas ? "▸" : "▾";
+    };
     elementos.layers.querySelectorAll("input[data-camada]").forEach((el) => {
       el.onchange = () => aoMudar(el.dataset.camada, el.checked);
     });
@@ -620,6 +680,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
     if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
     elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
+    definirBaseCinza(!!estado.mapa_base_cinza);
   }
 
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
@@ -691,9 +752,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", trocarEstilo);
   new MutationObserver(trocarEstilo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   function trocarEstilo() {
-    const url = temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro;
-    instancias.a.mapa.setStyle(url);
-    instancias.b.mapa.setStyle(url);
+    aplicarEstiloBase();
   }
 
   return {

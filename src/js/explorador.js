@@ -4,6 +4,7 @@ import { criarLoja } from "./estado/loja.js";
 import { estadoInicial, salvarLocalStorage } from "./estado/pergunta.js";
 import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
 import { valorHex } from "./dados/calculo.js";
+import { componenteMaior } from "./dados/visaoGeral.js";
 import { valorMedidaQualidade, medidaConstante, TIPO_MEDIDA } from "./dados/qualidade.js";
 import { criarMapa } from "./mapa/index.js";
 import { ligarPergunta } from "./ui/pergunta.js";
@@ -119,8 +120,23 @@ export async function iniciarExplorador() {
     el.removeAttribute("hidden");
   }
 
+  // F6.4 2b: "incerteza" do total não existe no pacote (as faixas dos componentes não
+  // se somam): em vez de um mapa em branco, um aviso com o atalho para um componente.
+  function renderizarAvisoMapa(estado) {
+    const el = $("f1-aviso-mapa");
+    const semFaixa = estado.tema === "qualidade" && estado.medida_qualidade === "incerteza" && estado.componente === "total";
+    el.hidden = !semFaixa;
+    if (!semFaixa) return;
+    const alvo = componenteMaior(totais, estado.periodo) ?? "coabitacao";
+    $("f1-aviso-mapa-txt").textContent = "O total não tem faixa de incerteza; escolha um componente.";
+    const btn = $("f1-aviso-mapa-btn");
+    btn.textContent = `Ver ${CLAB[alvo]}`;
+    btn.onclick = () => loja.definir({ componente: alvo, faixa_hist: [] });
+  }
+
   function renderTudo(estado) {
     sincronizarPergunta(estado);
+    renderizarAvisoMapa(estado);
     renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);

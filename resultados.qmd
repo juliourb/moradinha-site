@@ -33,6 +33,7 @@ title: ""
     <div class="deck" id="f1-deckB"></div>
     <div class="divider" id="f1-divider" tabindex="0" role="slider" aria-label="Arrastar a cortina" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50"><button type="button" aria-label="Arrastar a cortina">↔</button></div>
     <div class="maplab" id="f1-labA"></div><div class="maplab" id="f1-labB"></div>
+    <div class="aviso-mapa" id="f1-aviso-mapa" role="status" hidden><span id="f1-aviso-mapa-txt"></span> <button type="button" class="iconbtn" id="f1-aviso-mapa-btn"></button></div>
     <div class="legend" id="f1-legend"></div>
     <div class="hex-tooltip" id="f1-tooltip" role="tooltip" hidden></div>
     <div class="attrib"><a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://openmaptiles.org">OpenMapTiles</a> · Dados © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a></div>
