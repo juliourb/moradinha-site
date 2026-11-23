@@ -7,6 +7,7 @@ import { classeHex } from "../dados/escalaCor.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
 import { ligarDica, marcarGrafico, htmlDica, mostrarDica, esconderDica } from "../ui/ajuda.js";
 import { eixoSerie, svgQuebraEixo, NOTA_EIXO_SEM_ZERO } from "../util/eixoSerie.js";
+import { correlacaoComponentes, PARES_COMPONENTES } from "../dados/correlacao.js";
 
 /**
  * Hexágonos "normal" no período (SPEC_F6.3 item 3): 1+ domicílio e déficit
@@ -476,5 +477,60 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
       ? htmlDica({ titulo: s.lab, valor: "sem hexágono acima de zero" })
       : htmlDica({ titulo: s.lab, valor: `mediana ${formatar(s.q50, 2)}`, faixa: null, base: `p25–p75: ${formatar(s.q25, 2)} a ${formatar(s.q75, 2)} · p10–p90: ${formatar(s.q10, 2)} a ${formatar(s.q90, 2)} · ${formatar(s.n, 0)} hexágonos` }));
   marcarGrafico(svg.node(), "caixas");
+  box.replaceChildren(svg.node());
+}
+
+const ROT_CURTO_COMP = { coabitacao: "Coab.", onus: "Ônus", precariedade: "Prec." };
+const NOME_COMP = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
+
+/**
+ * Correlação entre componentes por hexágono (acréscimo F2, F6.5): Spearman de
+ * cada par de componentes em cada período, na medida escolhida; o período do
+ * mapa em destaque; clicar numa coluna leva aquele período ao mapa.
+ */
+export function renderizarCorrelacao(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
+  if (box.closest(".dcard")?.classList.contains("min")) return;
+  const medida = estado.medida === "relativo" ? "relativo" : "absoluto";
+  const dados = correlacaoComponentes(linhasArr, manifesto.periodos, medida);
+  // Períodos nas linhas, pares de componentes nas colunas: cabe num cartão estreito.
+  const W = Math.max(180, box.clientWidth || 200);
+  const m = { l: 46, r: 2, t: 22, b: 2 };
+  const linhaH = 16;
+  const H = m.t + manifesto.periodos.length * linhaH + m.b;
+  const chavePar = ([a, b]) => `${a}|${b}`;
+  const x = d3.scaleBand().domain(PARES_COMPONENTES.map(chavePar)).range([m.l, W - m.r]).padding(0.06);
+  const yDe = (periodo) => m.t + manifesto.periodos.findIndex((p) => p.id === periodo) * linhaH;
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img")
+    .attr("aria-label", `Correlação de Spearman entre componentes por hexágono, por período (${medida})`);
+  const corPos = d3.interpolateRgb(css("--surface") || "#ffffff", css("--accent") || "#1f6f78");
+  const corNeg = d3.interpolateRgb(css("--surface") || "#ffffff", css("--warn") || "#b7791f");
+  const cor = (rho) => (rho == null ? css("--line") : rho >= 0 ? corPos(Math.min(1, rho)) : corNeg(Math.min(1, -rho)));
+  const textoSobre = (fundo) => ((d3.hsl(fundo)?.l ?? 1) < 0.5 ? "#ffffff" : css("--ink"));
+  const cab = svg.append("g").selectAll("text").data(PARES_COMPONENTES).join("text")
+    .attr("x", (p) => x(chavePar(p)) + x.bandwidth() / 2).attr("y", m.t - 13).attr("text-anchor", "middle").style("font-size", "8.5px");
+  cab.append("tspan").text(([a]) => ROT_CURTO_COMP[a]);
+  cab.append("tspan").attr("x", (p) => x(chavePar(p)) + x.bandwidth() / 2).attr("dy", 9).text(([, b]) => `× ${ROT_CURTO_COMP[b]}`);
+  svg.append("g").selectAll("text").data(manifesto.periodos).join("text")
+    .attr("x", m.l - 4).attr("y", (p) => yDe(p.id) + linhaH / 2).attr("text-anchor", "end").attr("dominant-baseline", "middle").style("font-size", "9px")
+    .attr("font-weight", (p) => (p.id === estado.periodo ? 700 : 400)).text((p) => rotuloCurto(p.rotulo));
+  const g = svg.append("g").selectAll("g").data(dados).join("g").style("cursor", "pointer")
+    .attr("data-periodo", (d) => d.periodo)
+    .on("click", (_e, d) => aoClicarPeriodo?.(d.periodo));
+  g.append("rect")
+    .attr("x", (d) => x(`${d.a}|${d.b}`)).attr("width", x.bandwidth())
+    .attr("y", (d) => yDe(d.periodo) + 1).attr("height", linhaH - 2).attr("rx", 2)
+    .attr("fill", (d) => cor(d.rho))
+    .attr("stroke", (d) => (d.periodo === estado.periodo ? css("--ink") : "none")).attr("stroke-width", 1.5);
+  g.append("text")
+    .attr("x", (d) => x(`${d.a}|${d.b}`) + x.bandwidth() / 2).attr("y", (d) => yDe(d.periodo) + linhaH / 2)
+    .attr("text-anchor", "middle").attr("dominant-baseline", "middle").attr("font-size", 9).style("pointer-events", "none")
+    .style("fill", (d) => textoSobre(cor(d.rho)))
+    .text((d) => (d.rho == null ? "—" : formatar(d.rho, 2)));
+  ligarDica(g, (d) => htmlDica({
+    titulo: `${NOME_COMP[d.a]} × ${NOME_COMP[d.b]} · ${manifesto.periodos.find((p) => p.id === d.periodo)?.rotulo ?? d.periodo}`,
+    valor: d.rho == null ? "sem dado suficiente" : `Spearman ${formatar(d.rho, 2)}`,
+    base: `${formatar(d.n, 0)} hexágonos com domicílio, medida ${medida} · 1 = ordenam os hexágonos igual; 0 = sem relação; negativo = um sobe quando o outro desce`,
+  }));
+  marcarGrafico(svg.node(), "correlacao");
   box.replaceChildren(svg.node());
 }

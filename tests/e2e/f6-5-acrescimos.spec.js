@@ -259,3 +259,34 @@ test.describe("F1: cortina comparando componentes no mesmo período", () => {
     await expect(page.locator("#f1-ans-range")).toContainText("contra 2022");
   });
 });
+
+test.describe("F2: correlação entre componentes por hexágono", () => {
+  test("3 pares × períodos, valores entre −1 e 1, dica e clique levando o período", async ({ page }) => {
+    await abrirResultados(page);
+    const svg = page.locator('#f1-corr svg[data-grafico="correlacao"]');
+    await svg.scrollIntoViewIfNeeded();
+    const celulas = svg.locator("g[data-periodo]");
+    await expect(celulas).toHaveCount(3 * 6);
+    const valores = await svg.locator("g[data-periodo] text").allTextContents();
+    for (const v of valores) {
+      if (v === "—") continue;
+      const n = Number(v.replace(",", "."));
+      expect(n).toBeGreaterThanOrEqual(-1);
+      expect(n).toBeLessThanOrEqual(1);
+    }
+    await expect(page.locator('#f1-dock-body-deficit article[data-k="corr"] header button.ajuda')).toHaveCount(1);
+    await celulas.first().hover();
+    await expect(page.locator(".dica-flutuante")).toContainText("Spearman");
+    await expect(page.locator(".dica-flutuante")).toContainText("hexágonos");
+    await svg.locator('g[data-periodo="2022"]').first().click();
+    await page.waitForTimeout(300);
+    expect((await page.evaluate(() => window.__moradinhaEstado())).periodo).toBe("2022");
+  });
+
+  for (const w of [1024, 1280, 1440]) {
+    test(`${w}px: cinco cartões do Déficit sem rolagem lateral`, async ({ page }) => {
+      await abrirResultados(page, w, 900);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(w);
+    });
+  }
+});

@@ -104847,6 +104847,64 @@ function renderizarHexagono(el2, estado, linhas, apMap, manifesto, totais) {
   ligarDicaPorAtributos(el2);
 }
 
+// src/js/dados/correlacao.js
+function postos(vs9) {
+  const idx = vs9.map((v4, i4) => [v4, i4]).sort((a5, b10) => a5[0] - b10[0]);
+  const r3 = new Array(vs9.length);
+  let i3 = 0;
+  while (i3 < idx.length) {
+    let j4 = i3;
+    while (j4 + 1 < idx.length && idx[j4 + 1][0] === idx[i3][0]) j4++;
+    const media = (i3 + j4) / 2 + 1;
+    for (let k5 = i3; k5 <= j4; k5++) r3[idx[k5][1]] = media;
+    i3 = j4 + 1;
+  }
+  return r3;
+}
+function spearman(xs2, ys2) {
+  const n3 = xs2.length;
+  if (n3 < 3 || ys2.length !== n3) return null;
+  const rx2 = postos(xs2);
+  const ry2 = postos(ys2);
+  const mx2 = (n3 + 1) / 2;
+  let sxy = 0;
+  let sxx = 0;
+  let syy = 0;
+  for (let i3 = 0; i3 < n3; i3++) {
+    const dx2 = rx2[i3] - mx2;
+    const dy2 = ry2[i3] - mx2;
+    sxy += dx2 * dy2;
+    sxx += dx2 * dx2;
+    syy += dy2 * dy2;
+  }
+  return sxx > 0 && syy > 0 ? sxy / Math.sqrt(sxx * syy) : null;
+}
+var PARES_COMPONENTES = Object.freeze([
+  ["coabitacao", "onus"],
+  ["coabitacao", "precariedade"],
+  ["onus", "precariedade"]
+]);
+function correlacaoComponentes(linhasArr, periodos, medida) {
+  const saida = [];
+  for (const p4 of periodos) {
+    for (const [a5, b10] of PARES_COMPONENTES) {
+      const xs2 = [];
+      const ys2 = [];
+      for (const l3 of linhasArr) {
+        const dom = l3.dom?.[p4.id];
+        if (dom == null || dom < 1) continue;
+        const va2 = valorHex(l3, a5, p4.id, medida);
+        const vb2 = valorHex(l3, b10, p4.id, medida);
+        if (va2 == null || vb2 == null) continue;
+        xs2.push(va2);
+        ys2.push(vb2);
+      }
+      saida.push({ a: a5, b: b10, periodo: p4.id, rho: spearman(xs2, ys2), n: xs2.length });
+    }
+  }
+  return saida;
+}
+
 // src/js/graficos/deficit.js
 function linhasNormais(linhasArr, componente, periodo) {
   return linhasArr.filter((l3) => classeHex(l3.dom[periodo], brutoHex(l3, componente, periodo)) === "normal");
@@ -105155,6 +105213,39 @@ function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   marcarGrafico(svg.node(), "caixas");
   box.replaceChildren(svg.node());
 }
+var ROT_CURTO_COMP = { coabitacao: "Coab.", onus: "\xD4nus", precariedade: "Prec." };
+var NOME_COMP = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function renderizarCorrelacao(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
+  if (box.closest(".dcard")?.classList.contains("min")) return;
+  const medida = estado.medida === "relativo" ? "relativo" : "absoluto";
+  const dados = correlacaoComponentes(linhasArr, manifesto.periodos, medida);
+  const W4 = Math.max(180, box.clientWidth || 200);
+  const m4 = { l: 46, r: 2, t: 22, b: 2 };
+  const linhaH = 16;
+  const H4 = m4.t + manifesto.periodos.length * linhaH + m4.b;
+  const chavePar = ([a5, b10]) => `${a5}|${b10}`;
+  const x5 = band().domain(PARES_COMPONENTES.map(chavePar)).range([m4.l, W4 - m4.r]).padding(0.06);
+  const yDe = (periodo) => m4.t + manifesto.periodos.findIndex((p4) => p4.id === periodo) * linhaH;
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `Correla\xE7\xE3o de Spearman entre componentes por hex\xE1gono, por per\xEDodo (${medida})`);
+  const corPos = rgb2(css3("--surface") || "#ffffff", css3("--accent") || "#1f6f78");
+  const corNeg = rgb2(css3("--surface") || "#ffffff", css3("--warn") || "#b7791f");
+  const cor = (rho) => rho == null ? css3("--line") : rho >= 0 ? corPos(Math.min(1, rho)) : corNeg(Math.min(1, -rho));
+  const textoSobre = (fundo) => (hsl(fundo)?.l ?? 1) < 0.5 ? "#ffffff" : css3("--ink");
+  const cab = svg.append("g").selectAll("text").data(PARES_COMPONENTES).join("text").attr("x", (p4) => x5(chavePar(p4)) + x5.bandwidth() / 2).attr("y", m4.t - 13).attr("text-anchor", "middle").style("font-size", "8.5px");
+  cab.append("tspan").text(([a5]) => ROT_CURTO_COMP[a5]);
+  cab.append("tspan").attr("x", (p4) => x5(chavePar(p4)) + x5.bandwidth() / 2).attr("dy", 9).text(([, b10]) => `\xD7 ${ROT_CURTO_COMP[b10]}`);
+  svg.append("g").selectAll("text").data(manifesto.periodos).join("text").attr("x", m4.l - 4).attr("y", (p4) => yDe(p4.id) + linhaH / 2).attr("text-anchor", "end").attr("dominant-baseline", "middle").style("font-size", "9px").attr("font-weight", (p4) => p4.id === estado.periodo ? 700 : 400).text((p4) => rotuloCurto(p4.rotulo));
+  const g5 = svg.append("g").selectAll("g").data(dados).join("g").style("cursor", "pointer").attr("data-periodo", (d3) => d3.periodo).on("click", (_e4, d3) => aoClicarPeriodo?.(d3.periodo));
+  g5.append("rect").attr("x", (d3) => x5(`${d3.a}|${d3.b}`)).attr("width", x5.bandwidth()).attr("y", (d3) => yDe(d3.periodo) + 1).attr("height", linhaH - 2).attr("rx", 2).attr("fill", (d3) => cor(d3.rho)).attr("stroke", (d3) => d3.periodo === estado.periodo ? css3("--ink") : "none").attr("stroke-width", 1.5);
+  g5.append("text").attr("x", (d3) => x5(`${d3.a}|${d3.b}`) + x5.bandwidth() / 2).attr("y", (d3) => yDe(d3.periodo) + linhaH / 2).attr("text-anchor", "middle").attr("dominant-baseline", "middle").attr("font-size", 9).style("pointer-events", "none").style("fill", (d3) => textoSobre(cor(d3.rho))).text((d3) => d3.rho == null ? "\u2014" : formatar(d3.rho, 2));
+  ligarDica(g5, (d3) => htmlDica({
+    titulo: `${NOME_COMP[d3.a]} \xD7 ${NOME_COMP[d3.b]} \xB7 ${manifesto.periodos.find((p4) => p4.id === d3.periodo)?.rotulo ?? d3.periodo}`,
+    valor: d3.rho == null ? "sem dado suficiente" : `Spearman ${formatar(d3.rho, 2)}`,
+    base: `${formatar(d3.n, 0)} hex\xE1gonos com domic\xEDlio, medida ${medida} \xB7 1 = ordenam os hex\xE1gonos igual; 0 = sem rela\xE7\xE3o; negativo = um sobe quando o outro desce`
+  }));
+  marcarGrafico(svg.node(), "correlacao");
+  box.replaceChildren(svg.node());
+}
 
 // src/js/graficos/qualidade.js
 function css4(nome) {
@@ -105460,6 +105551,7 @@ async function iniciarExplorador() {
       renderizarRanking($4("f1-rank"), estado, linhasArr, ap2, (h32) => loja.definir({ selecionado: h32 }));
       renderizarSerie($4("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
       renderizarCaixas($4("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
+      renderizarCorrelacao($4("f1-corr"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($4("f1-qhist"), estado, linhasArr, ap2, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarDispersao($4("f1-disp"), estado, linhasArr, ap2, (h32) => loja.definir({ selecionado: h32 }), (id3) => {
@@ -105990,10 +106082,10 @@ function posicaoSpearman(v4) {
   if (v4 == null) return null;
   return Math.max(0, Math.min(1, (v4 - ESCALA_SPEARMAN.min) / (ESCALA_SPEARMAN.max - ESCALA_SPEARMAN.min)));
 }
-function periodoMenosParecido(spearman, manifesto) {
+function periodoMenosParecido(spearman2, manifesto) {
   const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
   const somas = new Map(anos.map((p4) => [p4.id, { soma: 0, n: 0 }]));
-  for (const { periodos, matriz } of Object.values(spearman ?? {})) {
+  for (const { periodos, matriz } of Object.values(spearman2 ?? {})) {
     periodos.forEach((pi5, i3) => {
       if (!somas.has(pi5)) return;
       periodos.forEach((pj2, j4) => {
@@ -106014,15 +106106,15 @@ function periodoMenosParecido(spearman, manifesto) {
   if (!pior) return null;
   return { ...pior, fonteDiferente: pior.periodo.marcas?.includes("fonte_estoque_diferente") ?? false };
 }
-function fraseAnoMenosParecido(spearman, manifesto) {
-  const r3 = periodoMenosParecido(spearman, manifesto);
+function fraseAnoMenosParecido(spearman2, manifesto) {
+  const r3 = periodoMenosParecido(spearman2, manifesto);
   if (!r3) return "";
   return `${r3.periodo.rotulo} \xE9 o ano que menos se parece com os outros: a ordem dos hex\xE1gonos muda${r3.fonteDiferente ? " porque o estoque vem de outra fonte" : ""}.`;
 }
-function spearmanContraBase(spearman, manifesto) {
+function spearmanContraBase(spearman2, manifesto) {
   const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
   const base = anos[0]?.id;
-  return Object.entries(spearman ?? {}).map(([componente, { periodos, matriz }]) => {
+  return Object.entries(spearman2 ?? {}).map(([componente, { periodos, matriz }]) => {
     const ib2 = periodos.indexOf(base);
     const pontos = anos.filter((p4) => p4.id !== base).map((p4) => ({ periodo: p4, valor: ib2 < 0 || periodos.indexOf(p4.id) < 0 ? null : matriz[ib2][periodos.indexOf(p4.id)] })).filter((d3) => d3.valor != null);
     return { componente, base: anos[0], pontos };
@@ -106278,11 +106370,11 @@ function formatarListaImportancia(importancia) {
   const soma = lista.reduce((s4, i3) => s4 + (i3.valor ?? 0), 0);
   return lista.map((i3) => `${i3.rotulo} (${formatarImportancia(i3.valor, soma)})`).join(" \xB7 ");
 }
-function renderizarHeatmap(el2, spearman, manifesto) {
+function renderizarHeatmap(el2, spearman2, manifesto) {
   const rotuloPeriodo2 = (id3) => manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3;
   const destaque = new Set(manifesto.periodos.filter((p4) => p4.marcas?.includes("fonte_estoque_diferente")).map((p4) => p4.id));
   const cor = (v4) => v4 == null ? css6("--line") : rgb2(css6("--warn-soft"), css6("--accent"))(posicaoSpearman(v4));
-  const matrizes = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
+  const matrizes = Object.entries(spearman2).map(([comp, { periodos, matriz }]) => {
     const cel = (i3, j4) => {
       const v4 = matriz[i3][j4];
       const dest = destaque.has(periodos[i3]) || destaque.has(periodos[j4]) ? " destaque-periodo" : "";
@@ -106295,16 +106387,16 @@ function renderizarHeatmap(el2, spearman, manifesto) {
         <tbody>${periodos.map((p4, i3) => `<tr>${th2(p4)}${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table></div>`;
   }).join("");
   const legenda = `<div class="hm-legenda" aria-label="Escala de cor do Spearman, de 0,8 a 1,0"><span>0,8 ou menos</span><span class="hm-rampa" style="background:linear-gradient(to right, ${css6("--warn-soft")}, ${css6("--accent")})"></span><span>1,0</span></div>`;
-  const frase = fraseAnoMenosParecido(spearman, manifesto);
+  const frase = fraseAnoMenosParecido(spearman2, manifesto);
   el2.innerHTML = `${frase ? `<p class="sub" id="f3-frase-spearman">${frase}</p>` : ""}${legenda}
     <div class="spearman-layout"><div class="hm-matrizes">${matrizes}</div><div class="hm-linhas" id="f3-spearman-linhas"></div></div>`;
-  renderizarSpearmanLinhas($6("f3-spearman-linhas"), spearman, manifesto);
+  renderizarSpearmanLinhas($6("f3-spearman-linhas"), spearman2, manifesto);
   instalarAjudas(el2);
   ligarDicaPorAtributos(el2);
 }
 var COR_COMPONENTE = { coabitacao: "--accent", onus: "--warn", precariedade: "--ink" };
-function renderizarSpearmanLinhas(el2, spearman, manifesto) {
-  const series = spearmanContraBase(spearman, manifesto);
+function renderizarSpearmanLinhas(el2, spearman2, manifesto) {
+  const series = spearmanContraBase(spearman2, manifesto);
   const todos = series.flatMap((sr2) => sr2.pontos.map((p4) => p4.valor));
   if (!todos.length) {
     el2.innerHTML = "";
@@ -106930,7 +107022,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "55a59e284e702839c3556c925748f54e7a8b5672");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "d5cc1dffc694cc0b96d6e15f68bbf38bca786884");
   renderizarInterna($7("met-interna"), modelo);
 }
 

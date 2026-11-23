@@ -10,7 +10,7 @@ import { criarMapa } from "./mapa/index.js";
 import { ligarPergunta } from "./ui/pergunta.js";
 import { renderizarResposta } from "./ui/resposta.js";
 import { renderizarHexagono } from "./ui/hexagono.js";
-import { renderizarHistograma, renderizarRanking, renderizarSerie, renderizarCaixas } from "./graficos/deficit.js";
+import { renderizarHistograma, renderizarRanking, renderizarSerie, renderizarCaixas, renderizarCorrelacao } from "./graficos/deficit.js";
 import { renderizarHistogramaQualidade, renderizarDispersao, renderizarComposicao, renderizarEstoque, quadranteAtivo } from "./graficos/qualidade.js";
 
 const NOME_MEDIDA_QUALIDADE = {
@@ -95,6 +95,7 @@ export async function iniciarExplorador() {
       renderizarRanking($("f1-rank"), estado, linhasArr, ap, (h3) => loja.definir({ selecionado: h3 }));
       renderizarSerie($("f1-series"), estado, manifesto, totais, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
       renderizarCaixas($("f1-boxes"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
+      renderizarCorrelacao($("f1-corr"), estado, manifesto, linhasArr, (periodo) => loja.definir({ periodo, faixa_hist: [] }));
     } else {
       renderizarHistogramaQualidade($("f1-qhist"), estado, linhasArr, ap, (faixa) => loja.definir({ faixa_hist: faixa }));
       renderizarDispersao($("f1-disp"), estado, linhasArr, ap, (h3) => loja.definir({ selecionado: h3 }), (id) => {

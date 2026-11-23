@@ -605,3 +605,7 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 .rastreio-dobra > summary { cursor: pointer; color: var(--ink); font-size: 13px; padding: 4px 0; }
 .rastreio-dobra > summary .rastreio-resumo { font-family: var(--mono, monospace); font-size: 12px; }
 .rastreio-dobra[open] > summary { margin-bottom: 8px; }
+
+/* Acréscimo F2: cartão estreito da correlação, para não apertar os outros. */
+.dcard[data-k="corr"] { flex: 0 0 210px; }
+@media (max-width: 1100px) { .dcard[data-k="corr"] { flex-basis: 180px; } }
