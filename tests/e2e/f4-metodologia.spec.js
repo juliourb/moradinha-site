@@ -27,17 +27,81 @@ test.describe("F6.1-14: o grafo mostra os 7 grupos do método, recolhidos, em or
   });
 });
 
-test.describe("F4-2: clicar num grupo leva à âncora da seção; as setas passam para o grupo seguinte", () => {
-  test("clicar no grupo 'Treino' rola até o texto de Treino; seta direita vai para Montagem 2022", async ({ page }) => {
+test.describe("F6.4-4b/4c: clicar abre o painel (sem rolar) com síntese e explicação; as setas passam adiante", () => {
+  test("grupo 'Treino': painel com síntese em destaque e explicação; a página não rola; seta direita vai a Montagem 2022", async ({ page }) => {
     await page.goto("/metodologia.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
+    const y0 = await page.evaluate(() => window.scrollY);
     await page.locator('#met-pipeline .no-pipeline[data-grupo="Treino"]').click();
-    await page.waitForTimeout(400);
-    await expect(page.locator("#met-texto-treino")).toBeInViewport();
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => window.scrollY)).toBe(y0);
+    const painel = page.locator("#met-painel");
+    await expect(painel.locator("h4")).toHaveText("Treino");
+    await expect(painel.locator(".met-sintese")).not.toBeEmpty();
+    await expect(painel.locator(".met-explicacao")).not.toBeEmpty();
+    // os textos não ficam listados abaixo do grafo
+    await expect(page.locator("#met-textos")).toBeHidden();
 
     await page.keyboard.press("ArrowRight");
-    await page.waitForTimeout(400);
-    await expect(page.locator("#met-texto-montagem2022")).toBeInViewport();
+    await expect(painel.locator("h4")).toHaveText("Montagem 2022");
+    expect(await page.evaluate(() => window.scrollY)).toBe(y0);
+  });
+
+  test("clicar numa tabela mostra só o nome (sem a descrição do contrato) e não rola", async ({ page }) => {
+    await page.goto("/metodologia.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.waitForLoadState("networkidle");
+    await page.locator('#met-pipeline .no-pipeline[data-grupo="Treino"]').click();
+    const y0 = await page.evaluate(() => window.scrollY);
+    const tabela = page.locator("#met-pipeline-expandido .no-tabela").first();
+    const nome = await tabela.locator("title").textContent();
+    await tabela.click();
+    await expect(page.locator("#met-painel .met-tabela-nome")).toHaveText(nome);
+    expect(await page.evaluate(() => window.scrollY)).toBe(y0);
+    const textoPainel = await page.locator("#met-painel").innerText();
+    expect(textoPainel.length).toBeLessThan(400); // sem o texto técnico do YAML
+  });
+});
+
+test.describe("F6.4-4a: subgrafo horizontal em camadas; Coleta não vira uma coluna", () => {
+  test("Coleta (22 tabelas, pacote real) ocupa várias colunas e tem no máximo 6 caixas por coluna", async ({ page }) => {
+    await page.goto("/metodologia.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.waitForLoadState("networkidle");
+    await page.locator('#met-pipeline .no-pipeline[data-grupo="Coleta"]').click();
+    const nos = page.locator("#met-pipeline-expandido .no-tabela");
+    expect(await nos.count()).toBe(22);
+    const xs = await nos.evaluateAll((els) => els.map((e) => e.getAttribute("transform")));
+    const colunas = new Map();
+    for (const t of xs) {
+      const x = t.match(/translate\(([-\d.]+),/)[1];
+      colunas.set(x, (colunas.get(x) ?? 0) + 1);
+    }
+    expect(colunas.size).toBeGreaterThanOrEqual(4);
+    expect(Math.max(...colunas.values())).toBeLessThanOrEqual(6);
+  });
+
+  test("Montagem 2022 tem ligações desenhadas entre as tabelas, da esquerda para a direita", async ({ page }) => {
+    await page.goto("/metodologia.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.waitForLoadState("networkidle");
+    await page.locator('#met-pipeline .no-pipeline[data-grupo="Montagem 2022"]').click();
+    expect(await page.locator("#met-pipeline-expandido svg path[marker-end]").count()).toBeGreaterThan(0);
+  });
+});
+
+test.describe("F6.4-4c/4f: botão de download desativado; rótulo legível na tabela de parâmetros", () => {
+  test("botão 'Baixar a metodologia completa' desativado com a nota", async ({ page }) => {
+    await page.goto("/metodologia.html?edicao=ficticio");
+    await page.waitForLoadState("networkidle");
+    const botao = page.getByRole("button", { name: "Baixar a metodologia completa" });
+    await expect(botao).toBeDisabled();
+    await expect(page.locator(".met-download")).toContainText("em preparação (documento da tese)");
+  });
+  test("a coluna Tipo não mostra 'media'/'ano' cru", async ({ page }) => {
+    await page.goto("/metodologia.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.waitForLoadState("networkidle");
+    const celulas = await page.locator("#met-parametros table").first().locator("tbody td:nth-child(2)").allInnerTexts();
+    expect(celulas).toContain("Ano");
+    expect(celulas.some((c) => /^Média de \d+ anos$/.test(c))).toBe(true);
+    expect(celulas).not.toContain("media");
   });
 });
 

@@ -1,7 +1,7 @@
-## Anos t
+::: {.sintese}
+O estoque de domicílios de cada ano é atualizado pela variação das edificações (Open Buildings até 2023) e da área urbanizada (MapBiomas depois), com o total ajustado ao da PNADc.
+:::
 
-O estoque de domicílios de cada ano é atualizado pela variação das edificações (Open Buildings até
-2023) e da área urbanizada (MapBiomas depois), com o total ajustado ao da PNADc. As taxas de 2022
-são mantidas e os totais são recalibrados na PNADc do ano. A precariedade dos anos seguintes é
-provisória e sai sem faixa. As médias de três anos reduzem o ruído da amostra, e uma mudança entre
-anos só é afirmada quando passa de 1,96 erro padrão. [@souza2020mapbiomas; @ibge_pnadc]
+::: {.explicacao}
+As taxas de 2022 são mantidas e os totais são recalibrados na PNADc do ano. A precariedade dos anos seguintes é provisória e sai sem faixa. As médias de três anos reduzem o ruído da amostra, e uma mudança entre anos só é afirmada quando passa de 1,96 erro padrão. [@souza2020mapbiomas; @ibge_pnadc]
+:::

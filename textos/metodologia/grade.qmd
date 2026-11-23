@@ -1,5 +1,7 @@
-## Grade
+::: {.sintese}
+O território é coberto por hexágonos H3 de resolução 8.
+:::
 
-O território é coberto por hexágonos H3 de resolução 8. Cada setor censitário é cortado pelos
-hexágonos que ele toca, e cada corte, o "pedaço", recebe a sua parte dos domicílios do setor pela
-grade estatística do IBGE. É o pedaço que leva cada fonte até o hexágono. [@brodsky2018h3]
+::: {.explicacao}
+Cada setor censitário é cortado pelos hexágonos que ele toca, e cada corte, o "pedaço", recebe a sua parte dos domicílios do setor pela grade estatística do IBGE. É o pedaço que leva cada fonte até o hexágono. [@brodsky2018h3]
+:::

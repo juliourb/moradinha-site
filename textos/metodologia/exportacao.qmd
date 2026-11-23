@@ -1,6 +1,7 @@
-## Exportação
+::: {.sintese}
+O pacote público leva só números agregados: nada de microdado, e a estimativa direta por área só aparece em áreas com pelo menos 30 domicílios na amostra.
+:::
 
-O pacote público leva só números agregados: nada de microdado, e a estimativa direta por área só
-aparece em áreas com pelo menos 30 domicílios na amostra. Cada arquivo tem a sua impressão digital
-(hash) no manifesto, o pacote é validado antes de sair, e a edição citada é o commit exato do
-código que o gerou.
+::: {.explicacao}
+Cada arquivo tem a sua impressão digital (hash) no manifesto, o pacote é validado antes de sair, e a edição citada é o commit exato do código que o gerou.
+:::

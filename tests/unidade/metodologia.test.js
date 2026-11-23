@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { camadasPipeline, parametrosDominio, linhasRastreio } from "../../src/js/dados/metodologia.js";
+import { camadasPipeline, layoutCamadasEmColunas, parametrosDominio, linhasRastreio } from "../../src/js/dados/metodologia.js";
 import { montarInternaHtml } from "../../src/js/metodologia.js";
 
 const PIPELINE_LINEAR = {
@@ -87,7 +87,8 @@ describe("dados/metodologia.js", () => {
       ],
     };
     const { periodos, limiares } = parametrosDominio(manifesto);
-    expect(periodos[0]).toEqual({ id: "2022", rotulo: "2022", tipo: "ano", fonteEstoque: "Censo 2022" });
+    expect(periodos[0]).toEqual({ id: "2022", rotulo: "2022", tipo: "ano", tipoRotulo: "Ano", fonteEstoque: "Censo 2022" });
+    expect(periodos[1].tipoRotulo).toBe("Média de vários anos");
     expect(periodos[1].fonteEstoque).toBe("Média de anos com fontes de estoque diferentes");
     expect(limiares.cv_ap_ressalva.valor).toBe(30);
   });
@@ -122,5 +123,38 @@ describe("F4-5 (seção interna): só aparece quando o pacote tem 'interno'", ()
     expect(html).toContain("r2_ap_fora_dobra");
     expect(html).toContain("0,87");
     expect(html).toContain("desfecho interno, não publicado");
+  });
+});
+
+describe("layoutCamadasEmColunas (F6.4 4a)", () => {
+  it("22 tabelas sem ligação (Coleta) viram colunas curtas, nunca uma coluna de 22", () => {
+    const etapas = Array.from({ length: 22 }, (_v, i) => ({ id: `t${i}`, nome: `T${i}`, commit: "x", data: "d" }));
+    const { nos, nColunas, maiorColuna } = layoutCamadasEmColunas({ etapas, ligacoes: [] }, 6);
+    expect(nos).toHaveLength(22);
+    expect(maiorColuna).toBeLessThanOrEqual(6);
+    expect(nColunas).toBeGreaterThanOrEqual(4);
+    // nenhum par de nós na mesma célula
+    expect(new Set(nos.map((n) => `${n.camada}:${n.posicao}`)).size).toBe(22);
+  });
+
+  it("respeita a ordem das ligações: o destino fica numa coluna à direita da origem", () => {
+    const { nos } = layoutCamadasEmColunas(PIPELINE_RAMO, 6);
+    const col = Object.fromEntries(nos.map((n) => [n.id, n.camada]));
+    expect(col.a).toBeLessThan(col.d);
+    expect(col.d).toBeLessThan(col.e);
+    expect(col.e).toBeLessThan(col.g);
+    expect(col.g).toBeLessThan(col.f);
+  });
+
+  it("camadas largas ocupam várias colunas e empurram as camadas seguintes para a direita", () => {
+    const etapas = [
+      ...Array.from({ length: 8 }, (_v, i) => ({ id: `r${i}`, nome: `R${i}`, commit: "x", data: "d" })),
+      { id: "fim", nome: "Fim", commit: "x", data: "d" },
+    ];
+    const ligacoes = Array.from({ length: 8 }, (_v, i) => ({ de: `r${i}`, para: "fim" }));
+    const { nos } = layoutCamadasEmColunas({ etapas, ligacoes }, 4);
+    const maxRaiz = Math.max(...nos.filter((n) => n.id.startsWith("r")).map((n) => n.camada));
+    expect(maxRaiz).toBe(1);
+    expect(nos.find((n) => n.id === "fim").camada).toBe(2);
   });
 });

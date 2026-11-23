@@ -106052,12 +106052,56 @@ function camadasPipeline(pipeline) {
   const maiorCamada = Math.max(...[...porCamada.values()].map((v4) => v4.length));
   return { nos, arestas, nCamadas, maiorCamada };
 }
+function layoutCamadasEmColunas(pipeline, maxPorColuna = 6) {
+  const base = camadasPipeline(pipeline);
+  const preds = new Map(base.nos.map((n3) => [n3.id, []]));
+  for (const a5 of base.arestas) preds.get(a5.para)?.push(a5.de);
+  const porCamada = /* @__PURE__ */ new Map();
+  for (const n3 of base.nos) {
+    if (!porCamada.has(n3.camada)) porCamada.set(n3.camada, []);
+    porCamada.get(n3.camada).push(n3);
+  }
+  const yNorm = /* @__PURE__ */ new Map();
+  const colunaDe = /* @__PURE__ */ new Map();
+  const linhaDe = /* @__PURE__ */ new Map();
+  let colunaAtual = 0;
+  for (const camada of [...porCamada.keys()].sort((a5, b10) => a5 - b10)) {
+    const nos2 = porCamada.get(camada);
+    const origem = new Map(nos2.map((n3, i3) => [n3.id, i3]));
+    const media = (n3) => {
+      const ys2 = (preds.get(n3.id) ?? []).map((p4) => yNorm.get(p4)).filter((v4) => v4 != null);
+      return ys2.length ? ys2.reduce((x5, y5) => x5 + y5, 0) / ys2.length : null;
+    };
+    const ordenados = [...nos2].sort((a5, b10) => {
+      const ma2 = media(a5);
+      const mb2 = media(b10);
+      if (ma2 != null && mb2 != null && ma2 !== mb2) return ma2 - mb2;
+      return origem.get(a5.id) - origem.get(b10.id);
+    });
+    const nCols = Math.max(1, Math.ceil(ordenados.length / maxPorColuna));
+    const porCol = Math.ceil(ordenados.length / nCols);
+    ordenados.forEach((n3, i3) => {
+      colunaDe.set(n3.id, colunaAtual + Math.floor(i3 / porCol));
+      linhaDe.set(n3.id, i3 % porCol);
+      yNorm.set(n3.id, i3 / Math.max(1, ordenados.length));
+    });
+    colunaAtual += nCols;
+  }
+  const nos = base.nos.map((n3) => ({ ...n3, camada: colunaDe.get(n3.id), posicao: linhaDe.get(n3.id), camadaLogica: n3.camada }));
+  return {
+    nos,
+    arestas: base.arestas,
+    nColunas: colunaAtual,
+    maiorColuna: Math.max(1, ...nos.map((n3) => n3.posicao + 1))
+  };
+}
 function parametrosDominio(manifesto) {
   return {
     periodos: manifesto.periodos.map((p4) => ({
       id: p4.id,
       rotulo: p4.rotulo,
       tipo: p4.tipo,
+      tipoRotulo: p4.tipo === "media" ? `M\xE9dia de ${p4.anos?.length ?? "v\xE1rios"} anos` : p4.tipo === "ano" ? "Ano" : p4.tipo,
       fonteEstoque: rotuloFonteEstoque(p4.fonte_estoque)
     })),
     limiares: LIMIARES_RASTREIO
@@ -106159,13 +106203,15 @@ function $7(id3) {
 function css7(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
-var LARGURA_NO = 150;
-var ALTURA_NO = 46;
-var ESPACO_X = 60;
-var ESPACO_Y = 14;
-var LARGURA_NO_SUB = 190;
-var ALTURA_NO_SUB = 58;
-var MAX_CHARS_LINHA_SUB = 24;
+var ESPACO_X = 44;
+var ESPACO_Y = 12;
+var LARG_GRUPO = 122;
+var ALT_GRUPO = 50;
+var ESPACO_GRUPO = 22;
+var LARGURA_NO_SUB = 178;
+var ALTURA_NO_SUB = 46;
+var MAX_CHARS_LINHA_SUB = 26;
+var MAX_POR_COLUNA = 6;
 function quebrarNomeDuasLinhas(nome, maxCharsPorLinha) {
   if (nome.length <= maxCharsPorLinha) return [nome];
   const palavras = nome.split(" ");
@@ -106182,14 +106228,10 @@ function quebrarNomeDuasLinhas(nome, maxCharsPorLinha) {
   if (linha2.length > maxCharsPorLinha) linha2 = `${linha2.slice(0, maxCharsPorLinha - 1)}\u2026`;
   return [linha1, linha2];
 }
-function montarSvgCaixas(nos, arestas, { larguraNo = LARGURA_NO, alturaNo = ALTURA_NO } = {}) {
-  const nCamadas = Math.max(...nos.map((n3) => n3.camada)) + 1;
-  const maiorCamada = Math.max(1, ...[...d3GrupoContagem(nos)].map(([, v4]) => v4));
-  const W4 = nCamadas * (larguraNo + ESPACO_X) - ESPACO_X;
-  const H4 = maiorCamada * (alturaNo + ESPACO_Y) - ESPACO_Y;
+function desenharLigacoes(nos, arestas, larguraNo, alturaNo) {
   const porId = new Map(nos.map((n3) => [n3.id, n3]));
   const xy2 = (n3) => ({ x: n3.camada * (larguraNo + ESPACO_X), y: n3.posicao * (alturaNo + ESPACO_Y) });
-  const linhas = arestas.map((a5) => {
+  return arestas.map((a5) => {
     const de4 = porId.get(a5.de);
     const para = porId.get(a5.para);
     if (!de4 || !para) return "";
@@ -106199,78 +106241,125 @@ function montarSvgCaixas(nos, arestas, { larguraNo = LARGURA_NO, alturaNo = ALTU
     const y1 = p1.y + alturaNo / 2;
     const x22 = p22.x;
     const y22 = p22.y + alturaNo / 2;
-    return `<path d="M${x1},${y1} C${x1 + ESPACO_X / 2},${y1} ${x22 - ESPACO_X / 2},${y22} ${x22},${y22}" fill="none" stroke="${css7("--line")}" stroke-width="2"/>`;
+    const dx2 = Math.max(ESPACO_X / 2, (x22 - x1) / 2);
+    return `<path d="M${x1},${y1} C${x1 + dx2},${y1} ${x22 - dx2},${y22} ${x22},${y22}" fill="none" stroke="${css7("--muted")}" stroke-width="1.4" opacity="0.7" marker-end="url(#met-seta)"/>`;
   }).join("");
-  return { W: W4, H: H4, linhas, xy: xy2 };
 }
-function d3GrupoContagem(nos) {
-  const m4 = /* @__PURE__ */ new Map();
-  for (const n3 of nos) m4.set(n3.camada, (m4.get(n3.camada) ?? 0) + 1);
-  return m4;
+var DEFS_SETA = `<defs><marker id="met-seta" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${"currentColor"}"/></marker></defs>`;
+function textoDoGrupo(nomeGrupo) {
+  const secao = $7(`met-texto-${GRUPO_PARA_TEXTO_ID[nomeGrupo]}`);
+  if (!secao) return { sintese: "", explicacao: "" };
+  return {
+    sintese: secao.querySelector(".sintese")?.innerHTML ?? "",
+    explicacao: secao.querySelector(".explicacao")?.innerHTML ?? ""
+  };
 }
-var grupoAtualIdx = -1;
 function renderizarPipeline(el2, pipeline, manifesto, config2) {
   const { grupos, grupoPorEtapaId } = agruparPipeline(pipeline, manifesto, config2);
   const arestasGrupos = arestasEntreGrupos(pipeline, grupoPorEtapaId);
   const nomesPresentes = grupos.map((g5) => g5.nome);
-  const LARG_GRUPO = 170;
-  const ALT_GRUPO = 56;
+  const estado = { grupo: -1, tabela: null };
   const nosGrupo = grupos.map((g5, i3) => ({ id: g5.nome, camada: i3, posicao: 0, grupo: g5 }));
-  const { W: W4, H: H4, linhas } = montarSvgCaixas(nosGrupo, arestasGrupos, { larguraNo: LARG_GRUPO, alturaNo: ALT_GRUPO });
+  const WG = nosGrupo.length * (LARG_GRUPO + ESPACO_GRUPO) - ESPACO_GRUPO;
+  const xGrupo = (i3) => i3 * (LARG_GRUPO + ESPACO_GRUPO);
+  const ligacoesGrupos = arestasGrupos.filter((a5) => nomesPresentes.indexOf(a5.para) === nomesPresentes.indexOf(a5.de) + 1).map((a5) => {
+    const i3 = nomesPresentes.indexOf(a5.de);
+    const x1 = xGrupo(i3) + LARG_GRUPO;
+    const x22 = xGrupo(i3 + 1);
+    const y5 = ALT_GRUPO / 2;
+    return `<path d="M${x1},${y5} L${x22},${y5}" stroke="${css7("--muted")}" stroke-width="1.4" marker-end="url(#met-seta)"/>`;
+  }).join("");
   const caixas = nosGrupo.map((n3) => {
-    const x5 = n3.camada * (LARG_GRUPO + ESPACO_X);
     const g5 = n3.grupo;
     const nEtapas = g5.etapas.filter((e67) => e67.id !== ID_NO_EXPORTACAO).length;
-    const sub5 = g5.nome === "Exporta\xE7\xE3o" ? "pacote de publica\xE7\xE3o" : `${nEtapas} tabela${nEtapas === 1 ? "" : "s"}`;
-    return `<g class="no-pipeline" tabindex="0" role="button" aria-expanded="false" data-grupo="${g5.nome}" transform="translate(${x5},0)" aria-label="${g5.nome}: ${sub5} \u2014 expandir e ir para o texto">
+    const sub5 = g5.nome === "Exporta\xE7\xE3o" ? "pacote" : `${nEtapas} tabela${nEtapas === 1 ? "" : "s"}`;
+    return `<g class="no-pipeline" tabindex="0" role="button" aria-expanded="false" data-grupo="${g5.nome}" transform="translate(${xGrupo(n3.camada)},0)" aria-label="${g5.nome}: ${sub5} \u2014 abrir o texto da etapa">
         <rect width="${LARG_GRUPO}" height="${ALT_GRUPO}" rx="8" fill="${css7("--surface")}" stroke="${css7("--accent")}" stroke-width="1.5"/>
-        <text x="10" y="22" font-size="13" font-weight="650" fill="${css7("--ink")}">${g5.nome}</text>
-        <text x="10" y="40" font-size="10" fill="${css7("--muted")}">${sub5}</text>
+        <text x="10" y="21" font-size="13" font-weight="650" fill="${css7("--ink")}">${g5.nome}</text>
+        <text x="10" y="38" font-size="10" fill="${css7("--muted")}">${sub5}</text>
       </g>`;
   }).join("");
-  el2.innerHTML = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="group" aria-label="Pipeline do moradinha por etapa do m\xE9todo, da coleta \xE0 exporta\xE7\xE3o">${linhas}${caixas}</svg>
-    <div id="met-pipeline-expandido"></div>`;
-  function expandirGrupo(nomeGrupo) {
-    const idx = nomesPresentes.indexOf(nomeGrupo);
-    if (idx === -1) return;
-    grupoAtualIdx = idx;
-    el2.querySelectorAll(".no-pipeline").forEach((n3) => n3.setAttribute("aria-expanded", String(n3.dataset.grupo === nomeGrupo)));
-    const grupo = grupos[idx];
+  el2.innerHTML = `<div class="met-layout">
+      <div class="met-grafo">
+        <svg viewBox="0 0 ${WG} ${ALT_GRUPO}" width="100%" role="group" aria-label="Pipeline do moradinha por etapa do m\xE9todo, da coleta \xE0 exporta\xE7\xE3o" style="color:${css7("--muted")}">${DEFS_SETA}${ligacoesGrupos}${caixas}</svg>
+        <div id="met-pipeline-expandido"></div>
+      </div>
+      <div class="met-painel" id="met-painel" role="region" aria-label="Texto da etapa" aria-live="polite"><p class="sub">Clique numa etapa do m\xE9todo para ler o texto dela; depois, numa tabela, para ver o nome.</p></div>
+    </div>`;
+  const painel = $7("met-painel");
+  function setas() {
+    return `<span class="met-setas"><button type="button" class="iconbtn" data-seta="-1" aria-label="Anterior">\u2190</button><button type="button" class="iconbtn" data-seta="1" aria-label="Pr\xF3ximo">\u2192</button></span>`;
+  }
+  function desenharPainelGrupo(grupo) {
+    const { sintese, explicacao } = textoDoGrupo(grupo.nome);
+    painel.innerHTML = `<div class="met-painel-cab"><h4>${grupo.nome}</h4>${setas()}</div>
+      <div class="met-sintese">${sintese}</div><div class="met-explicacao">${explicacao}</div>`;
+  }
+  function desenharPainelTabela(grupo, no2) {
+    painel.innerHTML = `<div class="met-painel-cab"><h4>Tabela</h4>${setas()}</div>
+      <div class="met-tabela-nome">${no2.nome}</div>
+      <div class="sub">Etapa do m\xE9todo: ${grupo.nome}</div>
+      <p><button type="button" class="iconbtn" id="met-voltar-grupo">Ver o texto da etapa ${grupo.nome}</button></p>`;
+    $7("met-voltar-grupo").onclick = () => selecionarGrupo(nomesPresentes.indexOf(grupo.nome));
+  }
+  function ligarSetas(aoMover) {
+    painel.querySelectorAll("[data-seta]").forEach((b10) => b10.onclick = () => aoMover(Number(b10.dataset.seta)));
+  }
+  let nosTabela = [];
+  function selecionarTabela(grupo, idx) {
+    const i3 = Math.max(0, Math.min(nosTabela.length - 1, idx));
+    estado.tabela = i3;
+    const no2 = nosTabela[i3];
+    document.querySelectorAll("#met-pipeline-expandido .no-tabela").forEach((g5) => g5.classList.toggle("selecionado", g5.dataset.id === no2.id));
+    desenharPainelTabela(grupo, no2);
+    ligarSetas((d3) => selecionarTabela(grupo, estado.tabela + d3));
+  }
+  function selecionarGrupo(idx) {
+    const i3 = Math.max(0, Math.min(nomesPresentes.length - 1, idx));
+    estado.grupo = i3;
+    estado.tabela = null;
+    const grupo = grupos[i3];
+    el2.querySelectorAll(".no-pipeline").forEach((n3) => n3.setAttribute("aria-expanded", String(n3.dataset.grupo === grupo.nome)));
     const expandidoEl = $7("met-pipeline-expandido");
+    nosTabela = [];
     if (grupo.nome === "Exporta\xE7\xE3o" && grupo.etapas.length === 1 && grupo.etapas[0].id === ID_NO_EXPORTACAO) {
-      const n3 = grupo.etapas[0];
-      expandidoEl.innerHTML = `<div class="pergunta-bloco"><h4>${n3.nome}</h4><div class="significado">${n3.descricao}</div></div>`;
+      expandidoEl.innerHTML = "";
     } else {
       const sub5 = pipelineDoGrupo(pipeline, grupo);
-      const { nos, arestas } = camadasPipeline(sub5);
-      const { W: We3, H: He4, linhas: linhasE } = montarSvgCaixas(nos, arestas, { larguraNo: LARGURA_NO_SUB, alturaNo: ALTURA_NO_SUB });
-      const caixasE = nos.map((n3) => {
+      const { nos, arestas, nColunas, maiorColuna } = layoutCamadasEmColunas(sub5, MAX_POR_COLUNA);
+      nosTabela = [...nos].sort((x5, y5) => x5.camada - y5.camada || x5.posicao - y5.posicao);
+      const We3 = nColunas * (LARGURA_NO_SUB + ESPACO_X) - ESPACO_X;
+      const He4 = maiorColuna * (ALTURA_NO_SUB + ESPACO_Y) - ESPACO_Y;
+      const caixasE = nosTabela.map((n3) => {
         const x5 = n3.camada * (LARGURA_NO_SUB + ESPACO_X);
         const y5 = n3.posicao * (ALTURA_NO_SUB + ESPACO_Y);
-        const dataCommit = `${n3.commit.slice(0, 7)} \xB7 ${n3.data}`;
         const linhasNome = quebrarNomeDuasLinhas(n3.nome, MAX_CHARS_LINHA_SUB);
-        const textoNome = linhasNome.map((l3, i3) => `<text x="8" y="${16 + i3 * 13}" font-size="11" fill="${css7("--ink")}">${l3}</text>`).join("");
-        return `<g transform="translate(${x5},${y5})"><rect width="${LARGURA_NO_SUB}" height="${ALTURA_NO_SUB}" rx="8" fill="${css7("--surface")}" stroke="${css7("--line")}" stroke-width="1.2"/>
-            <title>${n3.nome} \u2014 ${n3.commit} \xB7 ${n3.data}</title>
+        const textoNome = linhasNome.map((l3, i4) => `<text x="8" y="${18 + i4 * 13}" font-size="11" fill="${css7("--ink")}">${l3}</text>`).join("");
+        return `<g class="no-tabela" tabindex="0" role="button" data-id="${n3.id}" transform="translate(${x5},${y5})" aria-label="Tabela ${n3.nome}">
+            <rect width="${LARGURA_NO_SUB}" height="${ALTURA_NO_SUB}" rx="8" fill="${css7("--surface")}" stroke="${css7("--line")}" stroke-width="1.2"/>
+            <title>${n3.nome}</title>
             ${textoNome}
-            <text x="8" y="${16 + linhasNome.length * 13 + 4}" font-size="9" fill="${css7("--muted")}">${dataCommit}</text>
           </g>`;
       }).join("");
-      expandidoEl.innerHTML = `<div class="como-ler">Tabelas do grupo ${grupo.nome}, com as liga\xE7\xF5es entre elas.</div>
-        <svg viewBox="0 0 ${We3} ${He4}" width="100%" height="${He4}" role="group" aria-label="Tabelas do grupo ${grupo.nome}">${linhasE}${caixasE}</svg>`;
+      expandidoEl.innerHTML = `<header class="graf-cab"><h4>Tabelas da etapa ${grupo.nome}</h4></header><div class="grafico-dica">Cada caixa \xE9 uma tabela do pipeline; as linhas mostram de onde cada uma vem, da esquerda para a direita. Clique numa tabela para ver o nome no painel.</div>
+        <svg viewBox="0 0 ${We3} ${He4}" width="100%" style="max-width:${We3}px;color:var(--muted)" role="group" aria-label="Tabelas do grupo ${grupo.nome}">${DEFS_SETA.replace("met-seta", "met-seta2")}${desenharLigacoes(nos, arestas, LARGURA_NO_SUB, ALTURA_NO_SUB).replaceAll("met-seta", "met-seta2")}${caixasE}</svg>`;
+      instalarAjudas(expandidoEl);
+      expandidoEl.querySelectorAll(".no-tabela").forEach((g5) => {
+        const abrir = () => selecionarTabela(grupo, nosTabela.findIndex((n3) => n3.id === g5.dataset.id));
+        g5.addEventListener("click", abrir);
+        g5.addEventListener("keydown", (ev2) => {
+          if (ev2.key === "Enter" || ev2.key === " ") {
+            ev2.preventDefault();
+            abrir();
+          }
+        });
+      });
     }
-    const textoId = GRUPO_PARA_TEXTO_ID[nomeGrupo];
-    const destino = $7(`met-texto-${textoId}`);
-    const subEl = $7(`met-sub-${textoId}`);
-    if (subEl) {
-      const descricoes = grupo.etapas.filter((e67) => e67.id !== ID_NO_EXPORTACAO && e67.descricao).map((e67) => `<div>${e67.nome}: ${e67.descricao}</div>`).join("");
-      subEl.innerHTML = descricoes;
-    }
-    destino?.scrollIntoView({ behavior: "smooth", block: "start" });
-    destino?.focus();
+    desenharPainelGrupo(grupo);
+    ligarSetas((d3) => selecionarGrupo(estado.grupo + d3));
   }
   el2.querySelectorAll(".no-pipeline").forEach((no2) => {
-    const abrir = () => expandirGrupo(no2.dataset.grupo);
+    const abrir = () => selecionarGrupo(nomesPresentes.indexOf(no2.dataset.grupo));
     no2.addEventListener("click", abrir);
     no2.addEventListener("keydown", (ev2) => {
       if (ev2.key === "Enter" || ev2.key === " ") {
@@ -106281,15 +106370,15 @@ function renderizarPipeline(el2, pipeline, manifesto, config2) {
   });
   document.addEventListener("keydown", (ev2) => {
     if (ev2.key !== "ArrowRight" && ev2.key !== "ArrowLeft") return;
-    if (grupoAtualIdx === -1) return;
+    if (estado.grupo === -1 || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName ?? "")) return;
     const delta = ev2.key === "ArrowRight" ? 1 : -1;
-    const proximo = Math.max(0, Math.min(nomesPresentes.length - 1, grupoAtualIdx + delta));
-    expandirGrupo(nomesPresentes[proximo]);
+    if (estado.tabela != null) selecionarTabela(grupos[estado.grupo], estado.tabela + delta);
+    else selecionarGrupo(estado.grupo + delta);
   });
 }
 function renderizarParametros(el2, manifesto) {
   const { periodos, limiares } = parametrosDominio(manifesto);
-  const linhasPeriodos = periodos.map((p4) => `<tr><td>${p4.rotulo}</td><td>${p4.tipo}</td><td>${p4.fonteEstoque}</td></tr>`).join("");
+  const linhasPeriodos = periodos.map((p4) => `<tr><td>${p4.rotulo}</td><td>${p4.tipoRotulo}</td><td>${p4.fonteEstoque}</td></tr>`).join("");
   const linhasLimiares = Object.values(limiares).map((l3) => `<tr><td>${l3.rotulo}</td><td data-num="${l3.valor}">${formatar(l3.valor, l3.valor < 10 ? 2 : 0)}${l3.unidade}</td></tr>`).join("");
   el2.innerHTML = `
     <h4>Per\xEDodos</h4>
@@ -106351,7 +106440,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "eaba3508027541c514c3d85d5e1b5404f049adfc");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "d19a74a9bfe5b46f7afd277b7065fa7232a62169");
   renderizarInterna($7("met-interna"), modelo);
 }
 

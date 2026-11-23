@@ -1,7 +1,7 @@
-## Montagem 2022
+::: {.sintese}
+A taxa de cada pedaço sai da soma das contribuições do modelo pelas proporções do setor, uma conta exata.
+:::
 
-A taxa de cada pedaço sai da soma das contribuições do modelo pelas proporções do setor, uma conta
-exata. Um fator por área de ponderação alinha o resultado à estimativa da amostra naquela área. Na
-coabitação e no ônus, o total é ajustado ao da PNADc; a precariedade de 2022 vem da amostra do
-Censo. A faixa de incerteza vem de 200 réplicas da PNADc. O ajuste ao total é uma conta de
-fechamento e não mede a qualidade do modelo. [@ibge_censo2022]
+::: {.explicacao}
+Um fator por área de ponderação alinha o resultado à estimativa da amostra naquela área. Na coabitação e no ônus, o total é ajustado ao da PNADc; a precariedade de 2022 vem da amostra do Censo. A faixa de incerteza vem de 200 réplicas da PNADc. O ajuste ao total é uma conta de fechamento e não mede a qualidade do modelo. [@ibge_censo2022]
+:::

@@ -19,44 +19,40 @@ incerteza declarada. Quanto déficit há só se diz para o domínio; o mapa diz 
 
 ### O pipeline
 
-<div class="como-ler">Cada grupo é uma etapa do método, recolhida. Clique num grupo (ou use Tab e Enter) para
-expandir as tabelas dele e ir para o texto; as setas ← → passam para o grupo seguinte.</div>
+<div class="como-ler">Cada caixa é uma etapa do método. Clique numa etapa (ou use Tab e Enter) para ler o texto dela no painel ao lado e ver as tabelas que a compõem; clique numa tabela para ver o nome. As setas ← → passam para o item seguinte.</div>
 <div id="met-pipeline"></div>
 
-<section id="met-texto-coleta" tabindex="-1">
+<div class="met-download"><button type="button" class="iconbtn" disabled aria-disabled="true">Baixar a metodologia completa</button> <span class="sub">em preparação (documento da tese)</span></div>
+
+<div id="met-textos" hidden>
+<section id="met-texto-coleta">
 {{< include textos/metodologia/coleta.qmd >}}
-<div class="sub como-ler" id="met-sub-coleta"></div>
 </section>
 
-<section id="met-texto-grade" tabindex="-1">
+<section id="met-texto-grade">
 {{< include textos/metodologia/grade.qmd >}}
-<div class="sub como-ler" id="met-sub-grade"></div>
 </section>
 
-<section id="met-texto-classificacao" tabindex="-1">
+<section id="met-texto-classificacao">
 {{< include textos/metodologia/classificacao.qmd >}}
-<div class="sub como-ler" id="met-sub-classificacao"></div>
 </section>
 
-<section id="met-texto-treino" tabindex="-1">
+<section id="met-texto-treino">
 {{< include textos/metodologia/treino.qmd >}}
-<div class="sub como-ler" id="met-sub-treino"></div>
 </section>
 
-<section id="met-texto-montagem2022" tabindex="-1">
+<section id="met-texto-montagem2022">
 {{< include textos/metodologia/montagem2022.qmd >}}
-<div class="sub como-ler" id="met-sub-montagem2022"></div>
 </section>
 
-<section id="met-texto-anost" tabindex="-1">
+<section id="met-texto-anost">
 {{< include textos/metodologia/anost.qmd >}}
-<div class="sub como-ler" id="met-sub-anost"></div>
 </section>
 
-<section id="met-texto-exportacao" tabindex="-1">
+<section id="met-texto-exportacao">
 {{< include textos/metodologia/exportacao.qmd >}}
-<div class="sub como-ler" id="met-sub-exportacao"></div>
 </section>
+</div>
 
 ### Parâmetros do domínio
 

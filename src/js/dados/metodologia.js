@@ -156,6 +156,61 @@ export function camadasPipeline(pipeline) {
   return { nos, arestas, nCamadas, maiorCamada };
 }
 
+/**
+ * Layout em camadas, da esquerda para a direita, do subgrafo de um grupo
+ * (F6.4 4a). A camada de cada tabela vem da ordem das ligações do pipeline
+ * (caminho mais longo a partir das raízes). Tabelas da mesma camada empilham em
+ * colunas curtas (no máximo `maxPorColuna` linhas): uma camada com 22 tabelas
+ * sem ligação (Coleta) vira um bloco de poucas colunas, não uma coluna de 22.
+ * Dentro de cada camada, a ordem vertical segue a média das posições dos
+ * predecessores (reduz o cruzamento de linhas). Devolve nós com `camada` =
+ * índice de coluna visual e `posicao` = linha dentro da coluna.
+ */
+export function layoutCamadasEmColunas(pipeline, maxPorColuna = 6) {
+  const base = camadasPipeline(pipeline);
+  const preds = new Map(base.nos.map((n) => [n.id, []]));
+  for (const a of base.arestas) preds.get(a.para)?.push(a.de);
+
+  const porCamada = new Map();
+  for (const n of base.nos) {
+    if (!porCamada.has(n.camada)) porCamada.set(n.camada, []);
+    porCamada.get(n.camada).push(n);
+  }
+  const yNorm = new Map(); // posição vertical relativa (0–1) de cada nó já ordenado
+  const colunaDe = new Map();
+  const linhaDe = new Map();
+  let colunaAtual = 0;
+  for (const camada of [...porCamada.keys()].sort((a, b) => a - b)) {
+    const nos = porCamada.get(camada);
+    const origem = new Map(nos.map((n, i) => [n.id, i]));
+    const media = (n) => {
+      const ys = (preds.get(n.id) ?? []).map((p) => yNorm.get(p)).filter((v) => v != null);
+      return ys.length ? ys.reduce((x, y) => x + y, 0) / ys.length : null;
+    };
+    const ordenados = [...nos].sort((a, b) => {
+      const ma = media(a);
+      const mb = media(b);
+      if (ma != null && mb != null && ma !== mb) return ma - mb;
+      return origem.get(a.id) - origem.get(b.id);
+    });
+    const nCols = Math.max(1, Math.ceil(ordenados.length / maxPorColuna));
+    const porCol = Math.ceil(ordenados.length / nCols);
+    ordenados.forEach((n, i) => {
+      colunaDe.set(n.id, colunaAtual + Math.floor(i / porCol));
+      linhaDe.set(n.id, i % porCol);
+      yNorm.set(n.id, i / Math.max(1, ordenados.length));
+    });
+    colunaAtual += nCols;
+  }
+  const nos = base.nos.map((n) => ({ ...n, camada: colunaDe.get(n.id), posicao: linhaDe.get(n.id), camadaLogica: n.camada }));
+  return {
+    nos,
+    arestas: base.arestas,
+    nColunas: colunaAtual,
+    maiorColuna: Math.max(1, ...nos.map((n) => n.posicao + 1)),
+  };
+}
+
 /** Tabela de parâmetros do domínio: períodos do manifesto + limiares fixos do protocolo. */
 export function parametrosDominio(manifesto) {
   return {
@@ -163,6 +218,7 @@ export function parametrosDominio(manifesto) {
       id: p.id,
       rotulo: p.rotulo,
       tipo: p.tipo,
+      tipoRotulo: p.tipo === "media" ? `Média de ${p.anos?.length ?? "vários"} anos` : p.tipo === "ano" ? "Ano" : p.tipo,
       fonteEstoque: rotuloFonteEstoque(p.fonte_estoque),
     })),
     limiares: LIMIARES_RASTREIO,
