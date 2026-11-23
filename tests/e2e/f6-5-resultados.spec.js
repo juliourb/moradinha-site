@@ -37,8 +37,10 @@ test.describe("F6.5-1a: seletores de qualidade e de cortina na mesma linha", () 
 test.describe("F6.5-1b/1c: coluna à direita", () => {
   test("1440×900: título 'Hexágono' e as duas primeiras linhas visíveis sem rolar a coluna", async ({ page }) => {
     await abrir(page, 1440, 900);
+    await page.locator("#f1-rank tr").first().waitFor({ timeout: 15000 });
     await page.locator("#f1-rank tr").first().click();
-    await page.waitForTimeout(600);
+    await page.locator("#f1-detail dl dd").nth(1).waitFor({ timeout: 15000 });
+    await page.waitForTimeout(400);
     const r = await page.evaluate(() => {
       const lado = document.querySelector(".side");
       const base = lado.getBoundingClientRect().bottom;

@@ -579,8 +579,8 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
   border-color: var(--accent);
   box-shadow: none;
 }
-.vereditocel[aria-current="true"] { border: 2px solid var(--accent); background: var(--accent-soft); }
-.nav-lateral a[aria-current="true"] { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--ink) !important; padding: 4px 6px; }
+.vereditocel[aria-current="true"] { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--surface)); }
+.nav-lateral a[aria-current="true"] { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--surface)); color: var(--ink) !important; padding: 4px 6px; }
 .no-pipeline[aria-current="true"] rect, .no-tabela[aria-current="true"] rect { stroke: var(--accent); stroke-width: 2.5; fill: var(--accent-soft); }
 
 /* F6.5 4e: gráfico de dobras. */

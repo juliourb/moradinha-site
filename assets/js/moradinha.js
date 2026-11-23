@@ -106499,7 +106499,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "13cfb524f8c7b92fd81a25421d8976844ef073de");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "c2eae3c4f8d8695234cd8ca609dc2af8ae9fa532");
   renderizarInterna($7("met-interna"), modelo);
 }
 
