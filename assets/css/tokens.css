@@ -218,7 +218,7 @@ button, select, input {
   color: var(--ink) !important;
 }
 
-/* SPEC_F1 v1.3: a barra nunca quebra linha; abaixo de 1600px, "comparar com
+/* F6.5 1a: a barra nunca quebra linha; abaixo de 1100px, "comparar com
    (cortina)" sai para o menu "Mais" (tema/medida/componente/período continuam
    sempre visíveis). */
 .ask {
@@ -243,11 +243,11 @@ select { background: var(--surface); border: 1px solid var(--line); border-radiu
 .mais-menu {
   display: grid; gap: 8px;
 }
-@media (min-width: 1600px) {
+@media (min-width: 1100px) {
   .mais-btn { display: none; }
   .mais-menu, .mais-menu[hidden] { display: grid !important; }
 }
-@media (max-width: 1599.98px) {
+@media (max-width: 1099.98px) {
   .mais-menu {
     position: absolute; right: 0; top: calc(100% + 6px); z-index: 6;
     background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
@@ -543,3 +543,19 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 /* Referências (F6.4 4e): recuo francês */
 .lista-refs .ref-item { padding-left: 2em; text-indent: -2em; margin: 0 0 6px; font-size: 13px; line-height: 1.45; }
 .lista-refs .ref-item p { margin: 0; }
+
+/* F6.5 1a: seletor da medida de qualidade com largura pelo conteúdo; a explicação vai para a dica. */
+#f1-ctl-medida-qualidade select { width: auto; max-width: 150px; }
+#f1-medida-qualidade-explicacao { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* F6.5 1b: coluna à direita do mapa mais compacta, para o cartão do Hexágono subir. */
+.side { gap: 6px; }
+.side .panel, .side div.panel { margin: 0; padding: 8px 10px; }
+.side .panel h2 { margin: 0 0 4px; padding: 0; font-size: 15px; }
+.side .answer .big { font-size: 26px; }
+.side .answer .range { margin-top: 0; }
+.side .pills { margin-top: 4px; gap: 4px; }
+.side .cards { margin-top: 6px; gap: 5px; }
+.side .card { padding: 3px 7px; }
+.side .card .v { font-size: 14px; }
+.side .detail dl { margin: 4px 0; }

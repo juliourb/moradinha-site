@@ -13153,18 +13153,14 @@ function marcasHex(linha, componente, periodo) {
 function totalDoMapa(totais, componente, periodo) {
   if (componente === "total") {
     let soma = 0;
-    let epQuad = 0;
-    let semEp = false;
     const marcas = /* @__PURE__ */ new Set();
     for (const c3 of COMPONENTES_BASE) {
       const linha2 = linhaNoMapa(totais, c3, periodo);
       if (!linha2) return null;
       soma += linha2.total;
-      if (linha2.ep == null) semEp = true;
-      else epQuad += linha2.ep * linha2.ep;
       for (const m4 of linha2.marcas ?? []) if (m4 !== "total_fragil") marcas.add(m4);
     }
-    return { total: soma, ep: semEp ? null : Math.sqrt(epQuad), regime: "misto", marcas: [...marcas] };
+    return { total: soma, ep: null, regime: "misto", marcas: [...marcas] };
   }
   const linha = linhaNoMapa(totais, componente, periodo);
   if (!linha) return null;
@@ -104180,17 +104176,17 @@ var ROTULO_MEDIDA_QUALIDADE = {
 };
 var NOME_MEDIDA_QUALIDADE = {
   incerteza: "Incerteza",
-  qualidade_dado: "Qualidade do dado",
-  ressalva_ap: "Ressalva da AP",
-  cv_ap: "Precis\xE3o da amostra (CV)",
-  imputacao: "Parte imputada",
-  estoque: "Mudan\xE7a do estoque",
-  hex_novo: "Hex\xE1gono novo"
+  qualidade_dado: "Dado",
+  ressalva_ap: "Ressalva AP",
+  cv_ap: "CV da AP",
+  imputacao: "Imputada",
+  estoque: "Estoque",
+  hex_novo: "Novo"
 };
 function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
   elementos.selPeriodo.innerHTML = manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
   elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option>` + manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
-  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id3) => `<option value="${id3}">${NOME_MEDIDA_QUALIDADE[id3]}</option>`).join("");
+  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id3) => `<option value="${id3}" title="${ROTULO_MEDIDA_QUALIDADE[id3]}">${NOME_MEDIDA_QUALIDADE[id3]}</option>`).join("");
   elementos.segTema.querySelectorAll("button").forEach((b10) => {
     b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
   });
@@ -104219,11 +104215,13 @@ function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
     const qualidade = estado.tema === "qualidade";
     elementos.ctlMedida.hidden = qualidade;
     elementos.ctlMedidaQualidade.hidden = !qualidade;
-    elementos.explicacaoMedidaQualidade.textContent = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    const expl = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    elementos.explicacaoMedidaQualidade.textContent = expl;
+    elementos.selMedidaQualidade.title = expl;
     elementos.selMedidaQualidade.querySelectorAll("option").forEach((op2) => {
       const constante = medidaConstante2 ? medidaConstante2(op2.value) : false;
       op2.disabled = constante;
-      op2.title = constante ? "igual em todos os hex\xE1gonos neste per\xEDodo" : "";
+      op2.title = constante ? "igual em todos os hex\xE1gonos neste per\xEDodo" : ROTULO_MEDIDA_QUALIDADE[op2.value] ?? "";
     });
     elementos.question.textContent = textoPergunta(estado, manifesto);
   }
@@ -104257,7 +104255,7 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
         1
       )}%`;
     } else {
-      faixa = estado.componente === "total" ? "o total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas" : "sem faixa (provis\xF3ria)";
+      faixa = estado.componente === "total" ? "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas." : "sem faixa (provis\xF3ria)";
     }
     if (estado.comparar) {
       const m4 = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
@@ -104271,7 +104269,6 @@ function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao
     }
     elementos.range.innerHTML = faixa;
     const pills = (t4.marcas ?? []).map((m4) => pill(classeMarca(m4), rotuloMarca(m4)));
-    if (estado.componente === "total") pills.push(pill("info", "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas"));
     elementos.pills.innerHTML = pills.join("");
   }
   elementos.cards.innerHTML = COMPONENTES_BASE.map((c3) => {
@@ -106440,7 +106437,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "30aec2afb17dbbea3f29125130f6de920f59bc63");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "f7fea73eeddcf0c3ba9caa7ff7d46faf666b5a17");
   renderizarInterna($7("met-interna"), modelo);
 }
 

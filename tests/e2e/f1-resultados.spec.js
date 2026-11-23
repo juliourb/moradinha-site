@@ -127,9 +127,9 @@ test.describe("F1-4/F1-11/F1-13: roteiro de interação", () => {
   });
 });
 
-test.describe("F1-5: menu 'Mais' abaixo de 1600px", () => {
+test.describe("F1-5: menu 'Mais' abaixo de 1100px", () => {
   test("abre por clique e por teclado (Escape fecha); comparar funciona de dentro do menu", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 1024, height: 800 });
     await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
 
@@ -148,8 +148,8 @@ test.describe("F1-5: menu 'Mais' abaixo de 1600px", () => {
     await expect(page.locator("#f1-mais-btn")).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("acima de 1600px o menu some e o controle fica sempre visível na barra", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
+  test("a partir de 1100px o menu some e o controle fica sempre visível na barra", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await expect(page.locator("#f1-mais-btn")).toBeHidden();
