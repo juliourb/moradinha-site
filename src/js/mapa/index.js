@@ -99,10 +99,7 @@ export function acinzentarEstilo(mapa) {
   }
 }
 
-function temaEscuro() {
-  const t = document.documentElement.getAttribute("data-theme");
-  return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-}
+const MODOS_BASE = ["claro", "escuro", "cinza"];
 
 export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes }) {
   const linhasArr = [...linhas.values()];
@@ -141,29 +138,29 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     mapaB.on("move", () => copiar(mapaB, mapaA));
   })(instancias.a.mapa, instancias.b.mapa);
 
-  let baseCinza = false;
+  // Acréscimo B (F6.5): mapa de base CLARO por padrão em qualquer tema do site;
+  // escuro e cinza (claro dessaturado) são opções do painel Camadas.
+  let modoBase = "claro";
   let camadasRecolhidas = false;
-  function urlEstilo() {
-    return baseCinza || !temaEscuro() ? ESTILOS_BASE.claro : ESTILOS_BASE.escuro;
-  }
   function aplicarEstiloBase() {
     for (const { mapa } of Object.values(instancias)) {
-      mapa.setStyle(urlEstilo(), { diff: false });
+      mapa.setStyle(ESTILOS_BASE[modoBase === "escuro" ? "escuro" : "claro"], { diff: false });
       mapa.once("style.load", () => {
-        if (baseCinza) acinzentarEstilo(mapa);
+        if (modoBase === "cinza") acinzentarEstilo(mapa);
       });
     }
   }
-  function definirBaseCinza(ligado) {
-    if (ligado === baseCinza) return;
-    baseCinza = ligado;
+  function definirModoBase(modo) {
+    const novo = MODOS_BASE.includes(modo) ? modo : "claro";
+    if (novo === modoBase) return;
+    modoBase = novo;
     aplicarEstiloBase();
   }
 
   function criarInstancia(container, elBasefail, aoFalhar) {
     const mapa = new MapaMapLibre({
       container,
-      style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+      style: ESTILOS_BASE.claro,
       center: manifesto.centro ?? [-35.715, -9.585],
       zoom: manifesto.zoom_inicial ?? 11,
       attributionControl: false,
@@ -640,7 +637,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     )}${unidade}</span><span>${formatar(t[6], 1)}${unidade}</span></div><div class="note" style="margin-top:4px">Classes por sétimos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
   }
 
-  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBaseCinza) {
+  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBase) {
     const extras = [];
     extras.push(
       `<label><input type="checkbox" data-camada="ap" ${estado.camadas.ap ? "checked" : ""}> <span class="sw" style="border-color:var(--apline)"></span> Áreas de ponderação</label>`
@@ -661,7 +658,9 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
       );
     }
     const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
-    const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
+    const modo = MODOS_BASE.includes(estado.mapa_base) ? estado.mapa_base : "claro";
+    const opcaoBase = (v, rotulo, id) => `<label><input type="radio" name="f1-mapa-base" value="${v}" id="${id}" ${modo === v ? "checked" : ""}> ${rotulo}</label>`;
+    const cinzaHtml = `<fieldset class="mapa-base"><legend>Mapa de base</legend>${opcaoBase("claro", "Claro", "f1-mapa-claro")}${opcaoBase("escuro", "Escuro", "f1-mapa-escuro")}${opcaoBase("cinza", "Cinza", "f1-mapa-cinza")}</fieldset>`;
     elementos.layers.innerHTML = `<button type="button" class="layers-toggle" aria-expanded="${!camadasRecolhidas}" aria-controls="f1-layers-body"><span>Camadas</span><span aria-hidden="true">${camadasRecolhidas ? "▸" : "▾"}</span></button><div class="layers-body" id="f1-layers-body">${extras.join("")}${opacidadeHtml}${cinzaHtml}</div>`;
     elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
     elementos.layers.querySelector(".layers-toggle").onclick = () => {
@@ -676,10 +675,11 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     });
     const opEl = elementos.layers.querySelector("#f1-opacidade");
     if (opEl && aoMudarOpacidade) opEl.oninput = () => aoMudarOpacidade(Number(opEl.value));
-    const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
-    if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
-    elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
-    definirBaseCinza(!!estado.mapa_base_cinza);
+    elementos.layers.querySelectorAll('input[name="f1-mapa-base"]').forEach((el) => {
+      el.onchange = () => el.checked && aoMudarMapaBase && aoMudarMapaBase(el.value);
+    });
+    elementos.mapboxEl?.classList.toggle("cinza", modo === "cinza");
+    definirModoBase(modo);
   }
 
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
@@ -748,11 +748,6 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
   }
   ligarArrasto();
 
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", trocarEstilo);
-  new MutationObserver(trocarEstilo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  function trocarEstilo() {
-    aplicarEstiloBase();
-  }
 
   return {
     renderizar, renderizarCamadasUI, moverPara, agruparPorAp,
@@ -774,7 +769,7 @@ export function criarMiniMapa({ container, manifesto, linhas, ap, totais, toolti
 
   const mapa = new MapaMapLibre({
     container,
-    style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+    style: ESTILOS_BASE.claro, // acréscimo B: base clara em qualquer tema
     center: manifesto.centro ?? [-35.715, -9.585],
     zoom: Math.max((manifesto.zoom_inicial ?? 11) - 1.6, 0),
     interactive: true,
@@ -857,14 +852,6 @@ export function criarMiniMapa({ container, manifesto, linhas, ap, totais, toolti
   }
 
   mapa.on("load", render);
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
-    mapa.once("styledata", render);
-  });
-  new MutationObserver(() => {
-    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
-    mapa.once("styledata", render);
-  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   return { periodoRecente };
 }

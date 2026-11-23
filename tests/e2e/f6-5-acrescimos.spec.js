@@ -50,3 +50,42 @@ test.describe("A: eixo das séries pela faixa de 95%", () => {
     for (const t of ticks) expect(Math.abs(t / passo - Math.round(t / passo))).toBeLessThan(1e-6);
   });
 });
+
+test.describe("B: mapa de base claro por padrão nos dois temas", () => {
+  for (const tema of ["light", "dark"]) {
+    for (const pagina of ["/resultados.html", "/index.html"]) {
+      test(`${pagina}, tema ${tema}: só o estilo claro é pedido ao abrir`, async ({ page }) => {
+        await page.emulateMedia({ colorScheme: tema });
+        const pedidos = [];
+        page.on("request", (r) => {
+          const u = r.url();
+          if (u.startsWith("https://tiles.openfreemap.org/styles/")) pedidos.push(u.split("/").pop());
+        });
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(`${pagina}${Q}`);
+        if (pagina === "/resultados.html") await page.waitForSelector('[data-pronto="true"]', { timeout: 30000 });
+        else await page.waitForLoadState("networkidle");
+        await page.waitForTimeout(800);
+        expect(pedidos).toContain("positron");
+        expect(pedidos).not.toContain("dark");
+        if (pagina === "/resultados.html") {
+          await expect(page.locator("#f1-mapa-claro")).toBeChecked();
+          const estado = await page.evaluate(() => window.__moradinhaEstado());
+          expect(estado.mapa_base).toBe("claro");
+          // escuro continua como opção
+          await page.evaluate(() => document.querySelector("#f1-mapa-escuro").click());
+          await page.waitForTimeout(800);
+          expect(pedidos).toContain("dark");
+        }
+      });
+    }
+  }
+
+  test("a escolha não persiste: recarregar volta ao claro", async ({ page }) => {
+    await abrirResultados(page);
+    await page.evaluate(() => document.querySelector("#f1-mapa-escuro").click());
+    await page.reload();
+    await page.waitForSelector('[data-pronto="true"]', { timeout: 30000 });
+    await expect(page.locator("#f1-mapa-claro")).toBeChecked();
+  });
+});

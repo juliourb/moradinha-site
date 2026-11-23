@@ -13053,13 +13053,14 @@ function estadoInicial(manifesto) {
     medida: "absoluto",
     relativo_modo: "quebras",
     opacidade: 0.8,
-    mapa_base_cinza: false,
     componente: "total",
     periodo: periodoPadrao,
     selecionado: null,
     faixa_hist: [],
     camadas,
     ...salvo,
+    // Acréscimo B: o mapa de base abre sempre claro (não persiste).
+    mapa_base: "claro",
     comparar: null
   };
 }
@@ -13073,7 +13074,7 @@ function lerLocalStorage() {
 }
 function salvarLocalStorage(estado) {
   try {
-    const { selecionado, faixa_hist, comparar, ...persistido } = estado;
+    const { selecionado, faixa_hist, comparar, mapa_base, mapa_base_cinza, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
   }
@@ -103456,10 +103457,7 @@ function acinzentarEstilo(mapa) {
     }
   }
 }
-function temaEscuro() {
-  const t4 = document.documentElement.getAttribute("data-theme");
-  return t4 ? t4 === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-}
+var MODOS_BASE = ["claro", "escuro", "cinza"];
 function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes }) {
   const linhasArr = [...linhas.values()];
   const apGrupos = [];
@@ -103489,28 +103487,26 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     mapaA.on("move", () => copiar(mapaA, mapaB));
     mapaB.on("move", () => copiar(mapaB, mapaA));
   })(instancias.a.mapa, instancias.b.mapa);
-  let baseCinza = false;
+  let modoBase = "claro";
   let camadasRecolhidas = false;
-  function urlEstilo() {
-    return baseCinza || !temaEscuro() ? ESTILOS_BASE.claro : ESTILOS_BASE.escuro;
-  }
   function aplicarEstiloBase() {
     for (const { mapa } of Object.values(instancias)) {
-      mapa.setStyle(urlEstilo(), { diff: false });
+      mapa.setStyle(ESTILOS_BASE[modoBase === "escuro" ? "escuro" : "claro"], { diff: false });
       mapa.once("style.load", () => {
-        if (baseCinza) acinzentarEstilo(mapa);
+        if (modoBase === "cinza") acinzentarEstilo(mapa);
       });
     }
   }
-  function definirBaseCinza(ligado) {
-    if (ligado === baseCinza) return;
-    baseCinza = ligado;
+  function definirModoBase(modo) {
+    const novo = MODOS_BASE.includes(modo) ? modo : "claro";
+    if (novo === modoBase) return;
+    modoBase = novo;
     aplicarEstiloBase();
   }
   function criarInstancia(container, elBasefail, aoFalhar) {
     const mapa = new GF({
       container,
-      style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+      style: ESTILOS_BASE.claro,
       center: manifesto.centro ?? [-35.715, -9.585],
       zoom: manifesto.zoom_inicial ?? 11,
       attributionControl: false
@@ -103951,7 +103947,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
       1
     )}${unidade}</span><span>${formatar(t4[6], 1)}${unidade}</span></div><div class="note" style="margin-top:4px">Classes por s\xE9timos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
   }
-  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBaseCinza) {
+  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBase) {
     const extras = [];
     extras.push(
       `<label><input type="checkbox" data-camada="ap" ${estado.camadas.ap ? "checked" : ""}> <span class="sw" style="border-color:var(--apline)"></span> \xC1reas de pondera\xE7\xE3o</label>`
@@ -103970,7 +103966,9 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
       );
     }
     const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
-    const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
+    const modo = MODOS_BASE.includes(estado.mapa_base) ? estado.mapa_base : "claro";
+    const opcaoBase = (v4, rotulo2, id3) => `<label><input type="radio" name="f1-mapa-base" value="${v4}" id="${id3}" ${modo === v4 ? "checked" : ""}> ${rotulo2}</label>`;
+    const cinzaHtml = `<fieldset class="mapa-base"><legend>Mapa de base</legend>${opcaoBase("claro", "Claro", "f1-mapa-claro")}${opcaoBase("escuro", "Escuro", "f1-mapa-escuro")}${opcaoBase("cinza", "Cinza", "f1-mapa-cinza")}</fieldset>`;
     elementos.layers.innerHTML = `<button type="button" class="layers-toggle" aria-expanded="${!camadasRecolhidas}" aria-controls="f1-layers-body"><span>Camadas</span><span aria-hidden="true">${camadasRecolhidas ? "\u25B8" : "\u25BE"}</span></button><div class="layers-body" id="f1-layers-body">${extras.join("")}${opacidadeHtml}${cinzaHtml}</div>`;
     elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
     elementos.layers.querySelector(".layers-toggle").onclick = () => {
@@ -103985,10 +103983,11 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     });
     const opEl = elementos.layers.querySelector("#f1-opacidade");
     if (opEl && aoMudarOpacidade) opEl.oninput = () => aoMudarOpacidade(Number(opEl.value));
-    const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
-    if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
-    elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
-    definirBaseCinza(!!estado.mapa_base_cinza);
+    elementos.layers.querySelectorAll('input[name="f1-mapa-base"]').forEach((el2) => {
+      el2.onchange = () => el2.checked && aoMudarMapaBase && aoMudarMapaBase(el2.value);
+    });
+    elementos.mapboxEl?.classList.toggle("cinza", modo === "cinza");
+    definirModoBase(modo);
   }
   function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
     computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
@@ -104051,11 +104050,6 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     });
   }
   ligarArrasto();
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", trocarEstilo);
-  new MutationObserver(trocarEstilo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  function trocarEstilo() {
-    aplicarEstiloBase();
-  }
   return {
     renderizar,
     renderizarCamadasUI,
@@ -104074,7 +104068,8 @@ function criarMiniMapa({ container, manifesto, linhas, ap: ap2, totais, tooltip,
   const periodoRecente = [...manifesto.periodos].reverse().find((p4) => p4.tipo === "ano")?.id ?? manifesto.periodos.at(-1).id;
   const mapa = new GF({
     container,
-    style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+    style: ESTILOS_BASE.claro,
+    // acréscimo B: base clara em qualquer tema
     center: manifesto.centro ?? [-35.715, -9.585],
     zoom: Math.max((manifesto.zoom_inicial ?? 11) - 1.6, 0),
     interactive: true,
@@ -104153,14 +104148,6 @@ function criarMiniMapa({ container, manifesto, linhas, ap: ap2, totais, tooltip,
     });
   }
   mapa.on("load", render);
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
-    mapa.once("styledata", render);
-  });
-  new MutationObserver(() => {
-    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
-    mapa.once("styledata", render);
-  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   return { periodoRecente };
 }
 
@@ -104412,6 +104399,39 @@ function nivelFracaoImputada(valor) {
   return valor > LIMIARES.fracao_imputada.atencao ? "atencao" : "ok";
 }
 
+// src/js/util/eixoSerie.js
+function eixoSerie(pontos, nMarcas = 4) {
+  const vals = [];
+  for (const p4 of pontos ?? []) {
+    if (p4 == null) continue;
+    if (typeof p4 === "number") {
+      if (Number.isFinite(p4)) vals.push(p4);
+      continue;
+    }
+    for (const k5 of ["v", "lo", "hi"]) if (Number.isFinite(p4[k5])) vals.push(p4[k5]);
+  }
+  if (!vals.length) return null;
+  const min6 = Math.min(...vals);
+  const max6 = Math.max(...vals);
+  let amplitude2 = max6 - min6;
+  if (amplitude2 === 0) amplitude2 = Math.abs(max6) || 1;
+  let a5 = min6 - 0.1 * amplitude2;
+  let b10 = max6 + 0.1 * amplitude2;
+  if (min6 >= 0 && a5 < 0) a5 = 0;
+  if (max6 <= 0 && b10 > 0) b10 = 0;
+  const passo = tickStep(a5, b10, nMarcas);
+  a5 = Math.floor(a5 / passo) * passo;
+  b10 = Math.ceil(b10 / passo) * passo;
+  if (min6 >= 0 && a5 < 0) a5 = 0;
+  const marcas = range(a5, b10 + passo / 2, passo).map((t4) => +t4.toPrecision(12));
+  return { dominio: [a5, b10], marcas, naoComecaEmZero: a5 > 0 || b10 < 0 };
+}
+var NOTA_EIXO_SEM_ZERO = "eixo n\xE3o come\xE7a em zero";
+function svgQuebraEixo(x5, y5, cor) {
+  const d3 = `M${x5 - 4},${y5 - 3} l8,-3 M${x5 - 4},${y5 + 1} l8,-3`;
+  return `<path class="quebra-eixo" d="${d3}" stroke="${cor}" stroke-width="1.2" fill="none"><title>${NOTA_EIXO_SEM_ZERO}</title></path>`;
+}
+
 // src/js/ui/hexagono.js
 var CLAB3 = { coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
 var NIVEL_CLASSE = { ok: "ok", atencao: "warn", critico: "crit" };
@@ -104438,7 +104458,9 @@ function sparkline(linha, componente, medida, manifesto) {
   const W4 = 300;
   const H4 = 54;
   const x5 = point().domain(periodosAno.map((p4) => p4.id)).range([16, W4 - 16]);
-  const y5 = linear2().domain([0, max4(ok2) * 1.2 || 1]).range([H4 - 16, 6]);
+  const eixo = eixoSerie(ok2, 3);
+  const y5 = linear2().domain(eixo.dominio).range([H4 - 16, 6]);
+  const quebra = eixo.naoComecaEmZero ? svgQuebraEixo(8, H4 - 16, css2("--muted")) : "";
   const linha2 = line().defined((v4) => v4 != null).x((_v3, i3) => x5(periodosAno[i3].id)).y((v4) => y5(v4));
   const pontos = serie.map((v4, i3) => {
     if (v4 == null) return "";
@@ -104448,7 +104470,7 @@ function sparkline(linha, componente, medida, manifesto) {
       p4.id
     )}" y="${H4 - 2}" text-anchor="middle">${p4.rotulo}</text>`;
   }).join("");
-  return `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" data-grafico="serie-hexagono" aria-label="S\xE9rie do hex\xE1gono"><path d="${linha2(
+  return `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" data-grafico="serie-hexagono" aria-label="S\xE9rie do hex\xE1gono${eixo.naoComecaEmZero ? ` (${NOTA_EIXO_SEM_ZERO})` : ""}">${quebra}<path d="${linha2(
     serie
   )}" fill="none" stroke="${css2("--accent")}" stroke-width="2"/>${pontos}</svg>`;
 }
@@ -104531,6 +104553,11 @@ function linhasNormais(linhasArr, componente, periodo) {
 }
 function css3(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+}
+function marcarEixoSemZero(svg, eixo, xEixo, yBase, xDireita) {
+  if (!eixo?.naoComecaEmZero) return;
+  svg.node().insertAdjacentHTML("beforeend", svgQuebraEixo(xEixo, yBase, css3("--muted")));
+  svg.append("text").attr("class", "nota-eixo").attr("x", xDireita).attr("y", 7).attr("text-anchor", "end").attr("font-size", 8.5).attr("fill", css3("--muted")).text(NOTA_EIXO_SEM_ZERO);
 }
 function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
@@ -104705,12 +104732,14 @@ function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo) {
   const nAnos = anos.length;
   const xpos = (i3) => i3 < nAnos ? i3 : i3 - (nAnos - 1) + 0.28;
   const x5 = linear2().domain([-0.4, nAnos - 1 + 0.6]).range([m4.l, W4 - m4.r]);
-  const y5 = linear2().domain([0, max4(pts, (d3) => d3.hi ?? d3.v ?? 0) * 1.1 || 1]).nice().range([H4 - m4.b, m4.t]);
-  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Total do dom\xEDnio no tempo");
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(5).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
+  const eixo = eixoSerie(pts, 4) ?? { dominio: [0, 1], marcas: [0, 1], naoComecaEmZero: false };
+  const y5 = linear2().domain(eixo.dominio).range([H4 - m4.b, m4.t]);
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `Total do dom\xEDnio no tempo${eixo.naoComecaEmZero ? ` (${NOTA_EIXO_SEM_ZERO})` : ""}`);
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).tickValues(eixo.marcas).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
+  marcarEixoSemZero(svg, eixo, m4.l, H4 - m4.b, W4 - m4.r);
   svg.append("g").selectAll("text").data(anos).join("text").attr("x", (_p3, i3) => x5(i3)).attr("y", H4 - 8).attr("text-anchor", "middle").text((p4) => p4.rotulo);
   const anosPts = pts.slice(0, nAnos);
-  svg.append("path").attr("d", line().x((d3) => x5(xpos(d3.p))).y((d3) => y5(d3.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css3("--muted")).attr("stroke-width", 1.2);
+  svg.append("path").attr("d", line().defined((d3) => d3.v != null).x((d3) => x5(xpos(d3.p))).y((d3) => y5(d3.v))(anosPts)).attr("fill", "none").attr("stroke", css3("--muted")).attr("stroke-width", 1.2);
   const g5 = svg.append("g").selectAll("g").data(pts).join("g").style("cursor", "pointer").on("click", (_e4, d3) => aoClicarPeriodo(d3.id));
   g5.filter((d3) => d3.lo != null).append("line").attr("x1", (d3) => x5(xpos(d3.p))).attr("x2", (d3) => x5(xpos(d3.p))).attr("y1", (d3) => y5(d3.lo)).attr("y2", (d3) => y5(d3.hi)).attr("stroke", (d3) => d3.media ? css3("--accent") : css3("--ink")).attr("stroke-width", (d3) => d3.media ? 4 : 2).attr("opacity", (d3) => d3.media ? 0.55 : 0.8);
   g5.filter((d3) => d3.v != null).append("path").attr("transform", (d3) => `translate(${x5(xpos(d3.p))},${y5(d3.v)})`).attr("d", (d3) => Symbol2(d3.media ? diamond : circle, d3.id === estado.periodo ? 130 : 60)()).attr("fill", (d3) => d3.critico ? css3("--crit") : d3.media ? css3("--accent") : css3("--ink")).attr("stroke", (d3) => d3.id === estado.periodo ? css3("--warn") : "none").attr("stroke-width", 3);
@@ -104745,10 +104774,11 @@ function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo2) {
   const H4 = 128;
   const m4 = { l: 44, r: 20, t: 8, b: 20 };
   const x5 = point().domain(anos.map((p4) => p4.id)).range([m4.l, W4 - m4.r]);
-  const maxV = max4([...anosPts, ...mediaPts], (d3) => d3.hi ?? d3.v ?? 0) || 1;
-  const y5 = linear2().domain([0, maxV * 1.15]).nice().range([H4 - m4.b, m4.t]);
-  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `S\xE9rie de ${rotulo2}`);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
+  const eixo = eixoSerie([...anosPts, ...mediaPts], 4) ?? { dominio: [0, 1], marcas: [0, 1], naoComecaEmZero: false };
+  const y5 = linear2().domain(eixo.dominio).range([H4 - m4.b, m4.t]);
+  const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `S\xE9rie de ${rotulo2}${eixo.naoComecaEmZero ? ` (${NOTA_EIXO_SEM_ZERO})` : ""}`);
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).tickValues(eixo.marcas).tickFormat((v4) => formatar(v4, 0)));
+  marcarEixoSemZero(svg, eixo, m4.l, H4 - m4.b, W4 - m4.r);
   svg.append("g").selectAll("text").data(anos).join("text").attr("x", (p4) => x5(p4.id)).attr("y", H4 - 4).attr("text-anchor", "middle").text((p4) => rotuloCurto(p4.rotulo));
   svg.append("path").attr("d", line().defined((d3) => d3.v != null).x((d3) => x5(d3.id)).y((d3) => y5(d3.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css3("--muted")).attr("stroke-width", 1.2);
   svg.append("g").selectAll("line").data(mediaPts.filter((d3) => d3.v != null)).join("line").attr("x1", m4.l).attr("x2", W4 - m4.r).attr("y1", (d3) => y5(d3.v)).attr("y2", (d3) => y5(d3.v)).attr("stroke", css3("--accent")).attr("stroke-width", 1.4).attr("stroke-dasharray", "4,3");
@@ -105117,7 +105147,7 @@ async function iniciarExplorador() {
       estado,
       (id3, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id3]: ligado } }),
       (opacidade) => loja.definir({ opacidade }),
-      (mapa_base_cinza) => loja.definir({ mapa_base_cinza })
+      (mapa_base) => loja.definir({ mapa_base })
     );
     renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: [] }));
     renderizarHexagono(elDetail, estado, linhas, ap2, manifesto, totais);
@@ -105281,16 +105311,20 @@ function sparkline2(c3) {
   const W4 = 150;
   const H4 = 30;
   const m4 = { l: 40, r: 4, t: 4, b: 10 };
-  const lo2 = min4(ok2);
-  const hi2 = max4(ok2);
+  const eixo = eixoSerie(serie.map((v4, i3) => ({ v: v4, lo: c3.faixas?.[i3]?.[0] ?? null, hi: c3.faixas?.[i3]?.[1] ?? null })), 2);
+  const [lo2, hi2] = eixo.dominio;
   const x5 = point().domain(serie.map((_v3, i3) => i3)).range([m4.l, W4 - m4.r]);
-  const y5 = linear2().domain([lo2 === hi2 ? 0 : lo2, hi2]).range([H4 - m4.b, m4.t]);
+  const y5 = linear2().domain(eixo.dominio).range([H4 - m4.b, m4.t]);
   const linha = line().defined((v4) => v4 != null).x((_v3, i3) => x5(i3)).y((v4) => y5(v4));
   const svg = create5("svg").attr("class", "spark").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", W4).attr("height", H4).attr("role", "img").attr("aria-label", `S\xE9rie de ${c3.rotulo}, ${c3.anos[0]} a ${c3.anos.at(-1)}`);
   svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css5("--accent")).attr("stroke-width", 1.6);
   const rot = (txt, px2, py2, anchor) => svg.append("text").attr("x", px2).attr("y", py2).attr("text-anchor", anchor).attr("font-size", 7.5).attr("fill", css5("--muted")).text(txt);
   rot(formatar(hi2, 0), m4.l - 4, m4.t + 3, "end");
   rot(formatar(lo2, 0), m4.l - 4, H4 - m4.b + 1, "end");
+  if (eixo.naoComecaEmZero) {
+    svg.node().insertAdjacentHTML("beforeend", svgQuebraEixo(m4.l + 5, H4 - m4.b + 2, css5("--muted")));
+    svg.attr("aria-label", `${svg.attr("aria-label")} (${NOTA_EIXO_SEM_ZERO})`);
+  }
   rot(c3.anos[0], m4.l, H4 - 1, "start");
   rot(c3.anos.at(-1), W4 - m4.r, H4 - 1, "end");
   const pts = serie.map((v4, i3) => ({ v: v4, i: i3, ano: c3.anos[i3], faixa: c3.faixas?.[i3] ?? null })).filter((d3) => d3.v != null);
@@ -105331,7 +105365,7 @@ function renderizarCartoes(el2, manifesto, totais) {
         <span class="spark-slot"></span>
       </button>`;
     card.querySelector("header").appendChild(
-      criarAjuda("Evolu\xE7\xE3o do total do indicador por ano. O eixo vertical vai do menor ao maior valor da s\xE9rie; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
+      criarAjuda("Evolu\xE7\xE3o do total do indicador por ano. O eixo vertical vai da menor \xE0 maior ponta da faixa de 95% (ou do valor, quando n\xE3o h\xE1 faixa), com folga, e nem sempre come\xE7a em zero; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
     );
     const svg = sparkline2(c3);
     if (svg) card.querySelector(".spark-slot").appendChild(svg);
@@ -106499,7 +106533,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "c2eae3c4f8d8695234cd8ca609dc2af8ae9fa532");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "ab97ee3553bb9fd8aa4b2553e9f81e5aa892782e");
   renderizarInterna($7("met-interna"), modelo);
 }
 

@@ -88,7 +88,7 @@ async function luminosidadeBase(page) {
 }
 
 for (const tema of ["light", "dark"]) {
-  test(`F6.5-2: fundo cinza ligado dá base clara (>60%) no tema ${tema}; desligado volta ao tema`, async ({ page }) => {
+  test(`F6.5-2: fundo cinza ligado dá base clara (>60%) no tema ${tema}; escuro como opção`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: tema });
     await page.route("https://tiles.openfreemap.org/styles/dark", (r) => r.fulfill({ status: 200, contentType: "application/json", body: estilo("#101010") }));
     await page.route("https://tiles.openfreemap.org/styles/positron", (r) => r.fulfill({ status: 200, contentType: "application/json", body: estilo("#2060ff") }));
@@ -97,9 +97,9 @@ for (const tema of ["light", "dark"]) {
     await page.waitForTimeout(1500);
     await page.evaluate(() => document.querySelector("#f1-mapa-cinza").click());
     expect(await luminosidadeBase(page)).toBeGreaterThan(0.6);
-    await page.evaluate(() => document.querySelector("#f1-mapa-cinza").click());
-    const sem = await luminosidadeBase(page);
-    if (tema === "dark") expect(sem).toBeLessThan(0.3);
+    // Acréscimo B: "desligar" o cinza agora é escolher outra base; o escuro é opção nos dois temas.
+    await page.evaluate(() => document.querySelector("#f1-mapa-escuro").click());
+    expect(await luminosidadeBase(page)).toBeLessThan(0.3);
   });
 }
 

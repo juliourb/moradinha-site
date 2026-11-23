@@ -144,7 +144,7 @@ export async function iniciarExplorador() {
       estado,
       (id, ligado) => loja.definir({ camadas: { ...loja.obter().camadas, [id]: ligado } }),
       (opacidade) => loja.definir({ opacidade }),
-      (mapa_base_cinza) => loja.definir({ mapa_base_cinza })
+      (mapa_base) => loja.definir({ mapa_base })
     );
     renderizarResposta(elementosResposta, estado, manifesto, totais, (componente) => loja.definir({ componente, faixa_hist: [] }));
     renderizarHexagono(elDetail, estado, linhas, ap, manifesto, totais);
