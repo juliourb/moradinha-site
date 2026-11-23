@@ -58,7 +58,8 @@ test.describe("F6.4-2b: qualidade × incerteza do total mostra aviso com atalho"
     await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
     await page.locator('#f1-seg-tema button[data-v="qualidade"]').click();
-    await page.locator("#f1-sel-medida-qualidade").selectOption("incerteza");
+    await page.locator("#f1-sel-medida-qualidade").click();
+    await page.locator('#f1-mq-lista .mq-opcao[data-v="incerteza"]').click();
     await page.locator('#f1-seg-comp button[data-v="total"]').click();
     const aviso = page.locator("#f1-aviso-mapa");
     await expect(aviso).toBeVisible();

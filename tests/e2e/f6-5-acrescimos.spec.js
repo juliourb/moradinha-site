@@ -122,7 +122,8 @@ test.describe("C: Déficit × incerteza com quadrantes", () => {
 
   test("CV da AP: corte no limiar do protocolo (30%)", async ({ page }) => {
     const svg = await abrirDispersao(page);
-    await page.selectOption("#f1-sel-medida-qualidade", "cv_ap");
+    await page.locator("#f1-sel-medida-qualidade").click();
+    await page.locator('#f1-mq-lista .mq-opcao[data-v="cv_ap"]').click();
     await page.waitForTimeout(400);
     await expect(page.locator("#f1-disp svg text.rotulo-corte.corte-y")).toHaveText(/CV de 30%/);
     void svg;
@@ -157,5 +158,69 @@ test.describe("C: Déficit × incerteza com quadrantes", () => {
     estado = await page.evaluate(() => window.__moradinhaEstado());
     expect(estado.quadrante).toBeNull();
     await expect(page.locator("#f1-recorte-ativo")).toBeHidden();
+  });
+});
+
+test.describe("D: (?) em cada opção do seletor de medida de qualidade", () => {
+  test("cada opção tem (?) com o que mede, como se calcula e quando desconfiar", async ({ page }) => {
+    await abrirResultados(page);
+    await page.locator('#f1-seg-tema button[data-v="qualidade"]').click();
+    await page.locator("#f1-sel-medida-qualidade").click();
+    const lista = page.locator("#f1-mq-lista");
+    await expect(lista).toBeVisible();
+    const itens = lista.locator("li");
+    const n = await itens.count();
+    expect(n).toBe(7);
+    for (let i = 0; i < n; i++) {
+      const ajuda = itens.nth(i).locator("button.ajuda");
+      await expect(ajuda).toHaveCount(1);
+      const texto = await ajuda.getAttribute("data-texto");
+      expect(texto).toMatch(/O que mede:/);
+      expect(texto).toMatch(/Como se calcula:/);
+      expect(texto).toMatch(/Quando desconfiar:/);
+      // sigla só com explicação: AP, CV e IBGE aparecem por extenso na primeira vez
+      for (const [sigla, extenso] of [["AP", "área de ponderação"], ["CV", "coeficiente de variação"], ["IBGE", "Instituto Brasileiro"]]) {
+        const pos = texto.search(new RegExp(`\b${sigla}\b`));
+        if (pos >= 0) expect(texto.slice(0, pos + 60)).toContain(extenso);
+      }
+    }
+    // o (?) não escolhe a opção; o botão da opção escolhe
+    await itens.nth(3).locator("button.ajuda").hover();
+    await expect(lista).toBeVisible();
+    await expect(page.locator(".ajuda-pop")).toBeVisible();
+    await itens.nth(3).locator(".mq-opcao").click();
+    await expect(lista).toBeHidden();
+    const estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.medida_qualidade).toBe("cv_ap");
+    await expect(page.locator("#f1-sel-medida-qualidade")).toHaveAttribute("title", /CV/);
+  });
+
+  test("teclado: Esc fecha e devolve o foco ao botão", async ({ page }) => {
+    await abrirResultados(page);
+    await page.locator('#f1-seg-tema button[data-v="qualidade"]').click();
+    await page.locator("#f1-sel-medida-qualidade").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#f1-mq-lista")).toBeVisible();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#f1-mq-lista")).toBeHidden();
+    await expect(page.locator("#f1-sel-medida-qualidade")).toBeFocused();
+  });
+});
+
+test.describe("E: rastreio da execução recolhido com resumo de uma linha", () => {
+  test("fechado por padrão; resumo com edição, commit e nº de arquivos conferidos", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/metodologia.html${Q}`);
+    const dobra = page.locator("#met-rastreio-dobra");
+    await expect(dobra).toHaveCount(1);
+    await expect(dobra).not.toHaveAttribute("open", "");
+    const resumo = page.locator("#met-rastreio-resumo");
+    await expect(resumo).toHaveText(/^edição bd10cbd · moradinha [0-9a-f]{7}… · \d+ arquivos conferidos$/, { timeout: 30000 });
+    await expect(page.locator("#met-rastreio-arquivos")).toBeHidden();
+    const alturaResumo = (await page.locator("#met-rastreio-dobra > summary").boundingBox()).height;
+    expect(alturaResumo).toBeLessThan(32); // uma linha
+    await page.locator("#met-rastreio-dobra > summary").click();
+    await expect(page.locator("#met-rastreio-arquivos")).toBeVisible();
   });
 });

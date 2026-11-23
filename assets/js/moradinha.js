@@ -104330,123 +104330,6 @@ function criarMiniMapa({ container, manifesto, linhas, ap: ap2, totais, tooltip,
   return { periodoRecente };
 }
 
-// src/js/ui/pergunta.js
-var ROTULO_MEDIDA_QUALIDADE = {
-  incerteza: "Incerteza \u2014 largura da faixa de 95% em rela\xE7\xE3o \xE0 estimativa; 0,5 quer dizer que a faixa tem metade do tamanho do valor.",
-  qualidade_dado: "Qualidade do dado \u2014 se o hex\xE1gono tem estimativa plena, parcialmente em sigilo ou sem dado.",
-  ressalva_ap: "Ressalva da \xE1rea de pondera\xE7\xE3o \u2014 a AP do hex\xE1gono tem CV acima de 30% ou n\xE3o tem estimativa direta.",
-  cv_ap: "Precis\xE3o da amostra na AP \u2014 coeficiente de varia\xE7\xE3o da estimativa direta da AP.",
-  imputacao: "Parte imputada pela cascata \u2014 fra\xE7\xE3o dos domic\xEDlios de 2022 cujo bloco veio da reconstru\xE7\xE3o al\xE9m da AP.",
-  estoque: "Mudan\xE7a do estoque desde 2022 \u2014 raz\xE3o do estoque do per\xEDodo sobre o de 2022.",
-  hex_novo: "Hex\xE1gono novo no per\xEDodo \u2014 hex\xE1gono sem domic\xEDlio em 2022, absorvido depois."
-};
-var NOME_MEDIDA_QUALIDADE = {
-  incerteza: "Incerteza",
-  qualidade_dado: "Dado",
-  ressalva_ap: "Ressalva AP",
-  cv_ap: "CV da AP",
-  imputacao: "Imputada",
-  estoque: "Estoque",
-  hex_novo: "Novo"
-};
-function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
-  elementos.selPeriodo.innerHTML = manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
-  elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option>` + manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
-  elementos.selMedidaQualidade.innerHTML = MEDIDAS_QUALIDADE.map((id3) => `<option value="${id3}" title="${ROTULO_MEDIDA_QUALIDADE[id3]}">${NOME_MEDIDA_QUALIDADE[id3]}</option>`).join("");
-  elementos.segTema.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
-  });
-  elementos.segMedida.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: [] });
-  });
-  elementos.segComponente.querySelectorAll("button").forEach((b10) => {
-    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: [] });
-  });
-  elementos.selPeriodo.onchange = () => {
-    const periodo = elementos.selPeriodo.value;
-    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: [] });
-  };
-  elementos.selComparar.onchange = () => {
-    const comparar = elementos.selComparar.value || null;
-    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: [] });
-  };
-  elementos.selMedidaQualidade.onchange = () => loja.definir({ medida_qualidade: elementos.selMedidaQualidade.value });
-  function sincronizar(estado) {
-    elementos.segTema.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.tema)));
-    elementos.segMedida.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.medida)));
-    elementos.segComponente.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.componente)));
-    elementos.selPeriodo.value = estado.periodo;
-    elementos.selComparar.value = estado.comparar ?? "";
-    elementos.selMedidaQualidade.value = estado.medida_qualidade;
-    const qualidade = estado.tema === "qualidade";
-    elementos.ctlMedida.hidden = qualidade;
-    elementos.ctlMedidaQualidade.hidden = !qualidade;
-    const expl = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
-    elementos.explicacaoMedidaQualidade.textContent = expl;
-    elementos.selMedidaQualidade.title = expl;
-    elementos.selMedidaQualidade.querySelectorAll("option").forEach((op2) => {
-      const constante = medidaConstante2 ? medidaConstante2(op2.value) : false;
-      op2.disabled = constante;
-      op2.title = constante ? "igual em todos os hex\xE1gonos neste per\xEDodo" : ROTULO_MEDIDA_QUALIDADE[op2.value] ?? "";
-    });
-    elementos.question.textContent = textoPergunta(estado, manifesto);
-  }
-  return { sincronizar };
-}
-
-// src/js/ui/resposta.js
-var CLAB2 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
-function pill(classe, texto) {
-  return `<span class="pill ${classe}">${texto}</span>`;
-}
-function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao) {
-  const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
-  elementos.lab.textContent = `${CLAB2[estado.componente]} \xB7 ${periodoRotulo} \xB7 dom\xEDnio inteiro`;
-  const t4 = totalDoMapa(totais, estado.componente, estado.periodo);
-  const dom = domiciliosTotal(totais, estado.periodo);
-  const isRel = estado.medida === "relativo";
-  const k5 = isRel && dom ? 100 / dom : 1;
-  if (!t4) {
-    elementos.big.textContent = "\u2014";
-    elementos.range.innerHTML = "";
-    elementos.pills.innerHTML = "";
-  } else {
-    elementos.big.textContent = isRel ? formatarPercentual(t4.total * k5, 2) : `${formatar(t4.total, 0)} domic\xEDlios`;
-    let faixa;
-    if (t4.ep != null) {
-      const lo2 = (t4.total - 1.96 * t4.ep) * k5;
-      const hi2 = (t4.total + 1.96 * t4.ep) * k5;
-      faixa = `faixa de 95%: ${isRel ? `${formatar(lo2, 2)} a ${formatar(hi2, 2)} %` : `${formatar(lo2, 0)} a ${formatar(hi2, 0)}`} \xB7 CV ${formatar(
-        100 * t4.ep / t4.total,
-        1
-      )}%`;
-    } else {
-      faixa = estado.componente === "total" ? "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas." : "sem faixa (provis\xF3ria)";
-    }
-    if (estado.comparar) {
-      const m4 = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
-      if (m4) {
-        const dlt = m4.delta * (isRel && dom ? k5 : 1);
-        let z4 = "";
-        if (m4.z != null) z4 = ` \xB7 z = ${formatar(m4.z, 2)} (${m4.z < 1.96 ? "dentro do ru\xEDdo" : "mudan\xE7a afirm\xE1vel"})`;
-        const rotulo2 = m4.calculado ? " (calculado no site)" : "";
-        faixa += `<br>contra ${manifesto.periodos.find((p4) => p4.id === estado.comparar)?.rotulo}: ${dlt >= 0 ? "+" : "\u2212"}${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}${z4}${rotulo2}`;
-      }
-    }
-    elementos.range.innerHTML = faixa;
-    const pills = (t4.marcas ?? []).map((m4) => pill(classeMarca(m4), rotuloMarca(m4)));
-    elementos.pills.innerHTML = pills.join("");
-  }
-  elementos.cards.innerHTML = COMPONENTES_BASE.map((c3) => {
-    const tc2 = totalDoMapa(totais, c3, estado.periodo);
-    const v4 = tc2 ? isRel && dom ? 100 * tc2.total / dom : tc2.total : null;
-    return `<button type="button" class="card" data-c="${c3}" aria-pressed="${estado.componente === c3}"><div class="k">${CLAB2[c3]}</div><div class="v num">${v4 == null ? "\u2014" : isRel ? formatar(v4, 2) + " %" : formatar(v4, 0)}</div></button>`;
-  }).join("");
-  elementos.cards.querySelectorAll(".card").forEach((b10) => {
-    b10.onclick = () => aoClicarCartao(estado.componente === b10.dataset.c ? "total" : b10.dataset.c);
-  });
-}
-
 // src/js/ui/ajuda.js
 var flutuante = null;
 var popAjuda = null;
@@ -104553,6 +104436,215 @@ function ligarDicaPorAtributos(raiz) {
 }
 function attr(v4) {
   return String(v4 ?? "").replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
+}
+
+// src/js/ui/pergunta.js
+var AJUDA_MEDIDA_QUALIDADE = Object.freeze({
+  incerteza: "O que mede: quanto a estimativa do hex\xE1gono pode variar. Como se calcula: a largura da faixa de 95% (m\xE1ximo menos m\xEDnimo) dividida pelo valor estimado. Quando desconfiar: acima de 0,7 a faixa j\xE1 \xE9 quase do tamanho do valor; acima de 1, \xE9 maior que ele.",
+  qualidade_dado: "O que mede: se o hex\xE1gono tem dado completo. Como se calcula: marca do pacote que separa estimativa plena, parte em sigilo do IBGE (Instituto Brasileiro de Geografia e Estat\xEDstica) e sem dado. Quando desconfiar: com sigilo ou sem dado, o n\xFAmero do hex\xE1gono \xE9 parcial ou n\xE3o existe.",
+  ressalva_ap: "O que mede: se a \xE1rea de pondera\xE7\xE3o (AP, a menor \xE1rea com amostra pr\xF3pria no Censo) do hex\xE1gono tem estimativa fr\xE1gil. Como se calcula: a AP ganha ressalva quando o coeficiente de varia\xE7\xE3o (CV, o erro da amostra dividido pela estimativa) passa de 30% ou quando ela n\xE3o tem estimativa direta. Quando desconfiar: sempre que houver ressalva, o hex\xE1gono herda essa fragilidade.",
+  cv_ap: "O que mede: a precis\xE3o da amostra do Censo na \xE1rea de pondera\xE7\xE3o (AP) do hex\xE1gono. Como se calcula: coeficiente de varia\xE7\xE3o (CV), o erro-padr\xE3o da estimativa direta da AP dividido pela pr\xF3pria estimativa, em %. Quando desconfiar: acima de 30%, o limiar do protocolo.",
+  imputacao: "O que mede: quanto do hex\xE1gono foi preenchido com informa\xE7\xE3o de fora da sua \xE1rea de pondera\xE7\xE3o (AP). Como se calcula: a parte dos domic\xEDlios de 2022 cujo bloco veio da reconstru\xE7\xE3o al\xE9m da AP (munic\xEDpio, conjunto ou divis\xE3o igual). Quando desconfiar: acima de 30% (0,3), boa parte do n\xFAmero n\xE3o vem da pr\xF3pria \xE1rea.",
+  estoque: "O que mede: quanto o n\xFAmero de domic\xEDlios do hex\xE1gono mudou desde 2022. Como se calcula: o estoque do per\xEDodo dividido pelo de 2022 (1 = igual; 1,2 = 20% a mais). Quando desconfiar: em valores muito longe de 1 e nos per\xEDodos marcados com estoque vindo de outra fonte.",
+  hex_novo: "O que mede: se o hex\xE1gono n\xE3o tinha domic\xEDlio em 2022 e passou a ter depois. Como se calcula: marca do pacote para hex\xE1gonos sem domic\xEDlio no Censo 2022 que aparecem em per\xEDodos seguintes. Quando desconfiar: n\xE3o h\xE1 valor de 2022 para comparar; leia a evolu\xE7\xE3o desses hex\xE1gonos com cuidado."
+});
+var NOME_COMPLETO_MEDIDA = {
+  incerteza: "Incerteza",
+  qualidade_dado: "Qualidade do dado",
+  ressalva_ap: "Ressalva da \xE1rea de pondera\xE7\xE3o",
+  cv_ap: "Precis\xE3o da amostra na AP (CV)",
+  imputacao: "Parte imputada",
+  estoque: "Mudan\xE7a do estoque desde 2022",
+  hex_novo: "Hex\xE1gono novo"
+};
+var ROTULO_MEDIDA_QUALIDADE = {
+  incerteza: "Incerteza \u2014 largura da faixa de 95% em rela\xE7\xE3o \xE0 estimativa; 0,5 quer dizer que a faixa tem metade do tamanho do valor.",
+  qualidade_dado: "Qualidade do dado \u2014 se o hex\xE1gono tem estimativa plena, parcialmente em sigilo ou sem dado.",
+  ressalva_ap: "Ressalva da \xE1rea de pondera\xE7\xE3o \u2014 a AP do hex\xE1gono tem CV acima de 30% ou n\xE3o tem estimativa direta.",
+  cv_ap: "Precis\xE3o da amostra na AP \u2014 coeficiente de varia\xE7\xE3o da estimativa direta da AP.",
+  imputacao: "Parte imputada pela cascata \u2014 fra\xE7\xE3o dos domic\xEDlios de 2022 cujo bloco veio da reconstru\xE7\xE3o al\xE9m da AP.",
+  estoque: "Mudan\xE7a do estoque desde 2022 \u2014 raz\xE3o do estoque do per\xEDodo sobre o de 2022.",
+  hex_novo: "Hex\xE1gono novo no per\xEDodo \u2014 hex\xE1gono sem domic\xEDlio em 2022, absorvido depois."
+};
+var NOME_MEDIDA_QUALIDADE = {
+  incerteza: "Incerteza",
+  qualidade_dado: "Dado",
+  ressalva_ap: "Ressalva AP",
+  cv_ap: "CV da AP",
+  imputacao: "Imputada",
+  estoque: "Estoque",
+  hex_novo: "Novo"
+};
+function ligarPergunta(elementos, manifesto, loja, medidaConstante2) {
+  elementos.selPeriodo.innerHTML = manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
+  elementos.selComparar.innerHTML = `<option value="">sem compara\xE7\xE3o</option>` + manifesto.periodos.map((p4) => `<option value="${p4.id}">${p4.rotulo}</option>`).join("");
+  const seletorMedida = montarSeletorMedida(elementos.selMedidaQualidade, (id3) => loja.definir({ medida_qualidade: id3 }));
+  elementos.segTema.querySelectorAll("button").forEach((b10) => {
+    b10.onclick = () => loja.definir({ tema: b10.dataset.v, conjunto_graficos: b10.dataset.v === "qualidade" ? 1 : 0, faixa_hist: [] });
+  });
+  elementos.segMedida.querySelectorAll("button").forEach((b10) => {
+    b10.onclick = () => loja.definir({ medida: b10.dataset.v, faixa_hist: [] });
+  });
+  elementos.segComponente.querySelectorAll("button").forEach((b10) => {
+    b10.onclick = () => loja.definir({ componente: b10.dataset.v, faixa_hist: [] });
+  });
+  elementos.selPeriodo.onchange = () => {
+    const periodo = elementos.selPeriodo.value;
+    loja.definir({ periodo, comparar: loja.obter().comparar === periodo ? null : loja.obter().comparar, faixa_hist: [] });
+  };
+  elementos.selComparar.onchange = () => {
+    const comparar = elementos.selComparar.value || null;
+    loja.definir({ comparar: comparar === loja.obter().periodo ? null : comparar, faixa_hist: [] });
+  };
+  function sincronizar(estado) {
+    elementos.segTema.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.tema)));
+    elementos.segMedida.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.medida)));
+    elementos.segComponente.querySelectorAll("button").forEach((b10) => b10.setAttribute("aria-pressed", String(b10.dataset.v === estado.componente)));
+    elementos.selPeriodo.value = estado.periodo;
+    elementos.selComparar.value = estado.comparar ?? "";
+    const qualidade = estado.tema === "qualidade";
+    elementos.ctlMedida.hidden = qualidade;
+    elementos.ctlMedidaQualidade.hidden = !qualidade;
+    const expl = qualidade ? ROTULO_MEDIDA_QUALIDADE[estado.medida_qualidade] ?? "" : "";
+    elementos.explicacaoMedidaQualidade.textContent = expl;
+    seletorMedida.sincronizar(estado.medida_qualidade, (id3) => medidaConstante2 ? medidaConstante2(id3) : false);
+    elementos.question.textContent = textoPergunta(estado, manifesto);
+  }
+  return { sincronizar };
+}
+function montarSeletorMedida(botao, aoEscolher) {
+  const ctl = botao.parentElement;
+  ctl.classList.add("mq-ctl");
+  botao.setAttribute("aria-haspopup", "true");
+  botao.setAttribute("aria-expanded", "false");
+  botao.setAttribute("aria-controls", "f1-mq-lista");
+  const lista = document.createElement("ul");
+  lista.className = "mq-lista";
+  lista.id = "f1-mq-lista";
+  lista.hidden = true;
+  for (const id3 of MEDIDAS_QUALIDADE) {
+    const li2 = document.createElement("li");
+    const op2 = document.createElement("button");
+    op2.type = "button";
+    op2.className = "mq-opcao";
+    op2.dataset.v = id3;
+    op2.textContent = NOME_COMPLETO_MEDIDA[id3];
+    op2.onclick = () => {
+      fechar();
+      botao.focus();
+      aoEscolher(id3);
+    };
+    const ajuda = criarAjuda(AJUDA_MEDIDA_QUALIDADE[id3]);
+    ajuda.setAttribute("aria-label", `O que \xE9: ${NOME_COMPLETO_MEDIDA[id3]}`);
+    li2.append(op2, ajuda);
+    lista.appendChild(li2);
+  }
+  ctl.appendChild(lista);
+  function posicionar2() {
+    const r3 = botao.getBoundingClientRect();
+    lista.style.top = `${r3.bottom + 4}px`;
+    lista.style.left = `${Math.max(8, Math.min(r3.left, window.innerWidth - lista.offsetWidth - 8))}px`;
+  }
+  window.addEventListener("scroll", () => !lista.hidden && fechar(), { passive: true });
+  window.addEventListener("resize", () => !lista.hidden && posicionar2());
+  function abrir() {
+    lista.hidden = false;
+    posicionar2();
+    botao.setAttribute("aria-expanded", "true");
+    (lista.querySelector('.mq-opcao[aria-pressed="true"]') ?? lista.querySelector(".mq-opcao:not([disabled])"))?.focus();
+  }
+  function fechar() {
+    lista.hidden = true;
+    botao.setAttribute("aria-expanded", "false");
+  }
+  botao.onclick = (e67) => {
+    e67.stopPropagation();
+    if (lista.hidden) abrir();
+    else fechar();
+  };
+  lista.addEventListener("keydown", (e67) => {
+    const ops = [...lista.querySelectorAll(".mq-opcao:not([disabled])")];
+    const i3 = ops.indexOf(document.activeElement);
+    if (e67.key === "Escape") {
+      fechar();
+      botao.focus();
+    } else if (e67.key === "ArrowDown" && i3 >= 0) {
+      e67.preventDefault();
+      ops[(i3 + 1) % ops.length].focus();
+    } else if (e67.key === "ArrowUp" && i3 >= 0) {
+      e67.preventDefault();
+      ops[(i3 - 1 + ops.length) % ops.length].focus();
+    }
+  });
+  document.addEventListener("click", (e67) => {
+    if (!lista.hidden && !ctl.contains(e67.target)) fechar();
+  });
+  function sincronizar(atual, ehConstante) {
+    botao.innerHTML = `<span class="mq-rot">${NOME_MEDIDA_QUALIDADE[atual] ?? atual}</span><span aria-hidden="true"> \u25BE</span>`;
+    botao.dataset.v = atual;
+    botao.title = `${NOME_COMPLETO_MEDIDA[atual] ?? ""} \u2014 ${ROTULO_MEDIDA_QUALIDADE[atual] ?? ""}`;
+    botao.setAttribute("aria-label", `Medida de qualidade: ${NOME_COMPLETO_MEDIDA[atual] ?? atual}`);
+    lista.querySelectorAll(".mq-opcao").forEach((op2) => {
+      const constante = ehConstante(op2.dataset.v);
+      op2.disabled = constante;
+      op2.title = constante ? "igual em todos os hex\xE1gonos neste per\xEDodo" : "";
+      op2.setAttribute("aria-pressed", String(op2.dataset.v === atual));
+    });
+  }
+  return { sincronizar };
+}
+
+// src/js/ui/resposta.js
+var CLAB2 = { total: "Total", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus", precariedade: "Precariedade" };
+function pill(classe, texto) {
+  return `<span class="pill ${classe}">${texto}</span>`;
+}
+function renderizarResposta(elementos, estado, manifesto, totais, aoClicarCartao) {
+  const periodoRotulo = manifesto.periodos.find((p4) => p4.id === estado.periodo)?.rotulo ?? estado.periodo;
+  elementos.lab.textContent = `${CLAB2[estado.componente]} \xB7 ${periodoRotulo} \xB7 dom\xEDnio inteiro`;
+  const t4 = totalDoMapa(totais, estado.componente, estado.periodo);
+  const dom = domiciliosTotal(totais, estado.periodo);
+  const isRel = estado.medida === "relativo";
+  const k5 = isRel && dom ? 100 / dom : 1;
+  if (!t4) {
+    elementos.big.textContent = "\u2014";
+    elementos.range.innerHTML = "";
+    elementos.pills.innerHTML = "";
+  } else {
+    elementos.big.textContent = isRel ? formatarPercentual(t4.total * k5, 2) : `${formatar(t4.total, 0)} domic\xEDlios`;
+    let faixa;
+    if (t4.ep != null) {
+      const lo2 = (t4.total - 1.96 * t4.ep) * k5;
+      const hi2 = (t4.total + 1.96 * t4.ep) * k5;
+      faixa = `faixa de 95%: ${isRel ? `${formatar(lo2, 2)} a ${formatar(hi2, 2)} %` : `${formatar(lo2, 0)} a ${formatar(hi2, 0)}`} \xB7 CV ${formatar(
+        100 * t4.ep / t4.total,
+        1
+      )}%`;
+    } else {
+      faixa = estado.componente === "total" ? "O total n\xE3o tem faixa: as faixas dos componentes n\xE3o podem ser somadas." : "sem faixa (provis\xF3ria)";
+    }
+    if (estado.comparar) {
+      const m4 = mudanca(totais, estado.componente, estado.comparar, estado.periodo);
+      if (m4) {
+        const dlt = m4.delta * (isRel && dom ? k5 : 1);
+        let z4 = "";
+        if (m4.z != null) z4 = ` \xB7 z = ${formatar(m4.z, 2)} (${m4.z < 1.96 ? "dentro do ru\xEDdo" : "mudan\xE7a afirm\xE1vel"})`;
+        const rotulo2 = m4.calculado ? " (calculado no site)" : "";
+        faixa += `<br>contra ${manifesto.periodos.find((p4) => p4.id === estado.comparar)?.rotulo}: ${dlt >= 0 ? "+" : "\u2212"}${formatar(Math.abs(dlt), isRel ? 2 : 0)}${isRel ? " %" : " domic\xEDlios"}${z4}${rotulo2}`;
+      }
+    }
+    elementos.range.innerHTML = faixa;
+    const pills = (t4.marcas ?? []).map((m4) => pill(classeMarca(m4), rotuloMarca(m4)));
+    elementos.pills.innerHTML = pills.join("");
+  }
+  elementos.cards.innerHTML = COMPONENTES_BASE.map((c3) => {
+    const tc2 = totalDoMapa(totais, c3, estado.periodo);
+    const v4 = tc2 ? isRel && dom ? 100 * tc2.total / dom : tc2.total : null;
+    return `<button type="button" class="card" data-c="${c3}" aria-pressed="${estado.componente === c3}"><div class="k">${CLAB2[c3]}</div><div class="v num">${v4 == null ? "\u2014" : isRel ? formatar(v4, 2) + " %" : formatar(v4, 0)}</div></button>`;
+  }).join("");
+  elementos.cards.querySelectorAll(".card").forEach((b10) => {
+    b10.onclick = () => aoClicarCartao(estado.componente === b10.dataset.c ? "total" : b10.dataset.c);
+  });
 }
 
 // src/js/util/limiares.js
@@ -106736,7 +106828,9 @@ function renderizarParametros(el2, manifesto) {
 }
 async function renderizarRastreio(el2, manifesto, edicaoOrigem, versaoSite) {
   const { edicao, commitCompleto, dataExecucao, contrato, arquivos } = linhasRastreio(manifesto);
-  el2.innerHTML = `
+  const inicioResumo = `edi\xE7\xE3o ${edicao} \xB7 moradinha ${String(commitCompleto).slice(0, 7)}\u2026`;
+  el2.innerHTML = `<details class="rastreio-dobra" id="met-rastreio-dobra">
+    <summary><span class="rastreio-resumo" id="met-rastreio-resumo">${inicioResumo} \xB7 conferindo ${arquivos.length} arquivos\u2026</span></summary>
     <div class="pills">
       <span class="pill info">edi\xE7\xE3o: ${edicao}</span>
       <span class="pill info">commit do moradinha: ${commitCompleto}</span>
@@ -106746,8 +106840,8 @@ async function renderizarRastreio(el2, manifesto, edicaoOrigem, versaoSite) {
     </div>
     <table class="ponte" id="met-rastreio-arquivos"><thead><tr><th>Arquivo</th><th>Hash esperado (manifesto)</th><th>Confer\xEAncia</th></tr></thead><tbody>${arquivos.map(
     (a5) => `<tr data-arquivo="${a5.nome}"><td>${a5.nome}</td><td style="font-family:monospace;font-size:11px">${a5.hashEsperado}</td><td class="status">verificando\u2026</td></tr>`
-  ).join("")}</tbody></table>`;
-  await Promise.all(
+  ).join("")}</tbody></table></details>`;
+  const conferidos = await Promise.all(
     arquivos.map(async (a5) => {
       const linha = el2.querySelector(`tr[data-arquivo="${a5.nome}"] .status`);
       try {
@@ -106755,11 +106849,16 @@ async function renderizarRastreio(el2, manifesto, edicaoOrigem, versaoSite) {
         const real = await sha256Hex(bytes);
         const ok2 = real === a5.hashEsperado;
         linha.innerHTML = `<span class="pill ${ok2 ? "ok" : "crit"}" data-status="${ok2 ? "ok" : "divergente"}">${ok2 ? "ok" : "divergente"}</span>`;
+        return ok2;
       } catch {
         linha.innerHTML = `<span class="pill crit" data-status="erro">erro ao buscar</span>`;
+        return false;
       }
     })
   );
+  const falhas = conferidos.filter((ok2) => !ok2).length;
+  el2.querySelector("#met-rastreio-resumo").textContent = falhas ? `${inicioResumo} \xB7 ${falhas} de ${arquivos.length} arquivos n\xE3o conferem` : `${inicioResumo} \xB7 ${arquivos.length} arquivos conferidos`;
+  if (falhas) el2.querySelector("#met-rastreio-dobra").open = true;
 }
 function montarInternaHtml(modelo) {
   const cartoes = COMPONENTES_MODELO.map((c3) => {
@@ -106788,7 +106887,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "7fc5432fc6a346a2f38163ce40b8072a0d317dc8");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "1026f77ecc1d8aa882e4b8d0c5f3d709293b7097");
   renderizarInterna($7("met-interna"), modelo);
 }
 

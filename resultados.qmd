@@ -10,7 +10,7 @@ title: ""
   <div class="q" id="f1-question"></div>
   <div class="ctl"><span class="lab" id="f1-lab-tema">Tema</span><div class="seg" role="group" aria-labelledby="f1-lab-tema" id="f1-seg-tema">
     <button type="button" data-v="deficit" aria-pressed="true">Déficit</button><button type="button" data-v="qualidade" aria-pressed="false">Qualidade</button></div></div>
-  <div class="ctl" id="f1-ctl-medida-qualidade" hidden><label for="f1-sel-medida-qualidade">Medida de qualidade</label><select id="f1-sel-medida-qualidade"></select>
+  <div class="ctl" id="f1-ctl-medida-qualidade" hidden><span class="lab" id="f1-lab-mq">Medida de qualidade</span><button type="button" class="mq-btn" id="f1-sel-medida-qualidade" aria-describedby="f1-medida-qualidade-explicacao"></button>
     <div class="sub" id="f1-medida-qualidade-explicacao"></div></div>
   <div class="ctl" id="f1-ctl-medida"><span class="lab" id="f1-lab-med">Medida</span><div class="seg" role="group" aria-labelledby="f1-lab-med" id="f1-seg-med">
     <button type="button" data-v="absoluto" aria-pressed="true">Absoluto</button><button type="button" data-v="relativo" aria-pressed="false">Relativo</button></div></div>

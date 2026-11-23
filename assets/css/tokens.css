@@ -550,6 +550,16 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 
 /* F6.5 1a: seletor da medida de qualidade com largura pelo conteúdo; a explicação vai para a dica. */
 #f1-ctl-medida-qualidade select { width: auto; max-width: 150px; }
+/* Acréscimo D: seletor da medida de qualidade com (?) em cada opção. */
+.mq-ctl { position: relative; }
+.mq-btn { font: inherit; font-size: 12px; line-height: 16px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.mq-lista { position: fixed; z-index: 900; margin: 0; padding: 4px; list-style: none; min-width: 250px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.mq-lista[hidden] { display: none; }
+.mq-lista li { display: flex; align-items: center; gap: 6px; }
+.mq-opcao { flex: 1; text-align: left; font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--ink); cursor: pointer; }
+.mq-opcao:hover, .mq-opcao:focus-visible { background: var(--accent-soft); }
+.mq-opcao[aria-pressed="true"] { border-color: var(--accent); font-weight: 600; }
+.mq-opcao[disabled] { color: var(--muted); cursor: not-allowed; }
 #f1-medida-qualidade-explicacao { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* F6.5 1b: coluna à direita do mapa mais compacta, para o cartão do Hexágono subir. */
@@ -590,3 +600,8 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 /* F6.5 4e: gráfico de dobras. */
 .dobras-graficos { display: flex; flex-wrap: wrap; gap: 12px; margin: 4px 0 8px; }
 .dobras-painel svg { display: block; }
+
+/* Acréscimo E: rastreio da execução recolhido, resumo de uma linha. */
+.rastreio-dobra > summary { cursor: pointer; color: var(--ink); font-size: 13px; padding: 4px 0; }
+.rastreio-dobra > summary .rastreio-resumo { font-family: var(--mono, monospace); font-size: 12px; }
+.rastreio-dobra[open] > summary { margin-bottom: 8px; }
