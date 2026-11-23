@@ -559,3 +559,14 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 .side .card { padding: 3px 7px; }
 .side .card .v { font-size: 14px; }
 .side .detail dl { margin: 4px 0; }
+
+/* F6.5 3: cartões da faixa de totais, metade da altura. */
+.cartao-bi { padding: 6px 10px; gap: 2px; }
+.cartao-bi .cartao-corpo { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 6px; }
+.cartao-bi .cb-vr { display: flex; align-items: baseline; flex-wrap: nowrap; white-space: nowrap; gap: 0 6px; min-width: 0; width: auto; }
+.cartao-bi .v { font-size: 20px; line-height: 1.15; }
+.cartao-bi .r { font-size: 11px; }
+.cartao-bi .pills { margin: 0; gap: 3px; display: inline-flex; }
+.cartao-bi .marca-ico { width: 15px; height: 15px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; line-height: 1; cursor: help; }
+.cartao-bi .spark-slot { justify-self: end; line-height: 0; }
+.cartao-bi .spark { margin: 0; display: block; }

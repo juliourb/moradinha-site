@@ -105234,23 +105234,23 @@ function sparkline2(c3) {
   const serie = c3.serie;
   const ok2 = serie.filter((v4) => v4 != null);
   if (!ok2.length) return null;
-  const W4 = 170;
-  const H4 = 62;
-  const m4 = { l: 38, r: 8, t: 6, b: 16 };
+  const W4 = 150;
+  const H4 = 30;
+  const m4 = { l: 40, r: 4, t: 4, b: 10 };
   const lo2 = min4(ok2);
   const hi2 = max4(ok2);
   const x5 = point().domain(serie.map((_v3, i3) => i3)).range([m4.l, W4 - m4.r]);
   const y5 = linear2().domain([lo2 === hi2 ? 0 : lo2, hi2]).range([H4 - m4.b, m4.t]);
   const linha = line().defined((v4) => v4 != null).x((_v3, i3) => x5(i3)).y((v4) => y5(v4));
-  const svg = create5("svg").attr("class", "spark").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", `S\xE9rie de ${c3.rotulo}, ${c3.anos[0]} a ${c3.anos.at(-1)}`);
+  const svg = create5("svg").attr("class", "spark").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", W4).attr("height", H4).attr("role", "img").attr("aria-label", `S\xE9rie de ${c3.rotulo}, ${c3.anos[0]} a ${c3.anos.at(-1)}`);
   svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css5("--accent")).attr("stroke-width", 1.6);
-  const rot = (txt, px2, py2, anchor) => svg.append("text").attr("x", px2).attr("y", py2).attr("text-anchor", anchor).attr("font-size", 9).attr("fill", css5("--muted")).text(txt);
+  const rot = (txt, px2, py2, anchor) => svg.append("text").attr("x", px2).attr("y", py2).attr("text-anchor", anchor).attr("font-size", 7.5).attr("fill", css5("--muted")).text(txt);
   rot(formatar(hi2, 0), m4.l - 4, m4.t + 3, "end");
   rot(formatar(lo2, 0), m4.l - 4, H4 - m4.b + 1, "end");
-  rot(c3.anos[0], m4.l, H4 - 3, "start");
-  rot(c3.anos.at(-1), W4 - m4.r, H4 - 3, "end");
+  rot(c3.anos[0], m4.l, H4 - 1, "start");
+  rot(c3.anos.at(-1), W4 - m4.r, H4 - 1, "end");
   const pts = serie.map((v4, i3) => ({ v: v4, i: i3, ano: c3.anos[i3], faixa: c3.faixas?.[i3] ?? null })).filter((d3) => d3.v != null);
-  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d3) => x5(d3.i)).attr("cy", (d3) => y5(d3.v)).attr("r", 3.2).attr("fill", css5("--accent"));
+  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d3) => x5(d3.i)).attr("cy", (d3) => y5(d3.v)).attr("r", 2.4).attr("fill", css5("--accent"));
   svg.append("g").selectAll("rect").data(pts).join("rect").attr("x", (d3) => x5(d3.i) - 9).attr("width", 18).attr("y", 0).attr("height", H4).attr("fill", "transparent");
   ligarDica(
     svg.selectAll("rect"),
@@ -105281,10 +105281,10 @@ function renderizarCartoes(el2, manifesto, totais) {
     card.dataset.componente = c3.componente;
     card.innerHTML = `<header><span class="k">${c3.rotulo}</span></header>
       <button type="button" class="cartao-corpo">
-        <span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
+        <span class="cb-vr"><span class="v" data-num="${c3.absolutoAno ?? ""}">${formatar(c3.absolutoAno, 0)}</span>
         <span class="r" data-num="${c3.relativoAno ?? ""}">${formatarPercentual(c3.relativoAno, 2)}</span>
+        <span class="pills">${(c3.marcas ?? []).map((m4) => `<span class="pill marca-ico ${classeMarca(m4)}" role="img" aria-label="${rotuloMarca(m4)}" title="${rotuloMarca(m4)}">${classeMarca(m4) === "info" ? "i" : "!"}</span>`).join("")}</span></span>
         <span class="spark-slot"></span>
-        <span class="pills">${(c3.marcas ?? []).map((m4) => `<span class="pill ${classeMarca(m4)}">${rotuloMarca(m4)}</span>`).join("")}</span>
       </button>`;
     card.querySelector("header").appendChild(
       criarAjuda("Evolu\xE7\xE3o do total do indicador por ano. O eixo vertical vai do menor ao maior valor da s\xE9rie; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
@@ -106437,7 +106437,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "2143d7d4c3bc2d322b9818dd95cdc432c09ce21e");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "dbce71157ebf5dd2eff4fff009c5aee9f0249c09");
   renderizarInterna($7("met-interna"), modelo);
 }
 

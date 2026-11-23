@@ -100,3 +100,37 @@ for (const tema of ["light", "dark"]) {
     if (tema === "dark") expect(sem).toBeLessThan(0.3);
   });
 }
+
+// F6.5-3: cartões da Visão geral com no máximo metade da altura anterior (251 px em 1440×900).
+test("F6.5-3: cartões da faixa de totais ≤ 50% da altura anterior; marcas seguem no DOM", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?dominio=al_rm_maceio&edicao=bd10cbd");
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(1200);
+  const cartoes = page.locator(".cartao-bi");
+  expect(await cartoes.count()).toBe(4);
+  for (let i = 0; i < 4; i++) {
+    const h = (await cartoes.nth(i).boundingBox()).height;
+    expect(h).toBeLessThanOrEqual(251 * 0.5);
+  }
+  // número e porcentagem na mesma linha; mini-série à direita do número
+  const g = await page.evaluate(() => {
+    const c = document.querySelector('.cartao-bi[data-componente="total"]');
+    const r = (s) => c.querySelector(s).getBoundingClientRect();
+    return { v: r(".v"), pct: r(".r"), spark: r(".spark"), esp: getComputedStyle(c.querySelector(".cb-vr")).opacity };
+  });
+  expect(Math.abs(g.v.bottom - g.pct.bottom)).toBeLessThan(8);
+  expect(g.spark.left).toBeGreaterThan(g.v.right);
+  expect(g.spark.height).toBeLessThanOrEqual(32);
+  expect(g.esp).toBe("1");
+  // marcas: ícones no DOM, com o texto completo na dica e no nome acessível
+  const marcas = page.locator(".cartao-bi .marca-ico");
+  expect(await marcas.count()).toBeGreaterThan(0);
+  const m = marcas.first();
+  expect((await m.getAttribute("title")).length).toBeGreaterThan(8);
+  expect(await m.getAttribute("aria-label")).toBe(await m.getAttribute("title"));
+  await expect(page.locator("#f2-detalhes-btn")).toBeVisible();
+  // mini-série mantém a dica do mouse
+  await page.locator('.cartao-bi[data-componente="total"] .spark rect').nth(1).hover({ force: true });
+  await expect(page.locator(".dica-flutuante")).toBeVisible();
+});

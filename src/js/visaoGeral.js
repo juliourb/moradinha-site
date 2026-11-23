@@ -45,23 +45,23 @@ function sparkline(c) {
   const serie = c.serie;
   const ok = serie.filter((v) => v != null);
   if (!ok.length) return null;
-  const W = 170;
-  const H = 62;
-  const m = { l: 38, r: 8, t: 6, b: 16 };
+  const W = 150;
+  const H = 30;
+  const m = { l: 40, r: 4, t: 4, b: 10 };
   const lo = d3.min(ok);
   const hi = d3.max(ok);
   const x = d3.scalePoint().domain(serie.map((_v, i) => i)).range([m.l, W - m.r]);
   const y = d3.scaleLinear().domain([lo === hi ? 0 : lo, hi]).range([H - m.b, m.t]);
   const linha = d3.line().defined((v) => v != null).x((_v, i) => x(i)).y((v) => y(v));
-  const svg = d3.create("svg").attr("class", "spark").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", `Série de ${c.rotulo}, ${c.anos[0]} a ${c.anos.at(-1)}`);
+  const svg = d3.create("svg").attr("class", "spark").attr("viewBox", `0 0 ${W} ${H}`).attr("width", W).attr("height", H).attr("role", "img").attr("aria-label", `Série de ${c.rotulo}, ${c.anos[0]} a ${c.anos.at(-1)}`);
   svg.append("path").attr("d", linha(serie)).attr("fill", "none").attr("stroke", css("--accent")).attr("stroke-width", 1.6);
-  const rot = (txt, px, py, anchor) => svg.append("text").attr("x", px).attr("y", py).attr("text-anchor", anchor).attr("font-size", 9).attr("fill", css("--muted")).text(txt);
+  const rot = (txt, px, py, anchor) => svg.append("text").attr("x", px).attr("y", py).attr("text-anchor", anchor).attr("font-size", 7.5).attr("fill", css("--muted")).text(txt);
   rot(formatar(hi, 0), m.l - 4, m.t + 3, "end");
   rot(formatar(lo, 0), m.l - 4, H - m.b + 1, "end");
-  rot(c.anos[0], m.l, H - 3, "start");
-  rot(c.anos.at(-1), W - m.r, H - 3, "end");
+  rot(c.anos[0], m.l, H - 1, "start");
+  rot(c.anos.at(-1), W - m.r, H - 1, "end");
   const pts = serie.map((v, i) => ({ v, i, ano: c.anos[i], faixa: c.faixas?.[i] ?? null })).filter((d) => d.v != null);
-  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d) => x(d.i)).attr("cy", (d) => y(d.v)).attr("r", 3.2).attr("fill", css("--accent"));
+  const bolas = svg.append("g").selectAll("circle").data(pts).join("circle").attr("cx", (d) => x(d.i)).attr("cy", (d) => y(d.v)).attr("r", 2.4).attr("fill", css("--accent"));
   svg.append("g").selectAll("rect").data(pts).join("rect")
     .attr("x", (d) => x(d.i) - 9).attr("width", 18).attr("y", 0).attr("height", H).attr("fill", "transparent");
   ligarDica(svg.selectAll("rect"), (d) =>
@@ -98,10 +98,10 @@ function renderizarCartoes(el, manifesto, totais) {
     card.dataset.componente = c.componente;
     card.innerHTML = `<header><span class="k">${c.rotulo}</span></header>
       <button type="button" class="cartao-corpo">
-        <span class="v" data-num="${c.absolutoAno ?? ""}">${formatar(c.absolutoAno, 0)}</span>
+        <span class="cb-vr"><span class="v" data-num="${c.absolutoAno ?? ""}">${formatar(c.absolutoAno, 0)}</span>
         <span class="r" data-num="${c.relativoAno ?? ""}">${formatarPercentual(c.relativoAno, 2)}</span>
+        <span class="pills">${(c.marcas ?? []).map((m) => `<span class="pill marca-ico ${classeMarca(m)}" role="img" aria-label="${rotuloMarca(m)}" title="${rotuloMarca(m)}">${classeMarca(m) === "info" ? "i" : "!"}</span>`).join("")}</span></span>
         <span class="spark-slot"></span>
-        <span class="pills">${(c.marcas ?? []).map((m) => `<span class="pill ${classeMarca(m)}">${rotuloMarca(m)}</span>`).join("")}</span>
       </button>`;
     card.querySelector("header").appendChild(
       criarAjuda("Evolução do total do indicador por ano. O eixo vertical vai do menor ao maior valor da série; passe o mouse num ponto para ver o ano, o valor e, quando houver, a faixa de 95%.")
