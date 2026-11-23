@@ -570,3 +570,19 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 .cartao-bi .marca-ico { width: 15px; height: 15px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; line-height: 1; cursor: help; }
 .cartao-bi .spark-slot { justify-self: end; line-height: 0; }
 .cartao-bi .spark { margin: 0; display: block; }
+
+/* F6.5 5: destaque da seleção — borda de 2 px na cor de destaque e fundo levemente mais claro. */
+.vereditocel[aria-current="true"],
+.nav-lateral a[aria-current="true"],
+.no-pipeline[aria-current="true"] rect,
+.no-tabela[aria-current="true"] rect {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+.vereditocel[aria-current="true"] { border: 2px solid var(--accent); background: var(--accent-soft); }
+.nav-lateral a[aria-current="true"] { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--ink) !important; padding: 4px 6px; }
+.no-pipeline[aria-current="true"] rect, .no-tabela[aria-current="true"] rect { stroke: var(--accent); stroke-width: 2.5; fill: var(--accent-soft); }
+
+/* F6.5 4e: gráfico de dobras. */
+.dobras-graficos { display: flex; flex-wrap: wrap; gap: 12px; margin: 4px 0 8px; }
+.dobras-painel svg { display: block; }

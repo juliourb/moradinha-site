@@ -6,13 +6,18 @@ import {
   veredictoPergunta1, veredictoPergunta2, veredictoPergunta3, veredictoPergunta4, matrizOqueFalta,
   ESCALA_SPEARMAN, posicaoSpearman, fraseAnoMenosParecido, spearmanContraBase,
 } from "./dados/confiabilidade.js";
-import { instalarAjudas, ligarDicaPorAtributos, attr } from "./ui/ajuda.js";
-import { fjpTresValores } from "./dados/visaoGeral.js";
+import { instalarAjudas, ligarDicaPorAtributos, marcarGrafico, attr } from "./ui/ajuda.js";
+import { renderizarFjp } from "./ui/fjp.js";
 import { rotuloMarca, rotuloFonteEstoque } from "./util/marcas.js";
 import { rotulo } from "./util/rotulos.js";
 import { formatar, formatarPercentual, rotuloCurto } from "./util/formato.js";
 
-const NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habitação precária", coabitacao: "Coabitação", onus: "Ônus excessivo com aluguel", domicilios: "Domicílios" };
+const NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habitação precária", precariedade: "Precariedade", coabitacao: "Coabitação", onus: "Ônus excessivo com aluguel", domicilios: "Domicílios" };
+
+/** Atributos da caixa de valor (F6.5 4d) para tabelas e blocos de números. */
+function dica(titulo, valor, base) {
+  return `data-dica-titulo="${attr(titulo)}" data-dica-valor="${attr(valor)}"${base ? ` data-dica-base="${attr(base)}"` : ""}`;
+}
 
 function $(id) {
   return document.getElementById(id);
@@ -27,31 +32,34 @@ function renderizarFontes(el, manifesto) {
       const fonte = rotuloFonteEstoque(p.fonte_estoque);
       const troca = p.marcas?.includes("fonte_estoque_diferente") || p.marcas?.includes("media_inclui_fonte_diferente");
       const marcasTxt = (p.marcas ?? []).map((m) => rotuloMarca(m)).join("; ");
-      return `<span class="passo${troca ? " troca" : ""}" title="${p.rotulo}: ${fonte}${marcasTxt ? ` — ${marcasTxt}` : ""}">${p.rotulo}: ${fonte}</span>`;
+      return `<span class="passo${troca ? " troca" : ""}" ${dica(p.rotulo, fonte, marcasTxt || null)}>${p.rotulo}: ${fonte}</span>`;
     })
     .join("")}</div>`;
+  marcarGrafico(el, "tabela-fontes");
 }
 
 function renderizarSigilo(el, sigilo) {
   el.innerHTML = `
-    <div class="cartao-f3"><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hexágonos</div></div>
-    <div class="cartao-f3"><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hexágonos</div></div>`;
+    <div class="cartao-f3" ${dica("Sem dado (sigilo total)", `${formatar(sigilo.hex_sem_dado, 0)} hexágonos`, "hexágonos sem nenhum dado publicável")}><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hexágonos</div></div>
+    <div class="cartao-f3" ${dica("Parte em sigilo", `${formatar(sigilo.hex_parcial, 0)} hexágonos`, "hexágonos com alguma parte em sigilo")}><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hexágonos</div></div>`;
+  marcarGrafico(el, "cartoes-sigilo");
 }
 
 function renderizarAps(el, aps) {
   el.innerHTML = aps
     .map(
-      (a) => `<div class="cartao-f3"><div class="k">${CLAB[a.componente] ?? a.componente}</div>
+      (a) => `<div class="cartao-f3" ${dica(CLAB[a.componente] ?? a.componente, `${formatar(a.n_aps, 0)} APs`, `${formatar(a.n_ressalva, 0)} com ressalva · ${formatar(a.n_sem_direta, 0)} sem amostra direta`)}><div class="k">${CLAB[a.componente] ?? a.componente}</div>
         <div class="v" data-num="${a.n_aps}">${formatar(a.n_aps, 0)} APs</div>
         <div class="sub">${formatar(a.n_ressalva, 0)} com ressalva · ${formatar(a.n_sem_direta, 0)} sem amostra direta</div></div>`
     )
     .join("");
+  marcarGrafico(el, "cartoes-aps");
 }
 
 function renderizarPonte(el, ponte) {
   el.innerHTML = `<table class="ponte"><thead><tr><th>Indicador</th><th>PNADc</th><th>Censo</th><th>Razão</th><th>Leitura</th></tr></thead><tbody>${ponte
     .map(
-      (p) => `<tr>
+      (p) => `<tr ${dica(NOME_INDICADOR_FJP[p.indicador] ?? rotulo(p.indicador), `PNADc ${p.pnadc == null ? "—" : formatar(p.pnadc, 1)} · Censo ${p.censo == null ? "—" : formatar(p.censo, 1)} · razão ${p.razao == null ? "—" : formatar(p.razao, 2)}`, p.leitura)}>
         <td>${NOME_INDICADOR_FJP[p.indicador] ?? rotulo(p.indicador)}</td>
         <td data-num="${p.pnadc ?? ""}">${p.pnadc == null ? "—" : `${formatar(p.pnadc, 1)} (EP ${formatar(p.pnadc_ep, 1)})`}</td>
         <td data-num="${p.censo ?? ""}">${p.censo == null ? "—" : formatar(p.censo, 1)}</td>
@@ -60,6 +68,7 @@ function renderizarPonte(el, ponte) {
       </tr>`
     )
     .join("")}</tbody></table>`;
+  marcarGrafico(el, "tabela-ponte");
 }
 
 function renderizarCnefe(el, cnefe) {
@@ -68,31 +77,11 @@ function renderizarCnefe(el, cnefe) {
     return;
   }
   el.innerHTML = `
-    <div class="cartao-f3"><div class="k">Endereços</div><div class="v" data-num="${cnefe.enderecos}">${formatar(cnefe.enderecos, 0)}</div></div>
-    <div class="cartao-f3"><div class="k">Hexágonos sem endereço</div><div class="v" data-num="${cnefe.hex_sem_endereco}">${formatar(cnefe.hex_sem_endereco, 0)}</div>
+    <div class="cartao-f3" ${dica("Endereços", formatar(cnefe.enderecos, 0), "endereços do CNEFE no domínio")}><div class="k">Endereços</div><div class="v" data-num="${cnefe.enderecos}">${formatar(cnefe.enderecos, 0)}</div></div>
+    <div class="cartao-f3" ${dica("Hexágonos sem endereço", formatar(cnefe.hex_sem_endereco, 0), `${formatar(cnefe.domicilios_nesses_hex, 0)} domicílios nesses hexágonos`)}><div class="k">Hexágonos sem endereço</div><div class="v" data-num="${cnefe.hex_sem_endereco}">${formatar(cnefe.hex_sem_endereco, 0)}</div>
       <div class="sub">${formatar(cnefe.domicilios_nesses_hex, 0)} domicílios nesses hexágonos</div></div>
-    <div class="cartao-f3"><div class="k">Correlação com o hexágono</div><div class="v" data-num="${cnefe.correlacao_hex}">${formatar(cnefe.correlacao_hex, 2)}</div></div>`;
-}
-
-/** FJP × moradinha (N8/N9), nos mesmos três valores da Visão geral, para a seção "Números de partida". */
-function renderizarFjpConfiabilidade(el, referenciaFjp) {
-  const itens = fjpTresValores(referenciaFjp ?? []);
-  if (!itens.length) {
-    el.innerHTML = `<p class="empty">Sem referência da FJP neste pacote.</p>`;
-    return;
-  }
-  const anoRef = itens[0]?.ano_ref;
-  el.innerHTML = `<p class="sub">Comparação com a FJP${anoRef != null ? `, ${anoRef}` : ""}.</p><table class="ponte"><thead><tr><th>Indicador</th><th>FJP publicado</th><th>Parte do CadÚnico</th><th>FJP sem CadÚnico</th><th>Cai na faixa de 95%?</th></tr></thead><tbody>${itens
-    .map(
-      (item) => `<tr>
-        <td>${NOME_INDICADOR_FJP[item.indicador] ?? rotulo(item.indicador)}</td>
-        <td data-num="${item.fjp_publicado ?? ""}">${item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)}</td>
-        <td data-num="${item.cadUnico}">${formatar(item.cadUnico, 0)}</td>
-        <td data-num="${item.semCadUnico ?? ""}">${formatar(item.semCadUnico, 0)}</td>
-        <td>${item.dentro == null ? "—" : item.dentro ? "dentro" : "fora"}</td>
-      </tr>`
-    )
-    .join("")}</tbody></table>`;
+    <div class="cartao-f3" ${dica("Correlação com o hexágono", formatar(cnefe.correlacao_hex, 2), "correlação entre endereços e domicílios por hexágono")}><div class="k">Correlação com o hexágono</div><div class="v" data-num="${cnefe.correlacao_hex}">${formatar(cnefe.correlacao_hex, 2)}</div></div>`;
+  marcarGrafico(el, "cartoes-cnefe");
 }
 
 /** Matriz "o que falta" (N12): variável × período, em linguagem simples. */
@@ -105,39 +94,53 @@ function renderizarOqueFalta(el, qualidade, manifesto) {
   el.innerHTML = `<table class="grade-oquefalta"><thead><tr><th>Variável</th>${manifesto.periodos
     .map((p) => `<th>${p.rotulo}</th>`)
     .join("")}</tr></thead><tbody>${matriz
-    .map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c) => `<td>${c.uso}</td>`).join("")}</tr>`)
+    .map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c, i) => `<td ${dica(`${rotulo(linha.variavel)} · ${manifesto.periodos[i]?.rotulo ?? ""}`, c.uso)}>${c.uso}</td>`).join("")}</tr>`)
     .join("")}</tbody></table>`;
+  marcarGrafico(el, "tabela-oquefalta");
 }
 
 const SECOES_VEREDITOS = ["f3-secao-dados", "f3-secao-modelo", "f3-secao-consistencia", "f3-secao-achados"];
-// F6.4 3a: as quatro seções começam fechadas; abrir uma fecha as outras, e a aberta
-// aparece logo abaixo do painel de vereditos. Clicar de novo na mesma célula fecha.
-let secaoAtual = null;
+// F6.5 4a/4f: a seção 1 já vem aberta (a página nunca fica sem texto). Abre uma, fecha as
+// outras. Clicar de novo na célula aberta NÃO fecha; só outra célula, o menu, as setas ou
+// o título da seção trocam ou fecham.
+let secaoAtual = 0;
+let celulaAtual = null;
 
 function sincronizarSecoes() {
   SECOES_VEREDITOS.forEach((id, i) => {
     const el = $(id);
-    if (el) el.hidden = i !== secaoAtual;
+    if (!el) return;
+    el.hidden = i !== secaoAtual;
   });
-  document.querySelectorAll("button[data-secao]").forEach((b) => b.setAttribute("aria-expanded", String(Number(b.dataset.secao) === secaoAtual)));
+  // Destaque da seleção (F6.5 5): exatamente uma célula do painel e um item do menu.
+  const botoes = [...document.querySelectorAll("button[data-secao]")];
+  const daSecao = botoes.filter((b) => Number(b.dataset.secao) === secaoAtual);
+  const escolhida = daSecao.includes(celulaAtual) ? celulaAtual : daSecao[0] ?? null;
+  botoes.forEach((b) => {
+    b.setAttribute("aria-expanded", String(b === escolhida));
+    if (b === escolhida) b.setAttribute("aria-current", "true");
+    else b.removeAttribute("aria-current");
+  });
   document.querySelectorAll(".nav-lateral a").forEach((a) => {
-    if (SECOES_VEREDITOS[secaoAtual] && a.getAttribute("href") === `#${SECOES_VEREDITOS[secaoAtual]}`) a.setAttribute("aria-current", "true");
+    if (SECOES_VEREDITOS[secaoAtual] && a.hash === `#${SECOES_VEREDITOS[secaoAtual]}`) a.setAttribute("aria-current", "true");
     else a.removeAttribute("aria-current");
   });
 }
 
-function irParaSecao(indice, { alternar = false } = {}) {
+function irParaSecao(indice, { celula = null, rolar = true } = {}) {
   const i = Math.max(0, Math.min(SECOES_VEREDITOS.length - 1, indice));
-  if (alternar && secaoAtual === i) {
-    secaoAtual = null;
-    sincronizarSecoes();
-    return;
-  }
   secaoAtual = i;
+  celulaAtual = celula;
   sincronizarSecoes();
   const el = $(SECOES_VEREDITOS[i]);
-  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (rolar) el?.scrollIntoView({ behavior: "smooth", block: "start" });
   el?.focus({ preventScroll: true });
+}
+
+function fecharSecao() {
+  secaoAtual = null;
+  celulaAtual = null;
+  sincronizarSecoes();
 }
 
 function classeVeredicto(v) {
@@ -178,8 +181,7 @@ function renderizarVereditos(el, { qualidade, referenciaFjp, modelo, manifesto, 
     </tbody></table>`;
 
   el.querySelectorAll("button[data-secao]").forEach((b) => {
-    b.setAttribute("aria-expanded", "false");
-    b.onclick = () => irParaSecao(Number(b.dataset.secao), { alternar: true });
+    b.onclick = () => irParaSecao(Number(b.dataset.secao), { celula: b });
   });
 
   return { veredictoPergunta1Cels: linhas[0].cels, veredictoPergunta2Cels: linhas[1].cels, veredictoPergunta3Cels: linhas[2].cels };
@@ -191,15 +193,35 @@ function ligarNavegacaoSecoes() {
     if (e.key === "ArrowRight") irParaSecao(secaoAtual + 1);
     else if (e.key === "ArrowLeft") irParaSecao(secaoAtual - 1);
   });
-  document.querySelectorAll(".nav-lateral a[href^='#f3-secao']").forEach((a) => {
+  // O main.js reescreve os href internos com a consulta da página; por isso se usa a.hash.
+  document.querySelectorAll(".nav-lateral a").forEach((a) => {
     a.addEventListener("click", (e) => {
+      const i = SECOES_VEREDITOS.indexOf(a.hash.slice(1));
+      if (i < 0) return;
       e.preventDefault();
-      irParaSecao(SECOES_VEREDITOS.indexOf(a.getAttribute("href").slice(1)));
+      irParaSecao(i);
     });
   });
+  // O título da seção aberta a fecha (botão acessível).
+  SECOES_VEREDITOS.forEach((id) => {
+    const h2 = $(id)?.querySelector("h2");
+    if (!h2) return;
+    h2.style.cursor = "pointer";
+    h2.title = "Clique no título para fechar esta seção";
+    h2.onclick = (e) => {
+      if (e.target.closest("a")) return;
+      fecharSecao();
+    };
+    // Equivalente por teclado (o título tem o link de âncora do Quarto, então não vira botão).
+    const fechar = document.createElement("button");
+    fechar.type = "button";
+    fechar.className = "iconbtn secao-fechar";
+    fechar.textContent = "Fechar seção ×";
+    fechar.onclick = fecharSecao;
+    h2.insertAdjacentElement("afterend", fechar);
+  });
   const hash = SECOES_VEREDITOS.indexOf(window.location.hash.slice(1));
-  if (hash >= 0) irParaSecao(hash);
-  else sincronizarSecoes();
+  irParaSecao(hash >= 0 ? hash : 0, { rolar: hash >= 0 });
 }
 
 /** Frase-resposta de uma pergunta (topo de cada seção), a partir dos vereditos por componente. */
@@ -250,6 +272,31 @@ export function renderizarViesComDestaque(vies) {
     .join(" ");
 }
 
+/**
+ * Erro e Spearman por dobra (F6.5 4e): dois painéis pequenos lado a lado, um ponto por
+ * dobra, com a caixa de valor ao passar o mouse.
+ */
+export function graficoDobras(dobras) {
+  if (!dobras?.length) return "";
+  const W = 150;
+  const H = 96;
+  const m = { l: 30, r: 6, t: 8, b: 20 };
+  const x = d3.scalePoint().domain(dobras.map((d) => d.dobra)).range([m.l + 8, W - m.r - 8]);
+  const painel = (titulo, chave, dominio, fmt) => {
+    const y = d3.scaleLinear().domain(dominio).nice().range([H - m.b, m.t]);
+    const ticks = y.ticks(3);
+    const eixo = ticks.map((v) => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${css("--line")}" stroke-width="0.5"/><text x="${m.l - 4}" y="${y(v)}" text-anchor="end" dominant-baseline="middle" font-size="9">${fmt(v)}</text>`).join("");
+    const eixoX = dobras.map((d) => `<text x="${x(d.dobra)}" y="${H - 6}" text-anchor="middle" font-size="9">${d.dobra}</text>`).join("");
+    const pontos = dobras
+      .map((d) => `<circle cx="${x(d.dobra)}" cy="${y(d[chave])}" r="3.5" fill="${css("--accent")}"/><rect x="${x(d.dobra) - 11}" y="${m.t}" width="22" height="${H - m.b - m.t}" fill="transparent" data-dica-titulo="dobra ${attr(d.dobra)}" data-dica-valor="erro ${attr(formatar(d.razao_erro, 2))} · Spearman ${attr(formatar(d.spearman, 2))}" data-dica-base="1 = o erro do modelo é igual ao da linha de base; abaixo de 1, o modelo erra menos"/>`)
+      .join("");
+    return `<div class="dobras-painel"><div class="sub">${titulo}</div><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${titulo} por dobra">${eixo}${eixoX}${pontos}</svg></div>`;
+  };
+  const erros = dobras.map((d) => d.razao_erro);
+  const sps = dobras.map((d) => d.spearman);
+  return `<header class="graf-cab"><span class="sub">Erro e Spearman por dobra</span></header><div class="grafico-dica">Cada ponto é uma dobra da validação (uma parte das áreas deixada de fora do treino). À esquerda, a razão do erro do modelo contra a linha de base (abaixo de 1, o modelo erra menos); à direita, o Spearman entre o previsto e o observado (quanto mais perto de 1, melhor a ordem). Passe o mouse num ponto.</div><div class="dobras-graficos" data-grafico="dobras">${painel("Razão do erro", "razao_erro", [Math.min(0, ...erros), Math.max(1, ...erros)], (v) => formatar(v, 1))}${painel("Spearman", "spearman", [Math.min(...sps), 1], (v) => formatar(v, 2))}</div>`;
+}
+
 /** Monta o HTML dos blocos do modelo — função pura (testável sem DOM). */
 export function montarModeloHtml(modeloComponenteBruto) {
   const m = blocoModelo(modeloComponenteBruto);
@@ -264,10 +311,7 @@ export function montarModeloHtml(modeloComponenteBruto) {
   const viesResp = renderizarViesComDestaque(m.vies);
   // N15/B1: as curvas ficam recolhidas, sem as linhas cruas — só a nota e a importância (pendência F7).
   const curvasResp = `<div class="sub">Os nomes das categorias entram na próxima edição (pendência F7).</div><div class="sub" style="margin-top:6px">Importância: ${formatarListaImportancia(m.importancia)}</div>`;
-  const dobrasResp = (m.confianca.dobras ?? [])
-    .map((d) => `dobra ${d.dobra}: erro ${formatar(d.razao_erro, 2)} · Spearman ${formatar(d.spearman, 2)}`)
-    .join(" · ");
-  const confiancaResp = `${dobrasResp ? `<div class="sub">${dobrasResp}</div>` : ""}Moran dos resíduos I=${formatar(m.confianca.moran_residuos?.I, 2)} (p=${formatar(m.confianca.moran_residuos?.p, 2)}) · cobertura (d): modelo ${formatarPercentual(m.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m.confianca.cobertura_d?.base * 100, 0)}`;
+  const confiancaResp = `${graficoDobras(m.confianca.dobras)}Moran dos resíduos I=${formatar(m.confianca.moran_residuos?.I, 2)} (p=${formatar(m.confianca.moran_residuos?.p, 2)}) · cobertura (d): modelo ${formatarPercentual(m.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m.confianca.cobertura_d?.base * 100, 0)}`;
 
   const respostas = { ganho: ganhoResp, ordem: ordemResp, calibracao: calibResp, vies: viesResp, curvas: curvasResp, confianca: confiancaResp };
   return BLOCOS_MODELO.map((b) => linhaPergunta(b.titulo, respostas[b.chave], b.significado, { recolhido: b.recolhido })).join("");
@@ -441,7 +485,7 @@ export async function iniciarConfiabilidade() {
     carregarJSON(edicao.origem, "referencia_fjp.json"),
   ]);
 
-  renderizarFjpConfiabilidade($("f3-fjp"), referenciaFjp);
+  renderizarFjp($("f3-fjp"), referenciaFjp, { titulo: "sub" });
   renderizarPonte($("f3-ponte-tabela"), qualidade.ponte);
   renderizarFontes($("f3-fontes-timeline"), manifesto);
   renderizarSigilo($("f3-sigilo-cartoes"), qualidade.sigilo);
@@ -459,6 +503,8 @@ export async function iniciarConfiabilidade() {
   $("f3-resposta-2").textContent = fraseResposta(veredictoPergunta2Cels, "Lugar certo");
   $("f3-resposta-3").textContent = fraseResposta(veredictoPergunta3Cels, "Comparável");
   $("f3-resposta-4").textContent = `${veredictoPergunta4(achados).numero} achado(s) público(s) registrado(s).`;
+  instalarAjudas(painel);
+  ligarDicaPorAtributos(painel);
   ligarNavegacaoSecoes();
 
   const segComp = $("f3-seg-comp");

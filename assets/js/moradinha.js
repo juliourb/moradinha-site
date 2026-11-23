@@ -104316,6 +104316,7 @@ function esconderDica() {
 function ligarDica(alvos, texto) {
   const lista = alvos?.nodes ? alvos.nodes() : alvos instanceof Element ? [alvos] : [...alvos ?? []];
   for (const el2 of lista) {
+    if (el2.classList.contains("dica-alvo")) continue;
     el2.classList.add("dica-alvo");
     const dado = () => el2.__data__;
     const mostrar = (e67) => {
@@ -104364,13 +104365,13 @@ function criarAjuda(texto) {
   return b10;
 }
 function instalarAjudas(raiz = document) {
-  for (const dica of raiz.querySelectorAll(".grafico-dica")) {
-    const alvo = dica.previousElementSibling;
-    const texto = dica.textContent.trim();
+  for (const dica2 of raiz.querySelectorAll(".grafico-dica")) {
+    const alvo = dica2.previousElementSibling;
+    const texto = dica2.textContent.trim();
     if (!alvo || !texto) continue;
     if (/^(HEADER|H[1-6])$/.test(alvo.tagName)) {
       alvo.appendChild(criarAjuda(texto));
-      dica.remove();
+      dica2.remove();
     }
   }
 }
@@ -104418,7 +104419,7 @@ function css2(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 function linhaComponente(linha, componente, periodo) {
-  const dica = (v5, faixa2) => `data-dica-titulo="${attr(CLAB3[componente])}" data-dica-valor="${attr(formatar(v5, 1))} domic\xEDlios" ${faixa2 ? `data-dica-faixa="${attr(formatar(faixa2[0], 1))} a ${attr(formatar(faixa2[1], 1))}"` : 'data-dica-base="sem faixa de 95% para este componente"'}`;
+  const dica2 = (v5, faixa2) => `data-dica-titulo="${attr(CLAB3[componente])}" data-dica-valor="${attr(formatar(v5, 1))} domic\xEDlios" ${faixa2 ? `data-dica-faixa="${attr(formatar(faixa2[0], 1))} a ${attr(formatar(faixa2[1], 1))}"` : 'data-dica-base="sem faixa de 95% para este componente"'}`;
   const v4 = brutoHex(linha, componente, periodo);
   const faixa = faixaHex(linha, componente, periodo);
   if (v4 == null) {
@@ -104426,7 +104427,7 @@ function linhaComponente(linha, componente, periodo) {
   }
   const maximoEixo = Math.max(faixa ? faixa[1] : v4, 0.01) * 1.15;
   const pc2 = (x5) => 100 * x5 / maximoEixo;
-  return `<div class="comp-row" ${dica(v4, faixa)}><span>${CLAB3[componente]}</span><div class="bar">${faixa ? `<div class="rng" style="left:${pc2(faixa[0])}%;width:${pc2(faixa[1] - faixa[0])}%"></div>` : ""}<div class="pt" style="left:${pc2(v4)}%"></div></div><span class="num" style="text-align:right">${formatar(v4, 1)}</span></div>`;
+  return `<div class="comp-row" ${dica2(v4, faixa)}><span>${CLAB3[componente]}</span><div class="bar">${faixa ? `<div class="rng" style="left:${pc2(faixa[0])}%;width:${pc2(faixa[1] - faixa[0])}%"></div>` : ""}<div class="pt" style="left:${pc2(v4)}%"></div></div><span class="num" style="text-align:right">${formatar(v4, 1)}</span></div>`;
 }
 function sparkline(linha, componente, medida, manifesto) {
   const isRel = medida === "relativo";
@@ -105211,7 +105212,7 @@ function rotulo(chave) {
   return ROTULOS[chave] ?? chave;
 }
 
-// src/js/visaoGeral.js
+// src/js/ui/fjp.js
 var NOME_INDICADOR = {
   total: "Total",
   habitacao_precaria: "Habita\xE7\xE3o prec\xE1ria",
@@ -105219,6 +105220,49 @@ var NOME_INDICADOR = {
   onus: "\xD4nus excessivo com aluguel",
   domicilios: "Domic\xEDlios"
 };
+var AJUDA = "Cada linha compara um indicador do d\xE9ficit em tr\xEAs n\xFAmeros: o que a FJP publica sem a parte do Cad\xDAnico (que a PNADc n\xE3o capta), o que o moradinha reconstr\xF3i na PNADc com a faixa de 95%, e o total que ficou no mapa. Passe o mouse num n\xFAmero para ver de onde vem.";
+function renderizarFjp(el2, referenciaFjp, { titulo = "h3" } = {}) {
+  const itens = fjpTresValores(referenciaFjp ?? []);
+  if (!itens.length) {
+    el2.innerHTML = `<p class="empty">Sem refer\xEAncia da FJP neste pacote.</p>`;
+    return;
+  }
+  const anoRef = itens[0]?.ano_ref;
+  const texto = `Compara\xE7\xE3o com a FJP${anoRef != null ? `, ${anoRef}` : ""}`;
+  const num = (v4) => v4 == null ? "\u2014" : formatar(v4, 0);
+  const cab = titulo === "h3" ? `<h3>${texto}</h3>` : `<header class="graf-cab"><span class="sub">${texto}</span></header>`;
+  const linhas = itens.map((item) => {
+    const nome = NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador);
+    const faixaTxt = item.faixa ? `faixa de 95%: ${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : "sem faixa de 95%";
+    const dentro = item.dentro == null ? "" : ` \xB7 o valor da FJP sem Cad\xDAnico cai ${item.dentro ? "dentro" : "fora"} da faixa`;
+    const obs = item.cadUnico > 0 && item.fjp_publicado != null && ["total", "habitacao_precaria"].includes(item.indicador) ? `<div class="fjp-sub fjp-obs">A FJP publica ${formatar(item.fjp_publicado, 0)}, dos quais ${formatar(item.cadUnico, 0)} s\xE3o improvisados do Cad\xDAnico, que a PNADc n\xE3o capta.</div>` : "";
+    const fonte = item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : "";
+    const dica2 = (coluna, valor, faixa, base) => `data-dica-titulo="${attr(nome)} \xB7 ${attr(coluna)}" data-dica-valor="${attr(valor)}"${faixa ? ` data-dica-faixa="${attr(faixa)}"` : ""}${base ? ` data-dica-base="${attr(base)}"` : ""}`;
+    return `<div class="fjp-linha">
+        <h4>${nome}</h4>
+        <div class="fjp-colunas">
+          <div class="fjp-col" ${dica2("FJP compar\xE1vel", item.semCadUnico == null ? "a preencher" : num(item.semCadUnico), null, item.fjp_fonte)}><div class="k">FJP compar\xE1vel (sem Cad\xDAnico)</div>
+            <div class="v ${item.semCadUnico == null ? "a-preencher" : ""}" data-num="${item.semCadUnico ?? ""}">${item.semCadUnico == null ? "a preencher" : num(item.semCadUnico)}</div>
+          </div>
+          <div class="fjp-col" ${dica2("reconstru\xE7\xE3o na PNADc", num(item.reconstrucao_pnadc), item.faixa ? `${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : null, item.faixa ? null : "sem faixa de 95%")}><div class="k">Reconstru\xE7\xE3o do moradinha na PNADc</div>
+            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${num(item.reconstrucao_pnadc)}</div>
+            <div class="fjp-sub">${faixaTxt}${dentro}</div>
+          </div>
+          <div class="fjp-col" ${dica2("total do mapa", num(item.mapa), null, "soma dos hex\xE1gonos")}><div class="k">Total do mapa</div>
+            <div class="v" data-num="${item.mapa ?? ""}">${num(item.mapa)}</div>
+          </div>
+        </div>
+        ${obs}
+        <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
+        ${fonte}
+      </div>`;
+  }).join("");
+  el2.innerHTML = `${cab}<div class="grafico-dica">${AJUDA}</div><div data-grafico="tabela-fjp">${linhas}</div>`;
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
+}
+
+// src/js/visaoGeral.js
 var GRAVIDADE_ORDEM = ["crit", "warn", "info"];
 var NOME_GRAVIDADE = { crit: "Cr\xEDtico", warn: "Aten\xE7\xE3o", info: "Informativo" };
 function $5(id3) {
@@ -105299,35 +105343,6 @@ function renderizarCartoes(el2, manifesto, totais) {
     };
     el2.appendChild(card);
   }
-}
-function renderizarFjp(el2, referenciaFjp) {
-  const itens = fjpTresValores(referenciaFjp);
-  const anoRef = itens[0]?.ano_ref;
-  const num = (v4) => v4 == null ? "\u2014" : formatar(v4, 0);
-  el2.innerHTML = `<h3>Compara\xE7\xE3o com a FJP${anoRef != null ? `, ${anoRef}` : ""}</h3>` + itens.map((item) => {
-    const faixaTxt = item.faixa ? `faixa de 95%: ${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : "sem faixa de 95%";
-    const dentro = item.dentro == null ? "" : ` \xB7 o valor da FJP sem Cad\xDAnico cai ${item.dentro ? "dentro" : "fora"} da faixa`;
-    const obs = item.cadUnico > 0 && item.fjp_publicado != null && ["total", "habitacao_precaria"].includes(item.indicador) ? `<div class="fjp-sub fjp-obs">A FJP publica ${formatar(item.fjp_publicado, 0)}, dos quais ${formatar(item.cadUnico, 0)} s\xE3o improvisados do Cad\xDAnico, que a PNADc n\xE3o capta.</div>` : "";
-    const fonte = item.fjp_publicado != null ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` \xB7 <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>` : "";
-    return `<div class="fjp-linha">
-        <h4>${NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador)}</h4>
-        <div class="fjp-colunas">
-          <div class="fjp-col"><div class="k">FJP compar\xE1vel (sem Cad\xDAnico)</div>
-            <div class="v ${item.semCadUnico == null ? "a-preencher" : ""}" data-num="${item.semCadUnico ?? ""}">${item.semCadUnico == null ? "a preencher" : num(item.semCadUnico)}</div>
-          </div>
-          <div class="fjp-col"><div class="k">Reconstru\xE7\xE3o do moradinha na PNADc</div>
-            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${num(item.reconstrucao_pnadc)}</div>
-            <div class="fjp-sub">${faixaTxt}${dentro}</div>
-          </div>
-          <div class="fjp-col"><div class="k">Total do mapa</div>
-            <div class="v" data-num="${item.mapa ?? ""}">${num(item.mapa)}</div>
-          </div>
-        </div>
-        ${obs}
-        <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
-        ${fonte}
-      </div>`;
-  }).join("");
 }
 function renderizarMarcas(el2, totais) {
   const marcas = marcasDoDominio(totais);
@@ -105591,7 +105606,10 @@ function spearmanContraBase(spearman, manifesto) {
 }
 
 // src/js/confiabilidade.js
-var NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habita\xE7\xE3o prec\xE1ria", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus excessivo com aluguel", domicilios: "Domic\xEDlios" };
+var NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habita\xE7\xE3o prec\xE1ria", precariedade: "Precariedade", coabitacao: "Coabita\xE7\xE3o", onus: "\xD4nus excessivo com aluguel", domicilios: "Domic\xEDlios" };
+function dica(titulo, valor, base) {
+  return `data-dica-titulo="${attr(titulo)}" data-dica-valor="${attr(valor)}"${base ? ` data-dica-base="${attr(base)}"` : ""}`;
+}
 function $6(id3) {
   return document.getElementById(id3);
 }
@@ -105603,24 +105621,27 @@ function renderizarFontes(el2, manifesto) {
     const fonte = rotuloFonteEstoque(p4.fonte_estoque);
     const troca = p4.marcas?.includes("fonte_estoque_diferente") || p4.marcas?.includes("media_inclui_fonte_diferente");
     const marcasTxt = (p4.marcas ?? []).map((m4) => rotuloMarca(m4)).join("; ");
-    return `<span class="passo${troca ? " troca" : ""}" title="${p4.rotulo}: ${fonte}${marcasTxt ? ` \u2014 ${marcasTxt}` : ""}">${p4.rotulo}: ${fonte}</span>`;
+    return `<span class="passo${troca ? " troca" : ""}" ${dica(p4.rotulo, fonte, marcasTxt || null)}>${p4.rotulo}: ${fonte}</span>`;
   }).join("")}</div>`;
+  marcarGrafico(el2, "tabela-fontes");
 }
 function renderizarSigilo(el2, sigilo) {
   el2.innerHTML = `
-    <div class="cartao-f3"><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos</div></div>
-    <div class="cartao-f3"><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos</div></div>`;
+    <div class="cartao-f3" ${dica("Sem dado (sigilo total)", `${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos`, "hex\xE1gonos sem nenhum dado public\xE1vel")}><div class="k">Sem dado (sigilo total)</div><div class="v" data-num="${sigilo.hex_sem_dado}">${formatar(sigilo.hex_sem_dado, 0)} hex\xE1gonos</div></div>
+    <div class="cartao-f3" ${dica("Parte em sigilo", `${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos`, "hex\xE1gonos com alguma parte em sigilo")}><div class="k">Parte em sigilo</div><div class="v" data-num="${sigilo.hex_parcial}">${formatar(sigilo.hex_parcial, 0)} hex\xE1gonos</div></div>`;
+  marcarGrafico(el2, "cartoes-sigilo");
 }
 function renderizarAps(el2, aps) {
   el2.innerHTML = aps.map(
-    (a5) => `<div class="cartao-f3"><div class="k">${CLAB5[a5.componente] ?? a5.componente}</div>
+    (a5) => `<div class="cartao-f3" ${dica(CLAB5[a5.componente] ?? a5.componente, `${formatar(a5.n_aps, 0)} APs`, `${formatar(a5.n_ressalva, 0)} com ressalva \xB7 ${formatar(a5.n_sem_direta, 0)} sem amostra direta`)}><div class="k">${CLAB5[a5.componente] ?? a5.componente}</div>
         <div class="v" data-num="${a5.n_aps}">${formatar(a5.n_aps, 0)} APs</div>
         <div class="sub">${formatar(a5.n_ressalva, 0)} com ressalva \xB7 ${formatar(a5.n_sem_direta, 0)} sem amostra direta</div></div>`
   ).join("");
+  marcarGrafico(el2, "cartoes-aps");
 }
 function renderizarPonte(el2, ponte) {
   el2.innerHTML = `<table class="ponte"><thead><tr><th>Indicador</th><th>PNADc</th><th>Censo</th><th>Raz\xE3o</th><th>Leitura</th></tr></thead><tbody>${ponte.map(
-    (p4) => `<tr>
+    (p4) => `<tr ${dica(NOME_INDICADOR_FJP[p4.indicador] ?? rotulo(p4.indicador), `PNADc ${p4.pnadc == null ? "\u2014" : formatar(p4.pnadc, 1)} \xB7 Censo ${p4.censo == null ? "\u2014" : formatar(p4.censo, 1)} \xB7 raz\xE3o ${p4.razao == null ? "\u2014" : formatar(p4.razao, 2)}`, p4.leitura)}>
         <td>${NOME_INDICADOR_FJP[p4.indicador] ?? rotulo(p4.indicador)}</td>
         <td data-num="${p4.pnadc ?? ""}">${p4.pnadc == null ? "\u2014" : `${formatar(p4.pnadc, 1)} (EP ${formatar(p4.pnadc_ep, 1)})`}</td>
         <td data-num="${p4.censo ?? ""}">${p4.censo == null ? "\u2014" : formatar(p4.censo, 1)}</td>
@@ -105628,6 +105649,7 @@ function renderizarPonte(el2, ponte) {
         <td class="sub">${p4.leitura}</td>
       </tr>`
   ).join("")}</tbody></table>`;
+  marcarGrafico(el2, "tabela-ponte");
 }
 function renderizarCnefe(el2, cnefe) {
   if (!cnefe) {
@@ -105635,27 +105657,11 @@ function renderizarCnefe(el2, cnefe) {
     return;
   }
   el2.innerHTML = `
-    <div class="cartao-f3"><div class="k">Endere\xE7os</div><div class="v" data-num="${cnefe.enderecos}">${formatar(cnefe.enderecos, 0)}</div></div>
-    <div class="cartao-f3"><div class="k">Hex\xE1gonos sem endere\xE7o</div><div class="v" data-num="${cnefe.hex_sem_endereco}">${formatar(cnefe.hex_sem_endereco, 0)}</div>
+    <div class="cartao-f3" ${dica("Endere\xE7os", formatar(cnefe.enderecos, 0), "endere\xE7os do CNEFE no dom\xEDnio")}><div class="k">Endere\xE7os</div><div class="v" data-num="${cnefe.enderecos}">${formatar(cnefe.enderecos, 0)}</div></div>
+    <div class="cartao-f3" ${dica("Hex\xE1gonos sem endere\xE7o", formatar(cnefe.hex_sem_endereco, 0), `${formatar(cnefe.domicilios_nesses_hex, 0)} domic\xEDlios nesses hex\xE1gonos`)}><div class="k">Hex\xE1gonos sem endere\xE7o</div><div class="v" data-num="${cnefe.hex_sem_endereco}">${formatar(cnefe.hex_sem_endereco, 0)}</div>
       <div class="sub">${formatar(cnefe.domicilios_nesses_hex, 0)} domic\xEDlios nesses hex\xE1gonos</div></div>
-    <div class="cartao-f3"><div class="k">Correla\xE7\xE3o com o hex\xE1gono</div><div class="v" data-num="${cnefe.correlacao_hex}">${formatar(cnefe.correlacao_hex, 2)}</div></div>`;
-}
-function renderizarFjpConfiabilidade(el2, referenciaFjp) {
-  const itens = fjpTresValores(referenciaFjp ?? []);
-  if (!itens.length) {
-    el2.innerHTML = `<p class="empty">Sem refer\xEAncia da FJP neste pacote.</p>`;
-    return;
-  }
-  const anoRef = itens[0]?.ano_ref;
-  el2.innerHTML = `<p class="sub">Compara\xE7\xE3o com a FJP${anoRef != null ? `, ${anoRef}` : ""}.</p><table class="ponte"><thead><tr><th>Indicador</th><th>FJP publicado</th><th>Parte do Cad\xDAnico</th><th>FJP sem Cad\xDAnico</th><th>Cai na faixa de 95%?</th></tr></thead><tbody>${itens.map(
-    (item) => `<tr>
-        <td>${NOME_INDICADOR_FJP[item.indicador] ?? rotulo(item.indicador)}</td>
-        <td data-num="${item.fjp_publicado ?? ""}">${item.fjp_publicado == null ? "a preencher" : formatar(item.fjp_publicado, 0)}</td>
-        <td data-num="${item.cadUnico}">${formatar(item.cadUnico, 0)}</td>
-        <td data-num="${item.semCadUnico ?? ""}">${formatar(item.semCadUnico, 0)}</td>
-        <td>${item.dentro == null ? "\u2014" : item.dentro ? "dentro" : "fora"}</td>
-      </tr>`
-  ).join("")}</tbody></table>`;
+    <div class="cartao-f3" ${dica("Correla\xE7\xE3o com o hex\xE1gono", formatar(cnefe.correlacao_hex, 2), "correla\xE7\xE3o entre endere\xE7os e domic\xEDlios por hex\xE1gono")}><div class="k">Correla\xE7\xE3o com o hex\xE1gono</div><div class="v" data-num="${cnefe.correlacao_hex}">${formatar(cnefe.correlacao_hex, 2)}</div></div>`;
+  marcarGrafico(el2, "cartoes-cnefe");
 }
 function renderizarOqueFalta(el2, qualidade, manifesto) {
   const matriz = matrizOqueFalta(qualidade, manifesto);
@@ -105663,33 +105669,44 @@ function renderizarOqueFalta(el2, qualidade, manifesto) {
     el2.innerHTML = `<p class="empty">Sem lacunas registradas neste pacote.</p>`;
     return;
   }
-  el2.innerHTML = `<table class="grade-oquefalta"><thead><tr><th>Vari\xE1vel</th>${manifesto.periodos.map((p4) => `<th>${p4.rotulo}</th>`).join("")}</tr></thead><tbody>${matriz.map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c3) => `<td>${c3.uso}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  el2.innerHTML = `<table class="grade-oquefalta"><thead><tr><th>Vari\xE1vel</th>${manifesto.periodos.map((p4) => `<th>${p4.rotulo}</th>`).join("")}</tr></thead><tbody>${matriz.map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c3, i3) => `<td ${dica(`${rotulo(linha.variavel)} \xB7 ${manifesto.periodos[i3]?.rotulo ?? ""}`, c3.uso)}>${c3.uso}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  marcarGrafico(el2, "tabela-oquefalta");
 }
 var SECOES_VEREDITOS = ["f3-secao-dados", "f3-secao-modelo", "f3-secao-consistencia", "f3-secao-achados"];
-var secaoAtual = null;
+var secaoAtual = 0;
+var celulaAtual = null;
 function sincronizarSecoes() {
   SECOES_VEREDITOS.forEach((id3, i3) => {
     const el2 = $6(id3);
-    if (el2) el2.hidden = i3 !== secaoAtual;
+    if (!el2) return;
+    el2.hidden = i3 !== secaoAtual;
   });
-  document.querySelectorAll("button[data-secao]").forEach((b10) => b10.setAttribute("aria-expanded", String(Number(b10.dataset.secao) === secaoAtual)));
+  const botoes = [...document.querySelectorAll("button[data-secao]")];
+  const daSecao = botoes.filter((b10) => Number(b10.dataset.secao) === secaoAtual);
+  const escolhida = daSecao.includes(celulaAtual) ? celulaAtual : daSecao[0] ?? null;
+  botoes.forEach((b10) => {
+    b10.setAttribute("aria-expanded", String(b10 === escolhida));
+    if (b10 === escolhida) b10.setAttribute("aria-current", "true");
+    else b10.removeAttribute("aria-current");
+  });
   document.querySelectorAll(".nav-lateral a").forEach((a5) => {
-    if (SECOES_VEREDITOS[secaoAtual] && a5.getAttribute("href") === `#${SECOES_VEREDITOS[secaoAtual]}`) a5.setAttribute("aria-current", "true");
+    if (SECOES_VEREDITOS[secaoAtual] && a5.hash === `#${SECOES_VEREDITOS[secaoAtual]}`) a5.setAttribute("aria-current", "true");
     else a5.removeAttribute("aria-current");
   });
 }
-function irParaSecao(indice, { alternar = false } = {}) {
+function irParaSecao(indice, { celula = null, rolar = true } = {}) {
   const i3 = Math.max(0, Math.min(SECOES_VEREDITOS.length - 1, indice));
-  if (alternar && secaoAtual === i3) {
-    secaoAtual = null;
-    sincronizarSecoes();
-    return;
-  }
   secaoAtual = i3;
+  celulaAtual = celula;
   sincronizarSecoes();
   const el2 = $6(SECOES_VEREDITOS[i3]);
-  el2?.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (rolar) el2?.scrollIntoView({ behavior: "smooth", block: "start" });
   el2?.focus({ preventScroll: true });
+}
+function fecharSecao() {
+  secaoAtual = null;
+  celulaAtual = null;
+  sincronizarSecoes();
 }
 function classeVeredicto(v4) {
   if (v4 === "sim" || v4 === "bate") return "ok";
@@ -105718,8 +105735,7 @@ function renderizarVereditos(el2, { qualidade, referenciaFjp, modelo, manifesto,
       <tr><th scope="row">4. O que ainda n\xE3o sabemos</th><td colspan="${componentes.length}"><button type="button" class="vereditocel" data-secao="3"><span class="numero">${formatar(p4.numero, 0)} achados p\xFAblicos</span></button></td></tr>
     </tbody></table>`;
   el2.querySelectorAll("button[data-secao]").forEach((b10) => {
-    b10.setAttribute("aria-expanded", "false");
-    b10.onclick = () => irParaSecao(Number(b10.dataset.secao), { alternar: true });
+    b10.onclick = () => irParaSecao(Number(b10.dataset.secao), { celula: b10 });
   });
   return { veredictoPergunta1Cels: linhas[0].cels, veredictoPergunta2Cels: linhas[1].cels, veredictoPergunta3Cels: linhas[2].cels };
 }
@@ -105729,15 +105745,32 @@ function ligarNavegacaoSecoes() {
     if (e67.key === "ArrowRight") irParaSecao(secaoAtual + 1);
     else if (e67.key === "ArrowLeft") irParaSecao(secaoAtual - 1);
   });
-  document.querySelectorAll(".nav-lateral a[href^='#f3-secao']").forEach((a5) => {
+  document.querySelectorAll(".nav-lateral a").forEach((a5) => {
     a5.addEventListener("click", (e67) => {
+      const i3 = SECOES_VEREDITOS.indexOf(a5.hash.slice(1));
+      if (i3 < 0) return;
       e67.preventDefault();
-      irParaSecao(SECOES_VEREDITOS.indexOf(a5.getAttribute("href").slice(1)));
+      irParaSecao(i3);
     });
   });
+  SECOES_VEREDITOS.forEach((id3) => {
+    const h22 = $6(id3)?.querySelector("h2");
+    if (!h22) return;
+    h22.style.cursor = "pointer";
+    h22.title = "Clique no t\xEDtulo para fechar esta se\xE7\xE3o";
+    h22.onclick = (e67) => {
+      if (e67.target.closest("a")) return;
+      fecharSecao();
+    };
+    const fechar = document.createElement("button");
+    fechar.type = "button";
+    fechar.className = "iconbtn secao-fechar";
+    fechar.textContent = "Fechar se\xE7\xE3o \xD7";
+    fechar.onclick = fecharSecao;
+    h22.insertAdjacentElement("afterend", fechar);
+  });
   const hash = SECOES_VEREDITOS.indexOf(window.location.hash.slice(1));
-  if (hash >= 0) irParaSecao(hash);
-  else sincronizarSecoes();
+  irParaSecao(hash >= 0 ? hash : 0, { rolar: hash >= 0 });
 }
 function fraseResposta(cels, rotuloVerbo) {
   const partes = cels.map((c3) => `${CLAB5[c3.c]} ${c3.veredicto ?? "\u2014"}`);
@@ -105774,6 +105807,24 @@ function renderizarViesComDestaque(vies) {
     return `<span class="vies-pill${fora ? " fora" : ""}" title="${v4.grupo_tipo}">${v4.grupo}: ${formatar(v4.razao_somas, 2)}</span>`;
   }).join(" ");
 }
+function graficoDobras(dobras) {
+  if (!dobras?.length) return "";
+  const W4 = 150;
+  const H4 = 96;
+  const m4 = { l: 30, r: 6, t: 8, b: 20 };
+  const x5 = point().domain(dobras.map((d3) => d3.dobra)).range([m4.l + 8, W4 - m4.r - 8]);
+  const painel = (titulo, chave, dominio, fmt) => {
+    const y5 = linear2().domain(dominio).nice().range([H4 - m4.b, m4.t]);
+    const ticks2 = y5.ticks(3);
+    const eixo = ticks2.map((v4) => `<line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(v4)}" y2="${y5(v4)}" stroke="${css6("--line")}" stroke-width="0.5"/><text x="${m4.l - 4}" y="${y5(v4)}" text-anchor="end" dominant-baseline="middle" font-size="9">${fmt(v4)}</text>`).join("");
+    const eixoX = dobras.map((d3) => `<text x="${x5(d3.dobra)}" y="${H4 - 6}" text-anchor="middle" font-size="9">${d3.dobra}</text>`).join("");
+    const pontos = dobras.map((d3) => `<circle cx="${x5(d3.dobra)}" cy="${y5(d3[chave])}" r="3.5" fill="${css6("--accent")}"/><rect x="${x5(d3.dobra) - 11}" y="${m4.t}" width="22" height="${H4 - m4.b - m4.t}" fill="transparent" data-dica-titulo="dobra ${attr(d3.dobra)}" data-dica-valor="erro ${attr(formatar(d3.razao_erro, 2))} \xB7 Spearman ${attr(formatar(d3.spearman, 2))}" data-dica-base="1 = o erro do modelo \xE9 igual ao da linha de base; abaixo de 1, o modelo erra menos"/>`).join("");
+    return `<div class="dobras-painel"><div class="sub">${titulo}</div><svg viewBox="0 0 ${W4} ${H4}" width="${W4}" height="${H4}" role="img" aria-label="${titulo} por dobra">${eixo}${eixoX}${pontos}</svg></div>`;
+  };
+  const erros = dobras.map((d3) => d3.razao_erro);
+  const sps = dobras.map((d3) => d3.spearman);
+  return `<header class="graf-cab"><span class="sub">Erro e Spearman por dobra</span></header><div class="grafico-dica">Cada ponto \xE9 uma dobra da valida\xE7\xE3o (uma parte das \xE1reas deixada de fora do treino). \xC0 esquerda, a raz\xE3o do erro do modelo contra a linha de base (abaixo de 1, o modelo erra menos); \xE0 direita, o Spearman entre o previsto e o observado (quanto mais perto de 1, melhor a ordem). Passe o mouse num ponto.</div><div class="dobras-graficos" data-grafico="dobras">${painel("Raz\xE3o do erro", "razao_erro", [Math.min(0, ...erros), Math.max(1, ...erros)], (v4) => formatar(v4, 1))}${painel("Spearman", "spearman", [Math.min(...sps), 1], (v4) => formatar(v4, 2))}</div>`;
+}
 function montarModeloHtml(modeloComponenteBruto) {
   const m4 = blocoModelo(modeloComponenteBruto);
   if (!m4.usado) {
@@ -105784,8 +105835,7 @@ function montarModeloHtml(modeloComponenteBruto) {
   const calibResp = `inclina\xE7\xE3o ${formatar(m4.calibracao.inclinacao, 2)} (IC ${formatar(m4.calibracao.ic_inclinacao?.[0], 2)}\u2013${formatar(m4.calibracao.ic_inclinacao?.[1], 2)})${renderizarCalibracaoDecis(m4.calibracao.decis)}`;
   const viesResp = renderizarViesComDestaque(m4.vies);
   const curvasResp = `<div class="sub">Os nomes das categorias entram na pr\xF3xima edi\xE7\xE3o (pend\xEAncia F7).</div><div class="sub" style="margin-top:6px">Import\xE2ncia: ${formatarListaImportancia(m4.importancia)}</div>`;
-  const dobrasResp = (m4.confianca.dobras ?? []).map((d3) => `dobra ${d3.dobra}: erro ${formatar(d3.razao_erro, 2)} \xB7 Spearman ${formatar(d3.spearman, 2)}`).join(" \xB7 ");
-  const confiancaResp = `${dobrasResp ? `<div class="sub">${dobrasResp}</div>` : ""}Moran dos res\xEDduos I=${formatar(m4.confianca.moran_residuos?.I, 2)} (p=${formatar(m4.confianca.moran_residuos?.p, 2)}) \xB7 cobertura (d): modelo ${formatarPercentual(m4.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m4.confianca.cobertura_d?.base * 100, 0)}`;
+  const confiancaResp = `${graficoDobras(m4.confianca.dobras)}Moran dos res\xEDduos I=${formatar(m4.confianca.moran_residuos?.I, 2)} (p=${formatar(m4.confianca.moran_residuos?.p, 2)}) \xB7 cobertura (d): modelo ${formatarPercentual(m4.confianca.cobertura_d?.modelo * 100, 0)}, base ${formatarPercentual(m4.confianca.cobertura_d?.base * 100, 0)}`;
   const respostas = { ganho: ganhoResp, ordem: ordemResp, calibracao: calibResp, vies: viesResp, curvas: curvasResp, confianca: confiancaResp };
   return BLOCOS_MODELO.map((b10) => linhaPergunta(b10.titulo, respostas[b10.chave], b10.significado, { recolhido: b10.recolhido })).join("");
 }
@@ -105903,7 +105953,7 @@ async function iniciarConfiabilidade() {
     carregarJSON(edicao.origem, "totais.json"),
     carregarJSON(edicao.origem, "referencia_fjp.json")
   ]);
-  renderizarFjpConfiabilidade($6("f3-fjp"), referenciaFjp);
+  renderizarFjp($6("f3-fjp"), referenciaFjp, { titulo: "sub" });
   renderizarPonte($6("f3-ponte-tabela"), qualidade.ponte);
   renderizarFontes($6("f3-fontes-timeline"), manifesto);
   renderizarSigilo($6("f3-sigilo-cartoes"), qualidade.sigilo);
@@ -105925,6 +105975,8 @@ async function iniciarConfiabilidade() {
   $6("f3-resposta-2").textContent = fraseResposta(veredictoPergunta2Cels, "Lugar certo");
   $6("f3-resposta-3").textContent = fraseResposta(veredictoPergunta3Cels, "Compar\xE1vel");
   $6("f3-resposta-4").textContent = `${veredictoPergunta4(achados).numero} achado(s) p\xFAblico(s) registrado(s).`;
+  instalarAjudas(painel);
+  ligarDicaPorAtributos(painel);
   ligarNavegacaoSecoes();
   const segComp = $6("f3-seg-comp");
   function atualizarModelo(componente) {
@@ -106307,7 +106359,12 @@ function renderizarPipeline(el2, pipeline, manifesto, config2) {
     const i3 = Math.max(0, Math.min(nosTabela.length - 1, idx));
     estado.tabela = i3;
     const no2 = nosTabela[i3];
-    document.querySelectorAll("#met-pipeline-expandido .no-tabela").forEach((g5) => g5.classList.toggle("selecionado", g5.dataset.id === no2.id));
+    document.querySelectorAll("#met-pipeline-expandido .no-tabela").forEach((g5) => {
+      const sel = g5.dataset.id === no2.id;
+      g5.classList.toggle("selecionado", sel);
+      if (sel) g5.setAttribute("aria-current", "true");
+      else g5.removeAttribute("aria-current");
+    });
     desenharPainelTabela(grupo, no2);
     ligarSetas((d3) => selecionarTabela(grupo, estado.tabela + d3));
   }
@@ -106316,7 +106373,12 @@ function renderizarPipeline(el2, pipeline, manifesto, config2) {
     estado.grupo = i3;
     estado.tabela = null;
     const grupo = grupos[i3];
-    el2.querySelectorAll(".no-pipeline").forEach((n3) => n3.setAttribute("aria-expanded", String(n3.dataset.grupo === grupo.nome)));
+    el2.querySelectorAll(".no-pipeline").forEach((n3) => {
+      const sel = n3.dataset.grupo === grupo.nome;
+      n3.setAttribute("aria-expanded", String(sel));
+      if (sel) n3.setAttribute("aria-current", "true");
+      else n3.removeAttribute("aria-current");
+    });
     const expandidoEl = $7("met-pipeline-expandido");
     nosTabela = [];
     if (grupo.nome === "Exporta\xE7\xE3o" && grupo.etapas.length === 1 && grupo.etapas[0].id === ID_NO_EXPORTACAO) {
@@ -106437,7 +106499,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "dbce71157ebf5dd2eff4fff009c5aee9f0249c09");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "13cfb524f8c7b92fd81a25421d8976844ef073de");
   renderizarInterna($7("met-interna"), modelo);
 }
 

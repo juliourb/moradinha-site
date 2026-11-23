@@ -45,6 +45,7 @@ export function esconderDica() {
 export function ligarDica(alvos, texto) {
   const lista = alvos?.nodes ? alvos.nodes() : alvos instanceof Element ? [alvos] : [...(alvos ?? [])];
   for (const el of lista) {
+    if (el.classList.contains("dica-alvo")) continue; // já ligado
     el.classList.add("dica-alvo");
     const dado = () => el.__data__;
     const mostrar = (e) => {

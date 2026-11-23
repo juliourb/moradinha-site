@@ -27,24 +27,29 @@ title: ""
       <p class="sub" id="f3-resposta-1"></p>
 
       <h3>FJP × moradinha</h3>
-      <div class="como-ler">Número publicado pela FJP (Fundação João Pinheiro), a parte do CadÚnico (que a PNADc não capta) e o número sem CadÚnico, comparável à reconstrução do moradinha.</div>
+      <div class="como-ler">Mesma tabela da Visão geral: o número da FJP comparável (sem a parte do CadÚnico, que a PNADc não capta), a reconstrução do moradinha na PNADc com a faixa de 95% e o total do mapa. A observação do CadÚnico aparece só em Total e Habitação precária.</div>
       <div id="f3-fjp"></div>
 
       <h3>A amostra da PNADc bate com o Censo?</h3>
+      <div class="grafico-dica">Compara, para cada componente, o número que a PNADc estima com o que o Censo 2022 mediu na amostra; a razão perto de 1 quer dizer que as duas fontes contam a mesma história. Passe o mouse numa linha para ver os valores e a leitura.</div>
       <div class="sub">PNADc = Pesquisa Nacional por Amostra de Domicílios contínua.</div>
       <div id="f3-ponte-tabela"></div>
 
       <h3>De onde vem o estoque, ano a ano?</h3>
+      <div class="grafico-dica">Para cada período, a fonte que deu o estoque de domicílios; a borda marcada indica troca de fonte, e por isso o período não deve ser comparado direto com os outros. Passe o mouse num período para ver os detalhes.</div>
       <div id="f3-fontes-timeline"></div>
 
       <h3>Quanto está em sigilo?</h3>
+      <div class="grafico-dica">Quantos hexágonos não têm nenhum dado publicável (sigilo total) e quantos têm só uma parte em sigilo, por proteção da amostra.</div>
       <div class="cartoes-f3" id="f3-sigilo-cartoes"></div>
 
       <h3>Cobertura do CNEFE</h3>
+      <div class="grafico-dica">Quantos endereços do cadastro do IBGE existem no domínio, quantos hexágonos ficaram sem endereço e o quanto os endereços acompanham os domicílios por hexágono.</div>
       <div class="como-ler">CNEFE = Cadastro Nacional de Endereços para Fins Estatísticos (IBGE).</div>
       <div class="cartoes-f3" id="f3-cnefe-cartoes"></div>
 
       <h3>As APs têm amostra direta confiável?</h3>
+      <div class="grafico-dica">Por componente, quantas áreas de ponderação (APs) existem, quantas têm ressalva (amostra pequena) e quantas não têm estimativa direta da amostra.</div>
       <div class="cartoes-f3" id="f3-aps-cartoes"></div>
     </section>
 
@@ -78,6 +83,7 @@ title: ""
       <div id="f3-achados"></div>
 
       <h3>O que falta</h3>
+      <div class="grafico-dica">Cada linha é uma variável usada no método e cada coluna, um período; a célula diz como a variável entrou naquele período (medida, imputada, ou ausente).</div>
       <div id="f3-oquefalta"></div>
     </section>
   </div>

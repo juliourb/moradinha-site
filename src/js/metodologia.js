@@ -159,7 +159,12 @@ function renderizarPipeline(el, pipeline, manifesto, config) {
     const i = Math.max(0, Math.min(nosTabela.length - 1, idx));
     estado.tabela = i;
     const no = nosTabela[i];
-    document.querySelectorAll("#met-pipeline-expandido .no-tabela").forEach((g) => g.classList.toggle("selecionado", g.dataset.id === no.id));
+    document.querySelectorAll("#met-pipeline-expandido .no-tabela").forEach((g) => {
+      const sel = g.dataset.id === no.id;
+      g.classList.toggle("selecionado", sel);
+      if (sel) g.setAttribute("aria-current", "true");
+      else g.removeAttribute("aria-current");
+    });
     desenharPainelTabela(grupo, no);
     ligarSetas((d) => selecionarTabela(grupo, estado.tabela + d));
   }
@@ -169,7 +174,12 @@ function renderizarPipeline(el, pipeline, manifesto, config) {
     estado.grupo = i;
     estado.tabela = null;
     const grupo = grupos[i];
-    el.querySelectorAll(".no-pipeline").forEach((n) => n.setAttribute("aria-expanded", String(n.dataset.grupo === grupo.nome)));
+    el.querySelectorAll(".no-pipeline").forEach((n) => {
+      const sel = n.dataset.grupo === grupo.nome;
+      n.setAttribute("aria-expanded", String(sel));
+      if (sel) n.setAttribute("aria-current", "true");
+      else n.removeAttribute("aria-current");
+    });
 
     const expandidoEl = $("met-pipeline-expandido");
     nosTabela = [];

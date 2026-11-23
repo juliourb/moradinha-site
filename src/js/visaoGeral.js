@@ -5,21 +5,17 @@ import * as d3 from "d3";
 import { carregarJSON, carregarPacoteCompleto, escolherDominioEEdicao } from "./dados/pacote.js";
 import {
   periodoRecenteAno, periodoRecenteMedia, componenteMaior, marcaMaisImportante,
-  dadosCartoesBI, marcasDoDominio, linhasParaCitar, fjpTresValores,
+  dadosCartoesBI, marcasDoDominio, linhasParaCitar,
   fraseRessalvaRelativo, fraseRuidoAnual, NOME_COMPONENTE, CLAB,
 } from "./dados/visaoGeral.js";
 import { rotuloMarca, classeMarca } from "./util/marcas.js";
-import { rotulo } from "./util/rotulos.js";
 import { formatar, formatarPercentual } from "./util/formato.js";
 import { prepararNavegacaoResultados } from "./estado/pergunta.js";
 import { criarMiniMapa } from "./mapa/index.js";
 import { renderizarPainelDetalhe, renderizarCurvaConcentracao } from "./graficos/deficit.js";
 import { ligarDica, marcarGrafico, htmlDica, instalarAjudas, criarAjuda } from "./ui/ajuda.js";
+import { renderizarFjp } from "./ui/fjp.js";
 
-const NOME_INDICADOR = {
-  total: "Total", habitacao_precaria: "Habitação precária", coabitacao: "Coabitação",
-  onus: "Ônus excessivo com aluguel", domicilios: "Domicílios",
-};
 const GRAVIDADE_ORDEM = ["crit", "warn", "info"];
 const NOME_GRAVIDADE = { crit: "Crítico", warn: "Atenção", info: "Informativo" };
 
@@ -116,42 +112,6 @@ function renderizarCartoes(el, manifesto, totais) {
     };
     el.appendChild(card);
   }
-}
-
-function renderizarFjp(el, referenciaFjp) {
-  const itens = fjpTresValores(referenciaFjp);
-  const anoRef = itens[0]?.ano_ref;
-  const num = (v) => (v == null ? "—" : formatar(v, 0));
-  el.innerHTML = `<h3>Comparação com a FJP${anoRef != null ? `, ${anoRef}` : ""}</h3>` + itens
-    .map((item) => {
-      const faixaTxt = item.faixa ? `faixa de 95%: ${formatar(item.faixa.inf, 0)} a ${formatar(item.faixa.sup, 0)}` : "sem faixa de 95%";
-      const dentro = item.dentro == null ? "" : ` · o valor da FJP sem CadÚnico cai ${item.dentro ? "dentro" : "fora"} da faixa`;
-      const obs = item.cadUnico > 0 && item.fjp_publicado != null && ["total", "habitacao_precaria"].includes(item.indicador)
-        ? `<div class="fjp-sub fjp-obs">A FJP publica ${formatar(item.fjp_publicado, 0)}, dos quais ${formatar(item.cadUnico, 0)} são improvisados do CadÚnico, que a PNADc não capta.</div>`
-        : "";
-      const fonte = item.fjp_publicado != null
-        ? `<div class="fjp-sub">${item.fjp_fonte}${item.fjp_tabela ? `, ${item.fjp_tabela}` : ""}${item.fjp_pagina ? `, p. ${item.fjp_pagina}` : ""}${item.fjp_url ? ` · <a href="${item.fjp_url}" target="_blank" rel="noopener">link</a>` : ""}</div>`
-        : "";
-      return `<div class="fjp-linha">
-        <h4>${NOME_INDICADOR[item.indicador] ?? rotulo(item.indicador)}</h4>
-        <div class="fjp-colunas">
-          <div class="fjp-col"><div class="k">FJP comparável (sem CadÚnico)</div>
-            <div class="v ${item.semCadUnico == null ? "a-preencher" : ""}" data-num="${item.semCadUnico ?? ""}">${item.semCadUnico == null ? "a preencher" : num(item.semCadUnico)}</div>
-          </div>
-          <div class="fjp-col"><div class="k">Reconstrução do moradinha na PNADc</div>
-            <div class="v" data-num="${item.reconstrucao_pnadc ?? ""}">${num(item.reconstrucao_pnadc)}</div>
-            <div class="fjp-sub">${faixaTxt}${dentro}</div>
-          </div>
-          <div class="fjp-col"><div class="k">Total do mapa</div>
-            <div class="v" data-num="${item.mapa ?? ""}">${num(item.mapa)}</div>
-          </div>
-        </div>
-        ${obs}
-        <div class="fjp-sub" style="margin-top:6px">${item.explicacao}</div>
-        ${fonte}
-      </div>`;
-    })
-    .join("");
 }
 
 function renderizarMarcas(el, totais) {

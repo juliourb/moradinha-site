@@ -9,7 +9,9 @@ test.describe("F6.4-3a: seções recolhíveis a partir do painel de vereditos", 
     await page.goto(URL);
     await page.waitForLoadState("networkidle");
     await expect(page.locator("#f3-grade-vereditos")).toBeVisible();
-    for (const id of SECOES) await expect(page.locator(id)).toBeHidden();
+    // F6.5 4a: a seção 1 já vem aberta; as outras, fechadas.
+    await expect(page.locator("#f3-secao-dados")).toBeVisible();
+    for (const id of SECOES.slice(1)) await expect(page.locator(id)).toBeHidden();
 
     await page.locator('button.vereditocel[data-secao="2"]').first().click();
     await expect(page.locator("#f3-secao-consistencia")).toBeVisible();
@@ -27,7 +29,9 @@ test.describe("F6.4-3a: seções recolhíveis a partir do painel de vereditos", 
     await page.keyboard.press("ArrowRight");
     await expect(page.locator("#f3-secao-achados")).toBeVisible();
 
-    await page.locator('button.vereditocel[data-secao="3"]').first().click(); // de novo: fecha
+    await page.locator('button.vereditocel[data-secao="3"]').first().click(); // F6.5 4f: de novo não fecha
+    await expect(page.locator("#f3-secao-achados")).toBeVisible();
+    await page.locator("#f3-secao-achados .secao-fechar").click();
     await expect(page.locator("#f3-secao-achados")).toBeHidden();
   });
 });

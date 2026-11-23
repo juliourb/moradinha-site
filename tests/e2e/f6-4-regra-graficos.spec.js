@@ -61,10 +61,11 @@ test.describe("regra geral dos gráficos (pacote real)", () => {
   test("Confiabilidade (seções Série comparável e Lugar certo)", async ({ page }) => {
     await page.goto("/confiabilidade.html?dominio=al_rm_maceio&edicao=bd10cbd");
     await page.waitForLoadState("networkidle");
-    await page.locator('button.vereditocel[data-secao="2"]').first().click();
-    await conferir(page, "#pane-confiabilidade");
-    await page.locator('button.vereditocel[data-secao="1"]').first().click();
-    await conferir(page, "#pane-confiabilidade");
+    // F6.5 4d: gráficos E tabelas/blocos de números, em todas as seções (a 1 já vem aberta).
+    for (const s of [0, 1, 2, 3]) {
+      await page.locator(`button.vereditocel[data-secao="${s}"]`).first().click();
+      await conferir(page, "#pane-confiabilidade");
+    }
   });
 });
 
