@@ -246,7 +246,7 @@ export async function iniciarVisaoGeral() {
     renderizarPainelDetalhe($("f2-det-onus"), manifesto, totais, "onus", "Ônus");
     renderizarPainelDetalhe($("f2-det-precariedade"), manifesto, totais, "precariedade", "Precariedade");
     $("f2-det-frase-ruido").textContent = fraseRuidoAnual(manifesto, totais);
-    $("f2-det-concentracao-titulo").textContent = `Curva de concentração — Total, ${anoRecente.rotulo}`;
+    $("f2-det-concentracao-titulo").firstChild.textContent = `Curva de concentração — Total, ${anoRecente.rotulo}`;
     renderizarCurvaConcentracao($("f2-det-concentracao"), linhasArr, "total", anoRecente.id);
   }
   function abrirDetalhes() {

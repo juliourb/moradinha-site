@@ -1,5 +1,6 @@
 ---
 title: ""
+suppress-bibliography: true
 ---
 
 {{< include textos/_cabecalho.qmd >}}
@@ -61,6 +62,8 @@ incerteza declarada. Quanto déficit há só se diz para o domínio; o mapa diz 
 ### Rastreio da execução
 
 <div id="met-rastreio"></div>
+
+{{< include textos/metodologia/_referencias.qmd >}}
 :::
 
 ::: {.content-visible when-profile="interno"}

@@ -3,5 +3,5 @@ Reúne, cada fonte na sua resolução original: do Censo 2022, o universo por se
 :::
 
 ::: {.explicacao}
-Nada é combinado antes da grade. [@ibge_censo2022; @ibge_pnadc; @sirko2021openbuildings; @souza2020mapbiomas]
+Nada é combinado antes da grade. [@ibge_censo2022; @ibge_cnefe2022; @ibge_fcu2022; @ibge_pnadc; @roman2018blackmarble; @sirko2021openbuildings; @sirko2023openbuildings25d; @souza2020mapbiomas; @mapbiomas_col11; @inep_censoescolar; @mds_mapasocial]
 :::

@@ -539,3 +539,7 @@ table.hm .destaque-periodo { outline: 2px solid var(--crit); outline-offset: -2p
 .met-download { margin: 12px 0; }
 .met-download button[disabled] { cursor: not-allowed; opacity: .6; }
 .graf-cab h4 { font-size: 13px; margin: 6px 0 2px; font-family: var(--body); font-weight: 700; }
+
+/* Referências (F6.4 4e): recuo francês */
+.lista-refs .ref-item { padding-left: 2em; text-indent: -2em; margin: 0 0 6px; font-size: 13px; line-height: 1.45; }
+.lista-refs .ref-item p { margin: 0; }

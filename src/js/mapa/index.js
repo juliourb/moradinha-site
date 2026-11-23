@@ -604,7 +604,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         <div class="legend-row especial"><span class="sw hachura" style="background:${css("--muted")}"></span><span class="faixa">menos de 1 domicílio</span><span class="n">${formatar(hachuraCount, 0)} hex.</span><span class="pct"></span></div>
       </div>
       ${notaTaxa}
-      <div class="note" style="margin-top:4px">Quebras naturais (Jenks), do menor ao maior déficit. Listrado = menos de 1 domicílio (fora das contas).</div>`;
+      <div class="note" style="margin-top:4px">Quebras naturais (Jenks, 1967), do menor ao maior déficit. Listrado = menos de 1 domicílio (fora das contas).</div>`;
 
     if (estado.medida === "relativo" && elementos.aoMudarRelativoModo) {
       elementos.legend.querySelectorAll('input[name="relmodo"]').forEach((el) => {

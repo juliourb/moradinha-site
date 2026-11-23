@@ -103925,7 +103925,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
         <div class="legend-row especial"><span class="sw hachura" style="background:${css("--muted")}"></span><span class="faixa">menos de 1 domic\xEDlio</span><span class="n">${formatar(hachuraCount, 0)} hex.</span><span class="pct"></span></div>
       </div>
       ${notaTaxa}
-      <div class="note" style="margin-top:4px">Quebras naturais (Jenks), do menor ao maior d\xE9ficit. Listrado = menos de 1 domic\xEDlio (fora das contas).</div>`;
+      <div class="note" style="margin-top:4px">Quebras naturais (Jenks, 1967), do menor ao maior d\xE9ficit. Listrado = menos de 1 domic\xEDlio (fora das contas).</div>`;
     if (estado.medida === "relativo" && elementos.aoMudarRelativoModo) {
       elementos.legend.querySelectorAll('input[name="relmodo"]').forEach((el2) => {
         el2.onchange = () => elementos.aoMudarRelativoModo(el2.value);
@@ -105409,7 +105409,7 @@ async function iniciarVisaoGeral() {
     renderizarPainelDetalhe($5("f2-det-onus"), manifesto, totais, "onus", "\xD4nus");
     renderizarPainelDetalhe($5("f2-det-precariedade"), manifesto, totais, "precariedade", "Precariedade");
     $5("f2-det-frase-ruido").textContent = fraseRuidoAnual(manifesto, totais);
-    $5("f2-det-concentracao-titulo").textContent = `Curva de concentra\xE7\xE3o \u2014 Total, ${anoRecente.rotulo}`;
+    $5("f2-det-concentracao-titulo").firstChild.textContent = `Curva de concentra\xE7\xE3o \u2014 Total, ${anoRecente.rotulo}`;
     renderizarCurvaConcentracao($5("f2-det-concentracao"), linhasArr, "total", anoRecente.id);
   }
   function abrirDetalhes() {
@@ -106440,7 +106440,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "d19a74a9bfe5b46f7afd277b7065fa7232a62169");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "b81dd6666119f70072f5c9a52afd3acea7e297cf");
   renderizarInterna($7("met-interna"), modelo);
 }
 

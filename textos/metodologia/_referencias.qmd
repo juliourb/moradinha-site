@@ -1,0 +1,85 @@
+### Referências {#referencias}
+
+#### Dados
+
+::: {.lista-refs}
+::: {#ref-fjp2023deficit .ref-item}
+FUNDAÇÃO JOÃO PINHEIRO. **Déficit habitacional no Brasil 2023**. Belo Horizonte: FJP, 2025. [fjp.mg.gov.br](https://fjp.mg.gov.br/deficit-habitacional-no-brasil/).
+:::
+
+::: {#ref-ibge_cnefe2022 .ref-item}
+IBGE. **Cadastro Nacional de Endereços para Fins Estatísticos (CNEFE), Censo Demográfico 2022**. Rio de Janeiro: IBGE, 2024. [ftp.ibge.gov.br](https://ftp.ibge.gov.br/Cadastro_Nacional_de_Enderecos_para_Fins_Estatisticos/Censo_Demografico_2022/).
+:::
+
+::: {#ref-ibge_censo2022 .ref-item}
+IBGE. **Censo Demográfico 2022**. Rio de Janeiro: Instituto Brasileiro de Geografia e Estatística, 2022. [censo2022.ibge.gov.br](https://censo2022.ibge.gov.br/).
+:::
+
+::: {#ref-ibge_fcu2022 .ref-item}
+IBGE. **Favelas e Comunidades Urbanas, Censo Demográfico 2022**. Rio de Janeiro: IBGE, 2024. [ibge.gov.br](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/tipologias-do-territorio/15788-favelas-e-comunidades-urbanas.html).
+:::
+
+::: {#ref-ibge_grade2022 .ref-item}
+IBGE. **Grade Estatística, Censo Demográfico 2022**. Rio de Janeiro: IBGE, 2025. [geoftp.ibge.gov.br](https://geoftp.ibge.gov.br/recortes_para_fins_estatisticos/grade_estatistica/censo_2022/).
+:::
+
+::: {#ref-ibge_pnadc .ref-item}
+IBGE. **Pesquisa Nacional por Amostra de Domicílios Contínua (PNADc)**. Rio de Janeiro: IBGE, 2024. [ibge.gov.br](https://www.ibge.gov.br/estatisticas/sociais/trabalho/9171-pesquisa-nacional-por-amostra-de-domicilios-continua-mensal.html).
+:::
+
+::: {#ref-inep_censoescolar .ref-item}
+INEP. **Censo Escolar da Educação Básica**. Brasília: Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira. [gov.br/inep](https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/censo-escolar). *(endereço da página não conferido palavra por palavra)*
+:::
+
+::: {#ref-mapbiomas_col11 .ref-item}
+MAPBIOMAS. **Coleção 11 da série anual de mapas de uso e cobertura da terra do Brasil**. 2026. [brasil.mapbiomas.org](https://brasil.mapbiomas.org/).
+:::
+
+::: {#ref-mds_mapasocial .ref-item}
+MDS. **Mapa Social** e Cadastro Único (CadÚnico). Brasília: Ministério do Desenvolvimento e Assistência Social, Família e Combate à Fome. [gov.br/mds](https://www.gov.br/mds/pt-br/noticias-e-conteudos/dados-e-ferramentas-informacionais/informacao-pronta-para-usar/mapa-social).
+:::
+
+::: {#ref-openfreemap .ref-item}
+OPENFREEMAP. **OpenFreeMap**: mapa de fundo © OpenMapTiles, dados © colaboradores do OpenStreetMap. [openfreemap.org](https://openfreemap.org/).
+:::
+
+::: {#ref-roman2018blackmarble .ref-item}
+ROMÁN, M. O. et al. NASA's Black Marble nighttime lights product suite. **Remote Sensing of Environment**, v. 210, p. 113–143, 2018. [doi:10.1016/j.rse.2018.03.017](https://doi.org/10.1016/j.rse.2018.03.017).
+:::
+
+::: {#ref-sirko2021openbuildings .ref-item}
+SIRKO, W. et al. Continental-scale building detection from high resolution satellite imagery. **arXiv**, 2107.12283, 2021. [arXiv](https://arxiv.org/abs/2107.12283).
+:::
+
+::: {#ref-sirko2023openbuildings25d .ref-item}
+SIRKO, W. et al. High-resolution building and road detection from Sentinel-2 (**Open Buildings 2.5D Temporal**). 2023. [Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_Research_open-buildings-temporal_v1). *(título e autoria conferidos no catálogo; o artigo no arXiv não foi localizado)*
+:::
+
+::: {#ref-souza2020mapbiomas .ref-item}
+SOUZA, C. M. et al. Reconstructing three decades of land use and land cover changes in Brazilian biomes with Landsat archive and Earth Engine. **Remote Sensing**, v. 12, n. 17, art. 2735, 2020.
+:::
+:::
+
+#### Métodos
+
+::: {.lista-refs}
+::: {#ref-jenks1967data .ref-item}
+JENKS, G. F. The data model concept in statistical mapping. **International Yearbook of Cartography**, v. 7, p. 186–190, 1967. *(dados bibliográficos conferidos; sem endereço de acesso aberto)*
+:::
+
+::: {#ref-lou2013ga2m .ref-item}
+LOU, Y.; CARUANA, R.; GEHRKE, J.; HOOKER, G. Accurate intelligible models with pairwise interactions. In: ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 19., 2013. **Anais** […]. p. 623–631. [doi:10.1145/2487575.2487579](https://doi.org/10.1145/2487575.2487579). *(DOI conferido em uma só listagem secundária)*
+:::
+
+::: {#ref-nori2019interpretml .ref-item}
+NORI, H.; JENKINS, S.; KOCH, P.; CARUANA, R. InterpretML: a unified framework for machine learning interpretability. **arXiv**, 1909.09223, 2019. [arXiv](https://arxiv.org/abs/1909.09223).
+:::
+
+::: {#ref-roberts2017blockcv .ref-item}
+ROBERTS, D. R. et al. Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure. **Ecography**, v. 40, n. 8, p. 913–929, 2017. [doi:10.1111/ecog.02881](https://doi.org/10.1111/ecog.02881).
+:::
+
+::: {#ref-brodsky2018h3 .ref-item}
+UBER TECHNOLOGIES. **H3**: a hexagonal hierarchical geospatial indexing system. 2018. [h3geo.org](https://h3geo.org/).
+:::
+:::
