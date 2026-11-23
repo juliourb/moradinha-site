@@ -102,8 +102,26 @@ export async function iniciarExplorador() {
     }
   }
 
+  function renderizarRecorteAtivo(estado) {
+    const el = $("f1-recorte-ativo");
+    const faixa = estado.faixa_hist?.[0];
+    if (!faixa) {
+      el.setAttribute("hidden", "");
+      return;
+    }
+    const isRel = estado.medida === "relativo";
+    const dec = isRel ? 1 : 0;
+    const unidade = isRel ? " %" : "";
+    const [lo, hi] = faixa;
+    el.textContent = `Filtro ativo: hexágonos entre ${lo.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade} e ${
+      hi == null ? "ou mais" : `${hi.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade}`
+    }. Clique fora das barras do histograma ou em "Limpar" para remover.`;
+    el.removeAttribute("hidden");
+  }
+
   function renderTudo(estado) {
     sincronizarPergunta(estado);
+    renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
     mapa.renderizarCamadasUI(

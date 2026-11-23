@@ -32,7 +32,7 @@ jobs:
           npm run validar -- pacotes/al_rm_maceio/ficticio
           npm run validar -- pacotes/teste_pequeno/ficticio
 
-      - name: Validar o catalogo.json (F5-2: só pacote real fora de teste_apenas)
+      - name: "Validar o catalogo.json (F5-2: só pacote real fora de teste_apenas)"
         run: npm run validar:catalogo-publico
 
       - name: Validar citações da Metodologia (referencias.bib)

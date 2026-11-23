@@ -5,13 +5,14 @@ title: ""
 {{< include textos/_cabecalho.qmd >}}
 
 ```{=html}
-<div id="pane-confiabilidade" class="com-nav-lateral">
+<div id="pane-confiabilidade">
   <section class="panel" id="f3-vereditos">
     <h2>A estimativa é confiável?</h2>
     <div class="como-ler">Cada célula responde uma pergunta para um componente do déficit, com o número que sustenta a resposta. Clique numa célula (ou use Tab e Enter) para abrir a seção; as setas ← → passam para a seção seguinte.</div>
     <div id="f3-grade-vereditos"></div>
   </section>
 
+  <div class="com-nav-lateral">
   <nav class="nav-lateral" aria-label="Seções de Confiabilidade">
     <a href="#f3-secao-dados">1. Números de partida</a>
     <a href="#f3-secao-modelo">2. Lugar certo</a>
@@ -22,7 +23,7 @@ title: ""
   <div class="conteudo-nav-lateral">
     <section class="panel" id="f3-secao-dados" tabindex="-1">
       <h2>1. Números de partida</h2>
-      <div class="como-ler">Esta seção resume o domínio inteiro: de onde vem o estoque de cada ano, quanto está em sigilo, como a amostra da AP (área de ponderação) se compara ao Censo, e o que falta. A qualidade por hexágono fica no tema Qualidade da aba Resultados.</div>
+      <div class="como-ler">Os números de partida batem? Esta seção compara o total que o moradinha reconstrói com o número publicado pela FJP (Fundação João Pinheiro) e confere se a amostra da PNADc (Pesquisa Nacional por Amostra de Domicílios contínua) bate com o Censo; mostra também de onde vem o estoque de cada ano, quanto está em sigilo e o que falta. A qualidade por hexágono fica no tema Qualidade da aba Resultados.</div>
       <p class="sub" id="f3-resposta-1"></p>
 
       <h3>FJP × moradinha</h3>
@@ -81,6 +82,7 @@ title: ""
       <h3>O que falta</h3>
       <div id="f3-oquefalta"></div>
     </section>
+  </div>
   </div>
 </div>
 ```

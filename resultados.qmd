@@ -25,6 +25,8 @@ title: ""
   </div>
 </div>
 
+<p class="nota-fixa" id="f1-recorte-ativo" hidden></p>
+
 <div class="grid-main">
   <div class="mapbox" id="f1-mapbox">
     <div class="deck" id="f1-deckA"></div>
@@ -62,7 +64,7 @@ title: ""
     <button type="button" class="iconbtn" id="f1-dock-toggle" aria-expanded="true">Minimizar todos</button>
   </div>
   <div class="dock-body" id="f1-dock-body-deficit">
-    <article class="dcard" data-k="hist"><header><h3>Distribuição nos hexágonos</h3><button type="button" class="iconbtn" id="f1-hist-limpar">Limpar</button><button type="button" class="iconbtn" aria-label="Minimizar distribuição">–</button></header><div class="grafico-dica">Quantos hexágonos caem em cada faixa de valor. Clique numa ou mais barras para destacar esses hexágonos no mapa.</div><div class="body" id="f1-hist"></div></article>
+    <article class="dcard" data-k="hist"><header><h3>Distribuição nos hexágonos</h3><button type="button" class="iconbtn" id="f1-hist-limpar">Limpar</button><button type="button" class="iconbtn" aria-label="Minimizar distribuição">–</button></header><div class="grafico-dica">Quantos hexágonos em cada faixa. Arraste as alças para filtrar.</div><div class="body" id="f1-hist"></div><div class="faixa-dupla" id="f1-hist-faixa"></div></article>
     <article class="dcard" data-k="rank"><header><h3>Os 5 hexágonos com mais déficit</h3><button type="button" class="iconbtn" aria-label="Minimizar ranking">–</button></header><div class="grafico-dica">Os cinco hexágonos com o maior valor na medida atual. Clique numa linha para ir até aquele hexágono no mapa.</div><div class="body"><table class="rank num" id="f1-rank"></table></div></article>
     <article class="dcard" data-k="series"><header><h3>Total do domínio no tempo</h3><button type="button" class="iconbtn" aria-label="Minimizar série">–</button></header><div class="grafico-dica">Ponto = total; barra = faixa de 95%; losango = média de 3 anos. Clique num período para levá-lo ao mapa.</div><div class="body" id="f1-series"></div></article>
     <article class="dcard" data-k="boxes"><header><h3>Distribuição por período</h3><button type="button" class="iconbtn" aria-label="Minimizar caixas">–</button></header><div class="grafico-dica">Caixa = p25–p75; traço = mediana; haste = p10–p90; só hexágonos acima de zero.</div><div class="body" id="f1-boxes"></div></article>

@@ -26,6 +26,31 @@ const ALTURA_NO = 46;
 const ESPACO_X = 60;
 const ESPACO_Y = 14;
 
+// Subetapas expandidas (SPEC_F6.3 item 9): grade de várias colunas (uma por
+// camada do grafo) com o nome inteiro, quebrado em até 2 linhas — não truncado
+// com "…"; o nome completo também vai na dica (<title>).
+const LARGURA_NO_SUB = 190;
+const ALTURA_NO_SUB = 58;
+const MAX_CHARS_LINHA_SUB = 24;
+
+/** Quebra um nome em até 2 linhas por palavra inteira; só corta se uma linha sozinha ainda não couber. */
+function quebrarNomeDuasLinhas(nome, maxCharsPorLinha) {
+  if (nome.length <= maxCharsPorLinha) return [nome];
+  const palavras = nome.split(" ");
+  let linha1 = "";
+  let i = 0;
+  while (i < palavras.length) {
+    const tentativa = linha1 ? `${linha1} ${palavras[i]}` : palavras[i];
+    if (tentativa.length > maxCharsPorLinha && linha1) break;
+    linha1 = tentativa;
+    i++;
+  }
+  let linha2 = palavras.slice(i).join(" ");
+  if (!linha2) return [linha1];
+  if (linha2.length > maxCharsPorLinha) linha2 = `${linha2.slice(0, maxCharsPorLinha - 1)}…`;
+  return [linha1, linha2];
+}
+
 /** Desenha um mini-grafo em camadas (coleção de nós + arestas já com camada/posicao) — reusado para o grupo expandido. */
 function montarSvgCaixas(nos, arestas, { larguraNo = LARGURA_NO, alturaNo = ALTURA_NO } = {}) {
   const nCamadas = Math.max(...nos.map((n) => n.camada)) + 1;
@@ -101,16 +126,18 @@ function renderizarPipeline(el, pipeline, manifesto, config) {
     } else {
       const sub = pipelineDoGrupo(pipeline, grupo);
       const { nos, arestas } = camadasPipeline(sub);
-      const { W: We, H: He, linhas: linhasE } = montarSvgCaixas(nos, arestas);
+      const { W: We, H: He, linhas: linhasE } = montarSvgCaixas(nos, arestas, { larguraNo: LARGURA_NO_SUB, alturaNo: ALTURA_NO_SUB });
       const caixasE = nos
         .map((n) => {
-          const x = n.camada * (LARGURA_NO + ESPACO_X);
-          const y = n.posicao * (ALTURA_NO + ESPACO_Y);
+          const x = n.camada * (LARGURA_NO_SUB + ESPACO_X);
+          const y = n.posicao * (ALTURA_NO_SUB + ESPACO_Y);
           const dataCommit = `${n.commit.slice(0, 7)} · ${n.data}`;
-          return `<g transform="translate(${x},${y})"><rect width="${LARGURA_NO}" height="${ALTURA_NO}" rx="8" fill="${css("--surface")}" stroke="${css("--line")}" stroke-width="1.2"/>
+          const linhasNome = quebrarNomeDuasLinhas(n.nome, MAX_CHARS_LINHA_SUB);
+          const textoNome = linhasNome.map((l, i) => `<text x="8" y="${16 + i * 13}" font-size="11" fill="${css("--ink")}">${l}</text>`).join("");
+          return `<g transform="translate(${x},${y})"><rect width="${LARGURA_NO_SUB}" height="${ALTURA_NO_SUB}" rx="8" fill="${css("--surface")}" stroke="${css("--line")}" stroke-width="1.2"/>
             <title>${n.nome} — ${n.commit} · ${n.data}</title>
-            <text x="8" y="18" font-size="11" fill="${css("--ink")}">${n.nome.length > 28 ? n.nome.slice(0, 27) + "…" : n.nome}</text>
-            <text x="8" y="34" font-size="9" fill="${css("--muted")}">${dataCommit}</text>
+            ${textoNome}
+            <text x="8" y="${16 + linhasNome.length * 13 + 4}" font-size="9" fill="${css("--muted")}">${dataCommit}</text>
           </g>`;
         })
         .join("");

@@ -1,5 +1,11 @@
 # Mudanças nas especificações
 
+## v1.6.1 (22/11/2026) — F6.3: revisão do preview (Julio + Claude)
+- Sem mudança de arquivo de especificação: F6.3 é uma rodada de correções sobre a SPEC_F6_ajustes.md
+  já existente (a seção C1 da F6.2 foi reescrita no próprio `specs/SPEC_F6_ajustes.md` antes desta
+  rodada, pelo próprio Julio — registrado como "atualizada depois que você começou" no pedido).
+  Detalhes em `relatorios/F6.md` §F6.3. Contrato v1.1 sem mudança.
+
 ## v1.6 (22/11/2026) — SPEC_F6: ajustes depois da revisão do pacote real
 - `specs/SPEC_F6_ajustes.md` (novo): ajustes pedidos por Julio depois de revisar `relatorios/F5.md`
   e `PUBLICAR.md` com o pacote real `al_rm_maceio/69277fd` — e, já dentro da F6, com a edição

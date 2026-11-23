@@ -29,25 +29,75 @@ test.describe("N5: em 1440x900, o primeiro gráfico do explorador fica dentro da
   });
 });
 
-test.describe("C1: marcar 2 barras do histograma filtra o mapa; 'limpar' volta tudo", () => {
-  test("alterna faixa_hist com 2 barras e limpa", async ({ page }) => {
+test.describe("C1/F6.2-2: faixa de duas alças sob o histograma filtra o mapa; clicar fora e 'limpar' voltam tudo", () => {
+  test("clicar numa barra define a faixa; clicar fora das barras limpa", async ({ page }) => {
     await page.goto("/resultados.html?edicao=ficticio");
     await aguardarMapaPronto(page);
-    const barras = page.locator("#f1-hist rect");
-    await expect(barras.first()).toBeVisible();
-    const n = await barras.count();
+    const colunas = page.locator("#f1-hist rect.coluna");
+    await expect(colunas.first()).toBeVisible();
+    const n = await colunas.count();
     expect(n).toBeGreaterThan(2);
-    await barras.nth(0).click();
-    await page.waitForTimeout(150);
-    await barras.nth(1).click();
+
+    await colunas.nth(1).click();
     await page.waitForTimeout(150);
     let estado = await page.evaluate(() => window.__moradinhaEstado());
-    expect(estado.faixa_hist.length).toBe(2);
+    expect(estado.faixa_hist.length).toBe(1);
+
+    // Clicar fora das barras (fundo do SVG) limpa.
+    await page.locator("#f1-hist svg").click({ position: { x: 5, y: 95 } });
+    await page.waitForTimeout(150);
+    estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.faixa_hist.length).toBe(0);
+
+    await colunas.nth(0).click();
+    await page.waitForTimeout(150);
+    estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.faixa_hist.length).toBe(1);
 
     await page.locator("#f1-hist-limpar").click();
     await page.waitForTimeout(150);
     estado = await page.evaluate(() => window.__moradinhaEstado());
     expect(estado.faixa_hist.length).toBe(0);
+  });
+
+  test("F6.2-2: a faixa de duas alças (campos numéricos) edita a mesma seleção", async ({ page }) => {
+    await page.goto("/resultados.html?edicao=ficticio");
+    await aguardarMapaPronto(page);
+    const campoMin = page.locator("#f1-hist-faixa .fx-campo-min");
+    const campoMax = page.locator("#f1-hist-faixa .fx-campo-max");
+    await expect(campoMin).toHaveCount(1);
+    await expect(campoMax).toHaveCount(1);
+
+    const maxDominio = await page.locator("#f1-hist-faixa .fx-max").getAttribute("max");
+    await campoMax.fill(String(Number(maxDominio) / 2));
+    await campoMax.dispatchEvent("change");
+    await page.waitForTimeout(150);
+    let estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.faixa_hist.length).toBe(1);
+    expect(estado.faixa_hist[0][1]).toBeLessThan(Number(maxDominio));
+
+    await page.locator("#f1-hist-faixa .fx-chk-oumais").check();
+    await page.waitForTimeout(150);
+    estado = await page.evaluate(() => window.__moradinhaEstado());
+    expect(estado.faixa_hist[0][1]).toBeNull();
+
+    await page.locator("#f1-hist-limpar").click();
+  });
+});
+
+test.describe("item 2 (SPEC_F6.3): linha do recorte ativo aparece acima do mapa", () => {
+  test("filtrar uma faixa mostra a nota; limpar some com ela", async ({ page }) => {
+    await page.goto("/resultados.html?edicao=ficticio");
+    await aguardarMapaPronto(page);
+    const nota = page.locator("#f1-recorte-ativo");
+    await expect(nota).toBeHidden();
+    await page.locator("#f1-hist rect.coluna").nth(1).click();
+    await page.waitForTimeout(150);
+    await expect(nota).toBeVisible();
+    await expect(nota).toContainText("Filtro ativo");
+    await page.locator("#f1-hist-limpar").click();
+    await page.waitForTimeout(150);
+    await expect(nota).toBeHidden();
   });
 });
 

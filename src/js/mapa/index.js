@@ -263,10 +263,22 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         elementos.tooltip.setAttribute("hidden", "");
         return;
       }
+      // F6.3 item 5: nunca deixar a caixa visível sem conteúdo — se montar o HTML
+      // falhar (ou vier vazio), esconde em vez de mostrar uma caixa em branco.
+      let html;
+      try {
+        html = montarTooltipHtml(object, periodo, estado, obterValor);
+      } catch {
+        html = "";
+      }
+      if (!html) {
+        elementos.tooltip.setAttribute("hidden", "");
+        return;
+      }
       elementos.tooltip.removeAttribute("hidden");
       elementos.tooltip.style.left = `${x}px`;
       elementos.tooltip.style.top = `${y}px`;
-      elementos.tooltip.innerHTML = montarTooltipHtml(object, periodo, estado, obterValor);
+      elementos.tooltip.innerHTML = html;
     };
   }
 
@@ -462,6 +474,9 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     const dec = contexto.tipo === "relativo_quebras" ? 1 : 0;
     const lo = i === 0 ? 1 : contexto.quebras[i - 1];
     const hi = contexto.quebras[i];
+    // A última classe é aberta: a quebra é o maior valor OBSERVADO (Jenks), não um
+    // limite real — "500 ou mais" evita sugerir que nada passa de 500.
+    if (i === contexto.quebras.length - 1) return `${formatar(lo, dec)}${unidade} ou mais`;
     return `${formatar(lo, dec)}${unidade} – ${formatar(hi, dec)}${unidade}`;
   }
 
@@ -752,20 +767,31 @@ export function criarMiniMapa({ container, manifesto, linhas, ap, totais, toolti
               tooltip.setAttribute("hidden", "");
               return;
             }
+            let html = "";
+            try {
+              const bruto = brutoHex(object, "total", periodoRecente);
+              const dom = object.dom[periodoRecente];
+              const relativo = bruto != null && dom > 0.5 ? (100 * bruto) / dom : null;
+              const municipio = object.municipioNome + (object.nMunicipios > 1 ? ` (+${object.nMunicipios - 1})` : "");
+              const apNome = ap?.get(object.apCod)?.ap_nome ?? object.apCod;
+              let pesoHtml = "";
+              if (totais && bruto != null) {
+                const totalComponente = totalDoMapa(totais, "total", periodoRecente);
+                if (totalComponente?.total) pesoHtml = `<div class="linha">Peso no total do domínio: ${formatarPercentual((100 * bruto) / totalComponente.total, 2)}</div>`;
+              }
+              html = `<b>${municipio}</b><div class="linha">AP: ${apNome}</div><div class="linha">Relativo: ${formatarPercentual(relativo, 1)}</div>${pesoHtml}`;
+            } catch {
+              html = "";
+            }
+            // F6.3 item 5: nunca mostrar a caixa sem conteúdo.
+            if (!html) {
+              tooltip.setAttribute("hidden", "");
+              return;
+            }
             tooltip.removeAttribute("hidden");
             tooltip.style.left = `${x}px`;
             tooltip.style.top = `${y}px`;
-            const bruto = brutoHex(object, "total", periodoRecente);
-            const dom = object.dom[periodoRecente];
-            const relativo = bruto != null && dom > 0.5 ? (100 * bruto) / dom : null;
-            const municipio = object.municipioNome + (object.nMunicipios > 1 ? ` (+${object.nMunicipios - 1})` : "");
-            const apNome = ap?.get(object.apCod)?.ap_nome ?? object.apCod;
-            let pesoHtml = "";
-            if (totais && bruto != null) {
-              const totalComponente = totalDoMapa(totais, "total", periodoRecente);
-              if (totalComponente?.total) pesoHtml = `<div class="linha">Peso no total do domínio: ${formatarPercentual((100 * bruto) / totalComponente.total, 2)}</div>`;
-            }
-            tooltip.innerHTML = `<b>${municipio}</b><div class="linha">AP: ${apNome}</div><div class="linha">Relativo: ${formatarPercentual(relativo, 1)}</div>${pesoHtml}`;
+            tooltip.innerHTML = html;
           },
         }),
       ],

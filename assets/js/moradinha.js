@@ -12890,9 +12890,12 @@ function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }) {
       h3: a5.h3,
       municipioCod: a5.municipio_cod,
       municipioNome: a5.municipio_nome,
-      nMunicipios: a5.n_municipios,
+      // n_municipios/n_aps são BIGINT no Parquet (DuckDB devolve BigInt); convertidos
+      // aqui para Number — são contagens pequenas e o resto do código faz aritmética
+      // comum (ex.: "- 1" na dica do hexágono), que quebra ao misturar BigInt e Number.
+      nMunicipios: Number(a5.n_municipios),
       apCod: a5.ap_cod,
-      nAps: a5.n_aps,
+      nAps: Number(a5.n_aps),
       fcuFracao: a5.fcu_fracao,
       recortes: dividirCodigos(a5.recortes),
       dom: {},
@@ -12913,7 +12916,7 @@ function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }) {
     l3.qualidade[q4.periodo] = {
       fracaoImputada: q4.fracao_imputada ?? null,
       fracaoSigilo: q4.fracao_sigilo ?? null,
-      nSetores: q4.n_setores,
+      nSetores: q4.n_setores == null ? null : Number(q4.n_setores),
       fonteEstoque: q4.fonte_estoque,
       gEstoque: q4.g_estoque ?? null,
       hexNovo: q4.hex_novo,
@@ -102914,11 +102917,6 @@ function valorDentroFaixas(v4, faixas) {
   if (v4 == null) return false;
   return faixas.some(([x0, x1]) => v4 >= x0 && (x1 == null || v4 < x1));
 }
-function alternarFaixa(faixas, faixa) {
-  const atuais = faixas ?? [];
-  const existe = atuais.some(([x0]) => x0 === faixa[0]);
-  return existe ? atuais.filter(([x0]) => x0 !== faixa[0]) : [...atuais, faixa];
-}
 
 // node_modules/simple-statistics/dist/simple-statistics.mjs
 function makeMatrix(columns, rows) {
@@ -103399,10 +103397,20 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
         elementos.tooltip.setAttribute("hidden", "");
         return;
       }
+      let html;
+      try {
+        html = montarTooltipHtml(object2, periodo, estado, obterValor);
+      } catch {
+        html = "";
+      }
+      if (!html) {
+        elementos.tooltip.setAttribute("hidden", "");
+        return;
+      }
       elementos.tooltip.removeAttribute("hidden");
       elementos.tooltip.style.left = `${x5}px`;
       elementos.tooltip.style.top = `${y5}px`;
-      elementos.tooltip.innerHTML = montarTooltipHtml(object2, periodo, estado, obterValor);
+      elementos.tooltip.innerHTML = html;
     };
   }
   function camadasPara(periodo, estado, obterValor, lado, tipoMedida) {
@@ -103603,6 +103611,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     const dec = contexto.tipo === "relativo_quebras" ? 1 : 0;
     const lo2 = i3 === 0 ? 1 : contexto.quebras[i3 - 1];
     const hi2 = contexto.quebras[i3];
+    if (i3 === contexto.quebras.length - 1) return `${formatar(lo2, dec)}${unidade} ou mais`;
     return `${formatar(lo2, dec)}${unidade} \u2013 ${formatar(hi2, dec)}${unidade}`;
   }
   function renderizarLegendaDeficit(estado, contexto, rotuloMedida) {
@@ -103855,20 +103864,30 @@ function criarMiniMapa({ container, manifesto, linhas, ap: ap2, totais, tooltip,
               tooltip.setAttribute("hidden", "");
               return;
             }
+            let html = "";
+            try {
+              const bruto = brutoHex(object2, "total", periodoRecente);
+              const dom = object2.dom[periodoRecente];
+              const relativo = bruto != null && dom > 0.5 ? 100 * bruto / dom : null;
+              const municipio = object2.municipioNome + (object2.nMunicipios > 1 ? ` (+${object2.nMunicipios - 1})` : "");
+              const apNome = ap2?.get(object2.apCod)?.ap_nome ?? object2.apCod;
+              let pesoHtml = "";
+              if (totais && bruto != null) {
+                const totalComponente = totalDoMapa(totais, "total", periodoRecente);
+                if (totalComponente?.total) pesoHtml = `<div class="linha">Peso no total do dom\xEDnio: ${formatarPercentual(100 * bruto / totalComponente.total, 2)}</div>`;
+              }
+              html = `<b>${municipio}</b><div class="linha">AP: ${apNome}</div><div class="linha">Relativo: ${formatarPercentual(relativo, 1)}</div>${pesoHtml}`;
+            } catch {
+              html = "";
+            }
+            if (!html) {
+              tooltip.setAttribute("hidden", "");
+              return;
+            }
             tooltip.removeAttribute("hidden");
             tooltip.style.left = `${x5}px`;
             tooltip.style.top = `${y5}px`;
-            const bruto = brutoHex(object2, "total", periodoRecente);
-            const dom = object2.dom[periodoRecente];
-            const relativo = bruto != null && dom > 0.5 ? 100 * bruto / dom : null;
-            const municipio = object2.municipioNome + (object2.nMunicipios > 1 ? ` (+${object2.nMunicipios - 1})` : "");
-            const apNome = ap2?.get(object2.apCod)?.ap_nome ?? object2.apCod;
-            let pesoHtml = "";
-            if (totais && bruto != null) {
-              const totalComponente = totalDoMapa(totais, "total", periodoRecente);
-              if (totalComponente?.total) pesoHtml = `<div class="linha">Peso no total do dom\xEDnio: ${formatarPercentual(100 * bruto / totalComponente.total, 2)}</div>`;
-            }
-            tooltip.innerHTML = `<b>${municipio}</b><div class="linha">AP: ${apNome}</div><div class="linha">Relativo: ${formatarPercentual(relativo, 1)}</div>${pesoHtml}`;
+            tooltip.innerHTML = html;
           }
         })
       ]
@@ -104010,9 +104029,9 @@ var LIMIARES = Object.freeze({
   fracao_imputada: { atencao: 0.3 }
 });
 var LIMIARES_RASTREIO = Object.freeze({
-  cv_total_fragil: { valor: 15, unidade: "%", rotulo: "CV do total (marca total_fragil)" },
+  cv_total_fragil: { valor: 15, unidade: "%", rotulo: 'CV do total (marca "total fr\xE1gil")' },
   z_significancia: { valor: 1.96, unidade: "", rotulo: "z (mudan\xE7a afirm\xE1vel vs. dentro do ru\xEDdo)" },
-  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: "CV da AP (marca ap_ressalva)" }
+  cv_ap_ressalva: { valor: 30, unidade: "%", rotulo: 'CV da AP (marca "AP com ressalva")' }
 });
 function nivelIncerteza(valor) {
   if (valor == null) return "ok";
@@ -104071,7 +104090,8 @@ function blocoQualidade(linha, estado) {
   const piorIncerteza = incertezas.length ? Math.max(...incertezas) : null;
   const nivelInc = nivelIncerteza(piorIncerteza);
   const itens = [];
-  itens.push(`<span class="pill ${qb2 === "ok" ? "ok" : "warn"}">qualidade do dado: ${qb2 ?? "\u2014"}</span>`);
+  const qbTxt = qb2 == null ? "\u2014" : qb2 === "ok" ? "ok" : rotuloMarca(qb2);
+  itens.push(`<span class="pill ${qb2 === "ok" ? "ok" : "warn"}">qualidade do dado: ${qbTxt}</span>`);
   if (piorIncerteza != null) {
     itens.push(`<span class="pill ${NIVEL_CLASSE[nivelInc]}">incerteza: ${formatar(piorIncerteza, 2)}</span>`);
   }
@@ -104276,9 +104296,9 @@ function fraseRessalvaRelativo(linhasArr, totais, componente, periodo) {
   const maiorRel = maiorRelativo(linhasArr, componente, periodo);
   const taxa = taxaDominio(totais, componente, periodo);
   const vezes = taxa && maiorRel != null ? maiorRel / taxa : null;
-  const frase1 = `${Math.round(conc.nHexMeio).toLocaleString("pt-BR")} hex\xE1gonos (${conc.pctHexMeio.toFixed(0)}% dos que t\xEAm domic\xEDlio) somam metade do d\xE9ficit absoluto.`;
+  const frase1 = `${formatar(conc.nHexMeio, 0)} hex\xE1gonos (${formatar(conc.pctHexMeio, 0)}% dos que t\xEAm domic\xEDlio) somam metade do d\xE9ficit absoluto.`;
   if (vezes == null) return frase1;
-  const frase2 = vezes >= 2 ? `No relativo, o maior hex\xE1gono tem ${vezes.toFixed(1)} vezes a taxa do dom\xEDnio.` : `No relativo, o maior hex\xE1gono tem ${vezes.toFixed(1)} vezes a taxa do dom\xEDnio: a concentra\xE7\xE3o do mapa absoluto acompanha, em boa parte, onde est\xE3o os domic\xEDlios.`;
+  const frase2 = vezes >= 2 ? `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio.` : `No relativo, o maior hex\xE1gono tem ${formatar(vezes, 1)} vezes a taxa do dom\xEDnio: a concentra\xE7\xE3o do mapa absoluto acompanha, em boa parte, onde est\xE3o os domic\xEDlios.`;
   return `${frase1} ${frase2}`;
 }
 function mudancasAnuaisForaDoRuido(manifesto, totais) {
@@ -104302,18 +104322,23 @@ function fraseRuidoAnual(manifesto, totais) {
 }
 
 // src/js/graficos/deficit.js
+function linhasNormais(linhasArr, componente, periodo) {
+  return linhasArr.filter((l3) => classeHex(l3.dom[periodo], brutoHex(l3, componente, periodo)) === "normal");
+}
 function css3(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
+  const faixaEl = box.parentElement?.querySelector("#f1-hist-faixa");
   const isRel = estado.medida === "relativo";
-  const vs9 = linhasArr.map((l3) => valorHex(l3, estado.componente, estado.periodo, estado.medida)).filter((v4) => v4 != null && v4 > 0);
+  const vs9 = linhasNormais(linhasArr, estado.componente, estado.periodo).map((l3) => valorHex(l3, estado.componente, estado.periodo, estado.medida)).filter((v4) => v4 != null);
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 104;
   const m4 = { l: 34, r: 8, t: 6, b: 22 };
   if (!vs9.length) {
     box.innerHTML = `<p class="empty">Nenhum hex\xE1gono acima de zero nesta combina\xE7\xE3o.</p>`;
+    if (faixaEl) faixaEl.innerHTML = "";
     return;
   }
   const p99 = quantile(vs9.slice().sort(ascending), 0.99) || vs9[0];
@@ -104321,13 +104346,97 @@ function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const bins = bin().domain(x5.domain()).thresholds(x5.ticks(28))(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
-  const faixaSelecionada = (b10) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b10.x0);
+  const faixaAtual = estado.faixa_hist?.[0] ?? null;
+  const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hex\xE1gonos");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(6).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
-  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) ? css3("--ink") : "none").attr("stroke-width", 2).style("cursor", "pointer").attr("opacity", (b10) => !estado.faixa_hist?.length || faixaSelecionada(b10) ? 1 : 0.35).on("click", (_e4, b10) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b10.x0, b10 === ultimoBin ? null : b10.x1]))).append("title").text((b10) => b10 === ultimoBin ? `${b10.length} hex\xE1gonos de ${formatar(b10.x0, 1)} (p99 ou mais)` : `${b10.length} hex\xE1gonos entre ${formatar(b10.x0, 1)} e ${formatar(b10.x1, 1)}`);
+  const g5 = svg.append("g");
+  g5.selectAll("rect.coluna").data(bins).join("rect").attr("class", "coluna").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
+    e67.stopPropagation();
+    aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
+  }).append("title").text((b10) => b10 === ultimoBin ? `${b10.length} hex\xE1gonos de ${formatar(b10.x0, 1)} (p99 ou mais)` : `${b10.length} hex\xE1gonos entre ${formatar(b10.x0, 1)} e ${formatar(b10.x1, 1)}`);
+  g5.selectAll("rect.barra").data(bins).join("rect").attr("class", "barra").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css3("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css3("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
   svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("p99 ou mais \u2192");
+  svg.on("click", () => aoClicarBarra([]));
   box.replaceChildren(svg.node());
+  if (faixaEl) renderizarFaixaDupla(faixaEl, x5.domain(), faixaAtual, isRel ? 1 : 0, aoClicarBarra);
+}
+function renderizarFaixaDupla(el2, [dmin, dmax], faixaAtual, decimais, aoMudar) {
+  const passo = Math.max(10 ** -decimais, (dmax - dmin) / 200);
+  const aberto = faixaAtual != null && faixaAtual[1] == null;
+  const lo2 = faixaAtual?.[0] ?? dmin;
+  const hi2 = aberto ? dmax : faixaAtual?.[1] ?? dmax;
+  const assinatura = `${dmin}|${dmax}|${passo}`;
+  function emitir(novoLo, novoHi, novoAberto) {
+    const l3 = Math.max(dmin, Math.min(novoLo, novoHi, dmax));
+    const h4 = Math.max(l3, Math.min(novoHi, dmax));
+    if (l3 <= dmin + passo / 2 && h4 >= dmax - passo / 2 && !novoAberto) aoMudar([]);
+    else aoMudar([[l3, novoAberto ? null : h4]]);
+  }
+  if (el2.dataset.sig !== assinatura) {
+    let lerCampos = function() {
+      let novoLo = Number(elMin2.value);
+      let novoHi = Number(elMax2.value);
+      if (novoLo > novoHi) [novoLo, novoHi] = [novoHi, novoLo];
+      emitir(novoLo, novoHi, chk2.checked);
+    };
+    el2.dataset.sig = assinatura;
+    el2.innerHTML = `
+      <div class="fx-track">
+        <input type="range" class="fx-alca fx-min" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Valor m\xEDnimo da faixa">
+        <input type="range" class="fx-alca fx-max" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Valor m\xE1ximo da faixa">
+      </div>
+      <div class="fx-campos">
+        <input type="number" class="fx-campo fx-campo-min" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Campo do valor m\xEDnimo">
+        <span>\u2013</span>
+        <input type="number" class="fx-campo fx-campo-max" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Campo do valor m\xE1ximo">
+        <label class="fx-oumais"><input type="checkbox" class="fx-chk-oumais"> ou mais</label>
+      </div>`;
+    const elMin2 = el2.querySelector(".fx-min");
+    const elMax2 = el2.querySelector(".fx-max");
+    const campoMin2 = el2.querySelector(".fx-campo-min");
+    const campoMax2 = el2.querySelector(".fx-campo-max");
+    const chk2 = el2.querySelector(".fx-chk-oumais");
+    elMin2.addEventListener("input", () => {
+      campoMin2.value = elMin2.value;
+      lerCampos();
+    });
+    elMax2.addEventListener("input", () => {
+      campoMax2.value = elMax2.value;
+      lerCampos();
+    });
+    campoMin2.addEventListener("change", () => {
+      elMin2.value = campoMin2.value;
+      lerCampos();
+    });
+    campoMax2.addEventListener("change", () => {
+      elMax2.value = campoMax2.value;
+      lerCampos();
+    });
+    chk2.addEventListener("change", () => {
+      elMax2.disabled = chk2.checked;
+      campoMax2.disabled = chk2.checked;
+      lerCampos();
+    });
+  }
+  const elMin = el2.querySelector(".fx-min");
+  const elMax = el2.querySelector(".fx-max");
+  const campoMin = el2.querySelector(".fx-campo-min");
+  const campoMax = el2.querySelector(".fx-campo-max");
+  const chk = el2.querySelector(".fx-chk-oumais");
+  const foco = document.activeElement;
+  if (foco !== elMin) elMin.value = String(lo2);
+  if (foco !== elMax) elMax.value = String(hi2);
+  if (foco !== campoMin) campoMin.value = lo2.toFixed(decimais);
+  if (foco !== campoMax) campoMax.value = hi2.toFixed(decimais);
+  chk.checked = aberto;
+  elMax.disabled = aberto;
+  campoMax.disabled = aberto;
+}
+function codigoCurtoH3(h32) {
+  const semSufixo = h32.replace(/fffff$/, "");
+  return semSufixo.slice(-6);
 }
 function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
   const isRel = estado.medida === "relativo";
@@ -104336,7 +104445,7 @@ function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
   box.innerHTML = `<tbody>${rs2.map(
     (d3, i3) => (
       // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
-      `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod} \xB7 <span class="num" style="font-size:10px;color:var(--muted)">${d3.l.h3.slice(-6)}</span>${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
+      `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod} \xB7 <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d3.l.h3)}</span>${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
         d3.v,
         isRel ? 2 : 0
       )}${isRel ? " %" : ""}</td></tr>`
@@ -104408,7 +104517,7 @@ function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo2) {
   const mediaPts = medias.map(pontoDe);
   const W4 = Math.max(220, box.clientWidth || 260);
   const H4 = 128;
-  const m4 = { l: 44, r: 8, t: 8, b: 20 };
+  const m4 = { l: 44, r: 20, t: 8, b: 20 };
   const x5 = point().domain(anos.map((p4) => p4.id)).range([m4.l, W4 - m4.r]);
   const maxV = max4([...anosPts, ...mediaPts], (d3) => d3.hi ?? d3.v ?? 0) || 1;
   const y5 = linear2().domain([0, maxV * 1.15]).nice().range([H4 - m4.b, m4.t]);
@@ -104449,7 +104558,7 @@ function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   const isRel = estado.medida === "relativo";
   const todosValores = [];
   const st3 = manifesto.periodos.map((p4) => {
-    const vs9 = linhasArr.map((l3) => valorHex(l3, estado.componente, p4.id, estado.medida)).filter((v4) => v4 != null && v4 > 0).sort(ascending);
+    const vs9 = linhasNormais(linhasArr, estado.componente, p4.id).map((l3) => valorHex(l3, estado.componente, p4.id, estado.medida)).filter((v4) => v4 != null).sort(ascending);
     todosValores.push(...vs9);
     const q4 = (f4) => quantileSorted(vs9, f4);
     return { id: p4.id, lab: p4.rotulo, media: p4.tipo === "media", critico: p4.marcas?.includes("fonte_estoque_diferente"), q10: q4(0.1), q25: q4(0.25), q50: q4(0.5), q75: q4(0.75), q90: q4(0.9) };
@@ -104512,10 +104621,16 @@ function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoClicarBa
   const bins = bin().domain(x5.domain()).thresholds(20)(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
-  const faixaSelecionada = (b10) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b10.x0);
+  const faixaAtual = estado.faixa_hist?.[0] ?? null;
+  const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(5).tickFormat((v4) => formatar(v4, 2)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
-  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) ? css4("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => !estado.faixa_hist?.length || faixaSelecionada(b10) ? 1 : 0.35).style("cursor", "pointer").on("click", (_e4, b10) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b10.x0, b10 === ultimoBin ? null : b10.x1])));
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
+    e67.stopPropagation();
+    aoClicarBarra([[b10.x0, b10 === ultimoBin ? null : b10.x1]]);
+  });
+  svg.on("click", () => aoClicarBarra([]));
+  svg.append("g").selectAll("rect").data(bins).join("rect").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", (b10) => y5(b10.length)).attr("height", (b10) => y5(0) - y5(b10.length)).attr("fill", css4("--accent")).attr("stroke", (b10) => faixaSelecionada(b10) && faixaAtual ? css4("--ink") : "none").attr("stroke-width", 2).attr("opacity", (b10) => faixaSelecionada(b10) ? 1 : 0.35).style("pointer-events", "none");
   svg.append("text").attr("x", W4 - m4.r).attr("y", m4.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css4("--muted")).text("p99 ou mais \u2192");
   box.replaceChildren(svg.node());
 }
@@ -104701,8 +104816,23 @@ async function iniciarExplorador() {
       renderizarEstoque($4("f1-estoque"), manifesto, linhasArr);
     }
   }
+  function renderizarRecorteAtivo(estado) {
+    const el2 = $4("f1-recorte-ativo");
+    const faixa = estado.faixa_hist?.[0];
+    if (!faixa) {
+      el2.setAttribute("hidden", "");
+      return;
+    }
+    const isRel = estado.medida === "relativo";
+    const dec = isRel ? 1 : 0;
+    const unidade = isRel ? " %" : "";
+    const [lo2, hi2] = faixa;
+    el2.textContent = `Filtro ativo: hex\xE1gonos entre ${lo2.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade} e ${hi2 == null ? "ou mais" : `${hi2.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec })}${unidade}`}. Clique fora das barras do histograma ou em "Limpar" para remover.`;
+    el2.removeAttribute("hidden");
+  }
   function renderTudo(estado) {
     sincronizarPergunta(estado);
+    renderizarRecorteAtivo(estado);
     const { fn: obterValor, tipo } = obterValorMapa(estado);
     mapa.renderizar(estado, obterValor, rotuloLegenda(estado), tipo);
     mapa.renderizarCamadasUI(
@@ -104820,6 +104950,9 @@ function $5(id3) {
 function css5(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
+function primeiraMinuscula(texto) {
+  return texto ? texto[0].toLowerCase() + texto.slice(1) : texto;
+}
 function sparkline2(serie) {
   const ok2 = serie.filter((v4) => v4 != null);
   if (!ok2.length) return "";
@@ -104839,7 +104972,7 @@ function renderizarMensagem(el2, manifesto, totais) {
   const marca = marcaMaisImportante(totais, ano.id);
   const linha1 = `O d\xE9ficit habitacional total na ${manifesto.nome} \xE9 de <b data-num="${total.absolutoAno}">${formatar(total.absolutoAno, 0)}</b> domic\xEDlios (<span data-num="${total.relativoAno}">${formatarPercentual(total.relativoAno, 2)}</span>) em ${ano.rotulo}${media ? `, e de ${formatar(total.absolutoMedia, 0)} (${formatarPercentual(total.relativoMedia, 2)}) na ${media.rotulo.toLowerCase()}` : ""}.`;
   const linha2 = maior ? `O maior componente \xE9 ${NOME_COMPONENTE2[maior]}.` : "";
-  const linha3 = marca ? `${CLAB3[marca.componente]} com ${rotuloMarca(marca.codigo).toLowerCase()}.` : "";
+  const linha3 = marca ? `${CLAB3[marca.componente]} com ${primeiraMinuscula(rotuloMarca(marca.codigo))}.` : "";
   el2.innerHTML = [linha1, linha2, linha3].filter(Boolean).join("<br>");
 }
 function renderizarCartoes(el2, manifesto, totais) {
@@ -104965,6 +105098,7 @@ async function iniciarVisaoGeral() {
     renderizarPainelDetalhe($5("f2-det-onus"), manifesto, totais, "onus", "\xD4nus");
     renderizarPainelDetalhe($5("f2-det-precariedade"), manifesto, totais, "precariedade", "Precariedade");
     $5("f2-det-frase-ruido").textContent = fraseRuidoAnual(manifesto, totais);
+    $5("f2-det-concentracao-titulo").textContent = `Curva de concentra\xE7\xE3o \u2014 Total, ${anoRecente.rotulo}`;
     renderizarCurvaConcentracao($5("f2-det-concentracao"), linhasArr, "total", anoRecente.id);
   }
   function abrirDetalhes() {
@@ -104994,7 +105128,13 @@ function veredictoPergunta1(qualidade, referenciaFjp, componente) {
   const numero = pontePonto?.razao ?? null;
   const indicadorFjp = INDICADOR_FJP_POR_COMPONENTE[componente];
   const item = fjpTresValores(referenciaFjp ?? []).find((i3) => i3.indicador === indicadorFjp);
-  const veredicto = item?.dentro == null ? null : item.dentro ? "bate" : "n\xE3o bate";
+  const fjpDentro = item?.dentro ?? null;
+  const ponteDentro = numero == null ? null : numero >= 0.8 && numero <= 1.25;
+  let veredicto = null;
+  if (fjpDentro != null && ponteDentro != null) {
+    const nOk = (fjpDentro ? 1 : 0) + (ponteDentro ? 1 : 0);
+    veredicto = nOk === 2 ? "bate" : nOk === 1 ? "em parte" : "n\xE3o bate";
+  }
   return { veredicto, numero };
 }
 function veredictoPergunta2(modeloComponente) {
@@ -105132,7 +105272,7 @@ function renderizarAps(el2, aps) {
 function renderizarPonte(el2, ponte) {
   el2.innerHTML = `<table class="ponte"><thead><tr><th>Indicador</th><th>PNADc</th><th>Censo</th><th>Raz\xE3o</th><th>Leitura</th></tr></thead><tbody>${ponte.map(
     (p4) => `<tr>
-        <td>${p4.indicador}</td>
+        <td>${NOME_INDICADOR_FJP[p4.indicador] ?? rotulo(p4.indicador)}</td>
         <td data-num="${p4.pnadc ?? ""}">${p4.pnadc == null ? "\u2014" : `${formatar(p4.pnadc, 1)} (EP ${formatar(p4.pnadc_ep, 1)})`}</td>
         <td data-num="${p4.censo ?? ""}">${p4.censo == null ? "\u2014" : formatar(p4.censo, 1)}</td>
         <td data-num="${p4.razao ?? ""}">${p4.razao == null ? "\u2014" : formatar(p4.razao, 2)}</td>
@@ -105285,7 +105425,8 @@ function formatarListaImportancia(importancia) {
   const soma = lista.reduce((s4, i3) => s4 + (i3.valor ?? 0), 0);
   return lista.map((i3) => `${i3.rotulo} (${formatarImportancia(i3.valor, soma)})`).join(" \xB7 ");
 }
-function renderizarHeatmap(el2, spearman) {
+function renderizarHeatmap(el2, spearman, manifesto) {
+  const rotuloPeriodo2 = (id3) => manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3;
   el2.innerHTML = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
     const cel = (i3, j4) => {
       const v4 = matriz[i3][j4];
@@ -105293,11 +105434,12 @@ function renderizarHeatmap(el2, spearman) {
       return `<td style="background:${cor};text-align:center;padding:4px;font-size:11px" data-num="${v4 ?? ""}">${v4 == null ? "\u2014" : formatar(v4, 2)}</td>`;
     };
     return `<div class="sub" style="margin-top:8px">${CLAB5[comp] ?? comp}</div>
-        <table class="ponte"><thead><tr><th></th>${periodos.map((p4) => `<th>${p4}</th>`).join("")}</tr></thead>
-        <tbody>${periodos.map((p4, i3) => `<tr><th>${p4}</th>${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table>`;
+        <table class="ponte"><thead><tr><th></th>${periodos.map((p4) => `<th>${rotuloCurto(rotuloPeriodo2(p4))}</th>`).join("")}</tr></thead>
+        <tbody>${periodos.map((p4, i3) => `<tr><th>${rotuloCurto(rotuloPeriodo2(p4))}</th>${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table>`;
   }).join("");
 }
-function renderizarRazoes(el2, razoes) {
+function renderizarRazoes(el2, razoes, manifesto) {
+  const rotuloPeriodo2 = (id3) => rotuloCurto(manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3);
   const porComponente = group(razoes, (r3) => r3.componente);
   el2.innerHTML = [...porComponente.entries()].map(([comp, linhas]) => {
     const limite = limiteEixoP99(linhas.flatMap((l3) => [l3.p95, l3.razao_total]));
@@ -105313,9 +105455,9 @@ function renderizarRazoes(el2, razoes) {
         <line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(1)}" y2="${y5(1)}" stroke="${css6("--line")}" stroke-dasharray="2,3"/>
         ${linhas.map(
       (l3) => `<line x1="${x5(l3.periodo) + x5.bandwidth() / 2}" x2="${x5(l3.periodo) + x5.bandwidth() / 2}" y1="${y5(Math.min(l3.p95, limite))}" y2="${y5(Math.min(l3.p5, limite))}" stroke="${css6("--ink")}" stroke-width="2"/>
-                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"><title>${l3.periodo}: mediana ${formatar(l3.mediana, 2)}, raz\xE3o dos totais ${formatar(l3.razao_total, 2)}, n=${l3.n_hexagonos}</title></circle>`
+                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"><title>${rotuloPeriodo2(l3.periodo)}: mediana ${formatar(l3.mediana, 2)}, raz\xE3o dos totais ${formatar(l3.razao_total, 2)}, n=${l3.n_hexagonos}</title></circle>`
     ).join("")}
-        ${linhas.map((l3) => `<text x="${x5(l3.periodo) + x5.bandwidth() / 2}" y="${H4 - 6}" text-anchor="middle" font-size="9">${l3.periodo}</text>`).join("")}
+        ${linhas.map((l3, i3) => `<text x="${x5(l3.periodo) + x5.bandwidth() / 2}" y="${H4 - 6}" text-anchor="middle" font-size="9" transform="${linhas.length > 4 ? `rotate(-30, ${x5(l3.periodo) + x5.bandwidth() / 2}, ${H4 - 6})` : ""}">${rotuloPeriodo2(l3.periodo)}</text>`).join("")}
       </svg>`;
     return `<div class="mini"><h4>${CLAB5[comp] ?? comp}</h4>${svg}</div>`;
   }).join("");
@@ -105346,8 +105488,8 @@ async function iniciarConfiabilidade() {
   renderizarSigilo($6("f3-sigilo-cartoes"), qualidade.sigilo);
   renderizarCnefe($6("f3-cnefe-cartoes"), qualidade.cnefe);
   renderizarAps($6("f3-aps-cartoes"), qualidade.aps);
-  renderizarHeatmap($6("f3-heatmap"), consistencia.spearman);
-  renderizarRazoes($6("f3-razoes"), consistencia.razoes);
+  renderizarHeatmap($6("f3-heatmap"), consistencia.spearman, manifesto);
+  renderizarRazoes($6("f3-razoes"), consistencia.razoes, manifesto);
   renderizarAchados($6("f3-achados"), achados);
   renderizarOqueFalta($6("f3-oquefalta"), qualidade, manifesto);
   const { veredictoPergunta1Cels, veredictoPergunta2Cels, veredictoPergunta3Cels } = renderizarVereditos($6("f3-grade-vereditos"), {
@@ -105597,6 +105739,25 @@ var LARGURA_NO = 150;
 var ALTURA_NO = 46;
 var ESPACO_X = 60;
 var ESPACO_Y = 14;
+var LARGURA_NO_SUB = 190;
+var ALTURA_NO_SUB = 58;
+var MAX_CHARS_LINHA_SUB = 24;
+function quebrarNomeDuasLinhas(nome, maxCharsPorLinha) {
+  if (nome.length <= maxCharsPorLinha) return [nome];
+  const palavras = nome.split(" ");
+  let linha1 = "";
+  let i3 = 0;
+  while (i3 < palavras.length) {
+    const tentativa = linha1 ? `${linha1} ${palavras[i3]}` : palavras[i3];
+    if (tentativa.length > maxCharsPorLinha && linha1) break;
+    linha1 = tentativa;
+    i3++;
+  }
+  let linha2 = palavras.slice(i3).join(" ");
+  if (!linha2) return [linha1];
+  if (linha2.length > maxCharsPorLinha) linha2 = `${linha2.slice(0, maxCharsPorLinha - 1)}\u2026`;
+  return [linha1, linha2];
+}
 function montarSvgCaixas(nos, arestas, { larguraNo = LARGURA_NO, alturaNo = ALTURA_NO } = {}) {
   const nCamadas = Math.max(...nos.map((n3) => n3.camada)) + 1;
   const maiorCamada = Math.max(1, ...[...d3GrupoContagem(nos)].map(([, v4]) => v4));
@@ -105658,15 +105819,17 @@ function renderizarPipeline(el2, pipeline, manifesto, config2) {
     } else {
       const sub5 = pipelineDoGrupo(pipeline, grupo);
       const { nos, arestas } = camadasPipeline(sub5);
-      const { W: We3, H: He4, linhas: linhasE } = montarSvgCaixas(nos, arestas);
+      const { W: We3, H: He4, linhas: linhasE } = montarSvgCaixas(nos, arestas, { larguraNo: LARGURA_NO_SUB, alturaNo: ALTURA_NO_SUB });
       const caixasE = nos.map((n3) => {
-        const x5 = n3.camada * (LARGURA_NO + ESPACO_X);
-        const y5 = n3.posicao * (ALTURA_NO + ESPACO_Y);
+        const x5 = n3.camada * (LARGURA_NO_SUB + ESPACO_X);
+        const y5 = n3.posicao * (ALTURA_NO_SUB + ESPACO_Y);
         const dataCommit = `${n3.commit.slice(0, 7)} \xB7 ${n3.data}`;
-        return `<g transform="translate(${x5},${y5})"><rect width="${LARGURA_NO}" height="${ALTURA_NO}" rx="8" fill="${css7("--surface")}" stroke="${css7("--line")}" stroke-width="1.2"/>
+        const linhasNome = quebrarNomeDuasLinhas(n3.nome, MAX_CHARS_LINHA_SUB);
+        const textoNome = linhasNome.map((l3, i3) => `<text x="8" y="${16 + i3 * 13}" font-size="11" fill="${css7("--ink")}">${l3}</text>`).join("");
+        return `<g transform="translate(${x5},${y5})"><rect width="${LARGURA_NO_SUB}" height="${ALTURA_NO_SUB}" rx="8" fill="${css7("--surface")}" stroke="${css7("--line")}" stroke-width="1.2"/>
             <title>${n3.nome} \u2014 ${n3.commit} \xB7 ${n3.data}</title>
-            <text x="8" y="18" font-size="11" fill="${css7("--ink")}">${n3.nome.length > 28 ? n3.nome.slice(0, 27) + "\u2026" : n3.nome}</text>
-            <text x="8" y="34" font-size="9" fill="${css7("--muted")}">${dataCommit}</text>
+            ${textoNome}
+            <text x="8" y="${16 + linhasNome.length * 13 + 4}" font-size="9" fill="${css7("--muted")}">${dataCommit}</text>
           </g>`;
       }).join("");
       expandidoEl.innerHTML = `<div class="como-ler">Tabelas do grupo ${grupo.nome}, com as liga\xE7\xF5es entre elas.</div>
@@ -105764,7 +105927,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "17e566b0b0df547642bbb6cd40688fa4da72e710");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "7b627489f73beba238c8a6de216e22a7f0c85767");
   renderizarInterna($7("met-interna"), modelo);
 }
 

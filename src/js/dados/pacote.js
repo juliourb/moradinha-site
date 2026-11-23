@@ -111,9 +111,12 @@ export function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }
       h3: a.h3,
       municipioCod: a.municipio_cod,
       municipioNome: a.municipio_nome,
-      nMunicipios: a.n_municipios,
+      // n_municipios/n_aps são BIGINT no Parquet (DuckDB devolve BigInt); convertidos
+      // aqui para Number — são contagens pequenas e o resto do código faz aritmética
+      // comum (ex.: "- 1" na dica do hexágono), que quebra ao misturar BigInt e Number.
+      nMunicipios: Number(a.n_municipios),
       apCod: a.ap_cod,
-      nAps: a.n_aps,
+      nAps: Number(a.n_aps),
       fcuFracao: a.fcu_fracao,
       recortes: dividirCodigos(a.recortes),
       dom: {},
@@ -134,7 +137,7 @@ export function montarEstrutura({ hexRows, baseRows, qualRows, atrRows, apRows }
     l.qualidade[q.periodo] = {
       fracaoImputada: q.fracao_imputada ?? null,
       fracaoSigilo: q.fracao_sigilo ?? null,
-      nSetores: q.n_setores,
+      nSetores: q.n_setores == null ? null : Number(q.n_setores),
       fonteEstoque: q.fonte_estoque,
       gEstoque: q.g_estoque ?? null,
       hexNovo: q.hex_novo,

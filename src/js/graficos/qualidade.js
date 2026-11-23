@@ -5,7 +5,6 @@ import * as d3 from "d3";
 import { formatar, rotuloCurto } from "../util/formato.js";
 import { valorHex, incertezaHex, domiciliosTotal } from "../dados/calculo.js";
 import { valorMedidaQualidade, TIPO_MEDIDA } from "../dados/qualidade.js";
-import { alternarFaixa } from "../util/faixas.js";
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
@@ -56,9 +55,26 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
   const bins = d3.bin().domain(x.domain()).thresholds(20)(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
-  const faixaSelecionada = (b) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b.x0);
+  const faixaAtual = estado.faixa_hist?.[0] ?? null;
+  const faixaSelecionada = (b) => !faixaAtual || (b.x0 < (faixaAtual[1] ?? Infinity) && b.x1 > faixaAtual[0]);
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat((v) => formatar(v, 2)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
+  svg
+    .append("g")
+    .selectAll("rect")
+    .data(bins)
+    .join("rect")
+    .attr("x", (b) => x(b.x0) + 0.5)
+    .attr("width", (b) => Math.max(0, x(b.x1) - x(b.x0) - 1))
+    .attr("y", m.t)
+    .attr("height", H - m.b - m.t)
+    .attr("fill", "transparent")
+    .style("cursor", "pointer")
+    .on("click", (e, b) => {
+      e.stopPropagation();
+      aoClicarBarra([[b.x0, b === ultimoBin ? null : b.x1]]);
+    });
+  svg.on("click", () => aoClicarBarra([]));
   svg
     .append("g")
     .selectAll("rect")
@@ -69,11 +85,10 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
     .attr("y", (b) => y(b.length))
     .attr("height", (b) => y(0) - y(b.length))
     .attr("fill", css("--accent"))
-    .attr("stroke", (b) => (faixaSelecionada(b) ? css("--ink") : "none"))
+    .attr("stroke", (b) => (faixaSelecionada(b) && faixaAtual ? css("--ink") : "none"))
     .attr("stroke-width", 2)
-    .attr("opacity", (b) => (!estado.faixa_hist?.length || faixaSelecionada(b) ? 1 : 0.35))
-    .style("cursor", "pointer")
-    .on("click", (_e, b) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b.x0, b === ultimoBin ? null : b.x1])));
+    .attr("opacity", (b) => (faixaSelecionada(b) ? 1 : 0.35))
+    .style("pointer-events", "none");
   svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("p99 ou mais →");
   box.replaceChildren(svg.node());
 }

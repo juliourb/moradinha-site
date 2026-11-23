@@ -2,9 +2,18 @@
 // distribuição por período.
 import * as d3 from "d3";
 import { formatar, rotuloCurto } from "../util/formato.js";
-import { valorHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
+import { valorHex, brutoHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
+import { classeHex } from "../dados/escalaCor.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
-import { alternarFaixa } from "../util/faixas.js";
+
+/**
+ * Hexágonos "normal" no período (SPEC_F6.3 item 3): 1+ domicílio e déficit
+ * absoluto 1+ — as mesmas exclusões da legenda do mapa (`classeHex`). Evita
+ * que hachura/"menos de 1" entrem no histograma e na distribuição por período.
+ */
+function linhasNormais(linhasArr, componente, periodo) {
+  return linhasArr.filter((l) => classeHex(l.dom[periodo], brutoHex(l, componente, periodo)) === "normal");
+}
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
@@ -12,13 +21,17 @@ function css(nome) {
 
 export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
+  const faixaEl = box.parentElement?.querySelector("#f1-hist-faixa");
   const isRel = estado.medida === "relativo";
-  const vs = linhasArr.map((l) => valorHex(l, estado.componente, estado.periodo, estado.medida)).filter((v) => v != null && v > 0);
+  const vs = linhasNormais(linhasArr, estado.componente, estado.periodo)
+    .map((l) => valorHex(l, estado.componente, estado.periodo, estado.medida))
+    .filter((v) => v != null);
   const W = Math.max(260, box.clientWidth || 300);
   const H = 104;
   const m = { l: 34, r: 8, t: 6, b: 22 };
   if (!vs.length) {
     box.innerHTML = `<p class="empty">Nenhum hexágono acima de zero nesta combinação.</p>`;
+    if (faixaEl) faixaEl.innerHTML = "";
     return;
   }
   const p99 = d3.quantile(vs.slice().sort(d3.ascending), 0.99) || vs[0];
@@ -27,29 +40,148 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const bins = d3.bin().domain(x.domain()).thresholds(x.ticks(28))(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
-  const faixaSelecionada = (b) => (estado.faixa_hist ?? []).some(([x0]) => x0 === b.x0);
+  // F6.3 item 2/3: a faixa agora é uma única seleção contínua (duas alças), não um
+  // conjunto de barras marcadas. `valorDentroFaixas` com `estado.faixa_hist` decide
+  // a cor/opacidade; a área clicável de cada barra é a coluna inteira (até o eixo).
+  const faixaAtual = estado.faixa_hist?.[0] ?? null;
+  const faixaSelecionada = (b) => !faixaAtual || (b.x0 < (faixaAtual[1] ?? Infinity) && b.x1 > faixaAtual[0]);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hexágonos");
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(6).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
-  svg
-    .append("g")
-    .selectAll("rect")
+  const g = svg.append("g");
+  // Área clicável = a coluna inteira (do topo do gráfico até o eixo), não só a
+  // altura da barra: barras baixas continuam fáceis de clicar (item 3). Fica
+  // ANTES da barra visual no DOM (abaixo dela em z); como a barra tem
+  // pointer-events:none, o clique "atravessa" e cai na coluna — sem isso, o
+  // Playwright (e qualquer teste de hit-test) recusaria clicar num elemento
+  // coberto por outro.
+  g.selectAll("rect.coluna")
     .data(bins)
     .join("rect")
+    .attr("class", "coluna")
+    .attr("x", (b) => x(b.x0) + 0.5)
+    .attr("width", (b) => Math.max(0, x(b.x1) - x(b.x0) - 1))
+    .attr("y", m.t)
+    .attr("height", H - m.b - m.t)
+    .attr("fill", "transparent")
+    .style("cursor", "pointer")
+    .on("click", (e, b) => {
+      e.stopPropagation();
+      aoClicarBarra([[b.x0, b === ultimoBin ? null : b.x1]]);
+    })
+    .append("title")
+    .text((b) => (b === ultimoBin ? `${b.length} hexágonos de ${formatar(b.x0, 1)} (p99 ou mais)` : `${b.length} hexágonos entre ${formatar(b.x0, 1)} e ${formatar(b.x1, 1)}`));
+  g.selectAll("rect.barra")
+    .data(bins)
+    .join("rect")
+    .attr("class", "barra")
     .attr("x", (b) => x(b.x0) + 0.5)
     .attr("width", (b) => Math.max(0, x(b.x1) - x(b.x0) - 1))
     .attr("y", (b) => y(b.length))
     .attr("height", (b) => y(0) - y(b.length))
     .attr("fill", css("--accent"))
-    .attr("stroke", (b) => (faixaSelecionada(b) ? css("--ink") : "none"))
+    .attr("stroke", (b) => (faixaSelecionada(b) && faixaAtual ? css("--ink") : "none"))
     .attr("stroke-width", 2)
-    .style("cursor", "pointer")
-    .attr("opacity", (b) => (!estado.faixa_hist?.length || faixaSelecionada(b) ? 1 : 0.35))
-    .on("click", (_e, b) => aoClicarBarra(alternarFaixa(estado.faixa_hist, [b.x0, b === ultimoBin ? null : b.x1])))
-    .append("title")
-    .text((b) => (b === ultimoBin ? `${b.length} hexágonos de ${formatar(b.x0, 1)} (p99 ou mais)` : `${b.length} hexágonos entre ${formatar(b.x0, 1)} e ${formatar(b.x1, 1)}`));
+    .attr("opacity", (b) => (faixaSelecionada(b) ? 1 : 0.35))
+    .style("pointer-events", "none");
   svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("p99 ou mais →");
+  // Clicar fora das barras (fundo do SVG) limpa a faixa.
+  svg.on("click", () => aoClicarBarra([]));
   box.replaceChildren(svg.node());
+  if (faixaEl) renderizarFaixaDupla(faixaEl, x.domain(), faixaAtual, isRel ? 1 : 0, aoClicarBarra);
+}
+
+/**
+ * Faixa de duas alças abaixo do histograma (SPEC_F6.3 item 2): dois sliders
+ * sobrepostos (truque de CSS: só a bolinha recebe clique) mais dois campos
+ * numéricos editáveis e um "ou mais" para abrir a ponta de cima. Reconstrói o
+ * DOM só quando o domínio muda (troca de componente/período/medida): trocar o
+ * HTML a cada `input` interromperia o arrasto do mouse.
+ */
+function renderizarFaixaDupla(el, [dmin, dmax], faixaAtual, decimais, aoMudar) {
+  const passo = Math.max(10 ** -decimais, (dmax - dmin) / 200);
+  const aberto = faixaAtual != null && faixaAtual[1] == null;
+  const lo = faixaAtual?.[0] ?? dmin;
+  const hi = aberto ? dmax : faixaAtual?.[1] ?? dmax;
+  const assinatura = `${dmin}|${dmax}|${passo}`;
+
+  function emitir(novoLo, novoHi, novoAberto) {
+    const l = Math.max(dmin, Math.min(novoLo, novoHi, dmax));
+    const h = Math.max(l, Math.min(novoHi, dmax));
+    if (l <= dmin + passo / 2 && h >= dmax - passo / 2 && !novoAberto) aoMudar([]);
+    else aoMudar([[l, novoAberto ? null : h]]);
+  }
+
+  if (el.dataset.sig !== assinatura) {
+    el.dataset.sig = assinatura;
+    el.innerHTML = `
+      <div class="fx-track">
+        <input type="range" class="fx-alca fx-min" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Valor mínimo da faixa">
+        <input type="range" class="fx-alca fx-max" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Valor máximo da faixa">
+      </div>
+      <div class="fx-campos">
+        <input type="number" class="fx-campo fx-campo-min" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Campo do valor mínimo">
+        <span>–</span>
+        <input type="number" class="fx-campo fx-campo-max" min="${dmin}" max="${dmax}" step="${passo}" aria-label="Campo do valor máximo">
+        <label class="fx-oumais"><input type="checkbox" class="fx-chk-oumais"> ou mais</label>
+      </div>`;
+    const elMin = el.querySelector(".fx-min");
+    const elMax = el.querySelector(".fx-max");
+    const campoMin = el.querySelector(".fx-campo-min");
+    const campoMax = el.querySelector(".fx-campo-max");
+    const chk = el.querySelector(".fx-chk-oumais");
+    function lerCampos() {
+      let novoLo = Number(elMin.value);
+      let novoHi = Number(elMax.value);
+      if (novoLo > novoHi) [novoLo, novoHi] = [novoHi, novoLo];
+      emitir(novoLo, novoHi, chk.checked);
+    }
+    elMin.addEventListener("input", () => {
+      campoMin.value = elMin.value;
+      lerCampos();
+    });
+    elMax.addEventListener("input", () => {
+      campoMax.value = elMax.value;
+      lerCampos();
+    });
+    campoMin.addEventListener("change", () => {
+      elMin.value = campoMin.value;
+      lerCampos();
+    });
+    campoMax.addEventListener("change", () => {
+      elMax.value = campoMax.value;
+      lerCampos();
+    });
+    chk.addEventListener("change", () => {
+      elMax.disabled = chk.checked;
+      campoMax.disabled = chk.checked;
+      lerCampos();
+    });
+  }
+
+  const elMin = el.querySelector(".fx-min");
+  const elMax = el.querySelector(".fx-max");
+  const campoMin = el.querySelector(".fx-campo-min");
+  const campoMax = el.querySelector(".fx-campo-max");
+  const chk = el.querySelector(".fx-chk-oumais");
+  const foco = document.activeElement;
+  if (foco !== elMin) elMin.value = String(lo);
+  if (foco !== elMax) elMax.value = String(hi);
+  if (foco !== campoMin) campoMin.value = lo.toFixed(decimais);
+  if (foco !== campoMax) campoMax.value = hi.toFixed(decimais);
+  chk.checked = aberto;
+  elMax.disabled = aberto;
+  campoMax.disabled = aberto;
+}
+
+/**
+ * Código curto de um H3: os caracteres que mudam entre hexágonos, antes do
+ * sufixo "fffff" (os H3 de resolução 8 terminam todos nesse sufixo — tirar os
+ * 6 últimos caracteres crus repetia "7fffff" em quase toda linha, N3).
+ */
+export function codigoCurtoH3(h3) {
+  const semSufixo = h3.replace(/fffff$/, "");
+  return semSufixo.slice(-6);
 }
 
 export function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
@@ -64,7 +196,7 @@ export function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
     .map(
       (d, i) =>
         // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
-        `<tr data-h3="${d.l.h3}" tabindex="0"><td>${i + 1}</td><td>${d.l.municipioNome} · ${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod} · <span class="num" style="font-size:10px;color:var(--muted)">${d.l.h3.slice(-6)}</span>${
+        `<tr data-h3="${d.l.h3}" tabindex="0"><td>${i + 1}</td><td>${d.l.municipioNome} · ${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod} · <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d.l.h3)}</span>${
           d.l.fcuFracao > 0 ? " · FCU" : ""
         }</td><td style="width:45%"><div class="b" style="width:${(100 * d.v) / mx}%"></div></td><td style="text-align:right">${formatar(
           d.v,
@@ -162,7 +294,9 @@ export function renderizarPainelDetalhe(box, manifesto, totais, componente, rotu
   const mediaPts = medias.map(pontoDe);
   const W = Math.max(220, box.clientWidth || 260);
   const H = 128;
-  const m = { l: 44, r: 8, t: 8, b: 20 };
+  // r maior que o padrão: o rótulo do último ano (centrado no ponto) não pode ser
+  // cortado pela borda direita do viewBox (item 8, SPEC_F6.3).
+  const m = { l: 44, r: 20, t: 8, b: 20 };
   const x = d3.scalePoint().domain(anos.map((p) => p.id)).range([m.l, W - m.r]);
   const maxV = d3.max([...anosPts, ...mediaPts], (d) => d.hi ?? d.v ?? 0) || 1;
   const y = d3.scaleLinear().domain([0, maxV * 1.15]).nice().range([H - m.b, m.t]);
@@ -239,7 +373,10 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
   const isRel = estado.medida === "relativo";
   const todosValores = [];
   const st = manifesto.periodos.map((p) => {
-    const vs = linhasArr.map((l) => valorHex(l, estado.componente, p.id, estado.medida)).filter((v) => v != null && v > 0).sort(d3.ascending);
+    const vs = linhasNormais(linhasArr, estado.componente, p.id)
+      .map((l) => valorHex(l, estado.componente, p.id, estado.medida))
+      .filter((v) => v != null)
+      .sort(d3.ascending);
     todosValores.push(...vs);
     const q = (f) => d3.quantileSorted(vs, f);
     return { id: p.id, lab: p.rotulo, media: p.tipo === "media", critico: p.marcas?.includes("fonte_estoque_diferente"), q10: q(0.1), q25: q(0.25), q50: q(0.5), q75: q(0.75), q90: q(0.9) };

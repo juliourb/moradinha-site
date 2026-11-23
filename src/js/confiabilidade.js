@@ -8,7 +8,7 @@ import {
 import { fjpTresValores } from "./dados/visaoGeral.js";
 import { rotuloMarca, rotuloFonteEstoque } from "./util/marcas.js";
 import { rotulo } from "./util/rotulos.js";
-import { formatar, formatarPercentual } from "./util/formato.js";
+import { formatar, formatarPercentual, rotuloCurto } from "./util/formato.js";
 
 const NOME_INDICADOR_FJP = { total: "Total", habitacao_precaria: "Habitação precária", coabitacao: "Coabitação", onus: "Ônus excessivo com aluguel", domicilios: "Domicílios" };
 
@@ -50,7 +50,7 @@ function renderizarPonte(el, ponte) {
   el.innerHTML = `<table class="ponte"><thead><tr><th>Indicador</th><th>PNADc</th><th>Censo</th><th>Razão</th><th>Leitura</th></tr></thead><tbody>${ponte
     .map(
       (p) => `<tr>
-        <td>${p.indicador}</td>
+        <td>${NOME_INDICADOR_FJP[p.indicador] ?? rotulo(p.indicador)}</td>
         <td data-num="${p.pnadc ?? ""}">${p.pnadc == null ? "—" : `${formatar(p.pnadc, 1)} (EP ${formatar(p.pnadc_ep, 1)})`}</td>
         <td data-num="${p.censo ?? ""}">${p.censo == null ? "—" : formatar(p.censo, 1)}</td>
         <td data-num="${p.razao ?? ""}">${p.razao == null ? "—" : formatar(p.razao, 2)}</td>
@@ -279,7 +279,8 @@ function formatarListaImportancia(importancia) {
   return lista.map((i) => `${i.rotulo} (${formatarImportancia(i.valor, soma)})`).join(" · ");
 }
 
-function renderizarHeatmap(el, spearman) {
+function renderizarHeatmap(el, spearman, manifesto) {
+  const rotuloPeriodo = (id) => manifesto.periodos.find((p) => p.id === id)?.rotulo ?? id;
   el.innerHTML = Object.entries(spearman)
     .map(([comp, { periodos, matriz }]) => {
       const cel = (i, j) => {
@@ -288,14 +289,15 @@ function renderizarHeatmap(el, spearman) {
         return `<td style="background:${cor};text-align:center;padding:4px;font-size:11px" data-num="${v ?? ""}">${v == null ? "—" : formatar(v, 2)}</td>`;
       };
       return `<div class="sub" style="margin-top:8px">${CLAB[comp] ?? comp}</div>
-        <table class="ponte"><thead><tr><th></th>${periodos.map((p) => `<th>${p}</th>`).join("")}</tr></thead>
-        <tbody>${periodos.map((p, i) => `<tr><th>${p}</th>${periodos.map((_p, j) => cel(i, j)).join("")}</tr>`).join("")}</tbody></table>`;
+        <table class="ponte"><thead><tr><th></th>${periodos.map((p) => `<th>${rotuloCurto(rotuloPeriodo(p))}</th>`).join("")}</tr></thead>
+        <tbody>${periodos.map((p, i) => `<tr><th>${rotuloCurto(rotuloPeriodo(p))}</th>${periodos.map((_p, j) => cel(i, j)).join("")}</tr>`).join("")}</tbody></table>`;
     })
     .join("");
 }
 
 /** Razão do total por hexágono (ano ÷ 2022), com eixo e rótulos sem sobreposição (N16). */
-function renderizarRazoes(el, razoes) {
+function renderizarRazoes(el, razoes, manifesto) {
+  const rotuloPeriodo = (id) => rotuloCurto(manifesto.periodos.find((p) => p.id === id)?.rotulo ?? id);
   const porComponente = d3.group(razoes, (r) => r.componente);
   el.innerHTML = [...porComponente.entries()]
     .map(([comp, linhas]) => {
@@ -313,10 +315,10 @@ function renderizarRazoes(el, razoes) {
         ${linhas
           .map(
             (l) => `<line x1="${x(l.periodo) + x.bandwidth() / 2}" x2="${x(l.periodo) + x.bandwidth() / 2}" y1="${y(Math.min(l.p95, limite))}" y2="${y(Math.min(l.p5, limite))}" stroke="${css("--ink")}" stroke-width="2"/>
-                <circle cx="${x(l.periodo) + x.bandwidth() / 2}" cy="${y(Math.min(l.mediana, limite))}" r="3" fill="${css("--accent")}"><title>${l.periodo}: mediana ${formatar(l.mediana, 2)}, razão dos totais ${formatar(l.razao_total, 2)}, n=${l.n_hexagonos}</title></circle>`
+                <circle cx="${x(l.periodo) + x.bandwidth() / 2}" cy="${y(Math.min(l.mediana, limite))}" r="3" fill="${css("--accent")}"><title>${rotuloPeriodo(l.periodo)}: mediana ${formatar(l.mediana, 2)}, razão dos totais ${formatar(l.razao_total, 2)}, n=${l.n_hexagonos}</title></circle>`
           )
           .join("")}
-        ${linhas.map((l) => `<text x="${x(l.periodo) + x.bandwidth() / 2}" y="${H - 6}" text-anchor="middle" font-size="9">${l.periodo}</text>`).join("")}
+        ${linhas.map((l, i) => `<text x="${x(l.periodo) + x.bandwidth() / 2}" y="${H - 6}" text-anchor="middle" font-size="9" transform="${linhas.length > 4 ? `rotate(-30, ${x(l.periodo) + x.bandwidth() / 2}, ${H - 6})` : ""}">${rotuloPeriodo(l.periodo)}</text>`).join("")}
       </svg>`;
       return `<div class="mini"><h4>${CLAB[comp] ?? comp}</h4>${svg}</div>`;
     })
@@ -356,8 +358,8 @@ export async function iniciarConfiabilidade() {
   renderizarSigilo($("f3-sigilo-cartoes"), qualidade.sigilo);
   renderizarCnefe($("f3-cnefe-cartoes"), qualidade.cnefe);
   renderizarAps($("f3-aps-cartoes"), qualidade.aps);
-  renderizarHeatmap($("f3-heatmap"), consistencia.spearman);
-  renderizarRazoes($("f3-razoes"), consistencia.razoes);
+  renderizarHeatmap($("f3-heatmap"), consistencia.spearman, manifesto);
+  renderizarRazoes($("f3-razoes"), consistencia.razoes, manifesto);
   renderizarAchados($("f3-achados"), achados);
   renderizarOqueFalta($("f3-oquefalta"), qualidade, manifesto);
 

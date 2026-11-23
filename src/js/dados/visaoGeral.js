@@ -3,6 +3,7 @@
 import { totalDoMapa, domiciliosTotal, brutoHex, mudanca, COMPONENTES_BASE } from "./calculo.js";
 import { PRIORIDADE_MARCAS } from "../util/marcas.js";
 import { taxaDominio } from "./escalaCor.js";
+import { formatar } from "../util/formato.js";
 
 /** Parte do CadÚnico de um indicador do referencia_fjp.json (SPEC_F6 N8/N9). */
 export function parteCadUnico(item, todosItens) {
@@ -185,12 +186,12 @@ export function fraseRessalvaRelativo(linhasArr, totais, componente, periodo) {
   const maiorRel = maiorRelativo(linhasArr, componente, periodo);
   const taxa = taxaDominio(totais, componente, periodo);
   const vezes = taxa && maiorRel != null ? maiorRel / taxa : null;
-  const frase1 = `${Math.round(conc.nHexMeio).toLocaleString("pt-BR")} hexágonos (${conc.pctHexMeio.toFixed(0)}% dos que têm domicílio) somam metade do déficit absoluto.`;
+  const frase1 = `${formatar(conc.nHexMeio, 0)} hexágonos (${formatar(conc.pctHexMeio, 0)}% dos que têm domicílio) somam metade do déficit absoluto.`;
   if (vezes == null) return frase1;
   const frase2 =
     vezes >= 2
-      ? `No relativo, o maior hexágono tem ${vezes.toFixed(1)} vezes a taxa do domínio.`
-      : `No relativo, o maior hexágono tem ${vezes.toFixed(1)} vezes a taxa do domínio: a concentração do mapa absoluto acompanha, em boa parte, onde estão os domicílios.`;
+      ? `No relativo, o maior hexágono tem ${formatar(vezes, 1)} vezes a taxa do domínio.`
+      : `No relativo, o maior hexágono tem ${formatar(vezes, 1)} vezes a taxa do domínio: a concentração do mapa absoluto acompanha, em boa parte, onde estão os domicílios.`;
   return `${frase1} ${frase2}`;
 }
 

@@ -59,7 +59,8 @@ function blocoQualidade(linha, estado) {
   const piorIncerteza = incertezas.length ? Math.max(...incertezas) : null;
   const nivelInc = nivelIncerteza(piorIncerteza);
   const itens = [];
-  itens.push(`<span class="pill ${qb === "ok" ? "ok" : "warn"}">qualidade do dado: ${qb ?? "—"}</span>`);
+  const qbTxt = qb == null ? "—" : qb === "ok" ? "ok" : rotuloMarca(qb);
+  itens.push(`<span class="pill ${qb === "ok" ? "ok" : "warn"}">qualidade do dado: ${qbTxt}</span>`);
   if (piorIncerteza != null) {
     itens.push(`<span class="pill ${NIVEL_CLASSE[nivelInc]}">incerteza: ${formatar(piorIncerteza, 2)}</span>`);
   }

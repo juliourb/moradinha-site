@@ -10,13 +10,25 @@ export const CLAB = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "
 /** Indicador do referencia_fjp.json correspondente a cada componente (SPEC_F6 pergunta 1). */
 const INDICADOR_FJP_POR_COMPONENTE = { coabitacao: "coabitacao", onus: "onus", precariedade: "habitacao_precaria" };
 
-/** Pergunta 1 ("Os números de partida batem?") — SPEC_F6 painel de vereditos. */
+/**
+ * Pergunta 1 ("Os números de partida batem?") — SPEC_F6.3, regra nova (decisão
+ * de Julio, 22/11/2026): "bate" só quando as duas coisas valem — a FJP sem
+ * CadÚnico cai dentro da faixa de 95% da reconstrução E a razão da ponte
+ * (`qualidade.ponte.razao`) está entre 0,80 e 1,25; se só uma vale, "em parte";
+ * se nenhuma vale, "não bate".
+ */
 export function veredictoPergunta1(qualidade, referenciaFjp, componente) {
   const pontePonto = (qualidade.ponte ?? []).find((p) => p.indicador === componente);
   const numero = pontePonto?.razao ?? null;
   const indicadorFjp = INDICADOR_FJP_POR_COMPONENTE[componente];
   const item = fjpTresValores(referenciaFjp ?? []).find((i) => i.indicador === indicadorFjp);
-  const veredicto = item?.dentro == null ? null : item.dentro ? "bate" : "não bate";
+  const fjpDentro = item?.dentro ?? null;
+  const ponteDentro = numero == null ? null : numero >= 0.8 && numero <= 1.25;
+  let veredicto = null;
+  if (fjpDentro != null && ponteDentro != null) {
+    const nOk = (fjpDentro ? 1 : 0) + (ponteDentro ? 1 : 0);
+    veredicto = nOk === 2 ? "bate" : nOk === 1 ? "em parte" : "não bate";
+  }
   return { veredicto, numero };
 }
 

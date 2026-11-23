@@ -30,6 +30,11 @@ function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 
+/** Minúscula só na primeira letra — preserva siglas como "CV" no resto do texto. */
+function primeiraMinuscula(texto) {
+  return texto ? texto[0].toLowerCase() + texto.slice(1) : texto;
+}
+
 function sparkline(serie) {
   const ok = serie.filter((v) => v != null);
   if (!ok.length) return "";
@@ -53,7 +58,7 @@ function renderizarMensagem(el, manifesto, totais) {
     media ? `, e de ${formatar(total.absolutoMedia, 0)} (${formatarPercentual(total.relativoMedia, 2)}) na ${media.rotulo.toLowerCase()}` : ""
   }.`;
   const linha2 = maior ? `O maior componente é ${NOME_COMPONENTE[maior]}.` : "";
-  const linha3 = marca ? `${CLAB[marca.componente]} com ${rotuloMarca(marca.codigo).toLowerCase()}.` : "";
+  const linha3 = marca ? `${CLAB[marca.componente]} com ${primeiraMinuscula(rotuloMarca(marca.codigo))}.` : "";
 
   el.innerHTML = [linha1, linha2, linha3].filter(Boolean).join("<br>");
 }
@@ -210,6 +215,7 @@ export async function iniciarVisaoGeral() {
     renderizarPainelDetalhe($("f2-det-onus"), manifesto, totais, "onus", "Ônus");
     renderizarPainelDetalhe($("f2-det-precariedade"), manifesto, totais, "precariedade", "Precariedade");
     $("f2-det-frase-ruido").textContent = fraseRuidoAnual(manifesto, totais);
+    $("f2-det-concentracao-titulo").textContent = `Curva de concentração — Total, ${anoRecente.rotulo}`;
     renderizarCurvaConcentracao($("f2-det-concentracao"), linhasArr, "total", anoRecente.id);
   }
   function abrirDetalhes() {

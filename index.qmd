@@ -29,7 +29,7 @@ title: ""
       <div class="dpanel"><h3>Precariedade</h3><div id="f2-det-precariedade"></div></div>
     </div>
     <p class="sub" id="f2-det-frase-ruido"></p>
-    <h3>Curva de concentração</h3>
+    <h3 id="f2-det-concentracao-titulo">Curva de concentração</h3>
     <div class="como-ler">% dos hexágonos com domicílio (do maior para o menor déficit) no eixo x; % do déficit acumulado no eixo y.</div>
     <div id="f2-det-concentracao"></div>
   </div>
