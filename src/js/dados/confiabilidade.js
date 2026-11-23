@@ -130,7 +130,6 @@ export const BLOCOS_MODELO = [
   {
     chave: "curvas",
     titulo: "Por quê?",
-    recolhido: true,
     significado:
       "O modelo (EBM, Explainable Boosting Machine) soma uma contribuição por característica do domicílio ou do território; " +
       "a importância diz quanto cada variável pesa no total. As curvas ficam recolhidas nesta edição.",
@@ -138,7 +137,6 @@ export const BLOCOS_MODELO = [
   {
     chave: "confianca",
     titulo: "Quanto confiar nesses números?",
-    recolhido: true,
     significado:
       "Com poucas áreas (53 no piloto), cada métrica oscila; os intervalos mostram quanto. O Moran dos resíduos diz se os erros se agrupam no mapa " +
       "(se sim, falta ao modelo alguma informação espacial). A cobertura diz em quantas áreas o modelo cai dentro do intervalo de 95% da amostra — " +
@@ -171,4 +169,66 @@ export function limiteEixoP99(valores) {
   const vs = valores.filter((v) => v != null).sort(ascending);
   if (!vs.length) return 1;
   return quantileSorted(vs, 0.99) || vs.at(-1) || 1;
+}
+
+/** Escala fixa dos mapas de calor de Spearman (F6.4 3b): 0,8 a 1,0. */
+export const ESCALA_SPEARMAN = { min: 0.8, max: 1 };
+
+/** Posição (0–1) de um Spearman na escala fixa; abaixo de 0,8 fica no extremo baixo. */
+export function posicaoSpearman(v) {
+  if (v == null) return null;
+  return Math.max(0, Math.min(1, (v - ESCALA_SPEARMAN.min) / (ESCALA_SPEARMAN.max - ESCALA_SPEARMAN.min)));
+}
+
+/**
+ * Ano que menos se parece com os outros: menor média do Spearman com os demais
+ * anos (fora da diagonal), somando os componentes. Só anos, não médias de período.
+ * Devolve também se o pacote marca o estoque do ano como de outra fonte.
+ */
+export function periodoMenosParecido(spearman, manifesto) {
+  const anos = manifesto.periodos.filter((p) => p.tipo === "ano");
+  const somas = new Map(anos.map((p) => [p.id, { soma: 0, n: 0 }]));
+  for (const { periodos, matriz } of Object.values(spearman ?? {})) {
+    periodos.forEach((pi, i) => {
+      if (!somas.has(pi)) return;
+      periodos.forEach((pj, j) => {
+        if (i === j || !somas.has(pj) || matriz[i][j] == null) return;
+        const acc = somas.get(pi);
+        acc.soma += matriz[i][j];
+        acc.n += 1;
+      });
+    });
+  }
+  let pior = null;
+  for (const p of anos) {
+    const { soma, n } = somas.get(p.id);
+    if (!n) continue;
+    const media = soma / n;
+    if (!pior || media < pior.media) pior = { periodo: p, media };
+  }
+  if (!pior) return null;
+  return { ...pior, fonteDiferente: pior.periodo.marcas?.includes("fonte_estoque_diferente") ?? false };
+}
+
+/** Frase da Série comparável, gerada do pacote (F6.4 3b). */
+export function fraseAnoMenosParecido(spearman, manifesto) {
+  const r = periodoMenosParecido(spearman, manifesto);
+  if (!r) return "";
+  return `${r.periodo.rotulo} é o ano que menos se parece com os outros: a ordem dos hexágonos muda${
+    r.fonteDiferente ? " porque o estoque vem de outra fonte" : ""
+  }.`;
+}
+
+/** Spearman de cada ano contra o primeiro ano da série, por componente (F6.4 3b). */
+export function spearmanContraBase(spearman, manifesto) {
+  const anos = manifesto.periodos.filter((p) => p.tipo === "ano");
+  const base = anos[0]?.id;
+  return Object.entries(spearman ?? {}).map(([componente, { periodos, matriz }]) => {
+    const ib = periodos.indexOf(base);
+    const pontos = anos
+      .filter((p) => p.id !== base)
+      .map((p) => ({ periodo: p, valor: ib < 0 || periodos.indexOf(p.id) < 0 ? null : matriz[ib][periodos.indexOf(p.id)] }))
+      .filter((d) => d.valor != null);
+    return { componente, base: anos[0], pontos };
+  });
 }

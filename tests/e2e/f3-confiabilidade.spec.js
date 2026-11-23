@@ -56,6 +56,7 @@ test.describe("F3-4: componente com usado=false mostra só a mensagem própria",
   test("precariedade não mostra os blocos de pergunta nem curvas", async ({ page }) => {
     await page.goto("/confiabilidade.html?edicao=ficticio");
     await page.waitForLoadState("networkidle");
+    await page.locator('button.vereditocel[data-secao="1"]').first().click();
     await page.click('#f3-seg-comp button[data-v="precariedade"]');
     await expect(page.locator("#f3-modelo-blocos")).not.toContainText("O modelo ajuda?");
     await expect(page.locator("#f3-modelo-blocos svg")).toHaveCount(0);

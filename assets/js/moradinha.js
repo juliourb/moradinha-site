@@ -105523,13 +105523,11 @@ var BLOCOS_MODELO = [
   {
     chave: "curvas",
     titulo: "Por qu\xEA?",
-    recolhido: true,
     significado: "O modelo (EBM, Explainable Boosting Machine) soma uma contribui\xE7\xE3o por caracter\xEDstica do domic\xEDlio ou do territ\xF3rio; a import\xE2ncia diz quanto cada vari\xE1vel pesa no total. As curvas ficam recolhidas nesta edi\xE7\xE3o."
   },
   {
     chave: "confianca",
     titulo: "Quanto confiar nesses n\xFAmeros?",
-    recolhido: true,
     significado: "Com poucas \xE1reas (53 no piloto), cada m\xE9trica oscila; os intervalos mostram quanto. O Moran dos res\xEDduos diz se os erros se agrupam no mapa (se sim, falta ao modelo alguma informa\xE7\xE3o espacial). A cobertura diz em quantas \xE1reas o modelo cai dentro do intervalo de 95% da amostra \u2014 um teste exigente, porque pede ao modelo a precis\xE3o da pr\xF3pria amostra."
   }
 ];
@@ -105550,6 +105548,49 @@ function limiteEixoP99(valores) {
   const vs9 = valores.filter((v4) => v4 != null).sort(ascending);
   if (!vs9.length) return 1;
   return quantileSorted(vs9, 0.99) || vs9.at(-1) || 1;
+}
+var ESCALA_SPEARMAN = { min: 0.8, max: 1 };
+function posicaoSpearman(v4) {
+  if (v4 == null) return null;
+  return Math.max(0, Math.min(1, (v4 - ESCALA_SPEARMAN.min) / (ESCALA_SPEARMAN.max - ESCALA_SPEARMAN.min)));
+}
+function periodoMenosParecido(spearman, manifesto) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const somas = new Map(anos.map((p4) => [p4.id, { soma: 0, n: 0 }]));
+  for (const { periodos, matriz } of Object.values(spearman ?? {})) {
+    periodos.forEach((pi5, i3) => {
+      if (!somas.has(pi5)) return;
+      periodos.forEach((pj2, j4) => {
+        if (i3 === j4 || !somas.has(pj2) || matriz[i3][j4] == null) return;
+        const acc = somas.get(pi5);
+        acc.soma += matriz[i3][j4];
+        acc.n += 1;
+      });
+    });
+  }
+  let pior = null;
+  for (const p4 of anos) {
+    const { soma, n: n3 } = somas.get(p4.id);
+    if (!n3) continue;
+    const media = soma / n3;
+    if (!pior || media < pior.media) pior = { periodo: p4, media };
+  }
+  if (!pior) return null;
+  return { ...pior, fonteDiferente: pior.periodo.marcas?.includes("fonte_estoque_diferente") ?? false };
+}
+function fraseAnoMenosParecido(spearman, manifesto) {
+  const r3 = periodoMenosParecido(spearman, manifesto);
+  if (!r3) return "";
+  return `${r3.periodo.rotulo} \xE9 o ano que menos se parece com os outros: a ordem dos hex\xE1gonos muda${r3.fonteDiferente ? " porque o estoque vem de outra fonte" : ""}.`;
+}
+function spearmanContraBase(spearman, manifesto) {
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano");
+  const base = anos[0]?.id;
+  return Object.entries(spearman ?? {}).map(([componente, { periodos, matriz }]) => {
+    const ib2 = periodos.indexOf(base);
+    const pontos = anos.filter((p4) => p4.id !== base).map((p4) => ({ periodo: p4, valor: ib2 < 0 || periodos.indexOf(p4.id) < 0 ? null : matriz[ib2][periodos.indexOf(p4.id)] })).filter((d3) => d3.valor != null);
+    return { componente, base: anos[0], pontos };
+  });
 }
 
 // src/js/confiabilidade.js
@@ -105628,13 +105669,30 @@ function renderizarOqueFalta(el2, qualidade, manifesto) {
   el2.innerHTML = `<table class="grade-oquefalta"><thead><tr><th>Vari\xE1vel</th>${manifesto.periodos.map((p4) => `<th>${p4.rotulo}</th>`).join("")}</tr></thead><tbody>${matriz.map((linha) => `<tr><td>${rotulo(linha.variavel)}</td>${linha.celulas.map((c3) => `<td>${c3.uso}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
 }
 var SECOES_VEREDITOS = ["f3-secao-dados", "f3-secao-modelo", "f3-secao-consistencia", "f3-secao-achados"];
-var secaoAtual = 0;
-function irParaSecao(indice) {
+var secaoAtual = null;
+function sincronizarSecoes() {
+  SECOES_VEREDITOS.forEach((id3, i3) => {
+    const el2 = $6(id3);
+    if (el2) el2.hidden = i3 !== secaoAtual;
+  });
+  document.querySelectorAll("button[data-secao]").forEach((b10) => b10.setAttribute("aria-expanded", String(Number(b10.dataset.secao) === secaoAtual)));
+  document.querySelectorAll(".nav-lateral a").forEach((a5) => {
+    if (SECOES_VEREDITOS[secaoAtual] && a5.getAttribute("href") === `#${SECOES_VEREDITOS[secaoAtual]}`) a5.setAttribute("aria-current", "true");
+    else a5.removeAttribute("aria-current");
+  });
+}
+function irParaSecao(indice, { alternar = false } = {}) {
   const i3 = Math.max(0, Math.min(SECOES_VEREDITOS.length - 1, indice));
+  if (alternar && secaoAtual === i3) {
+    secaoAtual = null;
+    sincronizarSecoes();
+    return;
+  }
   secaoAtual = i3;
+  sincronizarSecoes();
   const el2 = $6(SECOES_VEREDITOS[i3]);
   el2?.scrollIntoView({ behavior: "smooth", block: "start" });
-  el2?.focus();
+  el2?.focus({ preventScroll: true });
 }
 function classeVeredicto(v4) {
   if (v4 === "sim" || v4 === "bate") return "ok";
@@ -105663,15 +105721,26 @@ function renderizarVereditos(el2, { qualidade, referenciaFjp, modelo, manifesto,
       <tr><th scope="row">4. O que ainda n\xE3o sabemos</th><td colspan="${componentes.length}"><button type="button" class="vereditocel" data-secao="3"><span class="numero">${formatar(p4.numero, 0)} achados p\xFAblicos</span></button></td></tr>
     </tbody></table>`;
   el2.querySelectorAll("button[data-secao]").forEach((b10) => {
-    b10.onclick = () => irParaSecao(Number(b10.dataset.secao));
+    b10.setAttribute("aria-expanded", "false");
+    b10.onclick = () => irParaSecao(Number(b10.dataset.secao), { alternar: true });
   });
   return { veredictoPergunta1Cels: linhas[0].cels, veredictoPergunta2Cels: linhas[1].cels, veredictoPergunta3Cels: linhas[2].cels };
 }
 function ligarNavegacaoSecoes() {
   document.addEventListener("keydown", (e67) => {
+    if (secaoAtual == null || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName ?? "")) return;
     if (e67.key === "ArrowRight") irParaSecao(secaoAtual + 1);
     else if (e67.key === "ArrowLeft") irParaSecao(secaoAtual - 1);
   });
+  document.querySelectorAll(".nav-lateral a[href^='#f3-secao']").forEach((a5) => {
+    a5.addEventListener("click", (e67) => {
+      e67.preventDefault();
+      irParaSecao(SECOES_VEREDITOS.indexOf(a5.getAttribute("href").slice(1)));
+    });
+  });
+  const hash = SECOES_VEREDITOS.indexOf(window.location.hash.slice(1));
+  if (hash >= 0) irParaSecao(hash);
+  else sincronizarSecoes();
 }
 function fraseResposta(cels, rotuloVerbo) {
   const partes = cels.map((c3) => `${CLAB5[c3.c]} ${c3.veredicto ?? "\u2014"}`);
@@ -105692,10 +105761,10 @@ function renderizarCalibracaoDecis(decis) {
   const max6 = max4(decis, (d3) => Math.max(d3.previsto, d3.observado)) || 1;
   const x5 = linear2().domain([0, max6 * 1.05]).range([m4.l, W4 - m4.r]);
   const y5 = linear2().domain([0, max6 * 1.05]).range([H4 - m4.b, m4.t]);
-  const pontos = decis.map((d3) => `<circle cx="${x5(d3.previsto)}" cy="${y5(d3.observado)}" r="3.5" fill="${css6("--accent")}"><title>decil ${d3.decil}: previsto ${formatar(d3.previsto, 1)}, observado ${formatar(d3.observado, 1)}</title></circle>`).join("");
+  const pontos = decis.map((d3) => `<circle cx="${x5(d3.previsto)}" cy="${y5(d3.observado)}" r="3.5" fill="${css6("--accent")}"/><circle cx="${x5(d3.previsto)}" cy="${y5(d3.observado)}" r="9" fill="transparent" data-dica-titulo="decil ${attr(d3.decil)}" data-dica-valor="previsto ${attr(formatar(d3.previsto, 1))} \xB7 observado ${attr(formatar(d3.observado, 1))}"/>`).join("");
   const ticks2 = ticks(0, max6, 4);
   const eixoY = ticks2.map((t4) => `<text x="${m4.l - 4}" y="${y5(t4)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t4, 0)}</text>`).join("");
-  return `<div class="sub" style="margin-top:6px">Previsto \xD7 observado, por decil:</div><svg viewBox="0 0 ${W4} ${H4}" width="180" height="180" role="img" aria-label="Calibra\xE7\xE3o por decis: previsto contra observado">
+  return `<header class="graf-cab" style="margin-top:6px"><span class="sub">Previsto \xD7 observado, por decil</span></header><div class="grafico-dica">Cada ponto \xE9 um d\xE9cimo das \xE1reas, do que o modelo prev\xEA menos ao que prev\xEA mais: o eixo horizontal \xE9 o previsto e o vertical, o observado na amostra. Pontos sobre a linha tracejada = o modelo acerta o tamanho. Passe o mouse num ponto.</div><svg data-grafico="calibracao" viewBox="0 0 ${W4} ${H4}" width="180" height="180" role="img" aria-label="Calibra\xE7\xE3o por decis: previsto contra observado">
     <line x1="${x5(0)}" y1="${y5(0)}" x2="${x5(max6)}" y2="${y5(max6)}" stroke="${css6("--line")}" stroke-dasharray="3,3"/>
     ${eixoY}
     ${pontos}
@@ -105725,6 +105794,8 @@ function montarModeloHtml(modeloComponenteBruto) {
 }
 function renderizarModelo(el2, modeloComponenteBruto) {
   el2.innerHTML = montarModeloHtml(modeloComponenteBruto);
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
 function formatarImportancia(valor, soma) {
   if (valor == null || !soma) return formatar(null);
@@ -105738,16 +105809,56 @@ function formatarListaImportancia(importancia) {
 }
 function renderizarHeatmap(el2, spearman, manifesto) {
   const rotuloPeriodo2 = (id3) => manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3;
-  el2.innerHTML = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
+  const destaque = new Set(manifesto.periodos.filter((p4) => p4.marcas?.includes("fonte_estoque_diferente")).map((p4) => p4.id));
+  const cor = (v4) => v4 == null ? css6("--line") : rgb2(css6("--warn-soft"), css6("--accent"))(posicaoSpearman(v4));
+  const matrizes = Object.entries(spearman).map(([comp, { periodos, matriz }]) => {
     const cel = (i3, j4) => {
       const v4 = matriz[i3][j4];
-      const cor = v4 == null ? css6("--line") : rgb2(css6("--warn-soft"), css6("--accent"))(Math.max(0, v4));
-      return `<td style="background:${cor};text-align:center;padding:4px;font-size:11px" data-num="${v4 ?? ""}">${v4 == null ? "\u2014" : formatar(v4, 2)}</td>`;
+      const dest = destaque.has(periodos[i3]) || destaque.has(periodos[j4]) ? " destaque-periodo" : "";
+      return `<td class="hm-cel${dest}" style="background:${cor(v4)} !important;color:var(--ink) !important" data-num="${v4 ?? ""}" data-dica-titulo="${attr(CLAB5[comp] ?? comp)}: ${attr(rotuloPeriodo2(periodos[i3]))} \xD7 ${attr(rotuloPeriodo2(periodos[j4]))}" data-dica-valor="Spearman ${v4 == null ? "sem dado" : attr(formatar(v4, 3))}" ${v4 != null && v4 < ESCALA_SPEARMAN.min ? 'data-dica-base="abaixo de 0,8 (fora da escala de cor)"' : ""}>${v4 == null ? "\u2014" : formatar(v4, 2)}</td>`;
     };
-    return `<div class="sub" style="margin-top:8px">${CLAB5[comp] ?? comp}</div>
-        <table class="ponte"><thead><tr><th></th>${periodos.map((p4) => `<th>${rotuloCurto(rotuloPeriodo2(p4))}</th>`).join("")}</tr></thead>
-        <tbody>${periodos.map((p4, i3) => `<tr><th>${rotuloCurto(rotuloPeriodo2(p4))}</th>${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table>`;
+    const th2 = (p4) => `<th class="${destaque.has(p4) ? "destaque-periodo" : ""}">${rotuloCurto(rotuloPeriodo2(p4))}</th>`;
+    return `<div class="hm-bloco"><header class="graf-cab"><h4>${CLAB5[comp] ?? comp}</h4></header>
+        <div class="grafico-dica">Cada c\xE9lula compara dois per\xEDodos: o quanto a ordem dos hex\xE1gonos (quem tem mais ou menos d\xE9ficit) se mant\xE9m entre eles. 1 = mesma ordem; cor mais forte = mais parecida. A escala de cor vai de 0,8 a 1,0. Os per\xEDodos com estoque de outra fonte est\xE3o destacados.</div>
+        <table class="ponte hm" data-grafico="heatmap"><thead><tr><th></th>${periodos.map(th2).join("")}</tr></thead>
+        <tbody>${periodos.map((p4, i3) => `<tr>${th2(p4)}${periodos.map((_p3, j4) => cel(i3, j4)).join("")}</tr>`).join("")}</tbody></table></div>`;
   }).join("");
+  const legenda = `<div class="hm-legenda" aria-label="Escala de cor do Spearman, de 0,8 a 1,0"><span>0,8 ou menos</span><span class="hm-rampa" style="background:linear-gradient(to right, ${css6("--warn-soft")}, ${css6("--accent")})"></span><span>1,0</span></div>`;
+  const frase = fraseAnoMenosParecido(spearman, manifesto);
+  el2.innerHTML = `${frase ? `<p class="sub" id="f3-frase-spearman">${frase}</p>` : ""}${legenda}
+    <div class="spearman-layout"><div class="hm-matrizes">${matrizes}</div><div class="hm-linhas" id="f3-spearman-linhas"></div></div>`;
+  renderizarSpearmanLinhas($6("f3-spearman-linhas"), spearman, manifesto);
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
+}
+var COR_COMPONENTE = { coabitacao: "--accent", onus: "--warn", precariedade: "--ink" };
+function renderizarSpearmanLinhas(el2, spearman, manifesto) {
+  const series = spearmanContraBase(spearman, manifesto);
+  const todos = series.flatMap((sr2) => sr2.pontos.map((p4) => p4.valor));
+  if (!todos.length) {
+    el2.innerHTML = "";
+    return;
+  }
+  const base = series[0].base;
+  const anos = manifesto.periodos.filter((p4) => p4.tipo === "ano" && p4.id !== base.id);
+  const W4 = 300;
+  const H4 = 190;
+  const m4 = { l: 38, r: 10, t: 10, b: 24 };
+  const x5 = point().domain(anos.map((p4) => p4.id)).range([m4.l + 8, W4 - m4.r - 8]);
+  const y5 = linear2().domain([Math.min(ESCALA_SPEARMAN.min, Math.floor((min4(todos) - 0.01) * 20) / 20), 1]).range([H4 - m4.b, m4.t]);
+  const eixoY = ticks(y5.domain()[0], 1, 4).map((t4) => `<line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(t4)}" y2="${y5(t4)}" stroke="${css6("--line")}" stroke-width="0.5"/><text x="${m4.l - 4}" y="${y5(t4)}" text-anchor="end" dominant-baseline="middle" font-size="9" fill="${css6("--muted")}">${formatar(t4, 2)}</text>`).join("");
+  const eixoX = anos.map((p4) => `<text x="${x5(p4.id)}" y="${H4 - 8}" text-anchor="middle" font-size="9" fill="${css6("--muted")}">${p4.rotulo}</text>`).join("");
+  const linhas = series.map((sr2) => {
+    const cor = css6(COR_COMPONENTE[sr2.componente] ?? "--accent");
+    const caminho = line().x((p4) => x5(p4.periodo.id)).y((p4) => y5(p4.valor))(sr2.pontos);
+    const pontos = sr2.pontos.map((p4) => `<circle cx="${x5(p4.periodo.id)}" cy="${y5(p4.valor)}" r="3.5" fill="${cor}"/><circle cx="${x5(p4.periodo.id)}" cy="${y5(p4.valor)}" r="9" fill="transparent" data-dica-titulo="${attr(CLAB5[sr2.componente] ?? sr2.componente)}: ${attr(p4.periodo.rotulo)} contra ${attr(base.rotulo)}" data-dica-valor="Spearman ${attr(formatar(p4.valor, 3))}"/>`).join("");
+    return `<path d="${caminho}" fill="none" stroke="${cor}" stroke-width="1.8"/>${pontos}`;
+  }).join("");
+  const chaves = series.map((sr2) => `<span class="hm-chave"><span class="sw" style="background:${css6(COR_COMPONENTE[sr2.componente] ?? "--accent")}"></span>${CLAB5[sr2.componente] ?? sr2.componente}</span>`).join("");
+  el2.innerHTML = `<header class="graf-cab"><h4>Cada ano contra ${base.rotulo}</h4></header>
+    <div class="grafico-dica">Spearman de cada ano contra ${base.rotulo}, uma linha por componente: quanto mais baixa a linha, menos a ordem dos hex\xE1gonos se parece com a de ${base.rotulo}. Passe o mouse num ponto para ver o valor.</div>
+    <svg data-grafico="spearman-linhas" viewBox="0 0 ${W4} ${H4}" width="100%" role="img" aria-label="Spearman de cada ano contra ${base.rotulo}, por componente">${eixoY}${eixoX}${linhas}</svg>
+    <div class="hm-chaves">${chaves}</div>`;
 }
 function renderizarRazoes(el2, razoes, manifesto) {
   const rotuloPeriodo2 = (id3) => rotuloCurto(manifesto.periodos.find((p4) => p4.id === id3)?.rotulo ?? id3);
@@ -105761,17 +105872,19 @@ function renderizarRazoes(el2, razoes, manifesto) {
     const y5 = linear2().domain([0, Math.max(limite * 1.1, 1)]).nice().range([H4 - m4.b, m4.t]);
     const ticksY = ticks(0, y5.domain()[1], 4);
     const eixoY = ticksY.map((t4) => `<text x="${m4.l - 4}" y="${y5(t4)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t4, 1)}</text>`).join("");
-    const svg = `<svg viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Raz\xE3o do total por hex\xE1gono, ${CLAB5[comp]}">
+    const svg = `<svg data-grafico="razoes" viewBox="0 0 ${W4} ${H4}" width="100%" height="${H4}" role="img" aria-label="Raz\xE3o do total por hex\xE1gono, ${CLAB5[comp]}">
         ${eixoY}
         <line x1="${m4.l}" x2="${W4 - m4.r}" y1="${y5(1)}" y2="${y5(1)}" stroke="${css6("--line")}" stroke-dasharray="2,3"/>
         ${linhas.map(
       (l3) => `<line x1="${x5(l3.periodo) + x5.bandwidth() / 2}" x2="${x5(l3.periodo) + x5.bandwidth() / 2}" y1="${y5(Math.min(l3.p95, limite))}" y2="${y5(Math.min(l3.p5, limite))}" stroke="${css6("--ink")}" stroke-width="2"/>
-                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"><title>${rotuloPeriodo2(l3.periodo)}: mediana ${formatar(l3.mediana, 2)}, raz\xE3o dos totais ${formatar(l3.razao_total, 2)}, n=${l3.n_hexagonos}</title></circle>`
+                <circle cx="${x5(l3.periodo) + x5.bandwidth() / 2}" cy="${y5(Math.min(l3.mediana, limite))}" r="3" fill="${css6("--accent")}"/><rect x="${x5(l3.periodo)}" y="${m4.t}" width="${x5.bandwidth()}" height="${H4 - m4.b - m4.t}" fill="transparent" data-dica-titulo="${attr(CLAB5[comp] ?? comp)}: ${attr(rotuloPeriodo2(l3.periodo))} \xF7 2022" data-dica-valor="mediana ${attr(formatar(l3.mediana, 2))} \xB7 raz\xE3o dos totais ${attr(formatar(l3.razao_total, 2))}" data-dica-faixa="${attr(formatar(l3.p5, 2))} a ${attr(formatar(l3.p95, 2))} (p5\u2013p95)" data-dica-base="${attr(formatar(l3.n_hexagonos, 0))} hex\xE1gonos"/>`
     ).join("")}
         ${linhas.map((l3, i3) => `<text x="${x5(l3.periodo) + x5.bandwidth() / 2}" y="${H4 - 6}" text-anchor="middle" font-size="9" transform="${linhas.length > 4 ? `rotate(-30, ${x5(l3.periodo) + x5.bandwidth() / 2}, ${H4 - 6})` : ""}">${rotuloPeriodo2(l3.periodo)}</text>`).join("")}
       </svg>`;
-    return `<div class="mini"><h4>${CLAB5[comp] ?? comp}</h4>${svg}</div>`;
+    return `<div class="mini"><header class="graf-cab"><h4>${CLAB5[comp] ?? comp}</h4></header><div class="grafico-dica">Ponto = mediana da raz\xE3o (ano \xF7 2022) do total por hex\xE1gono; haste = p5\u2013p95; linha pontilhada = sem mudan\xE7a (raz\xE3o 1). Passe o mouse numa coluna para ver os valores.</div>${svg}</div>`;
   }).join("");
+  instalarAjudas(el2);
+  ligarDicaPorAtributos(el2);
 }
 function renderizarAchados(el2, achados) {
   const grupos = achadosPublicos(achados);
@@ -106238,7 +106351,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "e7d07f32745182ffda4e3990695b910cd8645666");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "eaba3508027541c514c3d85d5e1b5404f049adfc");
   renderizarInterna($7("met-interna"), modelo);
 }
 

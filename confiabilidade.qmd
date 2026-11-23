@@ -65,11 +65,9 @@ title: ""
       <p class="sub" id="f3-resposta-3"></p>
 
       <h3>Spearman entre todos os pares de anos</h3>
-      <div class="grafico-dica">Quanto a ordem dos hexágonos se mantém entre dois períodos: 1 = mesma ordem; 0 = sem relação.</div>
       <div id="f3-heatmap"></div>
 
       <h3>Razão do total por hexágono (ano ÷ 2022)</h3>
-      <div class="grafico-dica">Ponto = mediana; haste = p5–p95, da razão (ano ÷ 2022) do total por hexágono; linha pontilhada = sem mudança (razão 1).</div>
       <div class="grid-razoes" id="f3-razoes"></div>
     </section>
 

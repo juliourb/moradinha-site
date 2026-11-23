@@ -4,7 +4,9 @@ import { carregarJSON, escolherDominioEEdicao } from "./dados/pacote.js";
 import {
   BLOCOS_MODELO, CLAB, blocoModelo, achadosPublicos, limiteEixoP99,
   veredictoPergunta1, veredictoPergunta2, veredictoPergunta3, veredictoPergunta4, matrizOqueFalta,
+  ESCALA_SPEARMAN, posicaoSpearman, fraseAnoMenosParecido, spearmanContraBase,
 } from "./dados/confiabilidade.js";
+import { instalarAjudas, ligarDicaPorAtributos, attr } from "./ui/ajuda.js";
 import { fjpTresValores } from "./dados/visaoGeral.js";
 import { rotuloMarca, rotuloFonteEstoque } from "./util/marcas.js";
 import { rotulo } from "./util/rotulos.js";
@@ -108,14 +110,34 @@ function renderizarOqueFalta(el, qualidade, manifesto) {
 }
 
 const SECOES_VEREDITOS = ["f3-secao-dados", "f3-secao-modelo", "f3-secao-consistencia", "f3-secao-achados"];
-let secaoAtual = 0;
+// F6.4 3a: as quatro seções começam fechadas; abrir uma fecha as outras, e a aberta
+// aparece logo abaixo do painel de vereditos. Clicar de novo na mesma célula fecha.
+let secaoAtual = null;
 
-function irParaSecao(indice) {
+function sincronizarSecoes() {
+  SECOES_VEREDITOS.forEach((id, i) => {
+    const el = $(id);
+    if (el) el.hidden = i !== secaoAtual;
+  });
+  document.querySelectorAll("button[data-secao]").forEach((b) => b.setAttribute("aria-expanded", String(Number(b.dataset.secao) === secaoAtual)));
+  document.querySelectorAll(".nav-lateral a").forEach((a) => {
+    if (SECOES_VEREDITOS[secaoAtual] && a.getAttribute("href") === `#${SECOES_VEREDITOS[secaoAtual]}`) a.setAttribute("aria-current", "true");
+    else a.removeAttribute("aria-current");
+  });
+}
+
+function irParaSecao(indice, { alternar = false } = {}) {
   const i = Math.max(0, Math.min(SECOES_VEREDITOS.length - 1, indice));
+  if (alternar && secaoAtual === i) {
+    secaoAtual = null;
+    sincronizarSecoes();
+    return;
+  }
   secaoAtual = i;
+  sincronizarSecoes();
   const el = $(SECOES_VEREDITOS[i]);
   el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  el?.focus();
+  el?.focus({ preventScroll: true });
 }
 
 function classeVeredicto(v) {
@@ -156,7 +178,8 @@ function renderizarVereditos(el, { qualidade, referenciaFjp, modelo, manifesto, 
     </tbody></table>`;
 
   el.querySelectorAll("button[data-secao]").forEach((b) => {
-    b.onclick = () => irParaSecao(Number(b.dataset.secao));
+    b.setAttribute("aria-expanded", "false");
+    b.onclick = () => irParaSecao(Number(b.dataset.secao), { alternar: true });
   });
 
   return { veredictoPergunta1Cels: linhas[0].cels, veredictoPergunta2Cels: linhas[1].cels, veredictoPergunta3Cels: linhas[2].cels };
@@ -164,9 +187,19 @@ function renderizarVereditos(el, { qualidade, referenciaFjp, modelo, manifesto, 
 
 function ligarNavegacaoSecoes() {
   document.addEventListener("keydown", (e) => {
+    if (secaoAtual == null || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName ?? "")) return;
     if (e.key === "ArrowRight") irParaSecao(secaoAtual + 1);
     else if (e.key === "ArrowLeft") irParaSecao(secaoAtual - 1);
   });
+  document.querySelectorAll(".nav-lateral a[href^='#f3-secao']").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      irParaSecao(SECOES_VEREDITOS.indexOf(a.getAttribute("href").slice(1)));
+    });
+  });
+  const hash = SECOES_VEREDITOS.indexOf(window.location.hash.slice(1));
+  if (hash >= 0) irParaSecao(hash);
+  else sincronizarSecoes();
 }
 
 /** Frase-resposta de uma pergunta (topo de cada seção), a partir dos vereditos por componente. */
@@ -193,13 +226,13 @@ export function renderizarCalibracaoDecis(decis) {
   const x = d3.scaleLinear().domain([0, max * 1.05]).range([m.l, W - m.r]);
   const y = d3.scaleLinear().domain([0, max * 1.05]).range([H - m.b, m.t]);
   const pontos = decis
-    .map((d) => `<circle cx="${x(d.previsto)}" cy="${y(d.observado)}" r="3.5" fill="${css("--accent")}"><title>decil ${d.decil}: previsto ${formatar(d.previsto, 1)}, observado ${formatar(d.observado, 1)}</title></circle>`)
+    .map((d) => `<circle cx="${x(d.previsto)}" cy="${y(d.observado)}" r="3.5" fill="${css("--accent")}"/><circle cx="${x(d.previsto)}" cy="${y(d.observado)}" r="9" fill="transparent" data-dica-titulo="decil ${attr(d.decil)}" data-dica-valor="previsto ${attr(formatar(d.previsto, 1))} · observado ${attr(formatar(d.observado, 1))}"/>`)
     .join("");
   const ticks = d3.ticks(0, max, 4);
   const eixoY = ticks
     .map((t) => `<text x="${m.l - 4}" y="${y(t)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t, 0)}</text>`)
     .join("");
-  return `<div class="sub" style="margin-top:6px">Previsto × observado, por decil:</div><svg viewBox="0 0 ${W} ${H}" width="180" height="180" role="img" aria-label="Calibração por decis: previsto contra observado">
+  return `<header class="graf-cab" style="margin-top:6px"><span class="sub">Previsto × observado, por decil</span></header><div class="grafico-dica">Cada ponto é um décimo das áreas, do que o modelo prevê menos ao que prevê mais: o eixo horizontal é o previsto e o vertical, o observado na amostra. Pontos sobre a linha tracejada = o modelo acerta o tamanho. Passe o mouse num ponto.</div><svg data-grafico="calibracao" viewBox="0 0 ${W} ${H}" width="180" height="180" role="img" aria-label="Calibração por decis: previsto contra observado">
     <line x1="${x(0)}" y1="${y(0)}" x2="${x(max)}" y2="${y(max)}" stroke="${css("--line")}" stroke-dasharray="3,3"/>
     ${eixoY}
     ${pontos}
@@ -242,6 +275,8 @@ export function montarModeloHtml(modeloComponenteBruto) {
 
 function renderizarModelo(el, modeloComponenteBruto) {
   el.innerHTML = montarModeloHtml(modeloComponenteBruto);
+  instalarAjudas(el);
+  ligarDicaPorAtributos(el);
 }
 
 export function renderizarCurvas(curvas, importancia) {
@@ -279,20 +314,72 @@ function formatarListaImportancia(importancia) {
   return lista.map((i) => `${i.rotulo} (${formatarImportancia(i.valor, soma)})`).join(" · ");
 }
 
+/**
+ * Spearman entre anos (F6.4 3b): três mapas de calor (escala fixa de 0,8 a 1,0,
+ * valor na dica do mouse, anos de estoque de outra fonte destacados), uma frase
+ * gerada do pacote e, ao lado, o Spearman de cada ano contra o primeiro ano.
+ */
 function renderizarHeatmap(el, spearman, manifesto) {
   const rotuloPeriodo = (id) => manifesto.periodos.find((p) => p.id === id)?.rotulo ?? id;
-  el.innerHTML = Object.entries(spearman)
+  const destaque = new Set(manifesto.periodos.filter((p) => p.marcas?.includes("fonte_estoque_diferente")).map((p) => p.id));
+  const cor = (v) => (v == null ? css("--line") : d3.interpolateRgb(css("--warn-soft"), css("--accent"))(posicaoSpearman(v)));
+  const matrizes = Object.entries(spearman)
     .map(([comp, { periodos, matriz }]) => {
       const cel = (i, j) => {
         const v = matriz[i][j];
-        const cor = v == null ? css("--line") : d3.interpolateRgb(css("--warn-soft"), css("--accent"))(Math.max(0, v));
-        return `<td style="background:${cor};text-align:center;padding:4px;font-size:11px" data-num="${v ?? ""}">${v == null ? "—" : formatar(v, 2)}</td>`;
+        const dest = destaque.has(periodos[i]) || destaque.has(periodos[j]) ? " destaque-periodo" : "";
+        return `<td class="hm-cel${dest}" style="background:${cor(v)} !important;color:var(--ink) !important" data-num="${v ?? ""}" data-dica-titulo="${attr(CLAB[comp] ?? comp)}: ${attr(rotuloPeriodo(periodos[i]))} × ${attr(rotuloPeriodo(periodos[j]))}" data-dica-valor="Spearman ${v == null ? "sem dado" : attr(formatar(v, 3))}" ${v != null && v < ESCALA_SPEARMAN.min ? 'data-dica-base="abaixo de 0,8 (fora da escala de cor)"' : ""}>${v == null ? "—" : formatar(v, 2)}</td>`;
       };
-      return `<div class="sub" style="margin-top:8px">${CLAB[comp] ?? comp}</div>
-        <table class="ponte"><thead><tr><th></th>${periodos.map((p) => `<th>${rotuloCurto(rotuloPeriodo(p))}</th>`).join("")}</tr></thead>
-        <tbody>${periodos.map((p, i) => `<tr><th>${rotuloCurto(rotuloPeriodo(p))}</th>${periodos.map((_p, j) => cel(i, j)).join("")}</tr>`).join("")}</tbody></table>`;
+      const th = (p) => `<th class="${destaque.has(p) ? "destaque-periodo" : ""}">${rotuloCurto(rotuloPeriodo(p))}</th>`;
+      return `<div class="hm-bloco"><header class="graf-cab"><h4>${CLAB[comp] ?? comp}</h4></header>
+        <div class="grafico-dica">Cada célula compara dois períodos: o quanto a ordem dos hexágonos (quem tem mais ou menos déficit) se mantém entre eles. 1 = mesma ordem; cor mais forte = mais parecida. A escala de cor vai de 0,8 a 1,0. Os períodos com estoque de outra fonte estão destacados.</div>
+        <table class="ponte hm" data-grafico="heatmap"><thead><tr><th></th>${periodos.map(th).join("")}</tr></thead>
+        <tbody>${periodos.map((p, i) => `<tr>${th(p)}${periodos.map((_p, j) => cel(i, j)).join("")}</tr>`).join("")}</tbody></table></div>`;
     })
     .join("");
+  const legenda = `<div class="hm-legenda" aria-label="Escala de cor do Spearman, de 0,8 a 1,0"><span>0,8 ou menos</span><span class="hm-rampa" style="background:linear-gradient(to right, ${css("--warn-soft")}, ${css("--accent")})"></span><span>1,0</span></div>`;
+  const frase = fraseAnoMenosParecido(spearman, manifesto);
+  el.innerHTML = `${frase ? `<p class="sub" id="f3-frase-spearman">${frase}</p>` : ""}${legenda}
+    <div class="spearman-layout"><div class="hm-matrizes">${matrizes}</div><div class="hm-linhas" id="f3-spearman-linhas"></div></div>`;
+  renderizarSpearmanLinhas($("f3-spearman-linhas"), spearman, manifesto);
+  instalarAjudas(el);
+  ligarDicaPorAtributos(el);
+}
+
+const COR_COMPONENTE = { coabitacao: "--accent", onus: "--warn", precariedade: "--ink" };
+
+/** Linhas: Spearman de cada ano contra o primeiro ano, uma linha por componente. */
+function renderizarSpearmanLinhas(el, spearman, manifesto) {
+  const series = spearmanContraBase(spearman, manifesto);
+  const todos = series.flatMap((sr) => sr.pontos.map((p) => p.valor));
+  if (!todos.length) {
+    el.innerHTML = "";
+    return;
+  }
+  const base = series[0].base;
+  const anos = manifesto.periodos.filter((p) => p.tipo === "ano" && p.id !== base.id);
+  const W = 300;
+  const H = 190;
+  const m = { l: 38, r: 10, t: 10, b: 24 };
+  const x = d3.scalePoint().domain(anos.map((p) => p.id)).range([m.l + 8, W - m.r - 8]);
+  const y = d3.scaleLinear().domain([Math.min(ESCALA_SPEARMAN.min, Math.floor((d3.min(todos) - 0.01) * 20) / 20), 1]).range([H - m.b, m.t]);
+  const eixoY = d3.ticks(y.domain()[0], 1, 4).map((t) => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" stroke="${css("--line")}" stroke-width="0.5"/><text x="${m.l - 4}" y="${y(t)}" text-anchor="end" dominant-baseline="middle" font-size="9" fill="${css("--muted")}">${formatar(t, 2)}</text>`).join("");
+  const eixoX = anos.map((p) => `<text x="${x(p.id)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="${css("--muted")}">${p.rotulo}</text>`).join("");
+  const linhas = series
+    .map((sr) => {
+      const cor = css(COR_COMPONENTE[sr.componente] ?? "--accent");
+      const caminho = d3.line().x((p) => x(p.periodo.id)).y((p) => y(p.valor))(sr.pontos);
+      const pontos = sr.pontos
+        .map((p) => `<circle cx="${x(p.periodo.id)}" cy="${y(p.valor)}" r="3.5" fill="${cor}"/><circle cx="${x(p.periodo.id)}" cy="${y(p.valor)}" r="9" fill="transparent" data-dica-titulo="${attr(CLAB[sr.componente] ?? sr.componente)}: ${attr(p.periodo.rotulo)} contra ${attr(base.rotulo)}" data-dica-valor="Spearman ${attr(formatar(p.valor, 3))}"/>`)
+        .join("");
+      return `<path d="${caminho}" fill="none" stroke="${cor}" stroke-width="1.8"/>${pontos}`;
+    })
+    .join("");
+  const chaves = series.map((sr) => `<span class="hm-chave"><span class="sw" style="background:${css(COR_COMPONENTE[sr.componente] ?? "--accent")}"></span>${CLAB[sr.componente] ?? sr.componente}</span>`).join("");
+  el.innerHTML = `<header class="graf-cab"><h4>Cada ano contra ${base.rotulo}</h4></header>
+    <div class="grafico-dica">Spearman de cada ano contra ${base.rotulo}, uma linha por componente: quanto mais baixa a linha, menos a ordem dos hexágonos se parece com a de ${base.rotulo}. Passe o mouse num ponto para ver o valor.</div>
+    <svg data-grafico="spearman-linhas" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Spearman de cada ano contra ${base.rotulo}, por componente">${eixoY}${eixoX}${linhas}</svg>
+    <div class="hm-chaves">${chaves}</div>`;
 }
 
 /** Razão do total por hexágono (ano ÷ 2022), com eixo e rótulos sem sobreposição (N16). */
@@ -309,20 +396,22 @@ function renderizarRazoes(el, razoes, manifesto) {
       const y = d3.scaleLinear().domain([0, Math.max(limite * 1.1, 1)]).nice().range([H - m.b, m.t]);
       const ticksY = d3.ticks(0, y.domain()[1], 4);
       const eixoY = ticksY.map((t) => `<text x="${m.l - 4}" y="${y(t)}" text-anchor="end" dominant-baseline="middle" font-size="9">${formatar(t, 1)}</text>`).join("");
-      const svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Razão do total por hexágono, ${CLAB[comp]}">
+      const svg = `<svg data-grafico="razoes" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Razão do total por hexágono, ${CLAB[comp]}">
         ${eixoY}
         <line x1="${m.l}" x2="${W - m.r}" y1="${y(1)}" y2="${y(1)}" stroke="${css("--line")}" stroke-dasharray="2,3"/>
         ${linhas
           .map(
             (l) => `<line x1="${x(l.periodo) + x.bandwidth() / 2}" x2="${x(l.periodo) + x.bandwidth() / 2}" y1="${y(Math.min(l.p95, limite))}" y2="${y(Math.min(l.p5, limite))}" stroke="${css("--ink")}" stroke-width="2"/>
-                <circle cx="${x(l.periodo) + x.bandwidth() / 2}" cy="${y(Math.min(l.mediana, limite))}" r="3" fill="${css("--accent")}"><title>${rotuloPeriodo(l.periodo)}: mediana ${formatar(l.mediana, 2)}, razão dos totais ${formatar(l.razao_total, 2)}, n=${l.n_hexagonos}</title></circle>`
+                <circle cx="${x(l.periodo) + x.bandwidth() / 2}" cy="${y(Math.min(l.mediana, limite))}" r="3" fill="${css("--accent")}"/><rect x="${x(l.periodo)}" y="${m.t}" width="${x.bandwidth()}" height="${H - m.b - m.t}" fill="transparent" data-dica-titulo="${attr(CLAB[comp] ?? comp)}: ${attr(rotuloPeriodo(l.periodo))} ÷ 2022" data-dica-valor="mediana ${attr(formatar(l.mediana, 2))} · razão dos totais ${attr(formatar(l.razao_total, 2))}" data-dica-faixa="${attr(formatar(l.p5, 2))} a ${attr(formatar(l.p95, 2))} (p5–p95)" data-dica-base="${attr(formatar(l.n_hexagonos, 0))} hexágonos"/>`
           )
           .join("")}
         ${linhas.map((l, i) => `<text x="${x(l.periodo) + x.bandwidth() / 2}" y="${H - 6}" text-anchor="middle" font-size="9" transform="${linhas.length > 4 ? `rotate(-30, ${x(l.periodo) + x.bandwidth() / 2}, ${H - 6})` : ""}">${rotuloPeriodo(l.periodo)}</text>`).join("")}
       </svg>`;
-      return `<div class="mini"><h4>${CLAB[comp] ?? comp}</h4>${svg}</div>`;
+      return `<div class="mini"><header class="graf-cab"><h4>${CLAB[comp] ?? comp}</h4></header><div class="grafico-dica">Ponto = mediana da razão (ano ÷ 2022) do total por hexágono; haste = p5–p95; linha pontilhada = sem mudança (razão 1). Passe o mouse numa coluna para ver os valores.</div>${svg}</div>`;
     })
     .join("");
+  instalarAjudas(el);
+  ligarDicaPorAtributos(el);
 }
 
 function renderizarAchados(el, achados) {
