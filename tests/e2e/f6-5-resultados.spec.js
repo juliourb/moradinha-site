@@ -58,3 +58,45 @@ test.describe("F6.5-1b/1c: coluna à direita", () => {
     await expect(page.locator("#f1-ans-pills .pill", { hasText: "não tem faixa" })).toHaveCount(0);
   });
 });
+
+// F6.5-2: com "Fundo cinza" ligado a base é SEMPRE o estilo claro dessaturado.
+const estilo = (cor) => JSON.stringify({ version: 8, sources: {}, layers: [{ id: "fundo", type: "background", paint: { "background-color": cor } }] });
+
+async function luminosidadeBase(page) {
+  await page.addStyleTag({ content: ".legend,.layers,.maplab,.attrib,.basefail,.divider{display:none !important}" });
+  await page.waitForTimeout(800);
+  const png = await page.locator("#f1-mapbox").screenshot();
+  return page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${b64}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height;
+    const ctx = c.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height).data;
+    let soma = 0, n = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const [r, g, b] = [d[i], d[i + 1], d[i + 2]];
+      if (r > b + 40) continue; // hexágonos (quentes): fora da conta da base
+      soma += (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; n++;
+    }
+    return n ? soma / n : 0;
+  }, png.toString("base64"));
+}
+
+for (const tema of ["light", "dark"]) {
+  test(`F6.5-2: fundo cinza ligado dá base clara (>60%) no tema ${tema}; desligado volta ao tema`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: tema });
+    await page.route("https://tiles.openfreemap.org/styles/dark", (r) => r.fulfill({ status: 200, contentType: "application/json", body: estilo("#101010") }));
+    await page.route("https://tiles.openfreemap.org/styles/positron", (r) => r.fulfill({ status: 200, contentType: "application/json", body: estilo("#2060ff") }));
+    await page.goto("/resultados.html?edicao=ficticio");
+    await page.waitForSelector('[data-pronto="true"]', { timeout: 20000 });
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => document.querySelector("#f1-mapa-cinza").click());
+    expect(await luminosidadeBase(page)).toBeGreaterThan(0.6);
+    await page.evaluate(() => document.querySelector("#f1-mapa-cinza").click());
+    const sem = await luminosidadeBase(page);
+    if (tema === "dark") expect(sem).toBeLessThan(0.3);
+  });
+}

@@ -73,12 +73,11 @@ function rgb(hex) {
  * novo. Um filtro CSS `grayscale` não bastava: o estilo claro já é quase cinza
  * e o ajuste ficava imperceptível.
  */
-export function acinzentarEstilo(mapa, escuro) {
+export function acinzentarEstilo(mapa) {
   const estilo = mapa.getStyle?.();
   if (!estilo?.layers) return;
-  const c = escuro
-    ? { terra: "#242424", agua: "#171717", via: "#3d3d3d", limite: "#6a6a6a", texto: "#a6a6a6", halo: "#242424" }
-    : { terra: "#e3e3e3", agua: "#c9c9c9", via: "#f7f7f7", limite: "#a8a8a8", texto: "#666666", halo: "#e3e3e3" };
+  // F6.5 2: sempre o estilo claro, dessaturado, qualquer que seja o tema do site.
+  const c = { terra: "#e3e3e3", agua: "#c9c9c9", via: "#f7f7f7", limite: "#a8a8a8", texto: "#666666", halo: "#e3e3e3" };
   const pintar = (id, prop, valor) => {
     try {
       mapa.setPaintProperty(id, prop, valor);
@@ -145,13 +144,13 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
   let baseCinza = false;
   let camadasRecolhidas = false;
   function urlEstilo() {
-    return temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro;
+    return baseCinza || !temaEscuro() ? ESTILOS_BASE.claro : ESTILOS_BASE.escuro;
   }
   function aplicarEstiloBase() {
     for (const { mapa } of Object.values(instancias)) {
       mapa.setStyle(urlEstilo(), { diff: false });
       mapa.once("style.load", () => {
-        if (baseCinza) acinzentarEstilo(mapa, temaEscuro());
+        if (baseCinza) acinzentarEstilo(mapa);
       });
     }
   }
