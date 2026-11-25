@@ -39,8 +39,9 @@ para `main` que torna o site público de fato.
 - [x] Build público (`npm run build`) recusa pacote não público/fictício fora de
   `teste_apenas` (`ferramentas/validar_catalogo_publico.mjs`, F5-2).
 - [x] Build interno (`npm run build:interno`) só roda no CI como artefato, nunca publicado no Pages.
-- [ ] **F5-5** (CI publica no Pages a partir da `main`): só se confirma depois do merge — não dá
-  para testar nesta branch sem publicar. Confira o job `deploy` verde depois do merge.
+- [x] **F5-5** (CI publica no Pages a partir da `main`): conferido depois do primeiro merge
+  (`5374ee9`, 23/11/2026): execução 45171954087, jobs `build` e `deploy` verdes, site no ar em
+  <https://juliourb.github.io/moradinha-site/>. Reconferir a cada novo merge.
 - [ ] **F5-6** (mapa de base próprio, `base.pmtiles`): não aplicável — item 5 não foi adotado.
 
 ## O que falta para este site ser multi-domínio de verdade
@@ -56,6 +57,23 @@ Registrado como pendência, não como bloqueio desta publicação (só há um do
   sendo a Visão Geral de um domínio (o escolhido pelo seletor), como desde a F2. Mesma decisão:
   revisitar com um segundo domínio real.
 
+## Conferência item a item da F6.5 (25/11/2026, branch `f5-publicacao`, `60ea49d` + este commit)
+
+| item | resultado |
+|---|---|
+| `npm run validar -- pacotes/al_rm_maceio/bd10cbd` | OK: todas as regras passaram |
+| `manifesto.ficticio` / `publico` / `d17_conferido` | `false` / `true` / `true` |
+| edição = prefixo do commit | `bd10cbd` = início de `bd10cbde76cbd2174abc6fbea0e8ff180265b673` |
+| `catalogo.json` | `al_rm_maceio`: `bd10cbd` padrão; `ficticio` marcada `teste_apenas`; `teste_pequeno` `teste_apenas`; `69277fd` fora do catálogo (pasta mantida) |
+| `npm run validar:catalogo-publico` | OK |
+| chip "dados fictícios" na edição padrão | ausente (`f5-publicacao.spec.js`, verde) |
+| atribuição e Termos do OpenFreeMap | presentes no HTML gerado (rodapé e mapa); leitura dos termos continua a ser de Julio |
+| build público e interno | `npm run build` e `build:interno` verdes; `validar:build-interno` OK |
+| suíte completa (item 7 da F6.5) | unidade 152/152; `validar:citacoes` OK; Playwright 137 verdes e 1 intermitente (F1-5 1440×900: estourou 30 s esperando o mapa na carga a frio; passa isolado, 3,4 s, e na repetição do arquivo) |
+| F5-5 (Pages) | conferido no primeiro merge; **reconferir** o job `deploy` depois do próximo merge |
+| em aberto (não bloqueiam) | mapa de base próprio (F5-6, decisão de Julio); endereços `/d/…` e página inicial por domínio (feitos na branch `s1-dominios`, não aqui) |
+
 ## Autorização
 
-- [ ] Julio confere os itens acima e autoriza o merge de `f5-publicacao` para `main`.
+- [ ] Julio autoriza o merge de `f5-publicacao` para `main` e a publicação. **Espera o "publicar" explícito de Julio**;
+  nenhum merge nem push na `main` foi feito. (A autorização anterior, de 23/11, valeu para o primeiro merge `5374ee9`.)
