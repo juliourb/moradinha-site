@@ -106,7 +106,7 @@ for (const tema of ["light", "dark"]) {
 // F6.5-3: cartões da Visão geral com no máximo metade da altura anterior (251 px em 1440×900).
 test("F6.5-3: cartões da faixa de totais ≤ 50% da altura anterior; marcas seguem no DOM", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/index.html?dominio=al_rm_maceio&edicao=bd10cbd");
+  await page.goto("/visao-geral.html?dominio=al_rm_maceio&edicao=bd10cbd");
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(1200);
   const cartoes = page.locator(".cartao-bi");

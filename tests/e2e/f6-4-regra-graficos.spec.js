@@ -37,7 +37,7 @@ async function conferir(page, raiz) {
 
 test.describe("regra geral dos gráficos (pacote real)", () => {
   test("Visão geral (cartões + Detalhes)", async ({ page }) => {
-    await page.goto("/index.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.goto("/visao-geral.html?dominio=al_rm_maceio&edicao=bd10cbd");
     await page.waitForLoadState("networkidle");
     await conferir(page, "#f2-cartoes");
     await page.locator("#f2-detalhes-btn").click();

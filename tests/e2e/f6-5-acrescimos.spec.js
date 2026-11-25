@@ -20,7 +20,7 @@ async function rotulosEixo(loc) {
 test.describe("A: eixo das séries pela faixa de 95%", () => {
   test("Detalhes: ônus não começa em zero, marca de quebra e eixo cobrindo as faixas", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto(`/index.html${Q}`);
+    await page.goto(`/visao-geral.html${Q}`);
     await page.waitForLoadState("networkidle");
     await page.locator("#f2-detalhes-btn").click();
     const svgs = page.locator('#f2-detalhes-backdrop svg[data-grafico="serie-detalhe"]');
@@ -53,7 +53,7 @@ test.describe("A: eixo das séries pela faixa de 95%", () => {
 
 test.describe("B: mapa de base claro por padrão nos dois temas", () => {
   for (const tema of ["light", "dark"]) {
-    for (const pagina of ["/resultados.html", "/index.html"]) {
+    for (const pagina of ["/resultados.html", "/visao-geral.html"]) {
       test(`${pagina}, tema ${tema}: só o estilo claro é pedido ao abrir`, async ({ page }) => {
         await page.emulateMedia({ colorScheme: tema });
         const pedidos = [];

@@ -7,15 +7,21 @@ import { iniciarExplorador } from "./explorador.js";
 import { iniciarVisaoGeral } from "./visaoGeral.js";
 import { iniciarConfiabilidade } from "./confiabilidade.js";
 import { iniciarMetodologia } from "./metodologia.js";
+import { iniciarInicio } from "./inicio.js";
 import { instalarAjudas } from "./ui/ajuda.js";
+import { irParaDominioEdicao, lerEndereco } from "./util/endereco.js";
 
-/** Troca `dominio`/`edicao` na URL atual e recarrega — o seletor do cabeçalho (SPEC_F5). */
-function navegarPara(dominioId, edicaoId) {
-  const params = new URLSearchParams(window.location.search);
-  params.set("dominio", dominioId);
-  if (edicaoId) params.set("edicao", edicaoId);
-  else params.delete("edicao");
-  window.location.search = params.toString();
+/** Troca de domínio/edição pelo seletor do cabeçalho (SPEC_F5): vai ao endereço `d/<conjunto>/<edicao>/` ou, no modo `?dominio=`, troca a consulta. */
+const navegarPara = irParaDominioEdicao;
+
+/** No modo `?dominio=&edicao=`, os links entre páginas levam a escolha junto (no modo `d/…` o build já reescreve os links). */
+function propagarEscolhaNosLinks() {
+  const consulta = window.location.search;
+  if (!/[?&](dominio|edicao)=/.test(consulta) || lerEndereco().aninhada) return;
+  for (const a of document.querySelectorAll('a[href$=".html"]')) {
+    const href = a.getAttribute("href");
+    if (href && !/^[a-z]+:/i.test(href)) a.setAttribute("href", href + consulta);
+  }
 }
 
 async function preencherCabecalho() {
@@ -49,7 +55,12 @@ async function preencherCabecalho() {
 }
 
 preencherCabecalho();
+propagarEscolhaNosLinks();
 instalarAjudas();
+iniciarInicio().catch((erro) => {
+  // eslint-disable-next-line no-console
+  console.error("Falha ao iniciar a página inicial:", erro);
+});
 iniciarExplorador().catch((erro) => {
   // eslint-disable-next-line no-console
   console.error("Falha ao iniciar o explorador:", erro);

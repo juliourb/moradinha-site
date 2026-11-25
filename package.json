@@ -10,8 +10,8 @@
   "scripts": {
     "dev": "quarto preview",
     "build:js": "node ferramentas/esbuild.mjs",
-    "build": "npm run catalogo && npm run validar:catalogo-publico && npm run build:js && quarto render",
-    "build:interno": "npm run catalogo && npm run build:js && quarto render --profile interno --output-dir _site_interno",
+    "build": "npm run catalogo && npm run validar:catalogo-publico && npm run build:js && quarto render && node ferramentas/gerar_enderecos.mjs",
+    "build:interno": "npm run catalogo && npm run build:js && quarto render --profile interno --output-dir _site_interno && node ferramentas/gerar_enderecos.mjs _site_interno",
     "validar": "node ferramentas/validar.mjs",
     "validar:citacoes": "node ferramentas/validar_citacoes.mjs",
     "validar:build-interno": "node ferramentas/validar_build_interno.mjs",

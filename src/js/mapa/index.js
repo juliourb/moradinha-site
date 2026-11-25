@@ -27,7 +27,7 @@ const ESTILOS_BASE = {
   claro: "https://tiles.openfreemap.org/styles/positron",
   escuro: "https://tiles.openfreemap.org/styles/dark",
 };
-const RAMPA_DEFICIT = ["#fbf3d5", "#f6dc9b", "#f0b864", "#e48a3f", "#cc5a2c", "#a2361f", "#6e1d16"];
+export const RAMPA_DEFICIT = ["#fbf3d5", "#f6dc9b", "#f0b864", "#e48a3f", "#cc5a2c", "#a2361f", "#6e1d16"];
 const RAMPA_QUALIDADE = ["#eef4fb", "#d3e3f2", "#aec9e6", "#84add8", "#5c8fc4", "#3b6ea8", "#1f4c80"];
 // "Vezes a taxa do domínio" (SPEC_F6 C4 item 4b): frio abaixo da taxa, neutro
 // perto dela, quente acima — 6 classes fixas (CORTES_VEZES_TAXA).

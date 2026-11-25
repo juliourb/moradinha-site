@@ -22,7 +22,7 @@ async function textoSemProsa(page) {
 }
 
 async function abrirTudo(page, pagina) {
-  if (pagina === "index.html") {
+  if (pagina === "visao-geral.html") {
     await page.click("#f2-detalhes-btn").catch(() => {});
     await page.waitForTimeout(300);
   }
@@ -40,7 +40,7 @@ async function abrirTudo(page, pagina) {
   }
 }
 
-for (const pagina of ["index.html", "resultados.html", "confiabilidade.html", "metodologia.html"]) {
+for (const pagina of ["visao-geral.html", "resultados.html", "confiabilidade.html", "metodologia.html"]) {
   test(`F6.3 item 7: ${pagina} sem rótulo cru nem id de período (pacote bd10cbd)`, async ({ page }) => {
     await page.goto(`/${pagina}?dominio=al_rm_maceio&edicao=bd10cbd`);
     await page.waitForLoadState("networkidle");

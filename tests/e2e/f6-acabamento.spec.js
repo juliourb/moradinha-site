@@ -7,7 +7,7 @@ async function aguardarMapaPronto(page) {
 
 test.describe("A6: sem rolagem lateral, nas 4 abas, em 1024/1280/1440", () => {
   for (const [w, h] of [[1024, 768], [1280, 800], [1440, 900]]) {
-    for (const pagina of ["index.html", "resultados.html", "confiabilidade.html", "metodologia.html"]) {
+    for (const pagina of ["visao-geral.html", "resultados.html", "confiabilidade.html", "metodologia.html"]) {
       test(`${pagina} em ${w}x${h}`, async ({ page }) => {
         await page.setViewportSize({ width: w, height: h });
         await page.goto(`/${pagina}?edicao=ficticio`);

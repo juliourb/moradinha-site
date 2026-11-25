@@ -7,7 +7,8 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const PAGINAS = [
-  ["index", "/index.html"],
+  ["inicio", "/index.html"],
+  ["visao-geral", "/visao-geral.html"],
   ["resultados", "/resultados.html"],
   ["confiabilidade", "/confiabilidade.html"],
   ["metodologia", "/metodologia.html"],

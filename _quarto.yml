@@ -3,6 +3,7 @@ project:
   output-dir: _site
   render:
     - index.qmd
+    - visao-geral.qmd
     - resultados.qmd
     - confiabilidade.qmd
     - metodologia.qmd
@@ -22,7 +23,7 @@ website:
   navbar:
     title: "moradinha"
     left:
-      - href: index.qmd
+      - href: visao-geral.qmd
         text: "Visão geral"
       - href: resultados.qmd
         text: "Resultados"

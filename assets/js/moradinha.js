@@ -12816,6 +12816,56 @@ async function er(s4) {
   return new Y.default(t4);
 }
 
+// src/js/dados/catalogo.js
+function dominiosPublicos(catalogo) {
+  return catalogo.dominios.filter((d3) => !d3.teste_apenas);
+}
+function edicoesPublicas(dominio) {
+  return dominio.edicoes.filter((e67) => !e67.teste_apenas);
+}
+function opcoesDominio(catalogo, dominioAtual) {
+  const base = dominiosPublicos(catalogo);
+  return base.some((d3) => d3.conjunto_id === dominioAtual.conjunto_id) ? base : [...base, dominioAtual];
+}
+function opcoesEdicao(dominio, edicaoAtual) {
+  const base = edicoesPublicas(dominio);
+  return base.some((e67) => e67.edicao === edicaoAtual.edicao) ? base : [...base, edicaoAtual];
+}
+
+// src/js/util/endereco.js
+function meta(nome) {
+  return document.querySelector(`meta[name="${nome}"]`)?.getAttribute("content") ?? null;
+}
+function lerEndereco() {
+  const dominio = meta("moradinha-dominio");
+  const edicao = meta("moradinha-edicao");
+  const pagina = meta("moradinha-pagina") ?? (window.location.pathname.split("/").pop() || "index.html");
+  return { aninhada: Boolean(dominio), dominio, edicao: edicao || null, pagina };
+}
+function caminhoDaPagina(dominio, edicao, pagina) {
+  return `d/${dominio}/${edicao ? `${edicao}/` : ""}${pagina}`;
+}
+function urlDaPaginaIrma(pagina) {
+  const e67 = lerEndereco();
+  if (e67.aninhada) return new URL(caminhoDaPagina(e67.dominio, e67.edicao, pagina), document.baseURI).href;
+  return new URL(pagina, window.location.href).href.split("?")[0] + window.location.search;
+}
+function irParaPagina(pagina) {
+  window.location.href = urlDaPaginaIrma(pagina);
+}
+function irParaDominioEdicao(dominioId, edicaoId) {
+  const e67 = lerEndereco();
+  if (e67.aninhada) {
+    window.location.href = new URL(caminhoDaPagina(dominioId, edicaoId, e67.pagina), document.baseURI).href;
+    return;
+  }
+  const params = new URLSearchParams(window.location.search);
+  params.set("dominio", dominioId);
+  if (edicaoId) params.set("edicao", edicaoId);
+  else params.delete("edicao");
+  window.location.search = params.toString();
+}
+
 // src/js/dados/pacote.js
 function urlAbsoluta(caminho) {
   return new URL(caminho, document.baseURI).href;
@@ -12848,9 +12898,10 @@ function conexao() {
 }
 function escolherDominioEEdicao(catalogo) {
   const params = new URLSearchParams(window.location.search);
-  const pedidoDominio = params.get("dominio");
-  const pedidoEdicao = params.get("edicao");
-  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedidoDominio) ?? catalogo.dominios[0];
+  const endereco = lerEndereco();
+  const pedidoDominio = params.get("dominio") ?? endereco.dominio;
+  const pedidoEdicao = params.get("edicao") ?? endereco.edicao;
+  const dominio = catalogo.dominios.find((d3) => d3.conjunto_id === pedidoDominio) ?? dominiosPublicos(catalogo)[0] ?? catalogo.dominios[0];
   const edicao = dominio.edicoes.find((e67) => e67.edicao === pedidoEdicao) ?? dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
   return { dominio, edicao };
 }
@@ -12980,22 +13031,6 @@ async function carregarPacoteCompleto(origem) {
     temArquivo("contornos/recortes.geojson") ? carregarJSON(origem, "contornos/recortes.geojson").catch(() => null) : null
   ]);
   return { manifesto, totais, qualidade, linhas, ap: ap2, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes };
-}
-
-// src/js/dados/catalogo.js
-function dominiosPublicos(catalogo) {
-  return catalogo.dominios.filter((d3) => !d3.teste_apenas);
-}
-function edicoesPublicas(dominio) {
-  return dominio.edicoes.filter((e67) => !e67.teste_apenas);
-}
-function opcoesDominio(catalogo, dominioAtual) {
-  const base = dominiosPublicos(catalogo);
-  return base.some((d3) => d3.conjunto_id === dominioAtual.conjunto_id) ? base : [...base, dominioAtual];
-}
-function opcoesEdicao(dominio, edicaoAtual) {
-  const base = edicoesPublicas(dominio);
-  return base.some((e67) => e67.edicao === edicaoAtual.edicao) ? base : [...base, edicaoAtual];
 }
 
 // src/js/estado/loja.js
@@ -97839,23 +97874,23 @@ JS_ERROR_MESSAGES[E_UNKNOWN_UNIT] = "Unknown unit";
 JS_ERROR_MESSAGES[E_ARRAY_LENGTH] = "Array length out of bounds";
 JS_ERROR_MESSAGES[E_NULL_INDEX] = "Got unexpected null value for H3 index";
 var UNKNOWN_ERROR_MSG = "Unknown error";
-function createError(messages, errCode, meta) {
-  var hasValue = meta && "value" in meta;
-  var err = new Error((messages[errCode] || UNKNOWN_ERROR_MSG) + " (code: " + errCode + (hasValue ? ", value: " + meta.value : "") + ")");
+function createError(messages, errCode, meta2) {
+  var hasValue = meta2 && "value" in meta2;
+  var err = new Error((messages[errCode] || UNKNOWN_ERROR_MSG) + " (code: " + errCode + (hasValue ? ", value: " + meta2.value : "") + ")");
   err.code = errCode;
   return err;
 }
 function H3LibraryError(errCode, value2) {
-  var meta = arguments.length === 2 ? {
+  var meta2 = arguments.length === 2 ? {
     value: value2
   } : {};
-  return createError(H3_ERROR_MSGS, errCode, meta);
+  return createError(H3_ERROR_MSGS, errCode, meta2);
 }
 function JSBindingError(errCode, value2) {
-  var meta = arguments.length === 2 ? {
+  var meta2 = arguments.length === 2 ? {
     value: value2
   } : {};
-  return createError(JS_ERROR_MESSAGES, errCode, meta);
+  return createError(JS_ERROR_MESSAGES, errCode, meta2);
 }
 function throwIfError(errCode) {
   if (errCode !== 0) {
@@ -105869,7 +105904,7 @@ function renderizarCartoes(el2, manifesto, totais) {
       if (e67.target.closest(".ajuda")) return;
       const ano = periodoRecenteAno(manifesto);
       prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente: c3.componente, periodo: ano.id });
-      window.location.href = "resultados.html";
+      irParaPagina("resultados.html");
     };
     el2.appendChild(card);
   }
@@ -105934,7 +105969,7 @@ async function iniciarVisaoGeral() {
     tooltip: $5("f2-minimapa-tooltip"),
     aoClicarHexagono: (h32) => {
       prepararNavegacaoResultados({ tema: "deficit", medida: "relativo", componente: "total", periodo: periodoRecente, selecionado: h32 });
-      window.location.href = "resultados.html";
+      irParaPagina("resultados.html");
     }
   });
   const periodo = manifesto.periodos.find((p4) => p4.id === periodoRecente);
@@ -107036,17 +107071,115 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "d31f34dc7572abcd535e2b7038c9f8c6873dfecd");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "6340f3f479130429cd094e0270837fbc2dd074e0");
   renderizarInterna($7("met-interna"), modelo);
 }
 
+// src/js/inicio.js
+var LARGURA = 320;
+var ALTURA = 200;
+var MARGEM = 6;
+function escapar(texto) {
+  return String(texto).replace(/[&<>"]/g, (c3) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c3]);
+}
+function dataBR(iso) {
+  const [a5, m4, d3] = String(iso).slice(0, 10).split("-");
+  return a5 && m4 && d3 ? `${d3}/${m4}/${a5}` : String(iso);
+}
+async function hexagonosDoCartao(origem, periodoId) {
+  const p4 = periodoId.replace(/'/g, "''");
+  const linhas = await consultar(`
+    SELECT h.h3 AS h3, SUM(h.absoluto) AS soma, COUNT(h.absoluto) AS n, ANY_VALUE(b.domicilios) AS dom
+    FROM read_parquet('${urlParquet(origem, "hex.parquet")}') h
+    JOIN read_parquet('${urlParquet(origem, "hex_base.parquet")}') b ON b.h3 = h.h3 AND b.periodo = h.periodo
+    WHERE h.periodo = '${p4}'
+    GROUP BY h.h3`);
+  return linhas.map((l3) => ({
+    h3: l3.h3,
+    relativo: Number(l3.n) >= 3 && l3.dom != null && l3.dom > 0.5 ? 100 * l3.soma / l3.dom : null
+  }));
+}
+function svgMiniMapa(hexagonos, nome) {
+  const celulas = hexagonos.map((h4) => ({ ...h4, pts: cellToBoundary(h4.h3).map(([lat, lng]) => [lat, lng]) }));
+  let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+  for (const c3 of celulas) for (const [lat, lng] of c3.pts) {
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLng = Math.min(minLng, lng);
+    maxLng = Math.max(maxLng, lng);
+  }
+  const fatorLng = Math.cos((minLat + maxLat) / 2 * Math.PI / 180);
+  const larguraGeo = Math.max((maxLng - minLng) * fatorLng, 1e-9);
+  const alturaGeo = Math.max(maxLat - minLat, 1e-9);
+  const escala = Math.min((LARGURA - 2 * MARGEM) / larguraGeo, (ALTURA - 2 * MARGEM) / alturaGeo);
+  const x0 = (LARGURA - larguraGeo * escala) / 2;
+  const y0 = (ALTURA - alturaGeo * escala) / 2;
+  const proj = ([lat, lng]) => `${(x0 + (lng - minLng) * fatorLng * escala).toFixed(1)},${(y0 + (maxLat - lat) * escala).toFixed(1)}`;
+  const positivos = celulas.map((c3) => c3.relativo).filter((v4) => v4 != null && v4 > 0).sort(ascending);
+  const quebras = positivos.length ? [1, 2, 3, 4, 5, 6].map((i3) => quantileSorted(positivos, i3 / 7)) : [];
+  const classeDe = (v4) => {
+    if (v4 == null || v4 <= 0) return -1;
+    let k5 = 0;
+    while (k5 < quebras.length && v4 > quebras[k5]) k5++;
+    return k5;
+  };
+  const caminhos = /* @__PURE__ */ new Map();
+  for (const c3 of celulas) {
+    const k5 = classeDe(c3.relativo);
+    caminhos.set(k5, (caminhos.get(k5) ?? "") + `M${c3.pts.map(proj).join("L")}Z`);
+  }
+  const paths = [...caminhos.entries()].sort((a5, b10) => a5[0] - b10[0]).map(([k5, d3]) => `<path d="${d3}" fill="${k5 < 0 ? "var(--line)" : RAMPA_DEFICIT[k5]}"/>`).join("");
+  return `<svg class="mini-svg" viewBox="0 0 ${LARGURA} ${ALTURA}" role="img" aria-label="${escapar(`Mapa do d\xE9ficit relativo de ${nome}`)}">${paths}</svg>`;
+}
+function htmlCartao(dominio, edicao, manifesto, periodoRotulo, outras) {
+  const alvo = caminhoDaPagina(dominio.conjunto_id, null, "visao-geral.html");
+  const links = outras.map((e67) => `<a href="${caminhoDaPagina(dominio.conjunto_id, e67.edicao, "visao-geral.html")}">${escapar(e67.edicao)}</a>`).join(", ");
+  return `
+    <a class="mini" href="${alvo}" tabindex="-1" aria-hidden="true"><div class="mini-slot" data-mini></div></a>
+    <h2>${escapar(manifesto.nome ?? dominio.nome)}</h2>
+    <p class="sub">Edi\xE7\xE3o ${escapar(edicao.edicao)} \xB7 gerada em ${dataBR(manifesto.data_execucao)}${periodoRotulo ? ` \xB7 cores: d\xE9ficit relativo total, ${escapar(periodoRotulo)}` : ""}</p>
+    ${manifesto.ficticio ? '<span class="chip ficticio">dados fict\xEDcios</span>' : ""}
+    <p><a class="iconbtn" href="${alvo}">Abrir os resultados \u2192</a></p>
+    ${outras.length ? `<p class="sub">Outras edi\xE7\xF5es: ${links}</p>` : ""}`;
+}
+async function iniciarInicio() {
+  const raiz = document.getElementById("inicio-cartoes");
+  if (!raiz) return;
+  const catalogo = await carregarJSON(".", "catalogo.json");
+  const comTeste = new URLSearchParams(window.location.search).get("teste") === "1";
+  const dominios = comTeste ? catalogo.dominios : dominiosPublicos(catalogo);
+  const cartoes = dominios.map((dominio) => {
+    const artigo = document.createElement("article");
+    artigo.className = "cartao-dominio";
+    artigo.dataset.dominio = dominio.conjunto_id;
+    raiz.appendChild(artigo);
+    return { dominio, artigo };
+  });
+  for (const { dominio, artigo } of cartoes) {
+    const edicao = dominio.edicoes.find((e67) => e67.padrao) ?? dominio.edicoes[0];
+    const manifesto = await carregarJSON(edicao.origem, "manifesto.json");
+    const periodo = periodoRecenteAno(manifesto);
+    const outras = (comTeste ? dominio.edicoes : edicoesPublicas(dominio)).filter((e67) => e67.edicao !== edicao.edicao);
+    artigo.innerHTML = htmlCartao(dominio, edicao, manifesto, periodo?.rotulo, outras);
+    try {
+      const hexagonos = await hexagonosDoCartao(edicao.origem, periodo.id);
+      artigo.querySelector("[data-mini]").innerHTML = svgMiniMapa(hexagonos, manifesto.nome ?? dominio.nome);
+    } catch (erro) {
+      console.error(`Mini-mapa de ${dominio.conjunto_id}:`, erro);
+    }
+  }
+  raiz.dataset.pronto = "1";
+}
+
 // src/js/main.js
-function navegarPara(dominioId, edicaoId) {
-  const params = new URLSearchParams(window.location.search);
-  params.set("dominio", dominioId);
-  if (edicaoId) params.set("edicao", edicaoId);
-  else params.delete("edicao");
-  window.location.search = params.toString();
+var navegarPara = irParaDominioEdicao;
+function propagarEscolhaNosLinks() {
+  const consulta = window.location.search;
+  if (!/[?&](dominio|edicao)=/.test(consulta) || lerEndereco().aninhada) return;
+  for (const a5 of document.querySelectorAll('a[href$=".html"]')) {
+    const href = a5.getAttribute("href");
+    if (href && !/^[a-z]+:/i.test(href)) a5.setAttribute("href", href + consulta);
+  }
 }
 async function preencherCabecalho() {
   const selDominio = document.getElementById("sel-dominio");
@@ -107070,7 +107203,11 @@ async function preencherCabecalho() {
   }
 }
 preencherCabecalho();
+propagarEscolhaNosLinks();
 instalarAjudas();
+iniciarInicio().catch((erro) => {
+  console.error("Falha ao iniciar a p\xE1gina inicial:", erro);
+});
 iniciarExplorador().catch((erro) => {
   console.error("Falha ao iniciar o explorador:", erro);
 });

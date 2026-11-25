@@ -11,6 +11,7 @@ import {
 import { rotuloMarca, classeMarca } from "./util/marcas.js";
 import { formatar, formatarPercentual } from "./util/formato.js";
 import { prepararNavegacaoResultados } from "./estado/pergunta.js";
+import { irParaPagina } from "./util/endereco.js";
 import { criarMiniMapa } from "./mapa/index.js";
 import { renderizarPainelDetalhe, renderizarCurvaConcentracao } from "./graficos/deficit.js";
 import { ligarDica, marcarGrafico, htmlDica, instalarAjudas, criarAjuda } from "./ui/ajuda.js";
@@ -114,7 +115,7 @@ function renderizarCartoes(el, manifesto, totais) {
       if (e.target.closest(".ajuda")) return;
       const ano = periodoRecenteAno(manifesto);
       prepararNavegacaoResultados({ tema: "deficit", medida: "absoluto", componente: c.componente, periodo: ano.id });
-      window.location.href = "resultados.html";
+      irParaPagina("resultados.html");
     };
     el.appendChild(card);
   }
@@ -191,7 +192,7 @@ export async function iniciarVisaoGeral() {
     tooltip: $("f2-minimapa-tooltip"),
     aoClicarHexagono: (h3) => {
       prepararNavegacaoResultados({ tema: "deficit", medida: "relativo", componente: "total", periodo: periodoRecente, selecionado: h3 });
-      window.location.href = "resultados.html";
+      irParaPagina("resultados.html");
     },
   });
   const periodo = manifesto.periodos.find((p) => p.id === periodoRecente);

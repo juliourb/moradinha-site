@@ -3,6 +3,8 @@
 // do site — sem CORS). Nenhuma lógica de mapa ou gráfico entra aqui
 // (SPEC_00 §2); este módulo só busca e monta os dados.
 import * as duckdb from "@duckdb/duckdb-wasm";
+import { dominiosPublicos } from "./catalogo.js";
+import { lerEndereco } from "../util/endereco.js";
 
 // Bundles auto-hospedados (SPEC_00 §3: nada de CDN em produção).
 // Os arquivos .wasm/.worker.js são copiados para assets/js/duckdb/ pelo esbuild
@@ -42,16 +44,17 @@ function conexao() {
 
 /**
  * Escolhe o domínio e a edição do catálogo: `?dominio=<conjunto_id>` e
- * `?edicao=<edicao>` na URL, se existirem e forem conhecidos (usado pelo
- * seletor do cabeçalho — SPEC_F5 — e por quem quiser abrir uma edição
- * específica, como os testes); sem parâmetros, usa o primeiro domínio do
- * catálogo e a edição marcada `padrao` (sempre a real e pública).
+ * `?edicao=<edicao>` na URL, se existirem e forem conhecidos (quem quiser abrir
+ * uma edição específica, como os testes), ou o endereço da página
+ * (`d/<conjunto>/<edicao>/`, via <meta>; S1-2); sem nada disso, usa o primeiro
+ * domínio público do catálogo e a edição marcada `padrao`.
  */
 export function escolherDominioEEdicao(catalogo) {
   const params = new URLSearchParams(window.location.search);
-  const pedidoDominio = params.get("dominio");
-  const pedidoEdicao = params.get("edicao");
-  const dominio = catalogo.dominios.find((d) => d.conjunto_id === pedidoDominio) ?? catalogo.dominios[0];
+  const endereco = lerEndereco();
+  const pedidoDominio = params.get("dominio") ?? endereco.dominio;
+  const pedidoEdicao = params.get("edicao") ?? endereco.edicao;
+  const dominio = catalogo.dominios.find((d) => d.conjunto_id === pedidoDominio) ?? dominiosPublicos(catalogo)[0] ?? catalogo.dominios[0];
   const edicao = dominio.edicoes.find((e) => e.edicao === pedidoEdicao) ?? dominio.edicoes.find((e) => e.padrao) ?? dominio.edicoes[0];
   return { dominio, edicao };
 }

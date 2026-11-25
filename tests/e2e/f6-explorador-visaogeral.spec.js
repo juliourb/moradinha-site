@@ -4,7 +4,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("F6.1-16: números da Visão geral (pacote real bd10cbd)", () => {
   test("2025 e média 2023–25 batem com o pacote", async ({ page }) => {
-    await page.goto("/index.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.goto("/visao-geral.html?dominio=al_rm_maceio&edicao=bd10cbd");
     await page.waitForLoadState("networkidle");
 
     const total = page.locator('.cartao-bi[data-componente="total"]');
@@ -98,7 +98,7 @@ test.describe("F6.1-7: dica no hexágono, peso no painel, camada de municípios"
 
 test.describe("F6.1-10: mini-mapa interativo", () => {
   test("arrastar muda a vista; clicar abre Resultados com o mesmo hexágono", async ({ page }) => {
-    await page.goto("/index.html?dominio=al_rm_maceio&edicao=bd10cbd");
+    await page.goto("/visao-geral.html?dominio=al_rm_maceio&edicao=bd10cbd");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(1500);
 
