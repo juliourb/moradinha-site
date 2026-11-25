@@ -26,11 +26,8 @@ jobs:
         with:
           version: "1.11.9"
 
-      - name: Montar o catálogo (valida V1–V12 em todo pacote de pacotes/, sai com erro se algum for inválido)
+      - name: Montar o catálogo (valida V1–V12 em todo pacote de pacotes/; o catalogo.json não é versionado e sai impresso no log)
         run: npm run catalogo
-
-      - name: Conferir que o catalogo.json versionado é o gerado (S1-1)
-        run: git diff --exit-code catalogo.json
 
       - name: "Validar o catalogo.json (F5-2: só pacote real fora de teste_apenas)"
         run: npm run validar:catalogo-publico

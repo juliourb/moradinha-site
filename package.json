@@ -8,9 +8,9 @@
     "node": "26.13.1"
   },
   "scripts": {
-    "dev": "quarto preview",
+    "dev": "npm run catalogo && quarto preview",
     "build:js": "node ferramentas/esbuild.mjs",
-    "build": "npm run catalogo && npm run validar:catalogo-publico && npm run build:js && quarto render && node ferramentas/gerar_enderecos.mjs",
+    "build": "npm run catalogo && npm run validar:catalogo-publico && npm run build:js && quarto render && node ferramentas/gerar_enderecos.mjs _site --publico && npm run validar:build-publico",
     "build:interno": "npm run catalogo && npm run build:js && quarto render --profile interno --output-dir _site_interno && node ferramentas/gerar_enderecos.mjs _site_interno",
     "validar": "node ferramentas/validar.mjs",
     "validar:citacoes": "node ferramentas/validar_citacoes.mjs",
@@ -18,9 +18,9 @@
     "validar:catalogo-publico": "node ferramentas/validar_catalogo_publico.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:all": "npm run test && npm run build && npm run test:e2e",
+    "test:all": "npm run test && npm run build && npm run build:interno && npm run test:e2e",
     "catalogo": "node ferramentas/montar_catalogo.mjs",
-    "catalogo:conferir": "node ferramentas/montar_catalogo.mjs --conferir"
+    "validar:build-publico": "node ferramentas/validar_build_publico.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "9.1.14",

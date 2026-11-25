@@ -16,10 +16,21 @@ export default defineConfig({
       args: ["--use-gl=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"],
     },
   },
-  webServer: {
-    command: "node ferramentas/servir.mjs 4173",
-    port: 4173,
-    reuseExistingServer: true,
-    timeout: 15000,
-  },
+  // Os testes usam o build INTERNO (_site_interno), que inclui os pacotes fictícios de teste
+  // (E58: o build público não os contém). A porta 4174 serve o build público, só para
+  // conferir que ele não tem pacote de teste (tests/e2e/s1-publico.spec.js).
+  webServer: [
+    {
+      command: "node ferramentas/servir.mjs 4173 _site_interno",
+      port: 4173,
+      reuseExistingServer: true,
+      timeout: 15000,
+    },
+    {
+      command: "node ferramentas/servir.mjs 4174 _site",
+      port: 4174,
+      reuseExistingServer: true,
+      timeout: 15000,
+    },
+  ],
 });

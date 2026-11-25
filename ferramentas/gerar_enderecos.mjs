@@ -12,8 +12,12 @@
 // relativo ir para a raiz). Domínios de teste também ganham endereço: ficam fora do
 // seletor público, mas abrem (é assim que os testes e a revisão os conferem).
 //
-// Uso: node ferramentas/gerar_enderecos.mjs [pasta do site, padrão _site]
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+// Com --publico (build público, E58): pacotes teste_apenas NÃO entram. O catalogo.json da pasta do site é
+// reescrito sem eles, as pastas deles saem de pacotes/ e não ganham endereço. Sem a opção (build interno),
+// tudo fica: o interno e os testes usam os pacotes fictícios.
+//
+// Uso: node ferramentas/gerar_enderecos.mjs [pasta do site, padrão _site] [--publico]
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,9 +43,34 @@ export function paginaDoEndereco(html, { dominio, edicao, pagina }) {
   return saida;
 }
 
+/** Separa o catálogo em público (sem teste_apenas) e as pastas de pacote a remover do build público. Pura. */
+export function separarTeste(catalogo) {
+  const publico = { dominios: [] };
+  const remover = [];
+  for (const d of catalogo.dominios) {
+    if (d.teste_apenas) {
+      remover.push(`pacotes/${d.conjunto_id}`);
+      continue;
+    }
+    const edicoes = d.edicoes.filter((e) => !e.teste_apenas);
+    for (const e of d.edicoes.filter((x) => x.teste_apenas)) remover.push(e.origem);
+    if (edicoes.length) publico.dominios.push({ ...d, edicoes });
+  }
+  return { publico, remover };
+}
+
 function main() {
-  const pastaSite = join(RAIZ, process.argv[2] ?? "_site");
-  const catalogo = JSON.parse(readFileSync(join(RAIZ, "catalogo.json"), "utf8"));
+  const args = process.argv.slice(2);
+  const soPublico = args.includes("--publico");
+  const pastaSite = join(RAIZ, args.find((a) => !a.startsWith("--")) ?? "_site");
+  let catalogo = JSON.parse(readFileSync(join(RAIZ, "catalogo.json"), "utf8"));
+  if (soPublico) {
+    const { publico, remover } = separarTeste(catalogo);
+    catalogo = publico;
+    for (const r of remover) rmSync(join(pastaSite, r), { recursive: true, force: true });
+    rmSync(join(pastaSite, "pacotes", "excecoes.json"), { force: true }); // nomes e motivos das exceções: só do repositório
+    writeFileSync(join(pastaSite, "catalogo.json"), JSON.stringify(publico, null, 2) + "\n");
+  }
   const originais = Object.fromEntries(
     PAGINAS.map((p) => {
       const arquivo = join(pastaSite, `${p}.html`);

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { montarCatalogo, instanteDaEdicao } from "../../ferramentas/catalogo_montagem.mjs";
+import { separarTeste } from "../../ferramentas/gerar_enderecos.mjs";
 
 const RAIZ = process.cwd();
 const pac = (conjunto, edicao, data, nome = conjunto) => ({
@@ -75,10 +76,23 @@ describe("catálogo gerado com os pacotes atuais x catalogo.json de antes do S1"
     }
   });
 
-  it("os domínios novos são só os de teste; o catalogo.json versionado é o gerado", () => {
+  it("os domínios novos são só os de teste (o catalogo.json não é versionado: é gerado no build)", () => {
     const novos = gerado.dominios.filter((d) => !antes.dominios.some((a) => a.conjunto_id === d.conjunto_id));
     expect(novos.every((d) => d.teste_apenas)).toBe(true);
-    const versionado = JSON.parse(readFileSync(join(RAIZ, "catalogo.json"), "utf8"));
-    expect(versionado).toEqual(gerado);
+  });
+});
+
+describe("E58: separarTeste (catálogo do build público)", () => {
+  const cat = {
+    dominios: [
+      { conjunto_id: "a", nome: "A", edicoes: [{ edicao: "r", origem: "pacotes/a/r", padrao: true }, { edicao: "f", origem: "pacotes/a/f", padrao: false, teste_apenas: true }] },
+      { conjunto_id: "t", nome: "T", teste_apenas: true, edicoes: [{ edicao: "f", origem: "pacotes/t/f", padrao: true }] },
+    ],
+  };
+  it("tira domínio e edição de teste e lista o que apagar do build", () => {
+    const { publico, remover } = separarTeste(cat);
+    expect(publico.dominios.map((d) => d.conjunto_id)).toEqual(["a"]);
+    expect(publico.dominios[0].edicoes.map((e) => e.edicao)).toEqual(["r"]);
+    expect(remover.sort()).toEqual(["pacotes/a/f", "pacotes/t"]);
   });
 });

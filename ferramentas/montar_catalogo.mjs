@@ -4,9 +4,8 @@
 // derruba o build e diz qual. Exceções (edição fora do catálogo, pacote de teste) ficam
 // em pacotes/excecoes.json, mantido à mão.
 //
-// Uso: node ferramentas/montar_catalogo.mjs             escreve catalogo.json
-//      node ferramentas/montar_catalogo.mjs --conferir  não escreve; falha se o catalogo.json
-//                                                       versionado difere do que seria gerado
+// O catalogo.json NÃO é versionado (.gitignore): é gerado em todo build (npm run build, CI) e
+// impresso no log. Uso: node ferramentas/montar_catalogo.mjs
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,7 +14,6 @@ import { validarPacote } from "./validar.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PASTA_PACOTES = join(RAIZ, "pacotes");
-const conferir = process.argv.includes("--conferir");
 
 function subpastas(pasta) {
   return readdirSync(pasta, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
@@ -65,15 +63,7 @@ try {
 const texto = JSON.stringify(catalogo, null, 2) + "\n";
 const arquivo = join(RAIZ, "catalogo.json");
 
-if (conferir) {
-  const atual = existsSync(arquivo) ? readFileSync(arquivo, "utf8").replace(/\r\n/g, "\n") : "";
-  if (atual !== texto) {
-    console.error("FALHOU: catalogo.json versionado difere do gerado a partir de pacotes/. Rode `npm run catalogo` e confira o diff.");
-    process.exit(1);
-  }
-  console.log("OK: catalogo.json versionado é igual ao gerado a partir de pacotes/.");
-} else {
-  writeFileSync(arquivo, texto);
-  const n = catalogo.dominios.reduce((s, d) => s + d.edicoes.length, 0);
-  console.log(`catalogo.json: ${catalogo.dominios.length} domínio(s), ${n} edição(ões), ${pacotes.length} pacote(s) validado(s).`);
-}
+writeFileSync(arquivo, texto);
+const n = catalogo.dominios.reduce((soma, d) => soma + d.edicoes.length, 0);
+console.log(`catalogo.json: ${catalogo.dominios.length} domínio(s), ${n} edição(ões), ${pacotes.length} pacote(s) validado(s). Conteúdo:`);
+console.log(texto);
