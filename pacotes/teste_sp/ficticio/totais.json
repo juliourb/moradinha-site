@@ -1,0 +1,348 @@
+{
+  "totais": [
+    {
+      "componente": "coabitacao",
+      "periodo": "2022",
+      "regime": "c",
+      "total": 83917.29999999999,
+      "ep": 15939.0,
+      "cv": 18.99,
+      "ic_inf": 52676.86,
+      "ic_sup": 115157.74,
+      "marcas": [
+        "total_fragil"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "2023",
+      "regime": "c",
+      "total": 68909.9,
+      "ep": 14088.0,
+      "cv": 20.44,
+      "ic_inf": 41297.42,
+      "ic_sup": 96522.38,
+      "marcas": [
+        "total_fragil",
+        "mudanca_no_ruido",
+        "fonte_estoque_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "2024",
+      "regime": "c",
+      "total": 67462.4,
+      "ep": 12898.0,
+      "cv": 19.12,
+      "ic_inf": 42182.32,
+      "ic_sup": 92742.48,
+      "marcas": [
+        "total_fragil",
+        "mudanca_no_ruido"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "2025",
+      "regime": "c",
+      "total": 77071.9,
+      "ep": 14970.0,
+      "cv": 19.42,
+      "ic_inf": 47730.7,
+      "ic_sup": 106413.1,
+      "marcas": [
+        "total_fragil",
+        "mudanca_no_ruido"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "m2024",
+      "regime": "c",
+      "total": 73429.9,
+      "ep": 8167.0,
+      "cv": 11.12,
+      "ic_inf": 57422.58,
+      "ic_sup": 89437.22,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "coabitacao",
+      "periodo": "m2025",
+      "regime": "c",
+      "total": 71148.1,
+      "ep": 8522.0,
+      "cv": 11.98,
+      "ic_inf": 54444.98,
+      "ic_sup": 87851.22,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "onus",
+      "periodo": "2022",
+      "regime": "c",
+      "total": 277702.4,
+      "ep": 32582.0,
+      "cv": 11.73,
+      "ic_inf": 213841.68,
+      "ic_sup": 341563.12,
+      "marcas": [],
+      "no_mapa": true
+    },
+    {
+      "componente": "onus",
+      "periodo": "2023",
+      "regime": "c",
+      "total": 344444.80000000005,
+      "ep": 29897.0,
+      "cv": 8.68,
+      "ic_inf": 285846.68,
+      "ic_sup": 403042.92,
+      "marcas": [
+        "mudanca_no_ruido",
+        "fonte_estoque_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "onus",
+      "periodo": "2024",
+      "regime": "c",
+      "total": 298273.9,
+      "ep": 35253.0,
+      "cv": 11.82,
+      "ic_inf": 229178.02,
+      "ic_sup": 367369.78,
+      "marcas": [
+        "mudanca_no_ruido"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "onus",
+      "periodo": "2025",
+      "regime": "c",
+      "total": 353564.4,
+      "ep": 30735.0,
+      "cv": 8.69,
+      "ic_inf": 293323.8,
+      "ic_sup": 413805.0,
+      "marcas": [
+        "mudanca_no_ruido"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "onus",
+      "periodo": "m2024",
+      "regime": "c",
+      "total": 306807.0,
+      "ep": 19075.0,
+      "cv": 6.22,
+      "ic_inf": 269420.0,
+      "ic_sup": 344194.0,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "onus",
+      "periodo": "m2025",
+      "regime": "c",
+      "total": 332094.4,
+      "ep": 20137.0,
+      "cv": 6.06,
+      "ic_inf": 292625.88,
+      "ic_sup": 371562.92,
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2022",
+      "regime": "amostra",
+      "total": 50817.299999999996,
+      "ep": 2633.0,
+      "cv": 5.18,
+      "ic_inf": 45656.62,
+      "ic_sup": 55977.98,
+      "marcas": [],
+      "no_mapa": true
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2023",
+      "regime": "provisoria",
+      "total": 54542.700000000004,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa",
+        "fonte_estoque_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2024",
+      "regime": "provisoria",
+      "total": 53229.2,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "2025",
+      "regime": "provisoria",
+      "total": 55739.6,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "m2024",
+      "regime": "provisoria",
+      "total": 52863.100000000006,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa",
+        "media_inclui_fonte_diferente"
+      ],
+      "no_mapa": true
+    },
+    {
+      "componente": "precariedade",
+      "periodo": "m2025",
+      "regime": "provisoria",
+      "total": 54503.8,
+      "ep": null,
+      "cv": null,
+      "ic_inf": null,
+      "ic_sup": null,
+      "marcas": [
+        "precariedade_provisoria_sem_faixa",
+        "media_inclui_fonte_diferente"
+      ],
+      "no_mapa": true
+    }
+  ],
+  "domicilios": [
+    {
+      "periodo": "2022",
+      "total": 4272040.0
+    },
+    {
+      "periodo": "2023",
+      "total": 4446886.0
+    },
+    {
+      "periodo": "2024",
+      "total": 4465745.0
+    },
+    {
+      "periodo": "2025",
+      "total": 4665750.0
+    },
+    {
+      "periodo": "m2024",
+      "total": 4394890.0
+    },
+    {
+      "periodo": "m2025",
+      "total": 4526127.0
+    }
+  ],
+  "mudancas": [
+    {
+      "componente": "coabitacao",
+      "de": "2022",
+      "para": "2023",
+      "delta": -15007.4,
+      "z": 0.705,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "de": "2023",
+      "para": "2024",
+      "delta": -1447.5,
+      "z": 0.076,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "coabitacao",
+      "de": "2024",
+      "para": "2025",
+      "delta": 9609.5,
+      "z": 0.486,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "de": "2022",
+      "para": "2023",
+      "delta": 66742.4,
+      "z": 1.509,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "de": "2023",
+      "para": "2024",
+      "delta": -46170.9,
+      "z": 0.999,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    },
+    {
+      "componente": "onus",
+      "de": "2024",
+      "para": "2025",
+      "delta": 55290.5,
+      "z": 1.182,
+      "marcas": [
+        "mudanca_no_ruido"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "contrato": "1.0",
+  "conjunto_id": "teste_sp",
+  "nome": "São Paulo (capital, fictício)",
+  "edicao": "63a3922",
+  "commit_completo": "63a3922ff8a08f89ec5dd3084d9955c6ad66c997",
+  "data_execucao": "2026-11-25T00:00:00Z",
+  "publico": true,
+  "ficticio": true,
+  "h3_resolucao": 8,
+  "centro": [
+    -46.633,
+    -23.55
+  ],
+  "zoom_inicial": 9.6,
+  "contornos_tolerancia_m": 10,
+  "d17_conferido": true,
+  "periodos": [
+    {
+      "id": "2022",
+      "rotulo": "2022",
+      "tipo": "ano",
+      "anos": [
+        2022
+      ],
+      "fonte_estoque": "censo",
+      "marcas": []
+    },
+    {
+      "id": "2023",
+      "rotulo": "2023",
+      "tipo": "ano",
+      "anos": [
+        2023
+      ],
+      "fonte_estoque": "open_buildings",
+      "marcas": [
+        "fonte_estoque_diferente"
+      ]
+    },
+    {
+      "id": "2024",
+      "rotulo": "2024",
+      "tipo": "ano",
+      "anos": [
+        2024
+      ],
+      "fonte_estoque": "mapbiomas",
+      "marcas": []
+    },
+    {
+      "id": "2025",
+      "rotulo": "2025",
+      "tipo": "ano",
+      "anos": [
+        2025
+      ],
+      "fonte_estoque": "mapbiomas",
+      "marcas": []
+    },
+    {
+      "id": "m2024",
+      "rotulo": "Média 2022–24",
+      "tipo": "media",
+      "anos": [
+        2022,
+        2023,
+        2024
+      ],
+      "fonte_estoque": "mista",
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    },
+    {
+      "id": "m2025",
+      "rotulo": "Média 2023–25",
+      "tipo": "media",
+      "anos": [
+        2023,
+        2024,
+        2025
+      ],
+      "fonte_estoque": "mista",
+      "marcas": [
+        "media_inclui_fonte_diferente"
+      ]
+    }
+  ],
+  "componentes": [
+    "coabitacao",
+    "onus",
+    "precariedade"
+  ],
+  "regime_mapa": "c",
+  "recortes": [],
+  "arquivos": {
+    "achados.json": "7a59dec233660d436757594a578f8e700ea16a45cb738de50f6411135e2cd97e",
+    "ap.parquet": "22c566c5bdb6d11211ac0a1f429e831bb2488acf8d191ebd4cd9eed95bdf94bc",
+    "consistencia.json": "4ea5e0bd66fd76c52f5aba2e2da7e505687bab299855387932c73e794f641a2a",
+    "contornos/ap.geojson": "2ba4ff7918bb712fe70aa3242528a90e6f9545b2e189de910c598affa9cb6dce",
+    "contornos/fcu.geojson": "fdc8b3487134d282cbe67f89d64272a339903d13c22d5a277ca8ee4077ce9549",
+    "contornos/municipios.geojson": "2d5c4326bd04f57004197f6841a99003409469a0cfc2ccbebb3d1be156c042d9",
+    "hex.parquet": "b75494030690108ba38dcccaf1e4c2644d7032808f74e85ff723ea2d9a85e16b",
+    "hex_atributos.parquet": "e5c4e76bb2ccc2ab7f10be999f790b7f8b31d1068de2e3923d347a06377badf7",
+    "hex_base.parquet": "a2d1a8110d602147c2d309bf007edb9b8fde02d2342daa0f5f6c7b0076cac18c",
+    "hex_qualidade.parquet": "a024f6b711b5de37a1991bb829cda3d3ffee81ef81b5934ff90c2f2d5d953b65",
+    "modelo.json": "e752eaf58f126fb3e9830aa9582922b30b4111a62b32553c54316ce5693f1c16",
+    "pipeline.json": "473982f3c6261d1cb24c9579df103b7ed1c22685eb631e3eeb3dbfc8d7c7c139",
+    "qualidade.json": "dec3eb879e3b561032e1c934068ba79769506c89731daa8bb4667440b5a41280",
+    "referencia_fjp.json": "c152cc8081b8e62bee95913afa5ef57cb5675dbbc61404b1ddaee72d01c09cdd",
+    "totais.json": "feff8f7e3d03d7535cf115025232e5c905b3872c81a09894e7d0aecb8c0cd639"
+  }
+}

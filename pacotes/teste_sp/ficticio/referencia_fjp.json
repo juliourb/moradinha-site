@@ -1,0 +1,82 @@
+[
+  {
+    "indicador": "total",
+    "ano_ref": 2023,
+    "fjp_publicado": 505329,
+    "fjp_fonte": "FICTÍCIO — valores inventados para teste do site; não são da Fundação João Pinheiro.",
+    "fjp_tabela": "Tabela fictícia",
+    "fjp_pagina": "0",
+    "reconstrucao_pnadc": 467897.4,
+    "reconstrucao_ep": null,
+    "mapa": 467897.4,
+    "explicacao": "Valor fictício (8% acima da reconstrução), só para teste."
+  },
+  {
+    "indicador": "habitacao_precaria",
+    "ano_ref": 2023,
+    "fjp_publicado": 58906,
+    "fjp_fonte": "FICTÍCIO — valores inventados para teste do site; não são da Fundação João Pinheiro.",
+    "fjp_tabela": "Tabela fictícia",
+    "fjp_pagina": "0",
+    "reconstrucao_pnadc": 54542.700000000004,
+    "reconstrucao_ep": null,
+    "mapa": 54542.700000000004,
+    "explicacao": "Valor fictício (8% acima da reconstrução), só para teste.",
+    "fjp_subcomponentes": [
+      {
+        "nome": "parte A (fictícia)",
+        "valor": 23562
+      },
+      {
+        "nome": "parte B (fictícia)",
+        "valor": 35344
+      }
+    ]
+  },
+  {
+    "indicador": "coabitacao",
+    "ano_ref": 2023,
+    "fjp_publicado": 74423,
+    "fjp_fonte": "FICTÍCIO — valores inventados para teste do site; não são da Fundação João Pinheiro.",
+    "fjp_tabela": "Tabela fictícia",
+    "fjp_pagina": "0",
+    "reconstrucao_pnadc": 68909.9,
+    "reconstrucao_ep": 14088.0,
+    "mapa": 68909.9,
+    "explicacao": "Valor fictício (8% acima da reconstrução), só para teste."
+  },
+  {
+    "indicador": "onus",
+    "ano_ref": 2023,
+    "fjp_publicado": 372000,
+    "fjp_fonte": "FICTÍCIO — valores inventados para teste do site; não são da Fundação João Pinheiro.",
+    "fjp_tabela": "Tabela fictícia",
+    "fjp_pagina": "0",
+    "reconstrucao_pnadc": 344444.80000000005,
+    "reconstrucao_ep": 29897.0,
+    "mapa": 344444.80000000005,
+    "explicacao": "Valor fictício (8% acima da reconstrução), só para teste."
+  },
+  {
+    "indicador": "domicilios",
+    "ano_ref": 2023,
+    "fjp_publicado": 4802637,
+    "fjp_fonte": "FICTÍCIO — valores inventados para teste do site; não são da Fundação João Pinheiro.",
+    "fjp_tabela": "Tabela fictícia",
+    "fjp_pagina": "0",
+    "reconstrucao_pnadc": 4446886.0,
+    "reconstrucao_ep": null,
+    "mapa": 4446886.0,
+    "explicacao": "Valor fictício (8% acima da reconstrução), só para teste.",
+    "fjp_subcomponentes": [
+      {
+        "nome": "parte A (fictícia)",
+        "valor": 1921055
+      },
+      {
+        "nome": "parte B (fictícia)",
+        "valor": 2881582
+      }
+    ]
+  }
+]

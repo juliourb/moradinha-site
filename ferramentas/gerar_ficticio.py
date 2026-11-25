@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 import h3
@@ -106,20 +107,28 @@ def r(v, n=3):
     return None if v is None else round(v, n)
 
 
-def gerar_hexagonos(cells, semente):
-    """Atributos fictícios por hexágono: densidade, taxas por componente, AP, FCU, Braskem."""
+# Pontos de referência (lat, lng) que moldam a densidade fictícia. `recorte` é o
+# ponto do recorte especial (None = domínio sem recorte); `lat_vazia` zera metade
+# dos hexágonos acima dessa latitude (mar/lagoa no piloto; None = não se aplica).
+GEO_MACEIO = dict(centro=(-9.655, -35.725), norte=(-9.545, -35.725), lagoa=(-9.665, -35.755),
+                  recorte=(-9.625, -35.752), lat_vazia=-9.47)
+GEO_SP = dict(centro=(-23.550, -46.633), norte=(-23.480, -46.630), lagoa=(-23.780, -46.690),
+              recorte=None, lat_vazia=None)
+
+
+def gerar_hexagonos(cells, semente, geo=None):
+    """Atributos fictícios por hexágono: densidade, taxas por componente, AP, FCU, recorte especial."""
+    geo = geo or GEO_MACEIO
     random.seed(semente)
-    centro = (-9.655, -35.725)
-    norte = (-9.545, -35.725)
-    lagoa = (-9.665, -35.755)
-    braskem_p = (-9.625, -35.752)
+    centro, norte, lagoa, braskem_p = geo["centro"], geo["norte"], geo["lagoa"], geo["recorte"]
     H = []
     for c in cells:
         lat, lng = h3.cell_to_latlng(c)
         p = (lat, lng)
-        dc, dn, dl, db = dist_km(p, centro), dist_km(p, norte), dist_km(p, lagoa), dist_km(p, braskem_p)
+        dc, dn, dl = dist_km(p, centro), dist_km(p, norte), dist_km(p, lagoa)
+        db = dist_km(p, braskem_p) if braskem_p else 1e9
         dens = 420 * math.exp(-dc / 5.5) + 260 * math.exp(-dn / 3.0) + 120 * math.exp(-dl / 2.0) + random.lognormvariate(3.0, 0.9)
-        if random.random() < 0.13 or (lat > -9.47 and random.random() < 0.5):
+        if random.random() < 0.13 or (geo["lat_vazia"] is not None and lat > geo["lat_vazia"] and random.random() < 0.5):
             dens = 0
         braskem = db < 1.1
         if braskem:
@@ -146,9 +155,28 @@ def escalar_para_total(valores, total_real):
     return [v * total_real / s for v in valores]
 
 
+# Perfil do domínio: o que muda de um domínio para outro no pacote fictício.
+PERFIL_MACEIO = dict(
+    edicao_pasta="ficticio", geo=GEO_MACEIO, municipio=("270030", "Maceió"),
+    centro=[-35.715, -9.585], zoom=11.1, ap_de_celula=None, data_execucao="2026-11-22T00:00:00Z",
+    recortes=[{
+        "id": "braskem", "nome": "Área da Braskem",
+        "motivo": "Área de subsidência por mineração (reassentamento desde 2018); 99 setores no piloto",
+        "fonte": "Perímetro de risco da Defesa Civil de Maceió / Braskem (fictício neste pacote)",
+    }],
+    fjp_ficticio=False,
+)
+
+
 def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, dom_reais, larg_reais,
-                   mudancas_z, n_setores_base, incluir_consistencia_real):
-    H = gerar_hexagonos(cells, semente=7 if "maceio" in conjunto_id else 11)
+                   mudancas_z, n_setores_base, incluir_consistencia_real, perfil=None):
+    perfil = perfil or PERFIL_MACEIO
+    mun_cod, mun_nome = perfil["municipio"]
+    H = gerar_hexagonos(cells, semente=7 if "maceio" in conjunto_id else 11, geo=perfil["geo"])
+    if perfil["ap_de_celula"]:
+        ap_de = perfil["ap_de_celula"](cells)
+        for x in H:
+            x["ap"] = ap_de[x["h"]]
     n_hex = len(H)
 
     # Sigilo: um punhado de hexágonos sem dado (todo período) e outro punhado parcial.
@@ -202,6 +230,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
         aps_idx.setdefault(x["ap"], []).append(j)
     ap_rows = []
     ap_ressalva_coab = {}
+    ap_nome_de = {}
     random.seed(202)
     for k, (ap_cod, idx) in enumerate(sorted(aps_idx.items())):
         motor = sum(valores["coabitacao"]["2022"][j] for j in idx)
@@ -215,7 +244,8 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
         ressalva = bool(cv is not None and cv > 0.30) or (direta == 0)
         ap_ressalva_coab[ap_cod] = ressalva
         ap_nome = f"AP {k + 1:02d}"
-        ap_rows.append(dict(ap_cod=ap_cod, ap_nome=ap_nome, municipio_cod="270030", tipo="capital",
+        ap_nome_de[ap_cod] = ap_nome
+        ap_rows.append(dict(ap_cod=ap_cod, ap_nome=ap_nome, municipio_cod=mun_cod, tipo="capital",
                              componente="coabitacao", direta=r(direta, 1) if direta else 0.0,
                              direta_cv=r(cv * 100, 1) if cv else None,
                              direta_ic_inf=r(direta - 1.96 * direta * (cv or 0), 1) if cv else None,
@@ -223,7 +253,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
                              motor_2022=r(motor, 1), ressalva=ressalva, sem_direta=False))
         for comp in ["onus", "precariedade"]:
             motor_c = sum(valores[comp]["2022"][j] for j in idx)
-            ap_rows.append(dict(ap_cod=ap_cod, ap_nome=ap_nome, municipio_cod="270030", tipo="capital",
+            ap_rows.append(dict(ap_cod=ap_cod, ap_nome=ap_nome, municipio_cod=mun_cod, tipo="capital",
                                  componente=comp, direta=None, direta_cv=None, direta_ic_inf=None,
                                  direta_ic_sup=None, motor_2022=r(motor_c, 1), ressalva=False, sem_direta=True))
 
@@ -334,17 +364,18 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
     # hexágonos toca uma AP vizinha (as APs fictícias têm só 7 células cada),
     # então a marca é amostrada, não aplicada a todo candidato.
     hexagonos_do_pacote = {y["h"] for y in H}
+    ap_do_hex = {y["h"]: y["ap"] for y in H}
     candidatas_borda = [
         j for j, x in enumerate(H)
-        if any(h3.cell_to_parent(v, 7) != x["ap"] for v in h3.grid_disk(x["h"], 1) if v in hexagonos_do_pacote)
+        if any(ap_do_hex[v] != x["ap"] for v in h3.grid_disk(x["h"], 1) if v in hexagonos_do_pacote)
     ]
     random.seed(303)
     n_bordas = max(1, len(candidatas_borda) // 20) if candidatas_borda else 0
     bordas_ap = set(random.sample(candidatas_borda, min(n_bordas, len(candidatas_borda))))
     hex_atributos_rows = [
-        dict(h3=x["h"], municipio_cod="270030", municipio_nome="Maceió", n_municipios=1,
+        dict(h3=x["h"], municipio_cod=mun_cod, municipio_nome=mun_nome, n_municipios=1,
              ap_cod=x["ap"], n_aps=2 if j in bordas_ap else 1,
-             fcu_fracao=1.0 if x["fcu"] else 0.0, recortes="braskem" if x["braskem"] else "")
+             fcu_fracao=1.0 if x["fcu"] else 0.0, recortes="braskem" if x["braskem"] and perfil["recortes"] else "")
         for j, x in enumerate(H)
     ]
 
@@ -410,7 +441,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
             "vies": [
                 {"grupo_tipo": "tipo de AP", "grupo": "capital", "razao_somas": 1.02},
                 {"grupo_tipo": "tipo de AP", "grupo": "resto", "razao_somas": 0.95},
-                {"grupo_tipo": "município", "grupo": "Maceió", "razao_somas": 1.01},
+                {"grupo_tipo": "município", "grupo": mun_nome, "razao_somas": 1.01},
             ],
             "curvas": [
                 {"variavel": "renda_domiciliar", "rotulo": "Renda domiciliar", "nivel": "até 1 SM", "escore": 0.42, "desvio": 0.05},
@@ -511,6 +542,32 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
                 item["reconstrucao_pnadc"] = totais_reais[comp]["v"][idx_2023]
                 item["reconstrucao_ep"] = totais_reais[comp]["ep"][idx_2023]
             referencia_fjp_json.append(item)
+    elif perfil["fjp_ficticio"]:
+        # Valores INVENTADOS (marcados como fictícios na fonte e na explicação): referência
+        # da FJP completa, com subcomponentes, para exercitar o site num domínio novo.
+        idx_2023 = PIDS.index("2023")
+        fonte_f = "FICTÍCIO — valores inventados para teste do site; não são da Fundação João Pinheiro."
+        referencia_fjp_json = []
+        comp_por_indicador = {"coabitacao": "coabitacao", "onus": "onus", "habitacao_precaria": "precariedade"}
+        for indicador in ["total", "habitacao_precaria", "coabitacao", "onus", "domicilios"]:
+            if indicador == "total":
+                mapa = sum(totais_reais[c]["v"][idx_2023] for c in COMPONENTES); ep = None
+            elif indicador == "domicilios":
+                mapa = dom_reais[idx_2023]; ep = None
+            else:
+                comp = comp_por_indicador[indicador]
+                mapa = totais_reais[comp]["v"][idx_2023]; ep = totais_reais[comp]["ep"][idx_2023]
+            item = {
+                "indicador": indicador, "ano_ref": 2023, "fjp_publicado": round(mapa * 1.08),
+                "fjp_fonte": fonte_f, "fjp_tabela": "Tabela fictícia", "fjp_pagina": "0",
+                "reconstrucao_pnadc": mapa, "reconstrucao_ep": ep, "mapa": mapa,
+                "explicacao": "Valor fictício (8% acima da reconstrução), só para teste.",
+            }
+            if indicador in ("habitacao_precaria", "domicilios"):
+                total_f = item["fjp_publicado"]
+                item["fjp_subcomponentes"] = [{"nome": "parte A (fictícia)", "valor": round(total_f * 0.4)},
+                                              {"nome": "parte B (fictícia)", "valor": total_f - round(total_f * 0.4)}]
+            referencia_fjp_json.append(item)
     else:
         # "total" vem preenchido de propósito (F2-2 testa os dois casos num pacote só:
         # fjp_publicado nulo -> "a preencher"; preenchido -> número, fonte e link).
@@ -552,7 +609,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
     pipeline_json = {"etapas": etapas, "ligacoes": ligacoes}
 
     # Escrever os arquivos (tudo menos manifesto.json, que entra por último).
-    pasta = RAIZ / "pacotes" / conjunto_id / "ficticio"
+    pasta = RAIZ / "pacotes" / conjunto_id / perfil["edicao_pasta"]
     pasta.mkdir(parents=True, exist_ok=True)
     (pasta / "contornos").mkdir(exist_ok=True)
 
@@ -624,9 +681,18 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
     def boundary_geojson(cell):
         return [[lng, lat] for lat, lng in h3.cell_to_boundary(cell)] + [[h3.cell_to_boundary(cell)[0][1], h3.cell_to_boundary(cell)[0][0]]]
 
+    def geometria_ap(ap_cod):
+        if not perfil["ap_de_celula"]:
+            return {"type": "Polygon", "coordinates": [boundary_geojson(ap_cod)]}
+        # AP que não é uma célula H3: a união dos hexágonos que a formam (coordenadas a 5 casas).
+        geo = h3.cells_to_geo([H[j]["h"] for j in aps_idx[ap_cod]])
+        def arredonda(v):
+            return [arredonda(i) for i in v] if isinstance(v[0], (list, tuple)) else [round(v[0], 5), round(v[1], 5)]
+        return {"type": geo["type"], "coordinates": arredonda(geo["coordinates"])}
+
     ap_features = [
         {"type": "Feature", "properties": {"cod": ap_cod, "nome": f"AP {k + 1:02d}"},
-         "geometry": {"type": "Polygon", "coordinates": [boundary_geojson(ap_cod)]}}
+         "geometry": geometria_ap(ap_cod)}
         for k, ap_cod in enumerate(sorted(aps_idx.keys()))
     ]
     (pasta / "contornos" / "ap.geojson").write_text(
@@ -658,7 +724,7 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
         casca = casca + [casca[0]]
     (pasta / "contornos" / "municipios.geojson").write_text(json.dumps({
         "type": "FeatureCollection",
-        "features": [{"type": "Feature", "properties": {"cod": "270030", "nome": "Maceió"},
+        "features": [{"type": "Feature", "properties": {"cod": mun_cod, "nome": mun_nome},
                       "geometry": {"type": "Polygon", "coordinates": [casca]}}],
     }, ensure_ascii=False), encoding="utf-8")
 
@@ -686,32 +752,72 @@ def montar_pacote(nome_pasta, cells, conjunto_id, nome_dominio, totais_reais, do
         "nome": nome_dominio,
         "edicao": commit_fake[:7],
         "commit_completo": commit_fake,
-        "data_execucao": "2026-11-22T00:00:00Z",
+        "data_execucao": perfil["data_execucao"],
         "publico": True,
         "ficticio": True,
         "h3_resolucao": 8,
-        "centro": [-35.715, -9.585],
-        "zoom_inicial": 11.1,
+        "centro": perfil["centro"],
+        "zoom_inicial": perfil["zoom"],
         "contornos_tolerancia_m": 10,
         "d17_conferido": True,
         "periodos": PERIODOS,
         "componentes": COMPONENTES,
         "regime_mapa": "c",
-        "recortes": [
-            {
-                "id": "braskem",
-                "nome": "Área da Braskem",
-                "motivo": "Área de subsidência por mineração (reassentamento desde 2018); 99 setores no piloto",
-                "fonte": "Perímetro de risco da Defesa Civil de Maceió / Braskem (fictício neste pacote)",
-            },
-        ],
+        "recortes": perfil["recortes"],
         "arquivos": arquivos,
     }
     (pasta / "manifesto.json").write_text(json.dumps(manifesto, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"{conjunto_id}: {n_hex} hexágonos, {len(ap_rows) // 3} APs, {len(sem_dado)} sem dado, {len(parcial)} sigilo parcial -> {pasta}")
 
 
+POLIGONO_SP = [  # (lat, lng) — contorno grosseiro e FICTÍCIO do município de São Paulo (~2.300 hexágonos)
+    (-23.414, -46.62), (-23.422, -46.522), (-23.471, -46.415), (-23.553, -46.407), (-23.611, -46.44),
+    (-23.676, -46.481), (-23.75, -46.473), (-23.816, -46.522), (-23.922, -46.538), (-23.955, -46.62),
+    (-23.939, -46.719), (-23.857, -46.768), (-23.791, -46.743), (-23.726, -46.784), (-23.652, -46.801),
+    (-23.586, -46.793), (-23.521, -46.768), (-23.463, -46.719), (-23.422, -46.686),
+]
+N_APS_SP = 332
+
+
+def aps_voronoi(cells, n_aps, semente=332, prefixo="3550308"):
+    """APs fictícias: `n_aps` sementes sorteadas entre as células e cada célula na semente mais próxima."""
+    rng = random.Random(semente)
+    sementes = rng.sample(cells, n_aps)
+    pos = {c: h3.cell_to_latlng(c) for c in cells}
+    ap_de = {}
+    for c in cells:
+        lat, lng = pos[c]
+        melhor = min(range(n_aps), key=lambda k: (lat - pos[sementes[k]][0]) ** 2 + ((lng - pos[sementes[k]][1]) * 0.92) ** 2)
+        ap_de[c] = f"{prefixo}{melhor + 1:03d}"
+    return ap_de
+
+
+PERFIL_SP = dict(
+    edicao_pasta="ficticio", geo=GEO_SP, municipio=("3550308", "São Paulo"),
+    centro=[-46.633, -23.550], zoom=9.6, data_execucao="2026-11-25T00:00:00Z",
+    ap_de_celula=lambda cells: aps_voronoi(cells, N_APS_SP),
+    recortes=[],  # domínio de um município só, sem recorte especial
+    fjp_ficticio=True,
+)
+
+
+def gerar_sp():
+    """Terceiro pacote fictício: formato de São Paulo (1 município, 332 APs, ~2.300 hexágonos, sem recorte)."""
+    cells = sorted(h3.polygon_to_cells(h3.LatLngPoly(POLIGONO_SP), 8))
+    fator = 10.0  # domínio ~10× o de Maceió (totais, erros-padrão e domicílios)
+    totais = {c: {"v": [v * fator for v in TOTAIS_REAIS[c]["v"]],
+                  "ep": [e * fator if e is not None else None for e in TOTAIS_REAIS[c]["ep"]]} for c in COMPONENTES}
+    montar_pacote(
+        "teste_sp", cells, "teste_sp", "São Paulo (capital, fictício)",
+        totais, [d * fator for d in DOM_REAIS], LARG_REAIS, MUDANCAS_Z_REAIS,
+        n_setores_base=4, incluir_consistencia_real=False, perfil=PERFIL_SP,
+    )
+
+
 def main():
+    if "--so-sp" in sys.argv:
+        gerar_sp()
+        return
     cells_maceio = sorted(h3.polygon_to_cells(h3.LatLngPoly(POLIGONO_MACEIO), 8))
     montar_pacote(
         "al_rm_maceio", cells_maceio, "al_rm_maceio", "RM de Maceió",
@@ -727,6 +833,7 @@ def main():
         totais_pequeno, dom_pequeno, LARG_REAIS, MUDANCAS_Z_REAIS,
         n_setores_base=1, incluir_consistencia_real=False,
     )
+    gerar_sp()
 
 
 if __name__ == "__main__":
