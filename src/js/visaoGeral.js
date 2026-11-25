@@ -9,7 +9,7 @@ import {
   fraseRessalvaRelativo, fraseRuidoAnual, NOME_COMPONENTE, CLAB,
 } from "./dados/visaoGeral.js";
 import { rotuloMarca, classeMarca } from "./util/marcas.js";
-import { formatar, formatarPercentual } from "./util/formato.js";
+import { formatar, formatarPercentual, margemEsquerda } from "./util/formato.js";
 import { prepararNavegacaoResultados } from "./estado/pergunta.js";
 import { irParaPagina } from "./util/endereco.js";
 import { criarMiniMapa } from "./mapa/index.js";
@@ -49,6 +49,7 @@ function sparkline(c) {
   // Acréscimo A: eixo da faixa de 95% (ou do valor), 10% de folga, pontas redondas.
   const eixo = eixoSerie(serie.map((v, i) => ({ v, lo: c.faixas?.[i]?.[0] ?? null, hi: c.faixas?.[i]?.[1] ?? null })), 2);
   const [lo, hi] = eixo.dominio;
+  m.l = margemEsquerda([formatar(hi, 0), formatar(lo, 0)], m.l, 7.5);
   const x = d3.scalePoint().domain(serie.map((_v, i) => i)).range([m.l, W - m.r]);
   const y = d3.scaleLinear().domain(eixo.dominio).range([H - m.b, m.t]);
   const linha = d3.line().defined((v) => v != null).x((_v, i) => x(i)).y((v) => y(v));

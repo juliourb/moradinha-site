@@ -794,7 +794,7 @@ def aps_voronoi(cells, n_aps, semente=332, prefixo="3550308"):
 
 PERFIL_SP = dict(
     edicao_pasta="ficticio", geo=GEO_SP, municipio=("3550308", "São Paulo"),
-    centro=[-46.633, -23.550], zoom=9.6, data_execucao="2026-11-25T00:00:00Z",
+    centro=[-46.60, -23.68], zoom=8.8, data_execucao="2026-11-25T00:00:00Z",
     ap_de_celula=lambda cells: aps_voronoi(cells, N_APS_SP),
     recortes=[],  # domínio de um município só, sem recorte especial
     fjp_ficticio=True,

@@ -47,6 +47,9 @@ export function estadoInicial(manifesto) {
     mapa_base: "claro",
     quadrante: null,
     comparar: null,
+    // S1-4: a escolha guardada vem de outro domínio, talvez; só vale o que existe neste manifesto.
+    periodo: periodos.some((p) => p.id === salvo.periodo) ? salvo.periodo : periodoPadrao,
+    camadas: Object.fromEntries(Object.keys(camadas).map((k) => [k, salvo.camadas?.[k] ?? camadas[k]])),
   };
 }
 

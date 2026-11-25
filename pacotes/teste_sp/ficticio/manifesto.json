@@ -9,10 +9,10 @@
   "ficticio": true,
   "h3_resolucao": 8,
   "centro": [
-    -46.633,
-    -23.55
+    -46.6,
+    -23.68
   ],
-  "zoom_inicial": 9.6,
+  "zoom_inicial": 8.8,
   "contornos_tolerancia_m": 10,
   "d17_conferido": true,
   "periodos": [

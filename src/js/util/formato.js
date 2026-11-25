@@ -40,3 +40,13 @@ export function yRotuloPeriodo(indice, passo, yBase) {
   if (passo >= 44) return yBase;
   return indice % 2 ? yBase + 5 : yBase - 6;
 }
+
+/**
+ * Margem esquerda (px) para os rótulos do eixo vertical caberem, qualquer que seja a
+ * grandeza do domínio (S1-4: um domínio dez vezes maior tem rótulos de 6 dígitos).
+ * `fonte` é o tamanho do texto do eixo; 0,6 em ≈ largura de um dígito em tabular-nums.
+ */
+export function margemEsquerda(rotulos, base, fonte = 10) {
+  const n = Math.max(0, ...rotulos.map((r) => String(r).length));
+  return Math.max(base, Math.ceil(n * fonte * 0.62) + 14);
+}

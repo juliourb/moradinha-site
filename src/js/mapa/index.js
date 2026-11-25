@@ -657,7 +657,8 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     extras.push(
       `<label><input type="checkbox" data-camada="fcu" ${estado.camadas.fcu ? "checked" : ""}> <span class="sw" style="border-color:var(--fcu)"></span> Favelas e comunidades (FCU)</label>`
     );
-    if (contornosMunicipios) {
+    // S1-4: com um município só, a camada "Municípios" não diz nada (e a lista de camadas fica menor).
+    if (contornosMunicipios && new Set(linhasArr.map((l) => l.municipioCod)).size > 1) {
       extras.push(
         `<label><input type="checkbox" data-camada="municipios" ${estado.camadas.municipios ? "checked" : ""}> <span class="sw" style="border-color:var(--ink)"></span> Municípios</label>`
       );
@@ -793,6 +794,17 @@ export function criarMiniMapa({ container, manifesto, linhas, ap, totais, toolti
   });
   const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
   mapa.addControl(overlay);
+
+  // S1-4: o mini-mapa enquadra os hexágonos do domínio (o zoom do manifesto serve ao mapa grande,
+  // e "zoom − 1,6" só servia a um domínio do tamanho do piloto).
+  if (linhasArr.length) {
+    let o = Infinity, s = Infinity, l = -Infinity, n = -Infinity;
+    for (const x of linhasArr) {
+      const [lat, lng] = cellToLatLng(x.h3);
+      o = Math.min(o, lng); l = Math.max(l, lng); s = Math.min(s, lat); n = Math.max(n, lat);
+    }
+    mapa.fitBounds([[o, s], [l, n]], { padding: 14, animate: false, maxZoom: 13 });
+  }
 
   function obterValor(l) {
     let soma = 0;

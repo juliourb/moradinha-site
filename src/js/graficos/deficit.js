@@ -1,7 +1,7 @@
 // Gráficos do conjunto "Déficit" (SPEC_F1 §6): histograma, ranking, série,
 // distribuição por período.
 import * as d3 from "d3";
-import { formatar, rotuloCurto, yRotuloPeriodo } from "../util/formato.js";
+import { formatar, margemEsquerda, rotuloCurto, yRotuloPeriodo } from "../util/formato.js";
 import { valorHex, brutoHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
 import { classeHex } from "../dados/escalaCor.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
@@ -54,6 +54,10 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const bins = d3.bin().domain(x.domain()).thresholds(x.ticks(28))(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
+  // S1-4: margem pelo maior rótulo do eixo vertical e rótulos do horizontal em número que caiba.
+  m.l = margemEsquerda(y.ticks(4).map((t) => formatar(t, 0)), 34);
+  x.range([m.l, W - m.r]);
+  const nMarcasX = Math.max(2, Math.min(6, Math.floor((W - m.l - m.r) / (formatar(x.domain()[1], isRel ? 1 : 0).length * 6 + 16))));
   // F6.3 item 2/3: a faixa agora é uma única seleção contínua (duas alças), não um
   // conjunto de barras marcadas. `valorDentroFaixas` com `estado.faixa_hist` decide
   // a cor/opacidade; a área clicável de cada barra é a coluna inteira (até o eixo).
@@ -61,8 +65,8 @@ export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const faixaSelecionada = (b) => !faixaAtual || (b.x0 < (faixaAtual[1] ?? Infinity) && b.x1 > faixaAtual[0]);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hexágonos");
   marcarGrafico(svg.node(), "histograma");
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(6).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(nMarcasX).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => formatar(v, 0)));
   const g = svg.append("g");
   // Área clicável = a coluna inteira (do topo do gráfico até o eixo), não só a
   // altura da barra: barras baixas continuam fáceis de clicar (item 3). Fica
@@ -212,11 +216,13 @@ export function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
     .sort((a, b) => b.v - a.v)
     .slice(0, 5);
   const mx = rs[0]?.v || 1;
+  // S1-4: com um município só, repetir o nome dele em cada linha só ocupa espaço.
+  const variosMunicipios = new Set(linhasArr.map((l) => l.municipioCod)).size > 1;
   box.innerHTML = `<tbody>${rs
     .map(
       (d, i) =>
         // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
-        `<tr data-h3="${d.l.h3}" tabindex="0"><td>${i + 1}</td><td>${d.l.municipioNome} · ${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod} · <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d.l.h3)}</span>${
+        `<tr data-h3="${d.l.h3}" tabindex="0"><td>${i + 1}</td><td>${variosMunicipios ? `${d.l.municipioNome} · ` : ""}${apMap.get(d.l.apCod)?.ap_nome ?? d.l.apCod} · <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d.l.h3)}</span>${
           d.l.fcuFracao > 0 ? " · FCU" : ""
         }</td><td style="width:45%"><div class="b" style="width:${(100 * d.v) / mx}%"></div></td><td style="text-align:right">${formatar(
           d.v,
@@ -261,6 +267,7 @@ export function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo)
   const W = Math.max(260, box.clientWidth || 300);
   const H = 122;
   const m = { l: 46, r: 8, t: 8, b: 22 };
+  m.l = margemEsquerda([formatar(Math.max(0, ...pts.map((p) => p.hi ?? p.v ?? 0)) * 1.2, isRel ? 1 : 0)], m.l);
   const nAnos = anos.length;
   const xpos = (i) => (i < nAnos ? i : i - (nAnos - 1) + 0.28);
   const x = d3.scaleLinear().domain([-0.4, nAnos - 1 + 0.6]).range([m.l, W - m.r]);
@@ -337,6 +344,7 @@ export function renderizarPainelDetalhe(box, manifesto, totais, componente, rotu
   // r maior que o padrão: o rótulo do último ano (centrado no ponto) não pode ser
   // cortado pela borda direita do viewBox (item 8, SPEC_F6.3).
   const m = { l: 44, r: 20, t: 8, b: 20 };
+  m.l = margemEsquerda([formatar(Math.max(0, ...[...anosPts, ...mediaPts].map((p) => p.hi ?? p.v ?? 0)) * 1.2, 0)], m.l);
   const x = d3.scalePoint().domain(anos.map((p) => p.id)).range([m.l, W - m.r]);
   const eixo = eixoSerie([...anosPts, ...mediaPts], 4) ?? { dominio: [0, 1], marcas: [0, 1], naoComecaEmZero: false };
   const y = d3.scaleLinear().domain(eixo.dominio).range([H - m.b, m.t]);
@@ -443,6 +451,8 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
   todosValores.sort(d3.ascending);
   const p99 = todosValores.length ? d3.quantileSorted(todosValores, 0.99) : 1;
   const y = d3.scaleLinear().domain([0, Math.max(p99 * 1.1, d3.max(st, (s) => s.q90 ?? 0) ?? 0, 1)]).nice().range([H - m.b, m.t]);
+  m.l = margemEsquerda(y.ticks(5).map((t) => formatar(t, 1)), m.l);
+  x.range([m.l, W - m.r]);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribuição dos hexágonos por período, eixo cortado no p99");
   svg.append("text").attr("x", W - m.r).attr("y", 9).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("eixo cortado no p99");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((v) => formatar(v, isRel ? 1 : 1)));

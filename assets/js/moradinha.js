@@ -13098,7 +13098,10 @@ function estadoInicial(manifesto) {
     // Acréscimo B: o mapa de base abre sempre claro (não persiste).
     mapa_base: "claro",
     quadrante: null,
-    comparar: null
+    comparar: null,
+    // S1-4: a escolha guardada vem de outro domínio, talvez; só vale o que existe neste manifesto.
+    periodo: periodos.some((p4) => p4.id === salvo.periodo) ? salvo.periodo : periodoPadrao,
+    camadas: Object.fromEntries(Object.keys(camadas).map((k5) => [k5, salvo.camadas?.[k5] ?? camadas[k5]]))
   };
 }
 function lerLocalStorage() {
@@ -13561,6 +13564,10 @@ function formatarPercentual(valor, decimais = 1) {
 function yRotuloPeriodo(indice, passo, yBase) {
   if (passo >= 44) return yBase;
   return indice % 2 ? yBase + 5 : yBase - 6;
+}
+function margemEsquerda(rotulos, base, fonte = 10) {
+  const n3 = Math.max(0, ...rotulos.map((r3) => String(r3).length));
+  return Math.max(base, Math.ceil(n3 * fonte * 0.62) + 14);
 }
 
 // src/js/dados/visaoGeral.js
@@ -104189,7 +104196,7 @@ function criarMapa({ elementos, manifesto, linhas, ap: ap2, totais, contornosAp,
     extras.push(
       `<label><input type="checkbox" data-camada="fcu" ${estado.camadas.fcu ? "checked" : ""}> <span class="sw" style="border-color:var(--fcu)"></span> Favelas e comunidades (FCU)</label>`
     );
-    if (contornosMunicipios) {
+    if (contornosMunicipios && new Set(linhasArr.map((l3) => l3.municipioCod)).size > 1) {
       extras.push(
         `<label><input type="checkbox" data-camada="municipios" ${estado.camadas.municipios ? "checked" : ""}> <span class="sw" style="border-color:var(--ink)"></span> Munic\xEDpios</label>`
       );
@@ -104311,6 +104318,17 @@ function criarMiniMapa({ container, manifesto, linhas, ap: ap2, totais, tooltip,
   });
   const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
   mapa.addControl(overlay);
+  if (linhasArr.length) {
+    let o3 = Infinity, s4 = Infinity, l3 = -Infinity, n3 = -Infinity;
+    for (const x5 of linhasArr) {
+      const [lat, lng] = cellToLatLng(x5.h3);
+      o3 = Math.min(o3, lng);
+      l3 = Math.max(l3, lng);
+      s4 = Math.min(s4, lat);
+      n3 = Math.max(n3, lat);
+    }
+    mapa.fitBounds([[o3, s4], [l3, n3]], { padding: 14, animate: false, maxZoom: 13 });
+  }
   function obterValor(l3) {
     let soma = 0;
     for (const c3 of ["coabitacao", "onus", "precariedade"]) {
@@ -104977,12 +104995,15 @@ function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
   const bins = bin().domain(x5.domain()).thresholds(x5.ticks(28))(vs9.map((v4) => Math.min(v4, x5.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y5 = linear2().domain([0, max4(bins, (b10) => b10.length) || 1]).nice().range([H4 - m4.b, m4.t]);
+  m4.l = margemEsquerda(y5.ticks(4).map((t4) => formatar(t4, 0)), 34);
+  x5.range([m4.l, W4 - m4.r]);
+  const nMarcasX = Math.max(2, Math.min(6, Math.floor((W4 - m4.l - m4.r) / (formatar(x5.domain()[1], isRel ? 1 : 0).length * 6 + 16))));
   const faixaAtual = estado.faixa_hist?.[0] ?? null;
   const faixaSelecionada = (b10) => !faixaAtual || b10.x0 < (faixaAtual[1] ?? Infinity) && b10.x1 > faixaAtual[0];
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Histograma dos hex\xE1gonos");
   marcarGrafico(svg.node(), "histograma");
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(6).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H4 - m4.b})`).call(axisBottom(x5).ticks(nMarcasX).tickFormat((v4) => formatar(v4, isRel ? 1 : 0)));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(4).tickFormat((v4) => formatar(v4, 0)));
   const g5 = svg.append("g");
   g5.selectAll("rect.coluna").data(bins).join("rect").attr("class", "coluna").attr("x", (b10) => x5(b10.x0) + 0.5).attr("width", (b10) => Math.max(0, x5(b10.x1) - x5(b10.x0) - 1)).attr("y", m4.t).attr("height", H4 - m4.b - m4.t).attr("fill", "transparent").style("cursor", "pointer").on("click", (e67, b10) => {
     e67.stopPropagation();
@@ -105079,10 +105100,11 @@ function renderizarRanking(box, estado, linhasArr, apMap, aoIrPara) {
   const isRel = estado.medida === "relativo";
   const rs2 = linhasArr.map((l3) => ({ l: l3, v: valorHex(l3, estado.componente, estado.periodo, estado.medida) })).filter((d3) => d3.v != null).sort((a5, b10) => b10.v - a5.v).slice(0, 5);
   const mx2 = rs2[0]?.v || 1;
+  const variosMunicipios = new Set(linhasArr.map((l3) => l3.municipioCod)).size > 1;
   box.innerHTML = `<tbody>${rs2.map(
     (d3, i3) => (
       // N3: município + AP + código curto do hexágono (6 últimos caracteres), para não repetir linha.
-      `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${d3.l.municipioNome} \xB7 ${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod} \xB7 <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d3.l.h3)}</span>${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
+      `<tr data-h3="${d3.l.h3}" tabindex="0"><td>${i3 + 1}</td><td>${variosMunicipios ? `${d3.l.municipioNome} \xB7 ` : ""}${apMap.get(d3.l.apCod)?.ap_nome ?? d3.l.apCod} \xB7 <span class="num" style="font-size:10px;color:var(--muted)">${codigoCurtoH3(d3.l.h3)}</span>${d3.l.fcuFracao > 0 ? " \xB7 FCU" : ""}</td><td style="width:45%"><div class="b" style="width:${100 * d3.v / mx2}%"></div></td><td style="text-align:right">${formatar(
         d3.v,
         isRel ? 2 : 0
       )}${isRel ? " %" : ""}</td></tr>`
@@ -105129,6 +105151,7 @@ function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo) {
   const W4 = Math.max(260, box.clientWidth || 300);
   const H4 = 122;
   const m4 = { l: 46, r: 8, t: 8, b: 22 };
+  m4.l = margemEsquerda([formatar(Math.max(0, ...pts.map((p4) => p4.hi ?? p4.v ?? 0)) * 1.2, isRel ? 1 : 0)], m4.l);
   const nAnos = anos.length;
   const xpos = (i3) => i3 < nAnos ? i3 : i3 - (nAnos - 1) + 0.28;
   const x5 = linear2().domain([-0.4, nAnos - 1 + 0.6]).range([m4.l, W4 - m4.r]);
@@ -105173,6 +105196,7 @@ function renderizarPainelDetalhe(box, manifesto, totais, componente, rotulo2) {
   const W4 = Math.max(220, box.clientWidth || 260);
   const H4 = 128;
   const m4 = { l: 44, r: 20, t: 8, b: 20 };
+  m4.l = margemEsquerda([formatar(Math.max(0, ...[...anosPts, ...mediaPts].map((p4) => p4.hi ?? p4.v ?? 0)) * 1.2, 0)], m4.l);
   const x5 = point().domain(anos.map((p4) => p4.id)).range([m4.l, W4 - m4.r]);
   const eixo = eixoSerie([...anosPts, ...mediaPts], 4) ?? { dominio: [0, 1], marcas: [0, 1], naoComecaEmZero: false };
   const y5 = linear2().domain(eixo.dominio).range([H4 - m4.b, m4.t]);
@@ -105241,6 +105265,8 @@ function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
   todosValores.sort(ascending);
   const p99 = todosValores.length ? quantileSorted(todosValores, 0.99) : 1;
   const y5 = linear2().domain([0, Math.max(p99 * 1.1, max4(st3, (s4) => s4.q90 ?? 0) ?? 0, 1)]).nice().range([H4 - m4.b, m4.t]);
+  m4.l = margemEsquerda(y5.ticks(5).map((t4) => formatar(t4, 1)), m4.l);
+  x5.range([m4.l, W4 - m4.r]);
   const svg = create5("svg").attr("viewBox", `0 0 ${W4} ${H4}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribui\xE7\xE3o dos hex\xE1gonos por per\xEDodo, eixo cortado no p99");
   svg.append("text").attr("x", W4 - m4.r).attr("y", 9).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css3("--muted")).text("eixo cortado no p99");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m4.l},0)`).call(axisLeft(y5).ticks(5).tickFormat((v4) => formatar(v4, isRel ? 1 : 1)));
@@ -105844,6 +105870,7 @@ function sparkline2(c3) {
   const m4 = { l: 40, r: 4, t: 4, b: 10 };
   const eixo = eixoSerie(serie.map((v4, i3) => ({ v: v4, lo: c3.faixas?.[i3]?.[0] ?? null, hi: c3.faixas?.[i3]?.[1] ?? null })), 2);
   const [lo2, hi2] = eixo.dominio;
+  m4.l = margemEsquerda([formatar(hi2, 0), formatar(lo2, 0)], m4.l, 7.5);
   const x5 = point().domain(serie.map((_v3, i3) => i3)).range([m4.l, W4 - m4.r]);
   const y5 = linear2().domain(eixo.dominio).range([H4 - m4.b, m4.t]);
   const linha = line().defined((v4) => v4 != null).x((_v3, i3) => x5(i3)).y((v4) => y5(v4));
@@ -107071,7 +107098,7 @@ async function iniciarMetodologia() {
   const config2 = analisarYamlSimples(configTexto);
   renderizarPipeline(painel, pipeline, manifesto, config2);
   renderizarParametros($7("met-parametros"), manifesto);
-  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "6340f3f479130429cd094e0270837fbc2dd074e0");
+  await renderizarRastreio($7("met-rastreio"), manifesto, edicao.origem, "be8222cff78444c613b9c9a8f8e7d70964fcb69d");
   renderizarInterna($7("met-interna"), modelo);
 }
 
