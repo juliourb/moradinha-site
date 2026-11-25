@@ -57,7 +57,7 @@ title: ""
   <h2>FJP × moradinha</h2>
   <div class="sub">Número publicado pela Fundação João Pinheiro (FJP), reconstrução do moradinha na PNADc (Pesquisa Nacional por Amostra de Domicílios contínua) e total que o mapa mostra.</div>
   <div id="f2-fjp"></div>
-  <p class="nota-fixa">Os totais do mapa seguem a métrica da FJP, mas não são o número da FJP: a coabitação é reconstruída a partir dos núcleos familiares, a precariedade de 2022 vem da amostra do Censo e os totais da RM (região metropolitana) têm o ruído da amostra da PNADc.</p>
+  <p class="nota-fixa">Os totais do mapa seguem a métrica da FJP, mas não são o número da FJP: a coabitação é reconstruída a partir dos núcleos familiares, a precariedade de 2022 vem da amostra do Censo e os totais do domínio têm o ruído da amostra da PNADc.</p>
 </div>
 
 <div class="panel">

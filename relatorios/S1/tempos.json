@@ -1,18 +1,18 @@
 {
   "maceio_real": {
-    "visao_geral_ms": 2626,
-    "resultados_ms": 5239
+    "visao_geral_ms": 3023,
+    "resultados_ms": 4330
   },
   "maceio_ficticio": {
-    "visao_geral_ms": 2395,
-    "resultados_ms": 4406
+    "visao_geral_ms": 2917,
+    "resultados_ms": 3736
   },
   "teste_pequeno": {
-    "visao_geral_ms": 3407,
-    "resultados_ms": 4629
+    "visao_geral_ms": 2139,
+    "resultados_ms": 3582
   },
   "teste_sp": {
-    "visao_geral_ms": 3555,
-    "resultados_ms": 5139
+    "visao_geral_ms": 3083,
+    "resultados_ms": 4188
   }
 }
