@@ -26,11 +26,11 @@ jobs:
         with:
           version: "1.11.9"
 
-      - name: Validar os pacotes do catálogo (contrato v1 ou v1.1, conforme manifesto.contrato)
-        run: |
-          npm run validar -- pacotes/al_rm_maceio/bd10cbd
-          npm run validar -- pacotes/al_rm_maceio/ficticio
-          npm run validar -- pacotes/teste_pequeno/ficticio
+      - name: Montar o catálogo (valida V1–V12 em todo pacote de pacotes/, sai com erro se algum for inválido)
+        run: npm run catalogo
+
+      - name: Conferir que o catalogo.json versionado é o gerado (S1-1)
+        run: git diff --exit-code catalogo.json
 
       - name: "Validar o catalogo.json (F5-2: só pacote real fora de teste_apenas)"
         run: npm run validar:catalogo-publico

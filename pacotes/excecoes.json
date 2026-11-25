@@ -1,0 +1,15 @@
+{
+  "_ajuda": "Exceções do catálogo, mantidas à mão (ferramentas/montar_catalogo.mjs gera o catalogo.json a partir de pacotes/<conjunto>/<edicao>/manifesto.json). 'fora_do_catalogo': edição que fica no repositório mas não entra no catálogo. 'teste_apenas': edição (ou o domínio inteiro, se 'edicao' for omitida) fictícia, que só existe para os testes e nunca aparece no seletor público.",
+  "fora_do_catalogo": [
+    {
+      "conjunto_id": "al_rm_maceio",
+      "edicao": "69277fd",
+      "motivo": "Erro da ponte (A1) corrigido na edição bd10cbd; mantida só para consulta e rastreio."
+    }
+  ],
+  "teste_apenas": [
+    { "conjunto_id": "al_rm_maceio", "edicao": "ficticio", "motivo": "Pacote fictício de Maceió (testes)." },
+    { "conjunto_id": "teste_pequeno", "motivo": "Domínio fictício de 20 hexágonos (testes)." },
+    { "conjunto_id": "teste_sp", "motivo": "Domínio fictício no formato de São Paulo: 1 município, 332 APs, sem recortes (testes e preparação do S1)." }
+  ]
+}
