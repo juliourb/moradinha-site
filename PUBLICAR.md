@@ -16,7 +16,7 @@ para `main` que torna o site público de fato.
   é o prefixo de `manifesto.commit_completo` (`bd10cbde76cbd2174abc6fbea0e8ff180265b673`).
 - [x] `catalogo.json`: a edição real (`bd10cbd`) é a `padrao` de `al_rm_maceio` (F6.0: a edição
   anterior, `69277fd`, saiu do catálogo por ter o erro da ponte A1 corrigido em `bd10cbd`; a pasta
-  `pacotes/al_rm_maceio/69277fd/` fica, apagar é decisão de Julio). A fictícia e o domínio
+  `pacotes/al_rm_maceio/69277fd/` foi removida do repositório em 26/11/2026; o histórico guarda). A fictícia e o domínio
   `teste_pequeno` ficam marcados `teste_apenas` (nunca aparecem no seletor público, só por
   `?dominio=&edicao=` explícito — é assim que a suíte de testes abre os pacotes fictícios).
 - [x] `npm run validar:catalogo-publico` → toda entrada do catálogo fora de `teste_apenas` é
@@ -64,7 +64,7 @@ Registrado como pendência, não como bloqueio desta publicação (só há um do
 | `npm run validar -- pacotes/al_rm_maceio/bd10cbd` | OK: todas as regras passaram |
 | `manifesto.ficticio` / `publico` / `d17_conferido` | `false` / `true` / `true` |
 | edição = prefixo do commit | `bd10cbd` = início de `bd10cbde76cbd2174abc6fbea0e8ff180265b673` |
-| `catalogo.json` | `al_rm_maceio`: `bd10cbd` padrão; `ficticio` marcada `teste_apenas`; `teste_pequeno` `teste_apenas`; `69277fd` fora do catálogo (pasta mantida) |
+| `catalogo.json` | `al_rm_maceio`: `bd10cbd` padrão; `ficticio` marcada `teste_apenas`; `teste_pequeno` `teste_apenas`; `69277fd` removida do repositório (26/11/2026) |
 | `npm run validar:catalogo-publico` | OK |
 | chip "dados fictícios" na edição padrão | ausente (`f5-publicacao.spec.js`, verde) |
 | atribuição e Termos do OpenFreeMap | presentes no HTML gerado (rodapé e mapa); leitura dos termos continua a ser de Julio |
@@ -75,5 +75,5 @@ Registrado como pendência, não como bloqueio desta publicação (só há um do
 
 ## Autorização
 
-- [ ] Julio autoriza o merge de `f5-publicacao` para `main` e a publicação. **Espera o "publicar" explícito de Julio**;
-  nenhum merge nem push na `main` foi feito. (A autorização anterior, de 23/11, valeu para o primeiro merge `5374ee9`.)
+- [x] **"publicar" dado por Julio em 26/11/2026**: merge de `f5-publicacao` para `main` e publicação autorizados.
+  (A autorização anterior, de 23/11, valeu para o primeiro merge `5374ee9`.)
