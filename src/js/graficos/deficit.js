@@ -1,11 +1,13 @@
 // Gráficos do conjunto "Déficit" (SPEC_F1 §6): histograma, ranking, série,
 // distribuição por período.
 import * as d3 from "d3";
-import { formatar, rotuloCurto } from "../util/formato.js";
+import { formatar, rotuloCurto, yRotuloPeriodo } from "../util/formato.js";
 import { valorHex, brutoHex, totalDoMapa, domiciliosTotal } from "../dados/calculo.js";
 import { classeHex } from "../dados/escalaCor.js";
 import { curvaConcentracao } from "../dados/visaoGeral.js";
 import { ligarDica, marcarGrafico, htmlDica, mostrarDica, esconderDica } from "../ui/ajuda.js";
+import { eixoSerie, svgQuebraEixo, NOTA_EIXO_SEM_ZERO } from "../util/eixoSerie.js";
+import { correlacaoComponentes, PARES_COMPONENTES } from "../dados/correlacao.js";
 
 /**
  * Hexágonos "normal" no período (SPEC_F6.3 item 3): 1+ domicílio e déficit
@@ -18,6 +20,17 @@ function linhasNormais(linhasArr, componente, periodo) {
 
 function css(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+}
+
+/**
+ * Acréscimo A: quando o eixo da série não começa em zero, quebra no eixo e
+ * nota discreta no canto superior direito.
+ */
+export function marcarEixoSemZero(svg, eixo, xEixo, yBase, xDireita) {
+  if (!eixo?.naoComecaEmZero) return;
+  svg.node().insertAdjacentHTML("beforeend", svgQuebraEixo(xEixo, yBase, css("--muted")));
+  svg.append("text").attr("class", "nota-eixo").attr("x", xDireita).attr("y", 7).attr("text-anchor", "end")
+    .attr("font-size", 8.5).attr("fill", css("--muted")).text(NOTA_EIXO_SEM_ZERO);
 }
 
 export function renderizarHistograma(box, estado, linhasArr, aoClicarBarra) {
@@ -251,13 +264,16 @@ export function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo)
   const nAnos = anos.length;
   const xpos = (i) => (i < nAnos ? i : i - (nAnos - 1) + 0.28);
   const x = d3.scaleLinear().domain([-0.4, nAnos - 1 + 0.6]).range([m.l, W - m.r]);
-  const y = d3.scaleLinear().domain([0, d3.max(pts, (d) => d.hi ?? d.v ?? 0) * 1.1 || 1]).nice().range([H - m.b, m.t]);
-  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Total do domínio no tempo");
+  const eixo = eixoSerie(pts, 4) ?? { dominio: [0, 1], marcas: [0, 1], naoComecaEmZero: false };
+  const y = d3.scaleLinear().domain(eixo.dominio).range([H - m.b, m.t]);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img")
+    .attr("aria-label", `Total do domínio no tempo${eixo.naoComecaEmZero ? ` (${NOTA_EIXO_SEM_ZERO})` : ""}`);
   svg
     .append("g")
     .attr("class", "axis")
     .attr("transform", `translate(${m.l},0)`)
-    .call(d3.axisLeft(y).ticks(5).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
+    .call(d3.axisLeft(y).tickValues(eixo.marcas).tickFormat((v) => formatar(v, isRel ? 1 : 0)));
+  marcarEixoSemZero(svg, eixo, m.l, H - m.b, W - m.r);
   svg
     .append("g")
     .selectAll("text")
@@ -268,7 +284,7 @@ export function renderizarSerie(box, estado, manifesto, totais, aoClicarPeriodo)
     .attr("text-anchor", "middle")
     .text((p) => p.rotulo);
   const anosPts = pts.slice(0, nAnos);
-  svg.append("path").attr("d", d3.line().x((d) => x(xpos(d.p))).y((d) => y(d.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-width", 1.2);
+  svg.append("path").attr("d", d3.line().defined((d) => d.v != null).x((d) => x(xpos(d.p))).y((d) => y(d.v))(anosPts)).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-width", 1.2);
   const g = svg.append("g").selectAll("g").data(pts).join("g").style("cursor", "pointer").on("click", (_e, d) => aoClicarPeriodo(d.id));
   g.filter((d) => d.lo != null)
     .append("line")
@@ -322,10 +338,12 @@ export function renderizarPainelDetalhe(box, manifesto, totais, componente, rotu
   // cortado pela borda direita do viewBox (item 8, SPEC_F6.3).
   const m = { l: 44, r: 20, t: 8, b: 20 };
   const x = d3.scalePoint().domain(anos.map((p) => p.id)).range([m.l, W - m.r]);
-  const maxV = d3.max([...anosPts, ...mediaPts], (d) => d.hi ?? d.v ?? 0) || 1;
-  const y = d3.scaleLinear().domain([0, maxV * 1.15]).nice().range([H - m.b, m.t]);
-  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", `Série de ${rotulo}`);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => formatar(v, 0)));
+  const eixo = eixoSerie([...anosPts, ...mediaPts], 4) ?? { dominio: [0, 1], marcas: [0, 1], naoComecaEmZero: false };
+  const y = d3.scaleLinear().domain(eixo.dominio).range([H - m.b, m.t]);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img")
+    .attr("aria-label", `Série de ${rotulo}${eixo.naoComecaEmZero ? ` (${NOTA_EIXO_SEM_ZERO})` : ""}`);
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(eixo.marcas).tickFormat((v) => formatar(v, 0)));
+  marcarEixoSemZero(svg, eixo, m.l, H - m.b, W - m.r);
   svg.append("g").selectAll("text").data(anos).join("text").attr("x", (p) => x(p.id)).attr("y", H - 4).attr("text-anchor", "middle").text((p) => rotuloCurto(p.rotulo));
   svg.append("path").attr("d", d3.line().defined((d) => d.v != null).x((d) => x(d.id)).y((d) => y(d.v ?? 0))(anosPts)).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-width", 1.2);
   // Médias de período: linha tracejada horizontal (referência de comparação).
@@ -434,7 +452,7 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
     .data(st)
     .join("text")
     .attr("x", (s) => x(s.id) + x.bandwidth() / 2)
-    .attr("y", H - 8)
+    .attr("y", (_s, i) => yRotuloPeriodo(i, x.step(), H - 8))
     .attr("text-anchor", "middle")
     .text((s) => rotuloCurto(s.lab))
     .append("title")
@@ -459,5 +477,60 @@ export function renderizarCaixas(box, estado, manifesto, linhasArr, aoClicarPeri
       ? htmlDica({ titulo: s.lab, valor: "sem hexágono acima de zero" })
       : htmlDica({ titulo: s.lab, valor: `mediana ${formatar(s.q50, 2)}`, faixa: null, base: `p25–p75: ${formatar(s.q25, 2)} a ${formatar(s.q75, 2)} · p10–p90: ${formatar(s.q10, 2)} a ${formatar(s.q90, 2)} · ${formatar(s.n, 0)} hexágonos` }));
   marcarGrafico(svg.node(), "caixas");
+  box.replaceChildren(svg.node());
+}
+
+const ROT_CURTO_COMP = { coabitacao: "Coab.", onus: "Ônus", precariedade: "Prec." };
+const NOME_COMP = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
+
+/**
+ * Correlação entre componentes por hexágono (acréscimo F2, F6.5): Spearman de
+ * cada par de componentes em cada período, na medida escolhida; o período do
+ * mapa em destaque; clicar numa coluna leva aquele período ao mapa.
+ */
+export function renderizarCorrelacao(box, estado, manifesto, linhasArr, aoClicarPeriodo) {
+  if (box.closest(".dcard")?.classList.contains("min")) return;
+  const medida = estado.medida === "relativo" ? "relativo" : "absoluto";
+  const dados = correlacaoComponentes(linhasArr, manifesto.periodos, medida);
+  // Períodos nas linhas, pares de componentes nas colunas: cabe num cartão estreito.
+  const W = Math.max(180, box.clientWidth || 200);
+  const m = { l: 46, r: 2, t: 22, b: 2 };
+  const linhaH = 16;
+  const H = m.t + manifesto.periodos.length * linhaH + m.b;
+  const chavePar = ([a, b]) => `${a}|${b}`;
+  const x = d3.scaleBand().domain(PARES_COMPONENTES.map(chavePar)).range([m.l, W - m.r]).padding(0.06);
+  const yDe = (periodo) => m.t + manifesto.periodos.findIndex((p) => p.id === periodo) * linhaH;
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img")
+    .attr("aria-label", `Correlação de Spearman entre componentes por hexágono, por período (${medida})`);
+  const corPos = d3.interpolateRgb(css("--surface") || "#ffffff", css("--accent") || "#1f6f78");
+  const corNeg = d3.interpolateRgb(css("--surface") || "#ffffff", css("--warn") || "#b7791f");
+  const cor = (rho) => (rho == null ? css("--line") : rho >= 0 ? corPos(Math.min(1, rho)) : corNeg(Math.min(1, -rho)));
+  const textoSobre = (fundo) => ((d3.hsl(fundo)?.l ?? 1) < 0.5 ? "#ffffff" : css("--ink"));
+  const cab = svg.append("g").selectAll("text").data(PARES_COMPONENTES).join("text")
+    .attr("x", (p) => x(chavePar(p)) + x.bandwidth() / 2).attr("y", m.t - 13).attr("text-anchor", "middle").style("font-size", "8.5px");
+  cab.append("tspan").text(([a]) => ROT_CURTO_COMP[a]);
+  cab.append("tspan").attr("x", (p) => x(chavePar(p)) + x.bandwidth() / 2).attr("dy", 9).text(([, b]) => `× ${ROT_CURTO_COMP[b]}`);
+  svg.append("g").selectAll("text").data(manifesto.periodos).join("text")
+    .attr("x", m.l - 4).attr("y", (p) => yDe(p.id) + linhaH / 2).attr("text-anchor", "end").attr("dominant-baseline", "middle").style("font-size", "9px")
+    .attr("font-weight", (p) => (p.id === estado.periodo ? 700 : 400)).text((p) => rotuloCurto(p.rotulo));
+  const g = svg.append("g").selectAll("g").data(dados).join("g").style("cursor", "pointer")
+    .attr("data-periodo", (d) => d.periodo)
+    .on("click", (_e, d) => aoClicarPeriodo?.(d.periodo));
+  g.append("rect")
+    .attr("x", (d) => x(`${d.a}|${d.b}`)).attr("width", x.bandwidth())
+    .attr("y", (d) => yDe(d.periodo) + 1).attr("height", linhaH - 2).attr("rx", 2)
+    .attr("fill", (d) => cor(d.rho))
+    .attr("stroke", (d) => (d.periodo === estado.periodo ? css("--ink") : "none")).attr("stroke-width", 1.5);
+  g.append("text")
+    .attr("x", (d) => x(`${d.a}|${d.b}`) + x.bandwidth() / 2).attr("y", (d) => yDe(d.periodo) + linhaH / 2)
+    .attr("text-anchor", "middle").attr("dominant-baseline", "middle").attr("font-size", 9).style("pointer-events", "none")
+    .style("fill", (d) => textoSobre(cor(d.rho)))
+    .text((d) => (d.rho == null ? "—" : formatar(d.rho, 2)));
+  ligarDica(g, (d) => htmlDica({
+    titulo: `${NOME_COMP[d.a]} × ${NOME_COMP[d.b]} · ${manifesto.periodos.find((p) => p.id === d.periodo)?.rotulo ?? d.periodo}`,
+    valor: d.rho == null ? "sem dado suficiente" : `Spearman ${formatar(d.rho, 2)}`,
+    base: `${formatar(d.n, 0)} hexágonos com domicílio, medida ${medida} · 1 = ordenam os hexágonos igual; 0 = sem relação; negativo = um sobe quando o outro desce`,
+  }));
+  marcarGrafico(svg.node(), "correlacao");
   box.replaceChildren(svg.node());
 }

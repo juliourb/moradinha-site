@@ -6,6 +6,7 @@ import { valorHex, brutoHex, faixaHex, incertezaHex, totalDoMapa, COMPONENTES_BA
 import { formatarPercentual } from "../util/formato.js";
 import { instalarAjudas, ligarDicaPorAtributos, attr } from "./ajuda.js";
 import { nivelIncerteza, nivelCvAp, nivelFracaoImputada } from "../util/limiares.js";
+import { eixoSerie, svgQuebraEixo, NOTA_EIXO_SEM_ZERO } from "../util/eixoSerie.js";
 
 const CLAB = { coabitacao: "Coabitação", onus: "Ônus", precariedade: "Precariedade" };
 const NIVEL_CLASSE = { ok: "ok", atencao: "warn", critico: "crit" };
@@ -40,7 +41,10 @@ function sparkline(linha, componente, medida, manifesto) {
   const W = 300;
   const H = 54;
   const x = d3.scalePoint().domain(periodosAno.map((p) => p.id)).range([16, W - 16]);
-  const y = d3.scaleLinear().domain([0, d3.max(ok) * 1.2 || 1]).range([H - 16, 6]);
+  // Acréscimo A: eixo do menor ao maior valor, com folga (sem faixa por ano aqui).
+  const eixo = eixoSerie(ok, 3);
+  const y = d3.scaleLinear().domain(eixo.dominio).range([H - 16, 6]);
+  const quebra = eixo.naoComecaEmZero ? svgQuebraEixo(8, H - 16, css("--muted")) : "";
   const linha2 = d3.line().defined((v) => v != null).x((_v, i) => x(periodosAno[i].id)).y((v) => y(v));
   const pontos = serie
     .map((v, i) => {
@@ -52,7 +56,7 @@ function sparkline(linha, componente, medida, manifesto) {
       )}" y="${H - 2}" text-anchor="middle">${p.rotulo}</text>`;
     })
     .join("");
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" data-grafico="serie-hexagono" aria-label="Série do hexágono"><path d="${linha2(
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" data-grafico="serie-hexagono" aria-label="Série do hexágono${eixo.naoComecaEmZero ? ` (${NOTA_EIXO_SEM_ZERO})` : ""}">${quebra}<path d="${linha2(
     serie
   )}" fill="none" stroke="${css("--accent")}" stroke-width="2"/>${pontos}</svg>`;
 }

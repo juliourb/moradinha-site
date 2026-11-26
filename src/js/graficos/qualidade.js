@@ -2,9 +2,9 @@
 // dispersão déficit × incerteza, composição ponderada por domicílios,
 // estoque ÷ 2022 por período.
 import * as d3 from "d3";
-import { formatar, rotuloCurto } from "../util/formato.js";
+import { formatar, rotuloCurto, yRotuloPeriodo } from "../util/formato.js";
 import { valorHex, incertezaHex, domiciliosTotal } from "../dados/calculo.js";
-import { valorMedidaQualidade, TIPO_MEDIDA } from "../dados/qualidade.js";
+import { valorMedidaQualidade, TIPO_MEDIDA, dadosDeficitIncerteza, NOME_QUADRANTE, CORTE_CV_PROTOCOLO } from "../dados/qualidade.js";
 import { ligarDica, marcarGrafico, htmlDica } from "../ui/ajuda.js";
 
 function css(nome) {
@@ -16,7 +16,7 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
   const tipo = TIPO_MEDIDA[estado.medida_qualidade];
   const W = Math.max(260, box.clientWidth || 300);
   const H = 104;
-  const m = { l: 34, r: 8, t: 6, b: 28 };
+  const m = { l: 38, r: 8, t: 6, b: 28 };
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Distribuição da medida de qualidade");
 
   if (tipo === "categorica") {
@@ -53,15 +53,26 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
   }
   const minimo = d3.min(vs);
   const p99 = d3.quantile(vs.slice().sort(d3.ascending), 0.99) ?? d3.max(vs);
-  const x = d3.scaleLinear().domain([minimo, p99]).nice().range([m.l, W - m.r]);
+  // Varredura F6.5: medida quase constante (variação < 1% do valor) — uma barra só
+  // com todos os hexágonos (antes, as 20 faixas saíam vazias e o gráfico ficava em branco).
+  const constante = Math.abs(d3.median(vs)) > 0 && (d3.max(vs) - minimo) / Math.abs(d3.median(vs)) < 0.01;
+  const folga = constante ? Math.abs(d3.median(vs)) * 0.05 : 0;
+  const x = (constante ? d3.scaleLinear().domain([minimo - folga, d3.max(vs) + folga]) : d3.scaleLinear().domain([minimo, p99]).nice()).range([m.l, W - m.r]);
   // N2: eixo cortado no p99; os valores acima entram na última barra ("p99 ou mais").
-  const bins = d3.bin().domain(x.domain()).thresholds(20)(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
+  const bins = d3.bin().domain(x.domain()).thresholds(constante ? [] : 20)(vs.map((v) => Math.min(v, x.domain()[1] - 1e-9)));
   const ultimoBin = bins.at(-1);
   const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.length) || 1]).nice().range([H - m.b, m.t]);
   const faixaAtual = estado.faixa_hist?.[0] ?? null;
   const faixaSelecionada = (b) => !faixaAtual || (b.x0 < (faixaAtual[1] ?? Infinity) && b.x1 > faixaAtual[0]);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat((v) => formatar(v, 2)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
+  // Varredura F6.5: casas decimais pelo passo das marcas; se ainda assim os rótulos
+  // se repetem (medida quase constante), um rótulo só, "≈ valor".
+  const passoX = d3.tickStep(...x.domain(), 4);
+  const casasX = Math.max(2, Math.min(4, -Math.floor(Math.log10(passoX))));
+  const marcasX = x.ticks(4);
+  const repetem = constante || new Set(marcasX.map((v) => formatar(v, casasX))).size < marcasX.length;
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).tickValues(repetem ? [d3.median(vs)] : marcasX).tickFormat((v) => (repetem ? `≈ ${formatar(v, 2)} (quase não varia)` : formatar(v, casasX))));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => formatar(v, 0)));
   svg
     .append("g")
     .selectAll("rect")
@@ -102,51 +113,142 @@ export function renderizarHistogramaQualidade(box, estado, linhasArr, apMap, aoC
     .attr("stroke-width", 2)
     .attr("opacity", (b) => (faixaSelecionada(b) ? 1 : 0.35))
     .style("pointer-events", "none");
-  svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text("p99 ou mais →");
+  svg.append("text").attr("x", W - m.r).attr("y", m.t + 8).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted")).text(constante ? "" : "p99 ou mais →");
   box.replaceChildren(svg.node());
 }
 
-export function renderizarDispersao(box, estado, linhasArr, aoSelecionar) {
+/** Quadrante ativo no estado, só se ainda vale para o componente/período/medida atuais. */
+export function quadranteAtivo(estado) {
+  const q = estado.quadrante;
+  if (!q || q.componente !== estado.componente || q.periodo !== estado.periodo || q.medida_qualidade !== estado.medida_qualidade) return null;
+  return q.id;
+}
+
+/**
+ * Déficit × incerteza (acréscimo C, F6.5): linhas de corte rotuladas, quatro
+ * quadrantes com nº de hexágonos e parte do déficit ("muito déficit e muita
+ * incerteza" em destaque), eixo do déficit em log quando a distribuição é
+ * assimétrica, dica em cada ponto e clique no quadrante filtrando o mapa.
+ */
+export function renderizarDispersao(box, estado, linhasArr, apMap, aoSelecionar, aoClicarQuadrante) {
   if (box.closest(".dcard")?.classList.contains("min")) return;
-  const pontos = linhasArr
-    .map((l) => ({ l, x: valorHex(l, estado.componente, estado.periodo, "absoluto"), y: incertezaHex(l, estado.componente, estado.periodo) }))
-    .filter((d) => d.x != null && d.x > 0 && d.y != null);
-  if (!pontos.length) {
+  const ehCv = estado.medida_qualidade === "cv_ap";
+  const dados = dadosDeficitIncerteza(
+    linhasArr,
+    (l) => valorHex(l, estado.componente, estado.periodo, "absoluto"),
+    (l) => (ehCv ? valorMedidaQualidade(l, estado.periodo, "cv_ap", estado.componente, apMap) : incertezaHex(l, estado.componente, estado.periodo)),
+    ehCv
+  );
+  if (!dados) {
     box.innerHTML = `<p class="empty">Sem faixa para esta combinação (total ou precariedade provisória não têm incerteza).</p>`;
     return;
   }
-  const medX = d3.median(pontos, (d) => d.x);
-  const medY = d3.median(pontos, (d) => d.y);
-  const noQuadrante = pontos.filter((d) => d.x > medX && d.y > medY).length;
+  const { pontos, corteX, corteY, quadrantes, log } = dados;
+  const nomeY = ehCv ? "CV da AP (%)" : "incerteza";
+  const decY = ehCv ? 0 : 2;
+  const qAtivo = quadranteAtivo(estado);
+  const halo = (sel) => sel.attr("stroke", css("--surface")).attr("stroke-width", 3).attr("paint-order", "stroke").attr("stroke-linejoin", "round");
 
   const W = Math.max(260, box.clientWidth || 300);
-  const H = 134;
-  const m = { l: 40, r: 8, t: 8, b: 22 };
-  const x = d3.scaleLinear().domain(d3.extent(pontos, (d) => d.x)).nice().range([m.l, W - m.r]);
-  const y = d3.scaleLinear().domain(d3.extent(pontos, (d) => d.y)).nice().range([H - m.b, m.t]);
-  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Dispersão déficit por incerteza");
-  svg.append("rect").attr("x", x(medX)).attr("y", m.t).attr("width", Math.max(0, W - m.r - x(medX))).attr("height", Math.max(0, y(medY) - m.t)).attr("fill", css("--warn-soft")).attr("opacity", 0.5);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(4).tickFormat((v) => formatar(v, 0)));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => formatar(v, 1)));
-  svg
-    .append("g")
-    .selectAll("circle")
-    .data(pontos)
-    .join("circle")
-    .attr("cx", (d) => x(d.x))
-    .attr("cy", (d) => y(d.y))
-    .attr("r", 2.6)
-    .attr("fill", css("--accent"))
-    .attr("opacity", 0.6)
+  const H = 176;
+  const [y0, y1] = d3.extent([...pontos.map((d) => d.y), corteY]);
+  const folgaY = (y1 - y0 || Math.abs(y1) || 1) * 0.12;
+  const dominioY = [y0 >= 0 ? Math.max(0, y0 - folgaY) : y0 - folgaY, y1 + folgaY];
+  // Incerteza quase igual em todos os hexágonos (variação < 1% do valor): uma só
+  // marca "≈ valor" e uma nota, em vez de um eixo com casas decimais sem sentido.
+  const quaseConstante = Math.abs(corteY) > 0 && (y1 - y0) / Math.abs(corteY) < 0.01;
+  const passoY = d3.tickStep(...dominioY, 4);
+  const casasY = quaseConstante ? decY : Math.max(0, Math.min(3, -Math.floor(Math.log10(passoY))));
+  const marcasY = quaseConstante ? [corteY] : d3.ticks(...dominioY, 4);
+  // Margem esquerda pelo rótulo mais largo do eixo vertical.
+  const larguraRotulo = Math.max(...marcasY.map((v) => formatar(v, casasY).length + (quaseConstante ? 2 : 0)), 3);
+  const m = { l: Math.max(36, 10 + 6 * larguraRotulo), r: 10, t: 14, b: 32 };
+  const [x0, x1] = d3.extent(pontos, (d) => d.x);
+  const x = (log ? d3.scaleLog().domain([Math.max(1, x0), Math.max(x1, x0 * 10)]) : d3.scaleLinear().domain([0, x1])).nice().range([m.l, W - m.r]);
+  // Eixo da incerteza pela amplitude dos dados (com folga), não a partir de zero:
+  // com incerteza quase constante, começar em zero espremia os pontos numa linha.
+  const y = d3.scaleLinear().domain(dominioY).range([H - m.b, m.t]);
+  const cx = Math.max(m.l, Math.min(W - m.r, x(corteX)));
+  const cy = Math.max(m.t, Math.min(H - m.b, y(corteY)));
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img")
+    .attr("aria-label", `Déficit por ${nomeY}, com quatro quadrantes${log ? "; eixo do déficit em escala log" : ""}`);
+
+  // Quadrantes (atrás dos pontos): clicar filtra o mapa; clicar de novo limpa.
+  const rects = [
+    { id: "aa", x: cx, y: m.t, w: W - m.r - cx, h: cy - m.t },
+    { id: "ba", x: m.l, y: m.t, w: cx - m.l, h: cy - m.t },
+    { id: "ab", x: cx, y: cy, w: W - m.r - cx, h: H - m.b - cy },
+    { id: "bb", x: m.l, y: cy, w: cx - m.l, h: H - m.b - cy },
+  ];
+  svg.append("g").attr("class", "quadrantes").selectAll("rect").data(rects).join("rect")
+    .attr("class", (r) => `quadrante q-${r.id}`)
+    .attr("data-quadrante", (r) => r.id)
+    .attr("x", (r) => r.x).attr("y", (r) => r.y).attr("width", (r) => Math.max(0, r.w)).attr("height", (r) => Math.max(0, r.h))
+    .attr("fill", (r) => (r.id === "aa" ? css("--warn-soft") : "transparent"))
+    .attr("opacity", (r) => (r.id === "aa" ? 0.75 : 1))
+    .attr("stroke", (r) => (qAtivo === r.id ? css("--accent") : r.id === "aa" ? css("--warn") : "none"))
+    .attr("stroke-width", (r) => (qAtivo === r.id ? 2 : 1))
+    .attr("aria-current", (r) => (qAtivo === r.id ? "true" : null))
     .style("cursor", "pointer")
-    .on("click", (_e, d) => aoSelecionar(d.l.h3))
-    .call((sel) =>
-      ligarDica(sel, (d) =>
-        htmlDica({ titulo: `${d.l.municipioNome ?? "Hexágono"} · ${d.l.h3.slice(-8)}`, valor: `déficit ${formatar(d.x, 0)}`, base: `incerteza (máx − mín) ÷ valor: ${formatar(d.y, 2)} · ${formatar(pontos.length, 0)} hexágonos no gráfico` })
-      )
-    );
+    .on("click", (e, r) => {
+      e.stopPropagation();
+      aoClicarQuadrante?.(qAtivo === r.id ? null : r.id);
+    })
+    .call((sel) => ligarDica(sel, (r) => htmlDica({
+      titulo: NOME_QUADRANTE[r.id][0].toUpperCase() + NOME_QUADRANTE[r.id].slice(1),
+      valor: `${formatar(quadrantes[r.id].n, 0)} hexágonos · ${formatar(100 * quadrantes[r.id].parteDeficit, 1)}% do déficit`,
+      base: qAtivo === r.id ? "clique para tirar o filtro do mapa" : "clique para mostrar só estes hexágonos no mapa",
+    })));
+
+  const potencia10 = (v) => Math.abs(Math.log10(v) - Math.round(Math.log10(v))) < 1e-9;
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).ticks(4).tickFormat((v) => (log && !potencia10(v) ? "" : formatar(v, 0))));
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(marcasY).tickFormat((v) => (quaseConstante ? "≈ " : "") + formatar(v, casasY)));
+  svg.append("text").attr("class", "rotulo-eixo").attr("x", W - m.r).attr("y", H - 3).attr("text-anchor", "end").attr("font-size", 9).attr("fill", css("--muted"))
+    .text(`déficit do hexágono (domicílios${log ? ", escala log" : ""})`);
+  // O eixo vertical é nomeado pelo rótulo da linha de corte horizontal (sem título solto no canto).
+
+  // Linhas de corte, rotuladas.
+  const linhaCor = css("--ink");
+  svg.append("line").attr("class", "corte corte-x").attr("x1", cx).attr("x2", cx).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
+  svg.append("line").attr("class", "corte corte-y").attr("x1", m.l).attr("x2", W - m.r).attr("y1", cy).attr("y2", cy).attr("stroke", linhaCor).attr("stroke-dasharray", "3,3");
+  svg.append("text").attr("class", "rotulo-corte corte-x").attr("x", cx).attr("y", m.t - 3).attr("text-anchor", cx > W / 2 ? "end" : "start").attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
+    .text(`mediana do déficit: ${formatar(corteX, 1)}`);
+  svg.append("text").attr("class", "rotulo-corte corte-y").attr("x", m.l + 3).attr("y", cy - 3).attr("text-anchor", "start").attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
+    .text(ehCv ? `limiar do protocolo: CV de ${CORTE_CV_PROTOCOLO}%` : `mediana da incerteza: ${formatar(corteY, 2)}`);
+
+  const gp = svg.append("g").selectAll("circle").data(pontos).join("circle")
+    .attr("cx", (d) => x(d.x)).attr("cy", (d) => y(d.y)).attr("r", 2.4)
+    .attr("fill", css("--accent"))
+    .attr("opacity", (d) => (qAtivo && d.quadrante !== qAtivo ? 0.15 : 0.6))
+    .style("cursor", "pointer")
+    .on("click", (e, d) => {
+      e.stopPropagation();
+      aoSelecionar(d.l.h3);
+    });
+  ligarDica(gp, (d) => htmlDica({
+    titulo: `Hexágono ${d.l.h3.slice(-8)}${d.l.municipioNome ? ` · ${d.l.municipioNome}` : ""}`,
+    valor: `déficit ${formatar(d.x, 1)} · ${nomeY} ${formatar(d.y, decY)}`,
+    base: `quadrante: ${NOME_QUADRANTE[d.quadrante]}`,
+  }));
+
+  // Nº de hexágonos e parte do déficit em cada quadrante.
+  // Cada contagem fica dentro do seu quadrante, em duas linhas, a partir do canto
+  // junto ao eixo (esquerda) ou junto à linha de corte (direita): nunca cruza o corte.
+  const cantos = { ba: [m.l + 3, m.t + 10], aa: [cx + 4, m.t + 10], bb: [m.l + 3, H - m.b - 14], ab: [cx + 4, H - m.b - 14] };
+  for (const [id, [tx, ty]] of Object.entries(cantos)) {
+    const q = quadrantes[id];
+    const t = svg.append("text").attr("class", `quadrante-contagem q-${id}`).attr("x", tx).attr("y", ty)
+      .attr("font-size", 9).attr("font-weight", id === "aa" ? 700 : 400).style("fill", id === "aa" ? css("--ink") : css("--muted"))
+      .style("pointer-events", "none").call(halo);
+    t.append("tspan").text(`${formatar(q.n, 0)} hex.`);
+    t.append("tspan").attr("x", tx).attr("dy", 10).text(`${formatar(100 * q.parteDeficit, 0)}% do déficit`);
+  }
+  if (quaseConstante) {
+    svg.append("text").attr("class", "nota-constante").attr("x", m.l + 3).attr("y", Math.min(cy + 12, H - m.b - 30)).attr("font-size", 8.5).attr("fill", css("--muted")).call(halo)
+      .text("quase não varia");
+  }
   marcarGrafico(svg.node(), "dispersao");
-  svg.append("text").attr("class", "quadrante-contagem").attr("x", W - m.r - 4).attr("y", m.t + 12).attr("text-anchor", "end").text(`${noQuadrante} no quadrante`);
   box.replaceChildren(svg.node());
 }
 
@@ -182,7 +284,7 @@ export function renderizarComposicao(box, manifesto, linhasArr, apMap, estado) {
   const x = d3.scaleBand().domain(dados.map((d) => d.id)).range([m.l, W - m.r]).padding(0.3);
   const y = d3.scaleLinear().domain([0, 1]).range([H - m.b, m.t]);
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Composição da qualidade por período");
-  svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d) => x(d.id) + x.bandwidth() / 2).attr("y", H - 8).attr("text-anchor", "middle").text((d) => rotuloCurto(d.lab));
+  svg.append("g").selectAll("text").data(dados).join("text").attr("x", (d) => x(d.id) + x.bandwidth() / 2).attr("y", (_d, i) => yRotuloPeriodo(i, x.step(), H - 8)).attr("text-anchor", "middle").text((d) => rotuloCurto(d.lab));
   for (const d of dados) {
     let acum = 0;
     categorias.forEach((cat, i) => {
@@ -218,7 +320,7 @@ export function renderizarEstoque(box, manifesto, linhasArr) {
   const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").attr("role", "img").attr("aria-label", "Estoque dividido por 2022, por período");
   svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4));
   svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(1)).attr("y2", y(1)).attr("stroke", css("--line")).attr("stroke-dasharray", "2,3");
-  svg.append("g").selectAll("text").data(st).join("text").attr("x", (s) => x(s.id) + x.bandwidth() / 2).attr("y", H - 8).attr("text-anchor", "middle").text((s) => rotuloCurto(s.lab));
+  svg.append("g").selectAll("text").data(st).join("text").attr("x", (s) => x(s.id) + x.bandwidth() / 2).attr("y", (_s, i) => yRotuloPeriodo(i, x.step(), H - 8)).attr("text-anchor", "middle").text((s) => rotuloCurto(s.lab));
   const col = (s) => (s.critico ? css("--crit") : css("--ink"));
   const g = svg.append("g").selectAll("g").data(st).join("g");
   g.filter((s) => s.q10 != null).append("line").attr("x1", (s) => x(s.id) + x.bandwidth() / 2).attr("x2", (s) => x(s.id) + x.bandwidth() / 2).attr("y1", (s) => y(s.q10)).attr("y2", (s) => y(s.q90)).attr("stroke", col);

@@ -36,13 +36,16 @@ export function estadoInicial(manifesto) {
     medida: "absoluto",
     relativo_modo: "quebras",
     opacidade: 0.8,
-    mapa_base_cinza: false,
     componente: "total",
     periodo: periodoPadrao,
     selecionado: null,
     faixa_hist: [],
+    quadrante: null,
     camadas,
     ...salvo,
+    // Acréscimo B: o mapa de base abre sempre claro (não persiste).
+    mapa_base: "claro",
+    quadrante: null,
     comparar: null,
   };
 }
@@ -61,7 +64,7 @@ export function salvarLocalStorage(estado) {
   try {
     // comparar (cortina) nunca persiste: N6 pede que ela comece desligada em
     // toda carga/recarga da página.
-    const { selecionado, faixa_hist, comparar, ...persistido } = estado;
+    const { selecionado, faixa_hist, comparar, mapa_base, mapa_base_cinza, quadrante, ...persistido } = estado;
     localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(persistido));
   } catch {
     // localStorage indisponível (modo privado, quota, etc.): segue sem persistir.
@@ -79,6 +82,22 @@ export function prepararNavegacaoResultados(parcial) {
   } catch {
     // localStorage indisponível: Resultados abre com o estado padrão.
   }
+}
+
+/**
+ * Acréscimo F (F6.5): a cortina compara com outro PERÍODO (comparar = id do
+ * período) ou com outro COMPONENTE no mesmo período (comparar = "c:<componente>").
+ * @returns {{tipo:"periodo", periodo:string, componente:string} | {tipo:"componente", periodo:string, componente:string} | null}
+ */
+export const PREFIXO_COMPARAR_COMPONENTE = "c:";
+export function alvoComparacao(estado) {
+  const c = estado?.comparar;
+  if (!c) return null;
+  if (c.startsWith(PREFIXO_COMPARAR_COMPONENTE)) {
+    const componente = c.slice(PREFIXO_COMPARAR_COMPONENTE.length);
+    return componente && componente !== estado.componente ? { tipo: "componente", componente, periodo: estado.periodo } : null;
+  }
+  return c !== estado.periodo ? { tipo: "periodo", periodo: c, componente: estado.componente } : null;
 }
 
 function rotuloPeriodo(periodoId, manifesto, preposicao = true) {
@@ -100,6 +119,8 @@ export function textoPergunta(estado, manifesto) {
 
   const medidaTxt = estado.medida === "abs" || estado.medida === "absoluto" ? "absoluto" : "relativo";
   let texto = `Onde está o déficit ${medidaTxt}${comp} ${per}?`;
-  if (estado.comparar) texto += ` Comparado com ${rotuloPeriodo(estado.comparar, manifesto, false)}.`;
+  const alvo = alvoComparacao(estado);
+  if (alvo?.tipo === "periodo") texto += ` Comparado com ${rotuloPeriodo(alvo.periodo, manifesto, false)}.`;
+  if (alvo?.tipo === "componente") texto += ` Comparado com ${alvo.componente === "total" ? "o total" : NOME_COMPONENTE[alvo.componente]}, no mesmo período.`;
   return texto;
 }

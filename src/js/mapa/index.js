@@ -99,10 +99,7 @@ export function acinzentarEstilo(mapa) {
   }
 }
 
-function temaEscuro() {
-  const t = document.documentElement.getAttribute("data-theme");
-  return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-}
+const MODOS_BASE = ["claro", "escuro", "cinza"];
 
 export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosAp, contornosMunicipios, contornosFcu, contornosRecortes }) {
   const linhasArr = [...linhas.values()];
@@ -141,29 +138,29 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     mapaB.on("move", () => copiar(mapaB, mapaA));
   })(instancias.a.mapa, instancias.b.mapa);
 
-  let baseCinza = false;
+  // Acréscimo B (F6.5): mapa de base CLARO por padrão em qualquer tema do site;
+  // escuro e cinza (claro dessaturado) são opções do painel Camadas.
+  let modoBase = "claro";
   let camadasRecolhidas = false;
-  function urlEstilo() {
-    return baseCinza || !temaEscuro() ? ESTILOS_BASE.claro : ESTILOS_BASE.escuro;
-  }
   function aplicarEstiloBase() {
     for (const { mapa } of Object.values(instancias)) {
-      mapa.setStyle(urlEstilo(), { diff: false });
+      mapa.setStyle(ESTILOS_BASE[modoBase === "escuro" ? "escuro" : "claro"], { diff: false });
       mapa.once("style.load", () => {
-        if (baseCinza) acinzentarEstilo(mapa);
+        if (modoBase === "cinza") acinzentarEstilo(mapa);
       });
     }
   }
-  function definirBaseCinza(ligado) {
-    if (ligado === baseCinza) return;
-    baseCinza = ligado;
+  function definirModoBase(modo) {
+    const novo = MODOS_BASE.includes(modo) ? modo : "claro";
+    if (novo === modoBase) return;
+    modoBase = novo;
     aplicarEstiloBase();
   }
 
   function criarInstancia(container, elBasefail, aoFalhar) {
     const mapa = new MapaMapLibre({
       container,
-      style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+      style: ESTILOS_BASE.claro,
       center: manifesto.centro ?? [-35.715, -9.585],
       zoom: manifesto.zoom_inicial ?? 11,
       attributionControl: false,
@@ -198,7 +195,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     novo: "--crit", existente: "--ok",
   };
 
-  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado) {
+  function computarEscala(periodo, periodoComparar, obterValor, tipoMedida, estado, obterValorB = obterValor) {
     if (tipoMedida === "categorica" || estado?.tema === "deficit") {
       // Déficit: escala vem de escalasAbsolutas/escalasRelativas (calculadas
       // uma vez por componente, SPEC_F6 C4). Qualidade/categórica seguem abaixo.
@@ -207,10 +204,11 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     }
     const vs = [];
     for (const l of linhasArr) {
-      for (const p of [periodo, periodoComparar]) {
-        if (!p) continue;
-        const v = obterValor(l, p);
-        if (v != null && v > 0) vs.push(v);
+      const v = obterValor(l, periodo);
+      if (v != null && v > 0) vs.push(v);
+      if (periodoComparar) {
+        const vb = obterValorB(l, periodoComparar);
+        if (vb != null && vb > 0) vs.push(vb);
       }
     }
     vs.sort(ascending);
@@ -260,7 +258,15 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     return [...rgb(rampa[Math.min(idx, rampa.length - 1)]), alfa];
   }
 
+  // Acréscimo C: hexágonos fora do quadrante escolhido no gráfico Déficit ×
+  // incerteza ficam apagados (null = sem filtro).
+  let filtroH3 = null;
   function corHex(l, periodo, estado, obterValor, tipoMedida, contexto) {
+    const cor = corHexBase(l, periodo, estado, obterValor, tipoMedida, contexto);
+    if (filtroH3 && !filtroH3.has(l.h3)) cor[3] = Math.min(cor[3], alfasPara(estado).apagado);
+    return cor;
+  }
+  function corHexBase(l, periodo, estado, obterValor, tipoMedida, contexto) {
     const v = obterValor(l, periodo);
     const qualidade = estado.tema === "qualidade";
     if (l.dom[periodo] == null && !qualidade) return [...rgb(css("--muted")), 110];
@@ -333,9 +339,12 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     };
   }
 
-  function camadasPara(periodo, estado, obterValor, lado, tipoMedida) {
+  function camadasPara(periodo, estado, obterValor, lado, tipoMedida, estadoEscala = estado) {
     const L = [];
-    const contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
+    // Acréscimo F: na cortina entre componentes, o lado B usa as quebras do lado A
+    // (mesma régua de cores dos dois lados); "vezes a taxa" segue a taxa de cada componente.
+    let contexto = estado.tema === "deficit" ? contextoCorDeficit(estado, periodo) : null;
+    if (contexto && estadoEscala !== estado && contexto.tipo !== "vezes_taxa") contexto = contextoCorDeficit(estadoEscala, estadoEscala.periodo);
     L.push(
       new H3HexagonLayer({
         id: "hex-" + lado,
@@ -345,7 +354,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
         updateTriggers: {
           getFillColor: [
             periodo, estado.tema, estado.medida, estado.componente, estado.medida_qualidade,
-            JSON.stringify(estado.faixa_hist), tipoMedida, estado.relativo_modo, estado.opacidade, faixaEscala.join(","),
+            JSON.stringify(estado.faixa_hist), tipoMedida, estado.relativo_modo, estado.opacidade, faixaEscala.join(","), filtroH3 ? filtroH3.size + ":" + JSON.stringify(estado.quadrante) : "",
           ],
         },
         extruded: false,
@@ -640,7 +649,7 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     )}${unidade}</span><span>${formatar(t[6], 1)}${unidade}</span></div><div class="note" style="margin-top:4px">Classes por sétimos (quantis). Cinza claro = zero; cinza escuro = sigilo.</div>`;
   }
 
-  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBaseCinza) {
+  function renderizarCamadasUI(estado, aoMudar, aoMudarOpacidade, aoMudarMapaBase) {
     const extras = [];
     extras.push(
       `<label><input type="checkbox" data-camada="ap" ${estado.camadas.ap ? "checked" : ""}> <span class="sw" style="border-color:var(--apline)"></span> Áreas de ponderação</label>`
@@ -661,7 +670,9 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
       );
     }
     const opacidadeHtml = `<label class="ctl-opacidade">Opacidade <input type="range" id="f1-opacidade" min="0.2" max="1" step="0.1" value="${estado.opacidade ?? 0.8}"></label>`;
-    const cinzaHtml = `<label><input type="checkbox" id="f1-mapa-cinza" ${estado.mapa_base_cinza ? "checked" : ""}> Fundo cinza</label>`;
+    const modo = MODOS_BASE.includes(estado.mapa_base) ? estado.mapa_base : "claro";
+    const opcaoBase = (v, rotulo, id) => `<label><input type="radio" name="f1-mapa-base" value="${v}" id="${id}" ${modo === v ? "checked" : ""}> ${rotulo}</label>`;
+    const cinzaHtml = `<fieldset class="mapa-base"><legend>Mapa de base</legend>${opcaoBase("claro", "Claro", "f1-mapa-claro")}${opcaoBase("escuro", "Escuro", "f1-mapa-escuro")}${opcaoBase("cinza", "Cinza", "f1-mapa-cinza")}</fieldset>`;
     elementos.layers.innerHTML = `<button type="button" class="layers-toggle" aria-expanded="${!camadasRecolhidas}" aria-controls="f1-layers-body"><span>Camadas</span><span aria-hidden="true">${camadasRecolhidas ? "▸" : "▾"}</span></button><div class="layers-body" id="f1-layers-body">${extras.join("")}${opacidadeHtml}${cinzaHtml}</div>`;
     elementos.layers.classList.toggle("recolhido", camadasRecolhidas);
     elementos.layers.querySelector(".layers-toggle").onclick = () => {
@@ -676,26 +687,31 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
     });
     const opEl = elementos.layers.querySelector("#f1-opacidade");
     if (opEl && aoMudarOpacidade) opEl.oninput = () => aoMudarOpacidade(Number(opEl.value));
-    const cinzaEl = elementos.layers.querySelector("#f1-mapa-cinza");
-    if (cinzaEl && aoMudarMapaBaseCinza) cinzaEl.onchange = () => aoMudarMapaBaseCinza(cinzaEl.checked);
-    elementos.mapboxEl?.classList.toggle("cinza", !!estado.mapa_base_cinza);
-    definirBaseCinza(!!estado.mapa_base_cinza);
+    elementos.layers.querySelectorAll('input[name="f1-mapa-base"]').forEach((el) => {
+      el.onchange = () => el.checked && aoMudarMapaBase && aoMudarMapaBase(el.value);
+    });
+    elementos.mapboxEl?.classList.toggle("cinza", modo === "cinza");
+    definirModoBase(modo);
   }
 
-  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit") {
-    computarEscala(estado.periodo, estado.comparar, obterValor, tipoMedida, estado);
+  /**
+   * @param ladoB acréscimo F: {periodo, estado, obterValor, rotulo} do lado direito
+   *   da cortina (outro período ou outro componente), ou null sem cortina.
+   */
+  function renderizar(estado, obterValor, rotuloMedida, tipoMedida = "deficit", filtro = null, ladoB = null) {
+    filtroH3 = filtro;
+    computarEscala(estado.periodo, ladoB?.periodo ?? null, obterValor, tipoMedida, estado, ladoB?.obterValor ?? obterValor);
     instancias.a.overlay.setProps({ layers: camadasPara(estado.periodo, estado, obterValor, "a", tipoMedida) });
 
-    const ligada = !!estado.comparar;
+    const ligada = !!ladoB;
     elementos.deckB.style.display = ligada ? "block" : "none";
     elementos.divider.style.display = ligada ? "block" : "none";
     elementos.labB.style.display = ligada ? "block" : "none";
     const perA = manifesto.periodos.find((p) => p.id === estado.periodo);
-    elementos.labA.textContent = perA?.rotulo ?? "";
+    elementos.labA.textContent = ladoB?.rotuloA ?? perA?.rotulo ?? "";
     if (ligada) {
-      instancias.b.overlay.setProps({ layers: camadasPara(estado.comparar, estado, obterValor, "b", tipoMedida) });
-      const perB = manifesto.periodos.find((p) => p.id === estado.comparar);
-      elementos.labB.textContent = perB?.rotulo ?? "";
+      instancias.b.overlay.setProps({ layers: camadasPara(ladoB.periodo, ladoB.estado, ladoB.obterValor, "b", tipoMedida, estado) });
+      elementos.labB.textContent = ladoB.rotulo;
       elementos.deckB.style.clipPath = `inset(0 0 0 ${clipPercentual}%)`;
       elementos.divider.style.left = clipPercentual + "%";
     }
@@ -748,11 +764,6 @@ export function criarMapa({ elementos, manifesto, linhas, ap, totais, contornosA
   }
   ligarArrasto();
 
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", trocarEstilo);
-  new MutationObserver(trocarEstilo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  function trocarEstilo() {
-    aplicarEstiloBase();
-  }
 
   return {
     renderizar, renderizarCamadasUI, moverPara, agruparPorAp,
@@ -774,7 +785,7 @@ export function criarMiniMapa({ container, manifesto, linhas, ap, totais, toolti
 
   const mapa = new MapaMapLibre({
     container,
-    style: temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro,
+    style: ESTILOS_BASE.claro, // acréscimo B: base clara em qualquer tema
     center: manifesto.centro ?? [-35.715, -9.585],
     zoom: Math.max((manifesto.zoom_inicial ?? 11) - 1.6, 0),
     interactive: true,
@@ -857,14 +868,6 @@ export function criarMiniMapa({ container, manifesto, linhas, ap, totais, toolti
   }
 
   mapa.on("load", render);
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
-    mapa.once("styledata", render);
-  });
-  new MutationObserver(() => {
-    mapa.setStyle(temaEscuro() ? ESTILOS_BASE.escuro : ESTILOS_BASE.claro);
-    mapa.once("styledata", render);
-  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   return { periodoRecente };
 }

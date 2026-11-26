@@ -44,7 +44,9 @@ test.describe("C1/F6.2-2: faixa de duas alças sob o histograma filtra o mapa; c
     expect(estado.faixa_hist.length).toBe(1);
 
     // Clicar fora das barras (fundo do SVG) limpa.
-    await page.locator("#f1-hist svg").click({ position: { x: 5, y: 95 } });
+    // posição relativa: a altura do SVG acompanha a largura do cartão (F6.5-F2 pôs um 5º cartão)
+    const caixaHist = await page.locator("#f1-hist svg").boundingBox();
+    await page.locator("#f1-hist svg").click({ position: { x: 5, y: Math.round(caixaHist.height * 0.9) } });
     await page.waitForTimeout(150);
     estado = await page.evaluate(() => window.__moradinhaEstado());
     expect(estado.faixa_hist.length).toBe(0);

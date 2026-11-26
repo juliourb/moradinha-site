@@ -260,7 +260,10 @@ function renderizarParametros(el, manifesto) {
 
 async function renderizarRastreio(el, manifesto, edicaoOrigem, versaoSite) {
   const { edicao, commitCompleto, dataExecucao, contrato, arquivos } = linhasRastreio(manifesto);
-  el.innerHTML = `
+  // Acréscimo E (F6.5): recolhido por padrão, com um resumo de uma linha.
+  const inicioResumo = `edição ${edicao} · moradinha ${String(commitCompleto).slice(0, 7)}…`;
+  el.innerHTML = `<details class="rastreio-dobra" id="met-rastreio-dobra">
+    <summary><span class="rastreio-resumo" id="met-rastreio-resumo">${inicioResumo} · conferindo ${arquivos.length} arquivos…</span></summary>
     <div class="pills">
       <span class="pill info">edição: ${edicao}</span>
       <span class="pill info">commit do moradinha: ${commitCompleto}</span>
@@ -273,9 +276,9 @@ async function renderizarRastreio(el, manifesto, edicaoOrigem, versaoSite) {
         (a) =>
           `<tr data-arquivo="${a.nome}"><td>${a.nome}</td><td style="font-family:monospace;font-size:11px">${a.hashEsperado}</td><td class="status">verificando…</td></tr>`
       )
-      .join("")}</tbody></table>`;
+      .join("")}</tbody></table></details>`;
 
-  await Promise.all(
+  const conferidos = await Promise.all(
     arquivos.map(async (a) => {
       const linha = el.querySelector(`tr[data-arquivo="${a.nome}"] .status`);
       try {
@@ -283,11 +286,18 @@ async function renderizarRastreio(el, manifesto, edicaoOrigem, versaoSite) {
         const real = await sha256Hex(bytes);
         const ok = real === a.hashEsperado;
         linha.innerHTML = `<span class="pill ${ok ? "ok" : "crit"}" data-status="${ok ? "ok" : "divergente"}">${ok ? "ok" : "divergente"}</span>`;
+        return ok;
       } catch {
         linha.innerHTML = `<span class="pill crit" data-status="erro">erro ao buscar</span>`;
+        return false;
       }
     })
   );
+  const falhas = conferidos.filter((ok) => !ok).length;
+  el.querySelector("#met-rastreio-resumo").textContent = falhas
+    ? `${inicioResumo} · ${falhas} de ${arquivos.length} arquivos não conferem`
+    : `${inicioResumo} · ${arquivos.length} arquivos conferidos`;
+  if (falhas) el.querySelector("#met-rastreio-dobra").open = true;
 }
 
 /**
